@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { Compass, ArrowRight, Lock, UserCheck, UserPlus, Mail, Key, User, ShieldCheck } from "lucide-react";
+import { Compass, Lock, UserCheck, UserPlus, Mail, Key, User } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { UserRole, getAuthorizedRedirectRoute, setAuthSession, UserProfile } from "@/lib/auth-rbac";
@@ -9,7 +9,7 @@ import { UserRole, getAuthorizedRedirectRoute, setAuthSession, UserProfile } fro
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "ExplorerTN Auth — Sign In & Create Account" },
+      { title: "ExplorerTN Gateway — Sign In & Create Account" },
       {
         name: "description",
         content: "Sign in or create an account for ExplorerTN.",
@@ -48,8 +48,8 @@ function LoginPage() {
 
   const [form, setForm] = useState({
     fullName: "",
-    email: "admin@exploretn.com",
-    password: "popz",
+    email: "",
+    password: "",
   });
 
   const handleAuthSubmit = () => {
@@ -68,7 +68,7 @@ function LoginPage() {
       name: isAdminCreds
         ? "Platform Super Admin"
         : form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer"),
-      email: form.email.trim() || "admin@exploretn.com",
+      email: form.email.trim() || "user@explorertn.com",
       avatar: isAdminCreds ? "AD" : (form.fullName || form.email || "EX").slice(0, 2).toUpperCase(),
       role: assignedRole,
       status: "active",
@@ -101,7 +101,7 @@ function LoginPage() {
               Explorer<span className="text-gradient">TN</span> Gateway
             </h1>
             <p className="text-xs text-slate-400 mt-1 font-mono">
-              Authentication & Admin Access Portal
+              Authentication Portal
             </p>
           </div>
 
@@ -173,7 +173,7 @@ function LoginPage() {
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="admin@exploretn.com"
+                      placeholder="you@explorertn.com"
                       className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                     />
                   </div>
@@ -187,7 +187,7 @@ function LoginPage() {
                       type="password"
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      placeholder="popz"
+                      placeholder="••••••••••••"
                       className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                     />
                   </div>
@@ -208,15 +208,6 @@ function LoginPage() {
                     </>
                   )}
                 </Button>
-
-                {/* Admin Access Hint Badge */}
-                <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between text-[11px] font-mono text-emerald-400">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="size-4 text-emerald-400 shrink-0" />
-                    <span>Admin Credential Configured</span>
-                  </div>
-                  <span className="font-bold text-white">popz</span>
-                </div>
               </motion.div>
             )}
 
@@ -237,13 +228,13 @@ function LoginPage() {
                     {form.email.toLowerCase().includes("admin") ? "Super Admin Access Granted!" : "Welcome Back!"}
                   </h3>
                   <p className="text-xs text-emerald-400 font-mono mt-1">
-                    Authenticating {form.email}
+                    Authenticating {form.email || "User"}
                   </p>
                 </div>
 
                 <div className="p-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-slate-300">
-                  {authStep === "authenticating" && "Verifying credentials & granting Super Admin privileges..."}
-                  {authStep === "authorized" && "Redirecting to /ops Operations Command Center..."}
+                  {authStep === "authenticating" && "Verifying credentials & initializing session..."}
+                  {authStep === "authorized" && "Redirecting..."}
                 </div>
               </motion.div>
             )}
