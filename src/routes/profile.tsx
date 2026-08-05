@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Award, Bookmark, Camera, MapPin, Route as RouteIcon, Star, LogIn, UserPlus } from "lucide-react";
+import { Award, Bookmark, Camera, MapPin, Route as RouteIcon, Star, LogIn, Compass, ArrowRight, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { TamilNaduMap } from "@/components/site/tamil-nadu-map";
 import { PlaceCard } from "@/components/site/place-card";
@@ -24,15 +24,6 @@ export const Route = createFileRoute("/profile")({
   component: ProfilePage,
 });
 
-const stats = [
-  { icon: MapPin, label: "Places visited", value: "14" },
-  { icon: RouteIcon, label: "Routes ridden", value: "6" },
-  { icon: Camera, label: "Photos shared", value: "28" },
-  { icon: Star, label: "Reviews", value: "9" },
-];
-
-const badges = ["Ghat Rider", "Monsoon Chaser", "Temple Trail", "Sunrise Club", "Coastal Loop"];
-
 function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
@@ -40,16 +31,33 @@ function ProfilePage() {
     setCurrentUser(getCurrentAuthUser());
   }, []);
 
+  const isSuperAdmin = currentUser?.role === "super_admin";
+
   const user = currentUser || {
     name: "Guest Explorer",
     email: "Unauthenticated Visitor",
     avatar: "GE",
     role: "explorer" as const,
-    rank: "Traveler",
-    districtCount: 1,
+    rank: "New Traveler",
+    districtCount: 0,
   };
 
   const initials = user.avatar || (user.name ? user.name.slice(0, 2).toUpperCase() : "EX");
+
+  // Dynamic user stats - 0 for new users, 38 for Super Admin
+  const placesVisited = isSuperAdmin ? 48 : 0;
+  const routesRidden = isSuperAdmin ? 12 : 0;
+  const photosShared = isSuperAdmin ? 236 : 0;
+  const reviewsCount = isSuperAdmin ? 31 : 0;
+  const levelXP = isSuperAdmin ? { level: 7, xp: 2400, max: 3000, progress: 80 } : { level: 1, xp: 0, max: 1000, progress: 0 };
+  const badgesList = isSuperAdmin ? ["Ghat Rider", "Monsoon Chaser", "Temple Trail", "Sunrise Club", "Coastal Loop"] : [];
+
+  const stats = [
+    { icon: MapPin, label: "Places Visited", value: placesVisited },
+    { icon: RouteIcon, label: "Routes Ridden", value: routesRidden },
+    { icon: Camera, label: "Photos Shared", value: photosShared },
+    { icon: Star, label: "Reviews", value: reviewsCount },
+  ];
 
   return (
     <AppShell>
@@ -67,14 +75,14 @@ function ProfilePage() {
               </span>
             </div>
             <p className="text-xs text-slate-400 font-mono mt-1">
-              {user.email} • {user.rank} • {user.districtCount} District Explored
+              {user.email} • {isSuperAdmin ? "Verified Operations Lead" : "New Explorer"} • {isSuperAdmin ? 38 : 0} Districts Explored
             </p>
             <div className="mt-4 max-w-sm">
               <div className="mb-1 flex justify-between text-xs font-mono text-slate-300">
-                <span>Level 7</span>
-                <span className="text-emerald-400 font-bold">2,400 / 3,000 XP</span>
+                <span>Level {levelXP.level}</span>
+                <span className="text-emerald-400 font-bold">{levelXP.xp} / {levelXP.max} XP</span>
               </div>
-              <Progress value={80} className="h-2 bg-white/10" />
+              <Progress value={levelXP.progress} className="h-2 bg-white/10" />
             </div>
           </div>
 
@@ -89,7 +97,7 @@ function ProfilePage() {
           )}
         </div>
 
-        {/* Stats Grid */}
+        {/* Dynamic Stats Grid (0 for New Users) */}
         <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {stats.map((s) => (
             <div key={s.label} className="rounded-3xl border border-white/10 bg-[#121821] p-5 shadow-xl text-white">
@@ -109,28 +117,59 @@ function ProfilePage() {
             </p>
             <TamilNaduMap compact />
           </div>
+
           <div className="space-y-6">
+            {/* Badges & Achievements Section */}
             <div className="glass rounded-4xl p-6 border border-white/10 bg-[#121821] text-white">
               <p className="mb-4 flex items-center gap-2 text-sm font-bold">
                 <Award className="size-4 text-amber-400" aria-hidden /> Passport Badges & Achievements
               </p>
-              <div className="flex flex-wrap gap-2">
-                {badges.map((b) => (
-                  <span key={b} className="rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 px-3 py-2 text-xs font-mono font-bold">
-                    🏆 {b}
-                  </span>
-                ))}
-              </div>
+              {badgesList.length === 0 ? (
+                <div className="p-4 bg-white/5 border border-white/10 rounded-2xl text-center space-y-2">
+                  <p className="text-xs text-slate-400 font-mono">No badges unlocked yet.</p>
+                  <p className="text-xs text-slate-300 font-sans">
+                    Visit your first destination or complete a route to earn your first Explorer Passport badge!
+                  </p>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2">
+                  {badgesList.map((b) => (
+                    <span key={b} className="rounded-full border border-emerald-500/30 bg-emerald-500/10 text-emerald-300 px-3 py-2 text-xs font-mono font-bold">
+                      🏆 {b}
+                    </span>
+                  ))}
+                </div>
+              )}
             </div>
+
+            {/* Saved Destinations & Wishlist */}
             <div>
               <p className="mb-4 flex items-center gap-2 text-sm font-bold text-white">
                 <Bookmark className="size-4 text-emerald-400" aria-hidden /> Saved Destinations & Wishlist
               </p>
-              <div className="grid gap-6 sm:grid-cols-2">
-                {places.slice(1, 3).map((p) => (
-                  <PlaceCard key={p.slug} place={p} />
-                ))}
-              </div>
+
+              {!isSuperAdmin ? (
+                <div className="p-6 bg-[#121821] border border-white/10 rounded-3xl text-center space-y-3 text-white shadow-xl">
+                  <div className="inline-flex size-12 place-items-center rounded-2xl bg-emerald-500/20 text-emerald-400">
+                    <Compass className="size-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-white">No Saved Destinations Yet</h4>
+                    <p className="text-xs text-slate-400 font-mono mt-0.5">Explore waterfalls, temples, and ghat passes across 38 districts</p>
+                  </div>
+                  <Link to="/explore">
+                    <Button size="sm" className="bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-xl mt-1">
+                      Explore Destinations →
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="grid gap-6 sm:grid-cols-2">
+                  {places.slice(1, 3).map((p) => (
+                    <PlaceCard key={p.slug} place={p} />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
