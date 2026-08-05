@@ -30,10 +30,11 @@ export interface UserProfile {
   name: string;
   email: string;
   avatar: string;
-  role: UserRole;
+  role: UserRole; // Platform Authorization Role (e.g., super_admin)
   status: "active" | "suspended" | "pending";
-  rank: string;
+  rank: string; // Explorer Gamification Rank (e.g., Level 0 Explorer)
   districtCount: number;
+  xp?: number;
 }
 
 export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {
@@ -96,7 +97,7 @@ export function hasPermission(role: UserRole, permission: Permission): boolean {
   return PERMISSION_MATRIX[role]?.includes(permission) ?? false;
 }
 
-// REAL AUTH SESSION MANAGER (No Hardcoded Profiles)
+// REAL AUTH SESSION MANAGER with Reactive Event Broadcast
 export function getCurrentAuthUser(): UserProfile | null {
   if (typeof window === "undefined") return null;
   try {
@@ -111,11 +112,30 @@ export function getCurrentAuthUser(): UserProfile | null {
 export function setAuthSession(user: UserProfile) {
   if (typeof window !== "undefined") {
     localStorage.setItem("etn_auth_user", JSON.stringify(user));
+    window.dispatchEvent(new CustomEvent("etn_auth_updated", { detail: user }));
+  }
+}
+
+export function updateAuthRole(newRole: UserRole) {
+  const current = getCurrentAuthUser();
+  if (current) {
+    const updated: UserProfile = { ...current, role: newRole };
+    setAuthSession(updated);
   }
 }
 
 export function clearAuthSession() {
   if (typeof window !== "undefined") {
     localStorage.removeItem("etn_auth_user");
+    window.dispatchEvent(new CustomEvent("etn_auth_updated", { detail: null }));
   }
+}
+
+export function subscribeToAuthChanges(callback: (user: UserProfile | null) => void) {
+  if (typeof window === "undefined") return () => {};
+  const handler = (e: any) => {
+    callback(e.detail);
+  };
+  window.addEventListener("etn_auth_updated", handler);
+  return () => window.removeEventListener("etn_auth_updated", handler);
 }

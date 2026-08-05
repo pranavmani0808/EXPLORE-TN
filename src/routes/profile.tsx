@@ -14,6 +14,7 @@ import {
   Lock,
   CheckCircle2,
   Search,
+  Shield,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { AppShell } from "@/components/site/app-shell";
@@ -22,7 +23,7 @@ import { PlaceCard } from "@/components/site/place-card";
 import { places } from "@/data/places";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { getCurrentAuthUser, UserProfile } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, subscribeToAuthChanges, UserProfile } from "@/lib/auth-rbac";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -52,6 +53,10 @@ function ProfilePage() {
 
   useEffect(() => {
     setCurrentUser(getCurrentAuthUser());
+    const unsubscribe = subscribeToAuthChanges((updatedUser) => {
+      setCurrentUser(updatedUser);
+    });
+    return () => unsubscribe();
   }, []);
 
   const isSuperAdmin = currentUser?.role === "super_admin";
@@ -61,7 +66,7 @@ function ProfilePage() {
     email: "Unauthenticated Visitor",
     avatar: "EX",
     role: "explorer" as const,
-    rank: "New Traveler",
+    rank: "Level 0 Explorer",
     districtCount: 0,
   };
 
@@ -129,12 +134,14 @@ function ProfilePage() {
             {initials}
           </span>
           <div className="min-w-52 flex-1 space-y-2">
+            {/* Dual Badge Display: Platform Authorization Role + Explorer Gamification Rank */}
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-mono text-[11px] font-bold rounded-full border border-emerald-500/30">
-                👋 Welcome to ExplorerTN
+              <span className="px-3 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-mono text-[11px] font-bold rounded-full border border-emerald-500/30 flex items-center gap-1">
+                <Shield className="size-3 text-emerald-600 dark:text-emerald-400" /> Platform Role: {user.role.replace("_", " ").toUpperCase()}
               </span>
-              <span className="px-2.5 py-0.5 bg-slate-100 dark:bg-white/10 text-slate-600 dark:text-slate-300 font-mono text-[10px] font-bold rounded-full uppercase">
-                {user.role.replace("_", " ")}
+
+              <span className="px-3 py-1 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-mono text-[11px] font-bold rounded-full border border-amber-500/30">
+                🏕️ Explorer Rank: {levelXP.rankTitle}
               </span>
             </div>
 

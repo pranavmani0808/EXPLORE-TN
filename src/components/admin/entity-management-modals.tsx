@@ -35,7 +35,7 @@ import {
   AuditTrailEntry,
 } from "@/lib/audit-trail-store";
 import { places as initialPlaces, Place } from "@/data/places";
-import { getCurrentAuthUser } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, updateAuthRole } from "@/lib/auth-rbac";
 
 interface ModalProps {
   isOpen: boolean;
@@ -64,6 +64,12 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
     saveManagedUsers(updated);
 
     const targetUser = users.find((u) => u.id === userId);
+
+    // REACTIVE SESSION SYNCHRONIZATION: If modifying current session user, update active auth session immediately
+    if (currentUser && (currentUser.id === userId || currentUser.email === targetUser?.email || currentUser.name === targetUser?.name)) {
+      updateAuthRole(newRole);
+    }
+
     recordAuditLog({
       entityType: "user",
       entityId: userId,
@@ -107,7 +113,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
             </div>
             <div>
               <h2 className="text-lg font-black text-slate-900 dark:text-white">User Management & RBAC</h2>
-              <p className="text-xs text-slate-500 font-mono">Manage accounts, roles, permissions, and security audit logs</p>
+              <p className="text-xs text-slate-500 font-mono">Manage accounts, roles, permissions, and reactive session claims</p>
             </div>
           </div>
           <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl">
@@ -164,37 +170,37 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
 
             <div className="p-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl font-mono text-xs space-y-2">
               {activeUserTab === "info" && (
-                <div className="space-y-2">
-                  <p><strong>District:</strong> {selectedUser.district || "Tamil Nadu Wide"}</p>
+                <div className="space-y-2 font-sans">
+                  <p><strong>Platform Role:</strong> <span className="font-mono text-emerald-600 font-bold uppercase">{selectedUser.role}</span></p>
+                  <p><strong>Explorer Rank:</strong> <span className="font-mono text-amber-600 font-bold">Level 0 Explorer</span></p>
+                  <p><strong>District Scope:</strong> {selectedUser.district || "Tamil Nadu Wide"}</p>
                   <p><strong>Status:</strong> {selectedUser.status}</p>
                   <p><strong>Last Login:</strong> {selectedUser.lastLogin}</p>
-                  <p><strong>Joined:</strong> {selectedUser.joinedDate}</p>
                 </div>
               )}
 
               {activeUserTab === "permissions" && (
-                <div className="space-y-1">
-                  <p className="text-emerald-600 dark:text-emerald-400 font-bold">✓ Full GIS Module Access</p>
+                <div className="space-y-1 font-sans">
+                  <p className="text-emerald-600 dark:text-emerald-400 font-bold">✓ GIS Module Access Granted</p>
                   <p className="text-emerald-600 dark:text-emerald-400 font-bold">✓ Content Publishing Allowed</p>
                   <p className="text-emerald-600 dark:text-emerald-400 font-bold">✓ Audit Log Telemetry Granted</p>
                 </div>
               )}
 
               {activeUserTab === "activity" && (
-                <p className="text-slate-500">Active session initiated today at 09:12 AM.</p>
+                <p className="text-slate-500 font-sans">Active session initiated today at 09:12 AM.</p>
               )}
 
               {activeUserTab === "audit" && (
-                <div className="space-y-1">
+                <div className="space-y-1 font-mono">
                   <p className="text-slate-400">[09:12 AM] Login via password credential verified</p>
-                  <p className="text-slate-400">[09:15 AM] Role RBAC telemetry validated</p>
+                  <p className="text-slate-400">[09:15 AM] Role RBAC telemetry claims synchronized</p>
                 </div>
               )}
             </div>
           </div>
         ) : (
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
-            {/* Search & Actions */}
             <div className="flex items-center justify-between gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
@@ -212,13 +218,12 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
               </Button>
             </div>
 
-            {/* Users Table */}
             <div className="overflow-x-auto border border-slate-200 dark:border-white/10 rounded-2xl">
               <table className="w-full text-left text-xs font-sans">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-white/5 border-b border-slate-200 dark:border-white/10 font-mono text-slate-500 text-[10px] uppercase">
                     <th className="py-2.5 px-3">User</th>
-                    <th className="py-2.5 px-3">Role</th>
+                    <th className="py-2.5 px-3">Platform Role</th>
                     <th className="py-2.5 px-3">Status</th>
                     <th className="py-2.5 px-3">Last Login</th>
                     <th className="py-2.5 px-3 text-right">Actions</th>
@@ -242,7 +247,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                         <select
                           value={u.role}
                           onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
-                          className="bg-transparent border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 focus:outline-none"
+                          className="bg-transparent border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 focus:outline-none cursor-pointer"
                         >
                           <option value="super_admin">Super Admin</option>
                           <option value="place_manager">Place Manager</option>
@@ -281,7 +286,6 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
           </div>
         )}
 
-        {/* Footer */}
         <div className="border-t border-slate-200 dark:border-white/10 pt-3 flex justify-end">
           <Button onClick={onClose} variant="outline" size="sm" className="text-xs font-bold rounded-xl">
             Close
@@ -300,8 +304,7 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [activePlaceTab, setActivePlaceTab] = useState<"overview" | "gps" | "gallery" | "routes" | "history">("overview");
-  
-  // Place 360 GPS Editor State
+
   const [lat, setLat] = useState<string>("");
   const [lng, setLng] = useState<string>("");
 
@@ -328,7 +331,6 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
         exit={{ opacity: 0, scale: 0.95 }}
         className="w-full max-w-4xl max-h-[90vh] bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-2xl text-slate-900 dark:text-white overflow-hidden flex flex-col justify-between"
       >
-        {/* Header */}
         <div className="flex items-center justify-between border-b border-slate-200 dark:border-white/10 pb-4">
           <div className="flex items-center gap-3">
             <div className="grid size-10 place-items-center rounded-2xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
@@ -344,7 +346,6 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
           </button>
         </div>
 
-        {/* 360° Place Workspace OR Places Directory */}
         {selectedPlace ? (
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
             <button
@@ -354,7 +355,6 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
               ← Back to Places Directory
             </button>
 
-            {/* Place Banner */}
             <div className="relative h-36 rounded-2xl overflow-hidden border border-slate-200 dark:border-white/10">
               <img src={selectedPlace.image} alt={selectedPlace.name} className="size-full object-cover" />
               <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent p-4 flex flex-col justify-end text-white">
@@ -366,7 +366,6 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
               </div>
             </div>
 
-            {/* Tabs */}
             <div className="flex border-b border-slate-200 dark:border-white/10 text-xs font-mono font-bold">
               {[
                 { id: "overview", label: "Overview" },
@@ -388,7 +387,6 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
               ))}
             </div>
 
-            {/* Content */}
             <div className="p-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-mono space-y-3">
               {activePlaceTab === "overview" && (
                 <div className="space-y-2 font-sans">
