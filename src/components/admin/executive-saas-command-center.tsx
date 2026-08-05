@@ -33,6 +33,7 @@ import {
   SunMedium,
   Inbox,
   Globe,
+  Bell,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -44,6 +45,8 @@ import {
   logAuditEvent,
 } from "@/lib/dashboard-telemetry";
 import { getCurrentAuthUser } from "@/lib/auth-rbac";
+import { UserManagementModal, PlacesManagerModal } from "./entity-management-modals";
+import { getNotifications, AppNotification } from "@/lib/audit-trail-store";
 
 interface ExecutiveCommandCenterProps {
   onNavigateTab: (tabId: string) => void;
@@ -54,8 +57,13 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
   const [services, setServices] = useState<ServiceHealthItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [approvalList, setApprovalList] = useState<ApprovalQueueItem[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [backupStatus, setBackupStatus] = useState<string | null>(null);
+
+  // Modal Visibility States
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  const [isPlacesModalOpen, setIsPlacesModalOpen] = useState(false);
 
   const currentUser = getCurrentAuthUser();
 
@@ -66,6 +74,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
     setServices(data.services);
     setAuditLogs(data.auditLogs);
     setApprovalList(data.approvalQueue);
+    setNotifications(getNotifications());
     setIsLoading(false);
   };
 
@@ -123,7 +132,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 text-xs font-mono shadow-sm text-slate-900 dark:text-white">
         <div className="flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
-            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Live Telemetry Online
+            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Live Telemetry & 360° Workspaces Online
           </span>
           <span className="text-slate-500">Storage: {metrics.storageUsedGB}</span>
           <span className="text-slate-500">• Latency: {metrics.avgLatencyMs}ms</span>
@@ -153,7 +162,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         <div className="flex flex-wrap items-center gap-2">
           <Button
             size="sm"
-            onClick={() => onNavigateTab("places")}
+            onClick={() => setIsPlacesModalOpen(true)}
             className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs rounded-xl cursor-pointer"
           >
             <Plus className="size-3.5 mr-1" /> Add Place
@@ -188,7 +197,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
 
           <Button
             size="sm"
-            onClick={() => onNavigateTab("users")}
+            onClick={() => setIsUserModalOpen(true)}
             variant="outline"
             className="border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-bold rounded-xl cursor-pointer"
           >
@@ -213,30 +222,34 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       )}
 
-      {/* 3. Truthful Platform Metrics Cards */}
+      {/* 3. Clickable Metric Entry Point Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3">
         {[
-          { label: "Registered Users", val: metrics.registeredUsers, sub: `${metrics.activeUsersToday} Active Session`, icon: Users, color: "text-emerald-600 dark:text-emerald-400" },
-          { label: "Total Places", val: metrics.totalPlaces, sub: `${metrics.verifiedPlaces} Verified • ${metrics.pendingPlaces} Pending`, icon: MapPin, color: "text-blue-600 dark:text-blue-400" },
-          { label: "Total Routes", val: metrics.totalRoutes, sub: `${metrics.totalRoutes} Verified Routes`, icon: RouteIcon, color: "text-amber-600 dark:text-amber-400" },
-          { label: "Media Assets", val: metrics.mediaAssets, sub: `${metrics.mediaAssets} DAM Uploads`, icon: FolderKanban, color: "text-purple-600 dark:text-purple-400" },
-          { label: "Published Stories", val: metrics.publishedStories, sub: `${metrics.publishedStories} Community Stories`, icon: FileText, color: "text-teal-600 dark:text-teal-400" },
-          { label: "Pending Reviews", val: metrics.pendingReviews, sub: `${metrics.pendingReviews} Flags Pending`, icon: CheckCircle2, color: "text-rose-600 dark:text-rose-400" },
-          { label: "Weather Alerts", val: metrics.weatherAlerts, sub: `${metrics.weatherAlerts} Active Warnings`, icon: CloudRain, color: "text-amber-500" },
+          { label: "Registered Users", val: metrics.registeredUsers, sub: `${metrics.activeUsersToday} Active Session`, icon: Users, color: "text-emerald-600 dark:text-emerald-400", onClick: () => setIsUserModalOpen(true) },
+          { label: "Total Places", val: metrics.totalPlaces, sub: `${metrics.verifiedPlaces} Verified • ${metrics.pendingPlaces} Pending`, icon: MapPin, color: "text-blue-600 dark:text-blue-400", onClick: () => setIsPlacesModalOpen(true) },
+          { label: "Total Routes", val: metrics.totalRoutes, sub: `${metrics.totalRoutes} Verified Routes`, icon: RouteIcon, color: "text-amber-600 dark:text-amber-400", onClick: () => onNavigateTab("routes") },
+          { label: "Media Assets", val: metrics.mediaAssets, sub: `${metrics.mediaAssets} DAM Uploads`, icon: FolderKanban, color: "text-purple-600 dark:text-purple-400", onClick: () => onNavigateTab("media") },
+          { label: "Published Stories", val: metrics.publishedStories, sub: `${metrics.publishedStories} Community Stories`, icon: FileText, color: "text-teal-600 dark:text-teal-400", onClick: () => onNavigateTab("cms") },
+          { label: "Pending Reviews", val: metrics.pendingReviews, sub: `${metrics.pendingReviews} Flags Pending`, icon: CheckCircle2, color: "text-rose-600 dark:text-rose-400", onClick: () => onNavigateTab("moderation") },
+          { label: "Weather Alerts", val: metrics.weatherAlerts, sub: `${metrics.weatherAlerts} Active Warnings`, icon: CloudRain, color: "text-amber-500", onClick: () => onNavigateTab("weather") },
         ].map((m) => (
-          <div
+          <button
             key={m.label}
-            className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-2xl p-4 shadow-sm text-slate-900 dark:text-white flex flex-col justify-between"
+            onClick={m.onClick}
+            className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-2xl p-4 shadow-sm hover:shadow-md hover:border-emerald-500/40 transition text-slate-900 dark:text-white flex flex-col justify-between text-left cursor-pointer group"
           >
             <div>
               <div className="flex items-center justify-between text-slate-500 dark:text-slate-400 mb-1">
-                <span className="text-[10px] font-mono font-bold uppercase truncate">{m.label}</span>
-                <m.icon className={`size-4 ${m.color}`} />
+                <span className="text-[10px] font-mono font-bold uppercase truncate group-hover:text-emerald-600 dark:group-hover:text-emerald-400">{m.label}</span>
+                <m.icon className={`size-4 ${m.color} group-hover:scale-110 transition-transform`} />
               </div>
               <p className="text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">{m.val}</p>
             </div>
-            <p className="mt-2 text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate">{m.sub}</p>
-          </div>
+            <p className="mt-2 text-[10px] font-mono text-slate-500 dark:text-slate-400 truncate flex items-center justify-between">
+              <span>{m.sub}</span>
+              <ArrowUpRight className="size-3 opacity-0 group-hover:opacity-100 text-emerald-600 transition-opacity" />
+            </p>
+          </button>
         ))}
       </div>
 
@@ -264,73 +277,29 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       </div>
 
-      {/* 5. Pending Approval Queue with Truthful Empty State */}
+      {/* 5. Live Notifications Center Stream */}
       <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-            <FileCheck className="size-5 text-emerald-600 dark:text-emerald-400" /> Content Approval Queue
+            <Bell className="size-5 text-amber-500" /> Live Platform Notification Stream
           </h3>
-          <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
-            {pendingApprovals.length} Items Pending
-          </span>
+          <span className="text-xs font-mono text-slate-500">{notifications.length} Alerts Logged</span>
         </div>
 
-        {pendingApprovals.length === 0 ? (
-          <div className="p-8 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-2">
-            <div className="inline-flex size-10 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-              <ShieldCheck className="size-5" />
+        <div className="space-y-2 font-mono text-xs">
+          {notifications.map((n) => (
+            <div key={n.id} className="p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-between gap-3">
+              <div>
+                <p className="font-bold text-slate-900 dark:text-white font-sans">{n.title}</p>
+                <p className="text-[11px] text-slate-500 mt-0.5">{n.message}</p>
+              </div>
+              <span className="text-[10px] text-slate-400 shrink-0">{n.time}</span>
             </div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white">Nothing waiting for approval</h4>
-            <p className="text-xs text-slate-500 font-mono">Everything is verified. Great job!</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-xs font-sans">
-              <thead>
-                <tr className="border-b border-slate-200 dark:border-white/10 font-mono text-slate-500 uppercase text-[10px]">
-                  <th className="py-2.5 px-3">Type</th>
-                  <th className="py-2.5 px-3">Item Name</th>
-                  <th className="py-2.5 px-3">Submitted By</th>
-                  <th className="py-2.5 px-3">Time</th>
-                  <th className="py-2.5 px-3">Priority</th>
-                  <th className="py-2.5 px-3">Status</th>
-                  <th className="py-2.5 px-3 text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-white/10 font-mono">
-                {pendingApprovals.map((item) => (
-                  <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition">
-                    <td className="py-3 px-3 font-bold text-emerald-700 dark:text-emerald-400">{item.type}</td>
-                    <td className="py-3 px-3 font-sans font-semibold text-slate-900 dark:text-white">{item.name}</td>
-                    <td className="py-3 px-3 text-slate-600 dark:text-slate-300">{item.submittedBy}</td>
-                    <td className="py-3 px-3 text-slate-400">{item.created}</td>
-                    <td className="py-3 px-3">
-                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full border ${item.priority === "HIGH" ? "bg-rose-500/10 text-rose-600 border-rose-500/30" : "bg-slate-100 text-slate-600 border-slate-200"}`}>
-                        {item.priority}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3">
-                      <span className="px-2 py-0.5 text-[9px] font-bold rounded-full uppercase bg-amber-500/10 text-amber-600">
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-3 text-right space-x-1.5 font-sans">
-                      <Button size="sm" onClick={() => handleApprove(item.id)} className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] rounded-lg">
-                        <Check className="size-3 mr-1" /> Approve
-                      </Button>
-                      <Button size="sm" onClick={() => handleReject(item.id)} variant="outline" className="h-7 px-2.5 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-[10px] rounded-lg">
-                        <X className="size-3 mr-1" /> Reject
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
 
-      {/* 6. Live Audit Log & Operational Actions */}
+      {/* 6. Live Audit Log & Registered Users */}
       <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
         {/* Real Audit Log Timeline */}
         <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
@@ -363,95 +332,48 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
           </div>
         </div>
 
-        {/* Action Queue & Weather State */}
-        <div className="space-y-6">
-          {/* Action Queue (Needs Attention) */}
-          <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
-            <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-              <ShieldAlert className="size-5 text-amber-500" /> Operational Action Queue
-            </h3>
-
-            {metrics.pendingPlaces === 0 && metrics.pendingReviews === 0 ? (
-              <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-2">
-                <div className="inline-flex size-10 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
-                  <ShieldCheck className="size-5" />
-                </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">No Action Required</h4>
-                <p className="text-xs text-slate-500 font-mono">All places and reviews are verified.</p>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                {metrics.pendingPlaces > 0 && (
-                  <button
-                    onClick={() => onNavigateTab("places")}
-                    className="w-full flex items-center justify-between p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-emerald-500/40 transition text-left cursor-pointer group"
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="grid size-7 place-items-center rounded-xl bg-amber-500/10 text-amber-600 dark:text-amber-400 font-mono font-black text-xs border border-amber-500/20">
-                        {metrics.pendingPlaces}
-                      </span>
-                      <span className="text-xs font-medium text-slate-800 dark:text-slate-200">
-                        Places waiting GIS verification
-                      </span>
-                    </div>
-                    <ArrowUpRight className="size-4 text-slate-400 group-hover:text-emerald-600" />
-                  </button>
-                )}
-              </div>
-            )}
-          </div>
-
-          {/* Weather Status (Real Empty State) */}
-          <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
+        {/* Registered Users Clickable Summary */}
+        <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
+          <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-              <CloudRain className="size-4 text-blue-600 dark:text-blue-400" /> Live Weather Warnings
+              <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400" /> Registered Explorers
             </h3>
-
-            {metrics.weatherAlerts === 0 ? (
-              <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-1">
-                <div className="inline-flex size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  <SunMedium className="size-5" />
-                </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Weather service not configured</h4>
-                <p className="text-xs text-slate-500 font-mono">Connect Weather API to stream live road conditions.</p>
-              </div>
-            ) : null}
+            <button onClick={() => setIsUserModalOpen(true)} className="text-xs font-mono text-emerald-600 font-bold hover:underline">
+              Manage Users →
+            </button>
           </div>
+
+          {currentUser ? (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+                <div className="flex items-center gap-3">
+                  <span className="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white font-black text-xs shadow-md">
+                    {currentUser.avatar}
+                  </span>
+                  <div>
+                    <p className="text-xs font-bold text-slate-900 dark:text-white">{currentUser.name}</p>
+                    <p className="text-[10px] font-mono text-slate-500">{currentUser.email}</p>
+                  </div>
+                </div>
+                <div className="text-right">
+                  <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono text-[9px] font-bold rounded-full uppercase border border-emerald-500/20">
+                    {currentUser.role}
+                  </span>
+                  <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 font-bold">● Active Today</p>
+                </div>
+              </div>
+            </div>
+          ) : (
+            <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-1">
+              <p className="text-xs text-slate-500 font-mono">No registered users online.</p>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* 7. Registered Users Directory */}
-      <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
-        <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-          <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400" /> Registered Explorers (Database Telemetry)
-        </h3>
-
-        {currentUser ? (
-          <div className="space-y-2">
-            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
-              <div className="flex items-center gap-3">
-                <span className="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white font-black text-xs shadow-md">
-                  {currentUser.avatar}
-                </span>
-                <div>
-                  <p className="text-xs font-bold text-slate-900 dark:text-white">{currentUser.name}</p>
-                  <p className="text-[10px] font-mono text-slate-500">{currentUser.email}</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono text-[9px] font-bold rounded-full uppercase border border-emerald-500/20">
-                  {currentUser.role}
-                </span>
-                <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 font-bold">● Active Today</p>
-              </div>
-            </div>
-          </div>
-        ) : (
-          <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-1">
-            <p className="text-xs text-slate-500 font-mono">No registered users online.</p>
-          </div>
-        )}
-      </div>
+      {/* 360° ENTITY MANAGEMENT MODALS */}
+      <UserManagementModal isOpen={isUserModalOpen} onClose={() => setIsUserModalOpen(false)} />
+      <PlacesManagerModal isOpen={isPlacesModalOpen} onClose={() => setIsPlacesModalOpen(false)} />
     </div>
   );
 }
