@@ -1,0 +1,268 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * ExplorerTN design system — Tamil Nadu landscapes.
+ * Dark mode is the default experience; light mode is fully supported.
+ * All colors are oklch tokens. Never hardcode colors in components.
+ */
+
+@theme inline {
+  --font-display: "Sora", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, sans-serif;
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+
+  /* Brand palette */
+  --color-forest: var(--forest);
+  --color-forest-foreground: var(--forest-foreground);
+  --color-ocean: var(--ocean);
+  --color-ocean-foreground: var(--ocean-foreground);
+  --color-sand: var(--sand);
+  --color-sand-foreground: var(--sand-foreground);
+  --color-stone: var(--stone);
+  --color-sunset: var(--sunset);
+  --color-sunset-foreground: var(--sunset-foreground);
+  --color-emerald-glow: var(--emerald-glow);
+  --color-gold: var(--gold);
+  --color-gold-foreground: var(--gold-foreground);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+
+  --color-chart-1: var(--forest);
+  --color-chart-2: var(--ocean);
+  --color-chart-3: var(--sunset);
+  --color-chart-4: var(--gold);
+  --color-chart-5: var(--emerald-glow);
+  --color-sidebar: var(--surface);
+  --color-sidebar-foreground: var(--foreground);
+  --color-sidebar-primary: var(--primary);
+  --color-sidebar-primary-foreground: var(--primary-foreground);
+  --color-sidebar-accent: var(--surface-2);
+  --color-sidebar-accent-foreground: var(--foreground);
+  --color-sidebar-border: var(--border);
+  --color-sidebar-ring: var(--ring);
+
+  --shadow-elevate: 0 24px 60px -24px oklch(0.08 0.03 200 / 0.75);
+  --shadow-glow: 0 0 40px -8px color-mix(in oklab, var(--emerald-glow) 55%, transparent);
+}
+
+:root {
+  --radius: 1rem;
+
+  /* Light mode — bright, accessible, sand + ocean */
+  --background: oklch(0.985 0.008 95);
+  --foreground: oklch(0.22 0.03 175);
+  --surface: oklch(0.965 0.012 95);
+  --surface-2: oklch(0.935 0.016 95);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.03 175);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.03 175);
+  --primary: oklch(0.44 0.1 168);
+  --primary-foreground: oklch(0.985 0.01 150);
+  --secondary: oklch(0.93 0.02 95);
+  --secondary-foreground: oklch(0.28 0.04 175);
+  --muted: oklch(0.94 0.012 95);
+  --muted-foreground: oklch(0.47 0.02 190);
+  --accent: oklch(0.92 0.04 180);
+  --accent-foreground: oklch(0.26 0.05 180);
+  --destructive: oklch(0.55 0.2 27);
+  --destructive-foreground: oklch(0.985 0.01 90);
+  --border: oklch(0.88 0.015 150);
+  --input: oklch(0.9 0.015 150);
+  --ring: oklch(0.55 0.12 168);
+
+  --forest: oklch(0.45 0.1 160);
+  --forest-foreground: oklch(0.98 0.01 150);
+  --ocean: oklch(0.42 0.11 240);
+  --ocean-foreground: oklch(0.98 0.01 240);
+  --sand: oklch(0.9 0.04 85);
+  --sand-foreground: oklch(0.3 0.04 80);
+  --stone: oklch(0.62 0.012 230);
+  --sunset: oklch(0.66 0.19 47);
+  --sunset-foreground: oklch(0.18 0.03 60);
+  --emerald-glow: oklch(0.62 0.16 165);
+  --gold: oklch(0.78 0.15 85);
+  --gold-foreground: oklch(0.2 0.04 80);
+
+  --gradient-hero: linear-gradient(
+    160deg,
+    color-mix(in oklab, var(--ocean) 85%, black) 0%,
+    color-mix(in oklab, var(--forest) 70%, black) 55%,
+    color-mix(in oklab, var(--sunset) 40%, black) 100%
+  );
+  --gradient-brand: linear-gradient(120deg, var(--emerald-glow), var(--gold));
+  --gradient-fade: linear-gradient(to top, var(--background) 5%, transparent 70%);
+}
+
+.dark {
+  --background: oklch(0.16 0.024 215);
+  --foreground: oklch(0.96 0.008 150);
+  --surface: oklch(0.2 0.026 210);
+  --surface-2: oklch(0.25 0.03 205);
+  --card: oklch(0.21 0.027 210);
+  --card-foreground: oklch(0.96 0.008 150);
+  --popover: oklch(0.2 0.028 210);
+  --popover-foreground: oklch(0.96 0.008 150);
+  --primary: oklch(0.72 0.15 165);
+  --primary-foreground: oklch(0.16 0.03 190);
+  --secondary: oklch(0.27 0.03 205);
+  --secondary-foreground: oklch(0.95 0.01 150);
+  --muted: oklch(0.26 0.026 208);
+  --muted-foreground: oklch(0.72 0.022 200);
+  --accent: oklch(0.3 0.05 195);
+  --accent-foreground: oklch(0.95 0.02 165);
+  --destructive: oklch(0.62 0.2 25);
+  --destructive-foreground: oklch(0.98 0.01 90);
+  --border: oklch(0.98 0.02 180 / 12%);
+  --input: oklch(0.98 0.02 180 / 16%);
+  --ring: oklch(0.72 0.15 165);
+
+  --forest: oklch(0.55 0.13 158);
+  --forest-foreground: oklch(0.97 0.01 150);
+  --ocean: oklch(0.52 0.13 238);
+  --ocean-foreground: oklch(0.97 0.01 240);
+  --sand: oklch(0.83 0.05 82);
+  --sand-foreground: oklch(0.22 0.03 70);
+  --stone: oklch(0.66 0.015 225);
+  --sunset: oklch(0.72 0.17 48);
+  --sunset-foreground: oklch(0.18 0.03 55);
+  --emerald-glow: oklch(0.78 0.16 166);
+  --gold: oklch(0.84 0.14 88);
+  --gold-foreground: oklch(0.2 0.04 80);
+
+  --gradient-hero: linear-gradient(
+    160deg,
+    oklch(0.2 0.05 240) 0%,
+    oklch(0.19 0.05 190) 50%,
+    oklch(0.22 0.06 60) 100%
+  );
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-display {
+    font-family: var(--font-display);
+    letter-spacing: -0.025em;
+  }
+
+  ::selection {
+    background: color-mix(in oklab, var(--emerald-glow) 35%, transparent);
+  }
+}
+
+@utility glass {
+  background: color-mix(in oklab, var(--surface) 62%, transparent);
+  backdrop-filter: blur(20px) saturate(140%);
+  border: 1px solid color-mix(in oklab, var(--foreground) 10%, transparent);
+}
+
+@utility glass-strong {
+  background: color-mix(in oklab, var(--surface) 88%, transparent);
+  backdrop-filter: blur(28px) saturate(150%);
+  border: 1px solid color-mix(in oklab, var(--foreground) 12%, transparent);
+}
+
+@utility text-gradient {
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+@utility bg-hero-gradient {
+  background-image: var(--gradient-hero);
+}
+
+@utility bg-fade-bottom {
+  background-image: var(--gradient-fade);
+}
+
+@utility shadow-elevate {
+  box-shadow: var(--shadow-elevate);
+}
+
+@utility shadow-glow {
+  box-shadow: var(--shadow-glow);
+}
+
+@keyframes marker-pulse {
+  0% {
+    transform: scale(0.7);
+    opacity: 0.75;
+  }
+  70% {
+    transform: scale(2.1);
+    opacity: 0;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@utility animate-marker-pulse {
+  animation: marker-pulse 2.6s ease-out infinite;
+}
+
+@utility animate-float-slow {
+  animation: float-slow 7s ease-in-out infinite;
+}
