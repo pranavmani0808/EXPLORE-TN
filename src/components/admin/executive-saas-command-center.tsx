@@ -29,9 +29,10 @@ import {
   Cpu,
   Layers,
   FileCheck,
-  Inbox,
   ShieldCheck,
   SunMedium,
+  Inbox,
+  Globe,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -70,7 +71,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 30000); // Auto-refresh telemetry every 30s
+    const interval = setInterval(loadData, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -114,15 +115,15 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
     );
   }
 
-  const pendingApprovalsCount = approvalList.filter((i) => i.status === "PENDING").length;
+  const pendingApprovals = approvalList.filter((i) => i.status === "PENDING");
 
   return (
     <div className="space-y-6 font-sans animate-in fade-in duration-300">
-      {/* 1. Real System Status Bar */}
+      {/* 1. Truthful Telemetry Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 text-xs font-mono shadow-sm text-slate-900 dark:text-white">
         <div className="flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
-            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Active Telemetry Window
+            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Live Telemetry Online
           </span>
           <span className="text-slate-500">Storage: {metrics.storageUsedGB}</span>
           <span className="text-slate-500">• Latency: {metrics.avgLatencyMs}ms</span>
@@ -141,7 +142,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       </div>
 
-      {/* 2. Top Quick Actions Bar */}
+      {/* 2. Top Operations Quick Actions Bar */}
       <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-4 shadow-sm flex flex-wrap items-center justify-between gap-3 text-slate-900 dark:text-white">
         <div className="flex items-center gap-2">
           <span className="text-xs font-mono font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
@@ -212,16 +213,16 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       )}
 
-      {/* 3. Real System Metrics Cards */}
+      {/* 3. Truthful Platform Metrics Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3">
         {[
-          { label: "Registered Users", val: metrics.registeredUsers, sub: `${metrics.activeUsersToday} Active Today`, icon: Users, color: "text-emerald-600 dark:text-emerald-400" },
+          { label: "Registered Users", val: metrics.registeredUsers, sub: `${metrics.activeUsersToday} Active Session`, icon: Users, color: "text-emerald-600 dark:text-emerald-400" },
           { label: "Total Places", val: metrics.totalPlaces, sub: `${metrics.verifiedPlaces} Verified • ${metrics.pendingPlaces} Pending`, icon: MapPin, color: "text-blue-600 dark:text-blue-400" },
-          { label: "Total Routes", val: metrics.totalRoutes, sub: `${metrics.totalRoutes} Published • ${metrics.draftRoutes} Draft`, icon: RouteIcon, color: "text-amber-600 dark:text-amber-400" },
+          { label: "Total Routes", val: metrics.totalRoutes, sub: `${metrics.totalRoutes} Verified Routes`, icon: RouteIcon, color: "text-amber-600 dark:text-amber-400" },
           { label: "Media Assets", val: metrics.mediaAssets, sub: `${metrics.mediaAssets} DAM Uploads`, icon: FolderKanban, color: "text-purple-600 dark:text-purple-400" },
-          { label: "Pending Reviews", val: metrics.pendingReviews, sub: `${metrics.pendingReviews} Reports`, icon: CheckCircle2, color: "text-teal-600 dark:text-teal-400" },
-          { label: "Weather Alerts", val: metrics.weatherAlerts, sub: `${metrics.weatherAlerts} Active Warnings`, icon: CloudRain, color: "text-rose-600 dark:text-rose-400" },
-          { label: "AI Requests Today", val: metrics.aiRequestsToday, sub: `${metrics.aiRequestsToday} Jobs Executed`, icon: Sparkles, color: "text-amber-500" },
+          { label: "Published Stories", val: metrics.publishedStories, sub: `${metrics.publishedStories} Community Stories`, icon: FileText, color: "text-teal-600 dark:text-teal-400" },
+          { label: "Pending Reviews", val: metrics.pendingReviews, sub: `${metrics.pendingReviews} Flags Pending`, icon: CheckCircle2, color: "text-rose-600 dark:text-rose-400" },
+          { label: "Weather Alerts", val: metrics.weatherAlerts, sub: `${metrics.weatherAlerts} Active Warnings`, icon: CloudRain, color: "text-amber-500" },
         ].map((m) => (
           <div
             key={m.label}
@@ -239,13 +240,13 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         ))}
       </div>
 
-      {/* 4. Live Health Telemetry */}
+      {/* 4. Service Health Probes Telemetry */}
       <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-            <Server className="size-5 text-emerald-600 dark:text-emerald-400" /> Service Health & Latency Telemetry
+            <Server className="size-5 text-emerald-600 dark:text-emerald-400" /> Infrastructure Service Health Probes
           </h3>
-          <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold">Live Backend Probes</span>
+          <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold">Live Health Probes</span>
         </div>
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs">
@@ -253,7 +254,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
             <div key={srv.name} className="p-3.5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between">
               <div>
                 <p className="font-bold text-slate-900 dark:text-white">{srv.name}</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">{srv.latency} latency • {srv.health}</p>
+                <p className="text-[10px] text-slate-500 mt-0.5">{srv.details || `${srv.latency} latency`}</p>
               </div>
               <span className={`px-2 py-0.5 font-extrabold text-[9px] rounded-full border uppercase ${srv.status === "Online" || srv.status === "Healthy" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" : "bg-slate-200 text-slate-700 border-slate-300"}`}>
                 {srv.status}
@@ -263,24 +264,24 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       </div>
 
-      {/* 5. Pending Approval Queue with Accurate Empty State */}
+      {/* 5. Pending Approval Queue with Truthful Empty State */}
       <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-            <FileCheck className="size-5 text-emerald-600 dark:text-emerald-400" /> Pending Approval Queue
+            <FileCheck className="size-5 text-emerald-600 dark:text-emerald-400" /> Content Approval Queue
           </h3>
           <span className="text-xs font-mono font-bold text-slate-600 dark:text-slate-300">
-            {pendingApprovalsCount} Items Pending
+            {pendingApprovals.length} Items Pending
           </span>
         </div>
 
-        {approvalList.length === 0 ? (
+        {pendingApprovals.length === 0 ? (
           <div className="p-8 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-2">
             <div className="inline-flex size-10 place-items-center rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
               <ShieldCheck className="size-5" />
             </div>
-            <h4 className="text-sm font-bold text-slate-900 dark:text-white">Everything is verified. Great job!</h4>
-            <p className="text-xs text-slate-500 font-mono">No items are currently waiting for approval.</p>
+            <h4 className="text-sm font-bold text-slate-900 dark:text-white">Nothing waiting for approval</h4>
+            <p className="text-xs text-slate-500 font-mono">Everything is verified. Great job!</p>
           </div>
         ) : (
           <div className="overflow-x-auto">
@@ -297,7 +298,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200 dark:divide-white/10 font-mono">
-                {approvalList.map((item) => (
+                {pendingApprovals.map((item) => (
                   <tr key={item.id} className="hover:bg-slate-50 dark:hover:bg-white/5 transition">
                     <td className="py-3 px-3 font-bold text-emerald-700 dark:text-emerald-400">{item.type}</td>
                     <td className="py-3 px-3 font-sans font-semibold text-slate-900 dark:text-white">{item.name}</td>
@@ -309,23 +310,17 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
                       </span>
                     </td>
                     <td className="py-3 px-3">
-                      <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full uppercase ${item.status === "APPROVED" ? "bg-emerald-500/10 text-emerald-600" : item.status === "REJECTED" ? "bg-rose-500/10 text-rose-600" : "bg-amber-500/10 text-amber-600"}`}>
+                      <span className="px-2 py-0.5 text-[9px] font-bold rounded-full uppercase bg-amber-500/10 text-amber-600">
                         {item.status}
                       </span>
                     </td>
                     <td className="py-3 px-3 text-right space-x-1.5 font-sans">
-                      {item.status === "PENDING" ? (
-                        <>
-                          <Button size="sm" onClick={() => handleApprove(item.id)} className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] rounded-lg">
-                            <Check className="size-3 mr-1" /> Approve
-                          </Button>
-                          <Button size="sm" onClick={() => handleReject(item.id)} variant="outline" className="h-7 px-2.5 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-[10px] rounded-lg">
-                            <X className="size-3 mr-1" /> Reject
-                          </Button>
-                        </>
-                      ) : (
-                        <span className="text-[10px] text-slate-400 italic">Action Logged</span>
-                      )}
+                      <Button size="sm" onClick={() => handleApprove(item.id)} className="h-7 px-2.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-[10px] rounded-lg">
+                        <Check className="size-3 mr-1" /> Approve
+                      </Button>
+                      <Button size="sm" onClick={() => handleReject(item.id)} variant="outline" className="h-7 px-2.5 border-slate-200 text-slate-700 hover:bg-slate-100 font-bold text-[10px] rounded-lg">
+                        <X className="size-3 mr-1" /> Reject
+                      </Button>
                     </td>
                   </tr>
                 ))}
@@ -335,7 +330,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         )}
       </div>
 
-      {/* 6. Live Audit Log & Action Queue */}
+      {/* 6. Live Audit Log & Operational Actions */}
       <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
         {/* Real Audit Log Timeline */}
         <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
@@ -382,7 +377,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
                   <ShieldCheck className="size-5" />
                 </div>
                 <h4 className="text-sm font-bold text-slate-900 dark:text-white">No Action Required</h4>
-                <p className="text-xs text-slate-500 font-mono">All places and reviews are fully verified.</p>
+                <p className="text-xs text-slate-500 font-mono">All places and reviews are verified.</p>
               </div>
             ) : (
               <div className="space-y-2">
@@ -417,12 +412,45 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
                 <div className="inline-flex size-10 place-items-center rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400">
                   <SunMedium className="size-5" />
                 </div>
-                <h4 className="text-sm font-bold text-slate-900 dark:text-white">No Active Weather Warnings</h4>
-                <p className="text-xs text-slate-500 font-mono">Road conditions across all 38 districts are clear.</p>
+                <h4 className="text-sm font-bold text-slate-900 dark:text-white">Weather service not configured</h4>
+                <p className="text-xs text-slate-500 font-mono">Connect Weather API to stream live road conditions.</p>
               </div>
             ) : null}
           </div>
         </div>
+      </div>
+
+      {/* 7. Registered Users Directory */}
+      <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
+        <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+          <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400" /> Registered Explorers (Database Telemetry)
+        </h3>
+
+        {currentUser ? (
+          <div className="space-y-2">
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10">
+              <div className="flex items-center gap-3">
+                <span className="grid size-9 place-items-center rounded-xl bg-emerald-600 text-white font-black text-xs shadow-md">
+                  {currentUser.avatar}
+                </span>
+                <div>
+                  <p className="text-xs font-bold text-slate-900 dark:text-white">{currentUser.name}</p>
+                  <p className="text-[10px] font-mono text-slate-500">{currentUser.email}</p>
+                </div>
+              </div>
+              <div className="text-right">
+                <span className="px-2.5 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono text-[9px] font-bold rounded-full uppercase border border-emerald-500/20">
+                  {currentUser.role}
+                </span>
+                <p className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 mt-1 font-bold">● Active Today</p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-1">
+            <p className="text-xs text-slate-500 font-mono">No registered users online.</p>
+          </div>
+        )}
       </div>
     </div>
   );

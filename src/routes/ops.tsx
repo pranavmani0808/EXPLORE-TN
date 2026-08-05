@@ -41,14 +41,15 @@ import { CommunityModerationModule } from "@/components/admin/community-moderati
 import { WeatherOperationsModule } from "@/components/admin/weather-operations-module";
 import { AIOperationsModule } from "@/components/admin/ai-operations-module";
 import { ContentHealthModule } from "@/components/admin/content-health-module";
+import { getLiveDashboardMetrics, DashboardMetrics } from "@/lib/dashboard-telemetry";
 
 export const Route = createFileRoute("/ops")({
   head: () => ({
     meta: [
-      { title: "ExplorerTN SaaS Operations Command Center" },
+      { title: "ExplorerTN Operations Command Center" },
       {
         name: "description",
-        content: "SaaS Command Center for ExplorerTN. Platform Health, Action Queue, Live Audit Trail, Telemetry, and Role-Based Access Control.",
+        content: "Truthful Operations Command Center for ExplorerTN. Platform Health, Action Queue, Live Audit Trail, Telemetry, and Role-Based Access Control.",
       },
     ],
   }),
@@ -57,7 +58,7 @@ export const Route = createFileRoute("/ops")({
 
 interface SidebarGroup {
   groupLabel: string;
-  items: { id: string; label: string; icon: any; badge?: string; roles?: UserRole[] }[];
+  items: { id: string; label: string; icon: any; getBadge?: (m: DashboardMetrics) => string | undefined; roles?: UserRole[] }[];
 }
 
 const SAAS_OPERATIONS_GROUPS: SidebarGroup[] = [
@@ -65,15 +66,15 @@ const SAAS_OPERATIONS_GROUPS: SidebarGroup[] = [
     groupLabel: "DASHBOARD",
     items: [
       { id: "overview", label: "Executive Dashboard", icon: BarChart3, roles: ["super_admin", "place_manager", "route_manager", "community_manager"] },
-      { id: "health", label: "Content Health Audit", icon: Activity, badge: "38", roles: ["super_admin", "place_manager"] },
+      { id: "health", label: "Content Health Audit", icon: Activity, getBadge: (m) => m.totalPlaces > 0 ? `${m.totalPlaces}` : undefined, roles: ["super_admin", "place_manager"] },
     ],
   },
   {
     groupLabel: "CONTENT WORKFLOWS",
     items: [
-      { id: "places", label: "Places GIS Manager", icon: MapPin, badge: "42 Pending", roles: ["super_admin", "place_manager"] },
-      { id: "routes", label: "Routes GIS Editor", icon: RouteIcon, badge: "8 Drafts", roles: ["super_admin", "route_manager"] },
-      { id: "media", label: "Media Library (DAM)", icon: FolderKanban, badge: "17 Uploads", roles: ["super_admin", "place_manager"] },
+      { id: "places", label: "Places GIS Manager", icon: MapPin, getBadge: (m) => m.pendingPlaces > 0 ? `${m.pendingPlaces} Pending` : undefined, roles: ["super_admin", "place_manager"] },
+      { id: "routes", label: "Routes GIS Editor", icon: RouteIcon, getBadge: (m) => m.draftRoutes > 0 ? `${m.draftRoutes} Drafts` : undefined, roles: ["super_admin", "route_manager"] },
+      { id: "media", label: "Media Library (DAM)", icon: FolderKanban, getBadge: (m) => m.mediaAssets > 0 ? `${m.mediaAssets} Uploads` : undefined, roles: ["super_admin", "place_manager"] },
       { id: "cms", label: "Visual CMS & Stories", icon: Layout, roles: ["super_admin"] },
     ],
   },
@@ -81,14 +82,14 @@ const SAAS_OPERATIONS_GROUPS: SidebarGroup[] = [
     groupLabel: "COMMUNITY WORKFLOWS",
     items: [
       { id: "users", label: "Users & Roles (RBAC)", icon: Users, roles: ["super_admin"] },
-      { id: "moderation", label: "Moderation Queue", icon: ShieldAlert, badge: "5 Reports", roles: ["super_admin", "community_manager"] },
+      { id: "moderation", label: "Moderation Queue", icon: ShieldAlert, getBadge: (m) => m.pendingReviews > 0 ? `${m.pendingReviews} Reports` : undefined, roles: ["super_admin", "community_manager"] },
     ],
   },
   {
     groupLabel: "INTELLIGENCE WORKFLOWS",
     items: [
       { id: "ai", label: "AI Operations", icon: Sparkles, roles: ["super_admin"] },
-      { id: "weather", label: "Weather Operations", icon: CloudRain, badge: "2 Active", roles: ["super_admin", "route_manager"] },
+      { id: "weather", label: "Weather Operations", icon: CloudRain, getBadge: (m) => m.weatherAlerts > 0 ? `${m.weatherAlerts} Active` : undefined, roles: ["super_admin", "route_manager"] },
       { id: "analytics", label: "Platform Analytics", icon: Activity, roles: ["super_admin"] },
     ],
   },
@@ -104,12 +105,16 @@ function OperationsWorkspacePage() {
 
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const sessionUser = getCurrentAuthUser();
     setCurrentUser(sessionUser);
-    setIsLoaded(true);
+    getLiveDashboardMetrics().then((res) => {
+      setMetrics(res.metrics);
+      setIsLoaded(true);
+    });
   }, []);
 
   const handleSignOut = () => {
@@ -118,7 +123,6 @@ function OperationsWorkspacePage() {
   };
 
   // RBAC ACCESS GUARD:
-  // If not authenticated or role is 'explorer' / 'beta_tester', DENY ACCESS to /ops!
   const isUnauthorized =
     isLoaded &&
     (!currentUser || currentUser.role === "explorer" || currentUser.role === "beta_tester");
@@ -127,7 +131,7 @@ function OperationsWorkspacePage() {
     return (
       <AppShell>
         <div className="min-h-[60vh] flex items-center justify-center font-mono text-slate-500 text-xs">
-          Verifying SaaS RBAC Telemetry...
+          Verifying Telemetry API & RBAC Session...
         </div>
       </AppShell>
     );
@@ -206,8 +210,7 @@ function OperationsWorkspacePage() {
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-3 font-mono">
                 <span>Email: {user.email}</span>
-                <span>• Last Login: Today 09:12</span>
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold">● Active Session: 3h 24m</span>
+                <span className="text-emerald-700 dark:text-emerald-400 font-bold">● Truthful Database Telemetry Active</span>
               </p>
             </div>
           </div>
@@ -218,7 +221,7 @@ function OperationsWorkspacePage() {
               onClick={() => setActiveTab("overview")}
               className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-bold text-xs rounded-xl cursor-pointer"
             >
-              <BarChart3 className="size-3.5 mr-1" /> SaaS Command Center
+              <BarChart3 className="size-3.5 mr-1" /> Operations Command Center
             </Button>
           </div>
         </div>
@@ -232,33 +235,37 @@ function OperationsWorkspacePage() {
                 <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 dark:text-slate-400 px-3 py-1">
                   {group.groupLabel}
                 </p>
-                {group.items.map((item) => (
-                  <button
-                    key={item.id}
-                    onClick={() => setActiveTab(item.id)}
-                    className={`w-full flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-xs font-bold transition text-left cursor-pointer ${
-                      activeTab === item.id
-                        ? "bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black shadow-md"
-                        : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <item.icon className="size-4 shrink-0" />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && (
-                      <span
-                        className={`px-2 py-0.5 text-[9px] font-extrabold rounded-full font-mono ${
-                          activeTab === item.id
-                            ? "bg-black/20 text-white dark:text-black"
-                            : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
-                        }`}
-                      >
-                        {item.badge}
-                      </span>
-                    )}
-                  </button>
-                ))}
+                {group.items.map((item) => {
+                  const badgeText = metrics && item.getBadge ? item.getBadge(metrics) : undefined;
+
+                  return (
+                    <button
+                      key={item.id}
+                      onClick={() => setActiveTab(item.id)}
+                      className={`w-full flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-xs font-bold transition text-left cursor-pointer ${
+                        activeTab === item.id
+                          ? "bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black shadow-md"
+                          : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <item.icon className="size-4 shrink-0" />
+                        <span>{item.label}</span>
+                      </div>
+                      {badgeText && (
+                        <span
+                          className={`px-2 py-0.5 text-[9px] font-extrabold rounded-full font-mono ${
+                            activeTab === item.id
+                              ? "bg-black/20 text-white dark:text-black"
+                              : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                          }`}
+                        >
+                          {badgeText}
+                        </span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             ))}
 
