@@ -15,45 +15,20 @@ import {
   Search,
   Activity,
   Server,
-  Edit,
-  Trash2,
-  Eye,
-  Shield,
-  Upload,
-  Layers,
   Settings,
   Bookmark,
   Compass,
-  FileText,
-  MessageSquare,
-  Award,
-  AlertCircle,
-  Bell,
-  UserCheck,
-  Zap,
-  Check,
-  X,
-  Code2,
-  Database,
-  Radio,
-  FileSpreadsheet,
-  Terminal,
-  Key,
-  Globe,
-  SlidersHorizontal,
-  Flame,
-  Clock,
-  Navigation,
   Download,
-  AlertTriangle,
-  HardDrive,
-  RefreshCcw,
+  Radio,
   Layout,
-  Cpu,
+  Lock,
+  ArrowLeft,
+  Shield,
+  LogIn,
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
-import { UserRole, PERMISSION_MATRIX, hasPermission, UserProfile, getCurrentAuthUser, clearAuthSession } from "@/lib/auth-rbac";
+import { UserRole, UserProfile, getCurrentAuthUser, clearAuthSession } from "@/lib/auth-rbac";
 import { PlacesManagementModule } from "@/components/admin/places-management-module";
 import { RoutesManagementModule } from "@/components/admin/routes-management-module";
 import { MediaLibraryModule } from "@/components/admin/media-library-module";
@@ -125,41 +100,81 @@ function OperationsWorkspacePage() {
 
   const [activeTab, setActiveTab] = useState<string>(initialTab);
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     const sessionUser = getCurrentAuthUser();
-    if (sessionUser) {
-      setCurrentUser(sessionUser);
-    } else {
-      // Default fallback if visiting /ops directly
-      setCurrentUser({
-        id: "usr-ops",
-        name: "Operations Manager",
-        email: "admin@explorertn.com",
-        avatar: "OM",
-        role: "super_admin",
-        status: "active",
-        rank: "Super Admin",
-        districtCount: 38,
-      });
-    }
+    setCurrentUser(sessionUser);
+    setIsLoaded(true);
   }, []);
 
   const handleSignOut = () => {
     clearAuthSession();
-    window.location.href = "/";
+    window.location.href = "/login";
   };
 
-  const user = currentUser || {
-    id: "usr-ops",
-    name: "Operations Manager",
-    email: "admin@explorertn.com",
-    avatar: "OM",
-    role: "super_admin" as UserRole,
-    status: "active" as const,
-    rank: "Super Admin",
-    districtCount: 38,
-  };
+  // RBAC ACCESS GUARD:
+  // If not authenticated or role is 'explorer' / 'beta_tester', DENY ACCESS to /ops!
+  const isUnauthorized =
+    isLoaded &&
+    (!currentUser || currentUser.role === "explorer" || currentUser.role === "beta_tester");
+
+  if (!isLoaded) {
+    return (
+      <AppShell>
+        <div className="min-h-[60vh] flex items-center justify-center font-mono text-slate-400 text-xs">
+          Verifying RBAC Permissions...
+        </div>
+      </AppShell>
+    );
+  }
+
+  if (isUnauthorized) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-md px-4 pt-36 pb-24 font-sans">
+          <div className="bg-[#121821] border border-rose-500/30 rounded-3xl p-8 shadow-2xl text-center space-y-5 text-white relative overflow-hidden">
+            <div className="inline-flex size-16 place-items-center rounded-2xl bg-rose-500/10 border border-rose-500/30 text-rose-400">
+              <Lock className="size-8 text-rose-400" />
+            </div>
+
+            <div>
+              <span className="px-3 py-1 bg-rose-500/20 text-rose-400 font-mono text-[10px] font-bold rounded-full border border-rose-500/30 uppercase">
+                403 Access Denied (RBAC Restricted)
+              </span>
+              <h2 className="text-xl font-black text-white mt-2">
+                Operations Center Restricted
+              </h2>
+              <p className="text-xs text-slate-400 mt-2 font-mono leading-relaxed">
+                Your account ({currentUser?.email || "Guest"}) is assigned the role{" "}
+                <span className="text-emerald-400 font-bold uppercase">{currentUser?.role || "GUEST"}</span>.
+              </p>
+              <p className="text-xs text-slate-400 mt-1 font-sans">
+                The Operations Command Center is restricted to authorized platform managers and administrators.
+              </p>
+            </div>
+
+            <div className="pt-2 flex flex-col gap-2">
+              <Link to="/">
+                <Button className="w-full bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-xl">
+                  <ArrowLeft className="size-4 mr-1.5" /> Return to Explorer App
+                </Button>
+              </Link>
+
+              <button
+                onClick={handleSignOut}
+                className="w-full py-2.5 bg-white/10 hover:bg-white/15 text-white font-bold text-xs rounded-xl transition flex items-center justify-center gap-1.5 cursor-pointer"
+              >
+                <LogIn className="size-3.5" /> Sign In with Admin Account
+              </button>
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
+
+  const user = currentUser!;
 
   return (
     <AppShell>
