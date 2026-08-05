@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { Shield, Sparkles, Compass, CheckCircle2, ArrowRight, Lock, UserCheck, UserPlus, Mail, Key, User } from "lucide-react";
+import { Compass, ArrowRight, Lock, UserCheck, UserPlus, Mail, Key, User } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { UserRole, getAuthorizedRedirectRoute, setAuthSession, UserProfile } from "@/lib/auth-rbac";
@@ -9,10 +9,10 @@ import { UserRole, getAuthorizedRedirectRoute, setAuthSession, UserProfile } fro
 export const Route = createFileRoute("/login")({
   head: () => ({
     meta: [
-      { title: "ExplorerTN Auth — Google SSO & Role Signup Gateway" },
+      { title: "ExplorerTN Auth — Sign In & Create Account" },
       {
         name: "description",
-        content: "Role-based authentication & signup gateway for ExplorerTN.",
+        content: "Sign in or create an account for ExplorerTN.",
       },
     ],
   }),
@@ -44,17 +44,20 @@ export function GoogleLogoSVG() {
 
 function LoginPage() {
   const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
-  const [authStep, setAuthStep] = useState<"idle" | "authenticating" | "fetching_role" | "authorized">("idle");
+  const [authStep, setAuthStep] = useState<"idle" | "authenticating" | "authorized">("idle");
 
   const [form, setForm] = useState({
     fullName: "",
     email: "",
     password: "",
-    role: "explorer" as UserRole,
   });
 
   const handleAuthSubmit = () => {
     setAuthStep("authenticating");
+
+    // Automatically resolve role based on email domain or default to explorer
+    const isDomainAdmin = form.email.toLowerCase().endsWith("@explorertn.com");
+    const assignedRole: UserRole = isDomainAdmin ? "super_admin" : "explorer";
 
     const createdUser: UserProfile = {
       id: `usr-${Date.now()}`,
@@ -66,26 +69,22 @@ function LoginPage() {
         .join("")
         .toUpperCase()
         .slice(0, 2),
-      role: form.role,
+      role: assignedRole,
       status: "active",
-      rank: form.role === "super_admin" ? "Super Admin" : "Verified Explorer",
+      rank: isDomainAdmin ? "Super Admin" : "Verified Explorer",
       districtCount: 1,
     };
 
     setAuthSession(createdUser);
 
     setTimeout(() => {
-      setAuthStep("fetching_role");
-    }, 800);
-
-    setTimeout(() => {
       setAuthStep("authorized");
-    }, 1600);
+    }, 1200);
 
     setTimeout(() => {
       const redirectUrl = getAuthorizedRedirectRoute(createdUser.role);
       window.location.href = redirectUrl;
-    }, 2400);
+    }, 2000);
   };
 
   return (
@@ -101,7 +100,7 @@ function LoginPage() {
               Explorer<span className="text-gradient">TN</span> Gateway
             </h1>
             <p className="text-xs text-slate-400 mt-1 font-mono">
-              Role-Based Single Sign-On (RBAC)
+              Authentication Portal
             </p>
           </div>
 
@@ -109,7 +108,7 @@ function LoginPage() {
           <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl mb-6 font-mono text-xs">
             <button
               onClick={() => setAuthMode("signin")}
-              className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${
+              className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 authMode === "signin" ? "bg-emerald-500 text-black shadow-md" : "text-slate-400 hover:text-white"
               }`}
             >
@@ -117,7 +116,7 @@ function LoginPage() {
             </button>
             <button
               onClick={() => setAuthMode("signup")}
-              className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 ${
+              className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
                 authMode === "signup" ? "bg-emerald-500 text-black shadow-md" : "text-slate-400 hover:text-white"
               }`}
             >
@@ -138,7 +137,7 @@ function LoginPage() {
                 <Button
                   onClick={handleAuthSubmit}
                   size="lg"
-                  className="w-full rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-6 text-sm shadow-xl transition flex items-center justify-center gap-3"
+                  className="w-full rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-6 text-sm shadow-xl transition flex items-center justify-center gap-3 cursor-pointer"
                 >
                   <GoogleLogoSVG /> Continue with Google
                 </Button>
@@ -159,7 +158,7 @@ function LoginPage() {
                         value={form.fullName}
                         onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                         placeholder="e.g. Tamil Selvan"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400"
+                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                       />
                     </div>
                   </div>
@@ -174,7 +173,7 @@ function LoginPage() {
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
                       placeholder="you@explorertn.com"
-                      className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400"
+                      className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                     />
                   </div>
                 </div>
@@ -188,40 +187,23 @@ function LoginPage() {
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       placeholder="••••••••••••"
-                      className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400"
+                      className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                     />
                   </div>
-                </div>
-
-                <div>
-                  <label className="block text-slate-300 font-bold mb-1 font-mono text-[11px] uppercase">
-                    Select Account Role (RBAC Scope)
-                  </label>
-                  <select
-                    value={form.role}
-                    onChange={(e) => setForm({ ...form, role: e.target.value as UserRole })}
-                    className="w-full bg-[#0B0F14] border border-white/15 rounded-xl p-2.5 text-white focus:outline-none font-bold"
-                  >
-                    <option value="explorer">Explorer / Traveler (Public App Access)</option>
-                    <option value="place_manager">Place Manager (/ops/places Workspace)</option>
-                    <option value="route_manager">Route Manager (/ops/routes Workspace)</option>
-                    <option value="community_manager">Community Moderator (/ops/community Workspace)</option>
-                    <option value="super_admin">Super Admin (/ops Command Center)</option>
-                  </select>
                 </div>
 
                 <Button
                   onClick={handleAuthSubmit}
                   size="lg"
-                  className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2"
+                  className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2 cursor-pointer"
                 >
                   {authMode === "signup" ? (
                     <>
-                      <UserPlus className="size-4 mr-1.5" /> Create Account & Authorize Session →
+                      <UserPlus className="size-4 mr-1.5" /> Create Account →
                     </>
                   ) : (
                     <>
-                      <Lock className="size-4 mr-1.5" /> Sign In & Redirect to Workspace →
+                      <Lock className="size-4 mr-1.5" /> Sign In →
                     </>
                   )}
                 </Button>
@@ -242,17 +224,16 @@ function LoginPage() {
 
                 <div>
                   <h3 className="text-lg font-black text-white">
-                    Session Authorized: {form.fullName || form.email || "Explorer User"}
+                    {authMode === "signup" ? "Account Created!" : "Welcome Back!"}
                   </h3>
                   <p className="text-xs text-emerald-400 font-mono mt-1">
-                    Role Assigned: <span className="uppercase font-bold">{form.role.replace("_", " ")}</span>
+                    Authenticating {form.fullName || form.email || "Explorer"}
                   </p>
                 </div>
 
                 <div className="p-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-slate-300">
-                  {authStep === "authenticating" && "Verifying credentials & creating auth token..."}
-                  {authStep === "fetching_role" && "Checking RBAC permission matrix..."}
-                  {authStep === "authorized" && `Redirecting to authorized workspace: ${getAuthorizedRedirectRoute(form.role)}...`}
+                  {authStep === "authenticating" && "Verifying credentials & initializing session..."}
+                  {authStep === "authorized" && "Redirecting..."}
                 </div>
               </motion.div>
             )}
