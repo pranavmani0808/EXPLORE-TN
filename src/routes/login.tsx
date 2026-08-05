@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
-import { Compass, ArrowRight, Lock, UserCheck, UserPlus, Mail, Key, User } from "lucide-react";
+import { Compass, ArrowRight, Lock, UserCheck, UserPlus, Mail, Key, User, ShieldCheck } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { UserRole, getAuthorizedRedirectRoute, setAuthSession, UserProfile } from "@/lib/auth-rbac";
@@ -48,43 +48,44 @@ function LoginPage() {
 
   const [form, setForm] = useState({
     fullName: "",
-    email: "",
-    password: "",
+    email: "admin@exploretn.com",
+    password: "popz",
   });
 
   const handleAuthSubmit = () => {
     setAuthStep("authenticating");
 
-    // Automatically resolve role based on email domain or default to explorer
-    const isDomainAdmin = form.email.toLowerCase().endsWith("@explorertn.com");
-    const assignedRole: UserRole = isDomainAdmin ? "super_admin" : "explorer";
+    const emailLower = form.email.trim().toLowerCase();
+    const isAdminCreds =
+      emailLower === "admin@exploretn.com" ||
+      emailLower === "admin@explorertn.com" ||
+      emailLower.endsWith("@explorertn.com");
+
+    const assignedRole: UserRole = isAdminCreds ? "super_admin" : "explorer";
 
     const createdUser: UserProfile = {
       id: `usr-${Date.now()}`,
-      name: form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer"),
-      email: form.email.trim() || "user@explorertn.com",
-      avatar: (form.fullName || form.email || "EX")
-        .split(" ")
-        .map((n) => n[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2),
+      name: isAdminCreds
+        ? "Platform Super Admin"
+        : form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer"),
+      email: form.email.trim() || "admin@exploretn.com",
+      avatar: isAdminCreds ? "AD" : (form.fullName || form.email || "EX").slice(0, 2).toUpperCase(),
       role: assignedRole,
       status: "active",
-      rank: isDomainAdmin ? "Super Admin" : "Verified Explorer",
-      districtCount: 1,
+      rank: isAdminCreds ? "Super Admin" : "Verified Explorer",
+      districtCount: isAdminCreds ? 38 : 1,
     };
 
     setAuthSession(createdUser);
 
     setTimeout(() => {
       setAuthStep("authorized");
-    }, 1200);
+    }, 1000);
 
     setTimeout(() => {
       const redirectUrl = getAuthorizedRedirectRoute(createdUser.role);
       window.location.href = redirectUrl;
-    }, 2000);
+    }, 1800);
   };
 
   return (
@@ -100,7 +101,7 @@ function LoginPage() {
               Explorer<span className="text-gradient">TN</span> Gateway
             </h1>
             <p className="text-xs text-slate-400 mt-1 font-mono">
-              Authentication Portal
+              Authentication & Admin Access Portal
             </p>
           </div>
 
@@ -144,7 +145,7 @@ function LoginPage() {
 
                 <div className="flex items-center my-3">
                   <div className="w-full border-t border-white/15" />
-                  <span className="px-3 text-[10px] font-mono text-slate-400 uppercase shrink-0">OR WITH EMAIL</span>
+                  <span className="px-3 text-[10px] font-mono text-slate-400 uppercase shrink-0">OR WITH EMAIL & PASSWORD</span>
                   <div className="w-full border-t border-white/15" />
                 </div>
 
@@ -172,7 +173,7 @@ function LoginPage() {
                       type="email"
                       value={form.email}
                       onChange={(e) => setForm({ ...form, email: e.target.value })}
-                      placeholder="you@explorertn.com"
+                      placeholder="admin@exploretn.com"
                       className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                     />
                   </div>
@@ -186,7 +187,7 @@ function LoginPage() {
                       type="password"
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      placeholder="••••••••••••"
+                      placeholder="popz"
                       className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
                     />
                   </div>
@@ -207,6 +208,15 @@ function LoginPage() {
                     </>
                   )}
                 </Button>
+
+                {/* Admin Access Hint Badge */}
+                <div className="mt-4 p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl flex items-center justify-between text-[11px] font-mono text-emerald-400">
+                  <div className="flex items-center gap-2">
+                    <ShieldCheck className="size-4 text-emerald-400 shrink-0" />
+                    <span>Admin Credential Configured</span>
+                  </div>
+                  <span className="font-bold text-white">popz</span>
+                </div>
               </motion.div>
             )}
 
@@ -224,16 +234,16 @@ function LoginPage() {
 
                 <div>
                   <h3 className="text-lg font-black text-white">
-                    {authMode === "signup" ? "Account Created!" : "Welcome Back!"}
+                    {form.email.toLowerCase().includes("admin") ? "Super Admin Access Granted!" : "Welcome Back!"}
                   </h3>
                   <p className="text-xs text-emerald-400 font-mono mt-1">
-                    Authenticating {form.fullName || form.email || "Explorer"}
+                    Authenticating {form.email}
                   </p>
                 </div>
 
                 <div className="p-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-slate-300">
-                  {authStep === "authenticating" && "Verifying credentials & initializing session..."}
-                  {authStep === "authorized" && "Redirecting..."}
+                  {authStep === "authenticating" && "Verifying credentials & granting Super Admin privileges..."}
+                  {authStep === "authorized" && "Redirecting to /ops Operations Command Center..."}
                 </div>
               </motion.div>
             )}
