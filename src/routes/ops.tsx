@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link, useSearch } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
@@ -53,7 +53,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
-import { MOCK_USERS, UserRole, PERMISSION_MATRIX, hasPermission, UserProfile } from "@/lib/auth-rbac";
+import { UserRole, PERMISSION_MATRIX, hasPermission, UserProfile, getCurrentAuthUser, clearAuthSession } from "@/lib/auth-rbac";
 import { PlacesManagementModule } from "@/components/admin/places-management-module";
 import { RoutesManagementModule } from "@/components/admin/routes-management-module";
 import { MediaLibraryModule } from "@/components/admin/media-library-module";
@@ -123,10 +123,43 @@ function OperationsWorkspacePage() {
   const searchParams: any = useSearch({ strict: false });
   const initialTab = searchParams?.tab || "health";
 
-  const [activeUserRole, setActiveUserRole] = useState<UserRole>("super_admin");
   const [activeTab, setActiveTab] = useState<string>(initialTab);
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
 
-  const currentUser = Object.values(MOCK_USERS).find((u) => u.role === activeUserRole) || MOCK_USERS.super_admin;
+  useEffect(() => {
+    const sessionUser = getCurrentAuthUser();
+    if (sessionUser) {
+      setCurrentUser(sessionUser);
+    } else {
+      // Default fallback if visiting /ops directly
+      setCurrentUser({
+        id: "usr-ops",
+        name: "Operations Manager",
+        email: "admin@explorertn.com",
+        avatar: "OM",
+        role: "super_admin",
+        status: "active",
+        rank: "Super Admin",
+        districtCount: 38,
+      });
+    }
+  }, []);
+
+  const handleSignOut = () => {
+    clearAuthSession();
+    window.location.href = "/";
+  };
+
+  const user = currentUser || {
+    id: "usr-ops",
+    name: "Operations Manager",
+    email: "admin@explorertn.com",
+    avatar: "OM",
+    role: "super_admin" as UserRole,
+    status: "active" as const,
+    rank: "Super Admin",
+    districtCount: 38,
+  };
 
   return (
     <AppShell>
@@ -135,19 +168,19 @@ function OperationsWorkspacePage() {
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-[#121821] border border-white/15 rounded-3xl p-6 shadow-2xl text-white">
           <div className="flex items-center gap-4">
             <div className="relative size-14 rounded-2xl bg-emerald-500 text-black font-black text-xl flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
-              {currentUser.avatar}
+              {user.avatar}
               <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-400 ring-2 ring-[#121821]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black text-white">{currentUser.name}</h1>
+                <h1 className="text-xl font-black text-white">{user.name}</h1>
                 <span className="px-2.5 py-0.5 bg-emerald-500/20 text-emerald-400 font-mono text-[10px] font-bold rounded-full uppercase border border-emerald-500/30">
-                  🟢 {currentUser.role.replace("_", " ")}
+                  🟢 {user.role.replace("_", " ")}
                 </span>
               </div>
               <p className="text-xs text-slate-400 mt-1 flex items-center gap-3 font-mono">
-                <span>Session Active • Today 10:50 AM</span>
-                <span>• 72 Permissions Active</span>
+                <span>Session Active ({user.email})</span>
+                <span>• Permissions Active</span>
                 <span className="text-emerald-400">● 38 District Data Health Audit Active</span>
               </p>
             </div>
@@ -198,9 +231,9 @@ function OperationsWorkspacePage() {
             ))}
 
             <div className="pt-4 border-t border-white/10 px-3">
-              <Link to="/login" className="text-xs text-rose-400 font-bold hover:underline flex items-center gap-1.5">
+              <button onClick={handleSignOut} className="text-xs text-rose-400 font-bold hover:underline flex items-center gap-1.5 cursor-pointer">
                 Sign Out →
-              </Link>
+              </button>
             </div>
           </aside>
 
@@ -244,8 +277,8 @@ function OperationsWorkspacePage() {
                   <div className="space-y-3 font-mono text-xs">
                     {[
                       { time: "09:25 AM", action: "Monsoon Flood Alert issued for Nilgiris & Pykara Basin", color: "border-rose-500/40 text-rose-300" },
-                      { time: "09:12 AM", action: "Deepa updated route: Valparai Sholayar Loop (40 Hairpins)", color: "border-blue-500/40 text-blue-300" },
-                      { time: "09:01 AM", action: "Karthik verified spatial node: Agaya Gangai Secret Basin", color: "border-emerald-500/40 text-emerald-300" },
+                      { time: "09:12 AM", action: "Route Manager updated: Valparai Sholayar Loop (40 Hairpins)", color: "border-blue-500/40 text-blue-300" },
+                      { time: "09:01 AM", action: "Place Manager verified node: Agaya Gangai Secret Basin", color: "border-emerald-500/40 text-emerald-300" },
                     ].map((item) => (
                       <div key={item.time + item.action} className={`p-3 bg-white/5 border ${item.color} rounded-2xl flex items-start justify-between gap-2`}>
                         <div>
