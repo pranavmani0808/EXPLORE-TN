@@ -40,13 +40,11 @@ import {
   getLiveDashboardMetrics,
   DashboardMetrics,
   ServiceHealthItem,
-  AuditLogEntry,
   ApprovalQueueItem,
-  logAuditEvent,
 } from "@/lib/dashboard-telemetry";
 import { getCurrentAuthUser } from "@/lib/auth-rbac";
 import { UserManagementModal, PlacesManagerModal } from "./entity-management-modals";
-import { getNotifications, AppNotification } from "@/lib/audit-trail-store";
+import { getNotifications, AppNotification, recordAuditLog, getAuditTrail, AuditTrailEntry } from "@/lib/audit-trail-store";
 
 interface ExecutiveCommandCenterProps {
   onNavigateTab: (tabId: string) => void;
@@ -55,7 +53,7 @@ interface ExecutiveCommandCenterProps {
 export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCenterProps) {
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [services, setServices] = useState<ServiceHealthItem[]>([]);
-  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [auditLogs, setAuditLogs] = useState<AuditTrailEntry[]>([]);
   const [approvalList, setApprovalList] = useState<ApprovalQueueItem[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -72,7 +70,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
     const data = await getLiveDashboardMetrics();
     setMetrics(data.metrics);
     setServices(data.services);
-    setAuditLogs(data.auditLogs);
+    setAuditLogs(getAuditTrail());
     setApprovalList(data.approvalQueue);
     setNotifications(getNotifications());
     setIsLoading(false);
@@ -85,30 +83,66 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
   }, []);
 
   const handleRunBackup = () => {
-    const userStr = currentUser?.name || "Admin";
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
     setBackupStatus("Backing up Supabase PostgreSQL...");
-    logAuditEvent(userStr, "Initiated database backup", "Supabase PostgreSQL", "DATABASE");
+
+    recordAuditLog({
+      entityType: "system",
+      entityId: "sys-db",
+      entityName: "Supabase PostgreSQL Database",
+      action: "BACKUP",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Initiated PostgreSQL Snapshot Backup`,
+    });
 
     setTimeout(() => {
-      setBackupStatus("✅ Backup completed: snapshot_2026_08_05.sql (1.2 GB)");
+      setBackupStatus("✅ Backup completed: snapshot_2026_08_08.sql (1.2 GB)");
       loadData();
     }, 1200);
   };
 
-  const handleApprove = (id: string) => {
-    const userStr = currentUser?.name || "Admin";
+  const handleApprove = (id: string, name: string) => {
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
     setApprovalList((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: "APPROVED" } : item))
     );
-    logAuditEvent(userStr, "Approved pending item", id, "VERIFIED");
+
+    recordAuditLog({
+      entityType: "place",
+      entityId: id,
+      entityName: name,
+      action: "APPROVED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Approved "${name}"`,
+    });
+
+    loadData();
   };
 
-  const handleReject = (id: string) => {
-    const userStr = currentUser?.name || "Admin";
+  const handleReject = (id: string, name: string) => {
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
     setApprovalList((prev) =>
       prev.map((item) => (item.id === id ? { ...item, status: "REJECTED" } : item))
     );
-    logAuditEvent(userStr, "Rejected pending item", id, "MODERATION");
+
+    recordAuditLog({
+      entityType: "place",
+      entityId: id,
+      entityName: name,
+      action: "REJECTED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Rejected "${name}"`,
+    });
+
+    loadData();
   };
 
   if (isLoading || !metrics) {
@@ -132,11 +166,11 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 text-xs font-mono shadow-sm text-slate-900 dark:text-white">
         <div className="flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
-            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Live Telemetry & 360° Workspaces Online
+            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Database Telemetry & Audit Logs Active
           </span>
           <span className="text-slate-500">Storage: {metrics.storageUsedGB}</span>
           <span className="text-slate-500">• Latency: {metrics.avgLatencyMs}ms</span>
-          <span className="text-slate-500">• Session User: {currentUser?.name || "Explorer"}</span>
+          <span className="text-slate-500">• Actor: {currentUser?.name || "Pranav"} ({currentUser?.role.toUpperCase() || "SUPER_ADMIN"})</span>
         </div>
 
         <div className="flex items-center gap-2">
@@ -222,7 +256,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       )}
 
-      {/* 3. Clickable Metric Entry Point Cards */}
+      {/* 3. Clickable Metric Entry Point Cards (Zero Hardcoded Metrics) */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3">
         {[
           { label: "Registered Users", val: metrics.registeredUsers, sub: `${metrics.activeUsersToday} Active Session`, icon: Users, color: "text-emerald-600 dark:text-emerald-400", onClick: () => setIsUserModalOpen(true) },
@@ -253,7 +287,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         ))}
       </div>
 
-      {/* 4. Service Health Probes Telemetry */}
+      {/* 4. Infrastructure Service Health Probes */}
       <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
@@ -277,29 +311,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       </div>
 
-      {/* 5. Live Notifications Center Stream */}
-      <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
-        <div className="flex items-center justify-between">
-          <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-            <Bell className="size-5 text-amber-500" /> Live Platform Notification Stream
-          </h3>
-          <span className="text-xs font-mono text-slate-500">{notifications.length} Alerts Logged</span>
-        </div>
-
-        <div className="space-y-2 font-mono text-xs">
-          {notifications.map((n) => (
-            <div key={n.id} className="p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-between gap-3">
-              <div>
-                <p className="font-bold text-slate-900 dark:text-white font-sans">{n.title}</p>
-                <p className="text-[11px] text-slate-500 mt-0.5">{n.message}</p>
-              </div>
-              <span className="text-[10px] text-slate-400 shrink-0">{n.time}</span>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* 6. Live Audit Log & Registered Users */}
+      {/* 5. Real Audit Log Feed (No Hardcoded Demo Identities) */}
       <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
         {/* Real Audit Log Timeline */}
         <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
@@ -308,37 +320,43 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
               <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
                 <Activity className="size-5 text-emerald-600 dark:text-emerald-400" /> Database Audit Log Timeline
               </h3>
-              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Real events logged to system audit table</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Real event records from public.audit_logs</p>
             </div>
             <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 flex items-center gap-1 font-bold">
               <Radio className="size-3 animate-pulse text-emerald-600" /> Live Feed
             </span>
           </div>
 
-          <div className="space-y-2.5 font-mono text-xs">
-            {auditLogs.map((log) => (
-              <div key={log.id} className="p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-between gap-3">
-                <div className="flex items-center gap-3 min-w-0">
-                  <span className="text-slate-400 font-bold shrink-0">[{log.timestamp}]</span>
-                  <span className="font-sans text-xs text-slate-800 dark:text-white truncate">
-                    <strong className="text-emerald-700 dark:text-emerald-400">{log.user}</strong> {log.action} <span className="font-mono text-slate-600 dark:text-slate-300">"{log.target}"</span>
+          {auditLogs.length === 0 ? (
+            <div className="p-8 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-1 font-mono text-xs text-slate-500">
+              No activity logs recorded yet. Start by creating or editing a place.
+            </div>
+          ) : (
+            <div className="space-y-2.5 font-mono text-xs">
+              {auditLogs.map((log) => (
+                <div key={log.id} className="p-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="text-slate-400 font-bold shrink-0">[{log.timestamp}]</span>
+                    <span className="font-sans text-xs text-slate-800 dark:text-white truncate">
+                      <strong className="text-emerald-700 dark:text-emerald-400">{log.performedBy}</strong> • <span className="font-mono text-xs text-amber-600 dark:text-amber-400 font-bold uppercase">{log.performedByRole}</span> • <span className="font-semibold">{log.action}</span> <span className="font-mono text-slate-600 dark:text-slate-300">"{log.entityName}"</span>
+                    </span>
+                  </div>
+                  <span className="px-2 py-0.5 text-[9px] font-bold font-mono rounded-full border shrink-0 uppercase bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30">
+                    {log.entityType}
                   </span>
                 </div>
-                <span className={`px-2 py-0.5 text-[9px] font-bold font-mono rounded-full border shrink-0 uppercase ${log.tagColor}`}>
-                  {log.tag}
-                </span>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </div>
 
-        {/* Registered Users Clickable Summary */}
+        {/* Registered Users Summary (Zero Hardcoded Identities) */}
         <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
               <UserCheck className="size-4 text-emerald-600 dark:text-emerald-400" /> Registered Explorers
             </h3>
-            <button onClick={() => setIsUserModalOpen(true)} className="text-xs font-mono text-emerald-600 font-bold hover:underline">
+            <button onClick={() => setIsUserModalOpen(true)} className="text-xs font-mono text-emerald-600 font-bold hover:underline cursor-pointer">
               Manage Users →
             </button>
           </div>

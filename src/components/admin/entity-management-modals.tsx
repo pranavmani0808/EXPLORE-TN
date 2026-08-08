@@ -59,13 +59,17 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
   }, [isOpen]);
 
   const handleRoleChange = (userId: string, newRole: ManagedUser["role"]) => {
+    const targetUser = users.find((u) => u.id === userId);
+    const oldRole = targetUser?.role || "explorer";
+
     const updated = users.map((u) => (u.id === userId ? { ...u, role: newRole } : u));
     setUsers(updated);
     saveManagedUsers(updated);
 
-    const targetUser = users.find((u) => u.id === userId);
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
 
-    // REACTIVE SESSION SYNCHRONIZATION: If modifying current session user, update active auth session immediately
+    // REACTIVE SESSION SYNCHRONIZATION: Update current session if modifying self
     if (currentUser && (currentUser.id === userId || currentUser.email === targetUser?.email || currentUser.name === targetUser?.name)) {
       updateAuthRole(newRole);
     }
@@ -75,18 +79,53 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
       entityId: userId,
       entityName: targetUser?.name || "User",
       action: "ROLE_CHANGED",
-      performedBy: currentUser?.name || "Admin",
-      performedByRole: currentUser?.role || "Super Admin",
-      details: `Changed role to ${newRole.toUpperCase()}`,
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Changed ${targetUser?.name || "User"}'s role from ${oldRole.toUpperCase()} → ${newRole.toUpperCase()}`,
     });
   };
 
   const handleToggleStatus = (userId: string) => {
-    const updated = users.map((u) =>
-      u.id === userId ? { ...u, status: u.status === "ACTIVE" ? ("INACTIVE" as const) : ("ACTIVE" as const) } : u
-    );
+    const targetUser = users.find((u) => u.id === userId);
+    const oldStatus = targetUser?.status || "ACTIVE";
+    const newStatus = oldStatus === "ACTIVE" ? ("INACTIVE" as const) : ("ACTIVE" as const);
+
+    const updated = users.map((u) => (u.id === userId ? { ...u, status: newStatus } : u));
     setUsers(updated);
     saveManagedUsers(updated);
+
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+    recordAuditLog({
+      entityType: "user",
+      entityId: userId,
+      entityName: targetUser?.name || "User",
+      action: "SUSPENDED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Updated ${targetUser?.name || "User"} status to ${newStatus}`,
+    });
+  };
+
+  const handleDeleteUser = (userId: string) => {
+    const targetUser = users.find((u) => u.id === userId);
+    const updated = users.filter((u) => u.id !== userId);
+    setUsers(updated);
+    saveManagedUsers(updated);
+
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+    recordAuditLog({
+      entityType: "user",
+      entityId: userId,
+      entityName: targetUser?.name || "User",
+      action: "DELETED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Deleted user account "${targetUser?.name || "User"}"`,
+    });
   };
 
   const filteredUsers = users.filter(
@@ -116,7 +155,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
               <p className="text-xs text-slate-500 font-mono">Manage accounts, roles, permissions, and reactive session claims</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl cursor-pointer">
             <X className="size-5" />
           </button>
         </div>
@@ -172,7 +211,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
               {activeUserTab === "info" && (
                 <div className="space-y-2 font-sans">
                   <p><strong>Platform Role:</strong> <span className="font-mono text-emerald-600 font-bold uppercase">{selectedUser.role}</span></p>
-                  <p><strong>Explorer Rank:</strong> <span className="font-mono text-amber-600 font-bold">Level 0 Explorer</span></p>
+                  <p><strong>Explorer Rank:</strong> <span className="font-mono text-amber-600 font-bold">Level 0 Explorer (0 / 100 XP)</span></p>
                   <p><strong>District Scope:</strong> {selectedUser.district || "Tamil Nadu Wide"}</p>
                   <p><strong>Status:</strong> {selectedUser.status}</p>
                   <p><strong>Last Login:</strong> {selectedUser.lastLogin}</p>
@@ -188,13 +227,13 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
               )}
 
               {activeUserTab === "activity" && (
-                <p className="text-slate-500 font-sans">Active session initiated today at 09:12 AM.</p>
+                <p className="text-slate-500 font-sans">Active session initiated today at 10:21 AM.</p>
               )}
 
               {activeUserTab === "audit" && (
                 <div className="space-y-1 font-mono">
-                  <p className="text-slate-400">[09:12 AM] Login via password credential verified</p>
-                  <p className="text-slate-400">[09:15 AM] Role RBAC telemetry claims synchronized</p>
+                  <p className="text-slate-400">[10:21 AM] Login via authenticated credential verified</p>
+                  <p className="text-slate-400">[10:25 AM] Role RBAC claims synchronized</p>
                 </div>
               )}
             </div>
@@ -265,18 +304,27 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                       <td className="py-3 px-3 text-right space-x-1 font-sans">
                         <button
                           onClick={() => setSelectedUser(u)}
-                          className="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                          className="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
                           title="View 360 Workspace"
                         >
                           <Eye className="size-4" />
                         </button>
                         <button
                           onClick={() => handleToggleStatus(u.id)}
-                          className="p-1.5 text-amber-500 hover:text-amber-600"
+                          className="p-1.5 text-amber-500 hover:text-amber-600 cursor-pointer"
                           title="Toggle Status"
                         >
                           <Ban className="size-4" />
                         </button>
+                        {u.id !== "usr-1" && (
+                          <button
+                            onClick={() => handleDeleteUser(u.id)}
+                            className="p-1.5 text-rose-500 hover:text-rose-600 cursor-pointer"
+                            title="Delete User"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        )}
                       </td>
                     </tr>
                   ))}
@@ -287,7 +335,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
         )}
 
         <div className="border-t border-slate-200 dark:border-white/10 pt-3 flex justify-end">
-          <Button onClick={onClose} variant="outline" size="sm" className="text-xs font-bold rounded-xl">
+          <Button onClick={onClose} variant="outline" size="sm" className="text-xs font-bold rounded-xl cursor-pointer">
             Close
           </Button>
         </div>
@@ -341,7 +389,7 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
               <p className="text-xs text-slate-500 font-mono">Verified geospatial destination database across 38 districts</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl">
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-white rounded-xl cursor-pointer">
             <X className="size-5" />
           </button>
         </div>
@@ -428,9 +476,8 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
 
               {activePlaceTab === "history" && (
                 <div className="space-y-2 font-mono">
-                  <p className="text-slate-400">[July 21] Pranav (Super Admin) Created Place Node</p>
-                  <p className="text-slate-400">[July 24] Arun Kumar (Operations) Verified Coordinates</p>
-                  <p className="text-slate-400">[Today 09:12] Gemini AI Generated Description</p>
+                  <p className="text-slate-400">[July 21] Pranav (SUPER_ADMIN) Created Place Node</p>
+                  <p className="text-slate-400">[July 24] Pranav (SUPER_ADMIN) Verified Coordinates</p>
                 </div>
               )}
             </div>
@@ -479,7 +526,7 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
                       <td className="py-3 px-3 text-right space-x-1 font-sans">
                         <button
                           onClick={() => setSelectedPlace(p)}
-                          className="p-1.5 text-slate-400 hover:text-blue-600"
+                          className="p-1.5 text-slate-400 hover:text-blue-600 cursor-pointer"
                           title="Open 360 Workspace"
                         >
                           <Eye className="size-4" />
@@ -494,7 +541,7 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
         )}
 
         <div className="border-t border-slate-200 dark:border-white/10 pt-3 flex justify-end">
-          <Button onClick={onClose} variant="outline" size="sm" className="text-xs font-bold rounded-xl">
+          <Button onClick={onClose} variant="outline" size="sm" className="text-xs font-bold rounded-xl cursor-pointer">
             Close
           </Button>
         </div>

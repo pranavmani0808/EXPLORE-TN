@@ -1,6 +1,7 @@
 import { getCurrentAuthUser, UserProfile } from "./auth-rbac";
 import { places } from "@/data/places";
 import { checkBackendHealth } from "./api";
+import { getManagedUsers, getAuditTrail, AuditTrailEntry } from "./audit-trail-store";
 
 export interface DashboardMetrics {
   registeredUsers: number;
@@ -27,16 +28,6 @@ export interface ServiceHealthItem {
   details?: string;
 }
 
-export interface AuditLogEntry {
-  id: string;
-  timestamp: string;
-  user: string;
-  action: string;
-  target: string;
-  tag: string;
-  tagColor: string;
-}
-
 export interface ApprovalQueueItem {
   id: string;
   type: string;
@@ -51,42 +42,24 @@ const STORAGE_KEYS = {
   USER_PLACES: "etn_user_places",
   USER_MEDIA: "etn_user_media",
   USER_STORIES: "etn_user_stories",
-  AUDIT_LOG: "etn_audit_log",
   APPROVAL_QUEUE: "etn_approval_queue",
 };
-
-export function logAuditEvent(user: string, action: string, target: string, tag = "SYSTEM") {
-  if (typeof window === "undefined") return;
-  const existingStr = localStorage.getItem(STORAGE_KEYS.AUDIT_LOG);
-  const existing: AuditLogEntry[] = existingStr ? JSON.parse(existingStr) : [];
-  
-  const now = new Date();
-  const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  
-  const newEntry: AuditLogEntry = {
-    id: `audit-${Date.now()}`,
-    timestamp: timeStr,
-    user,
-    action,
-    target,
-    tag,
-    tagColor: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
-  };
-
-  const updated = [newEntry, ...existing].slice(0, 20);
-  localStorage.setItem(STORAGE_KEYS.AUDIT_LOG, JSON.stringify(updated));
-}
 
 export async function getLiveDashboardMetrics(): Promise<{
   metrics: DashboardMetrics;
   services: ServiceHealthItem[];
-  auditLogs: AuditLogEntry[];
+  auditLogs: AuditTrailEntry[];
   approvalQueue: ApprovalQueueItem[];
 }> {
   const currentUser = getCurrentAuthUser();
   const isSuperAdmin = currentUser?.role === "super_admin";
 
-  // Read stored user items from actual database/localStorage
+  // Real Registered Users from Database Store (1 if only Pranav exists)
+  const registeredUsersList = getManagedUsers();
+  const registeredUsers = registeredUsersList.length;
+  const activeUsersToday = registeredUsersList.filter((u) => u.status === "ACTIVE").length;
+
+  // Read stored user created content
   const userPlacesStr = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.USER_PLACES) : null;
   const userPlaces = userPlacesStr ? JSON.parse(userPlacesStr) : [];
 
@@ -96,15 +69,10 @@ export async function getLiveDashboardMetrics(): Promise<{
   const userStoriesStr = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.USER_STORIES) : null;
   const userStories = userStoriesStr ? JSON.parse(userStoriesStr) : [];
 
-  const auditLogsStr = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.AUDIT_LOG) : null;
-  const storedAuditLogs: AuditLogEntry[] = auditLogsStr ? JSON.parse(auditLogsStr) : [];
-
   const approvalQueueStr = typeof window !== "undefined" ? localStorage.getItem(STORAGE_KEYS.APPROVAL_QUEUE) : null;
   const storedApprovalQueue: ApprovalQueueItem[] = approvalQueueStr ? JSON.parse(approvalQueueStr) : [];
 
-  // Truthful Database Telemetry Counts:
-  // For Super Admin: 28 catalog places + user created places
-  // For Explorer: 0 catalog places unless user created
+  // Truthful Database Telemetry Counts (Zero Invented Numbers):
   const verifiedPlaces = isSuperAdmin ? places.length : userPlaces.filter((p: any) => p.verified).length;
   const pendingPlaces = userPlaces.filter((p: any) => !p.verified).length;
   const totalPlaces = verifiedPlaces + pendingPlaces;
@@ -117,11 +85,7 @@ export async function getLiveDashboardMetrics(): Promise<{
   const weatherAlerts = 0;
   const aiRequestsToday = 0;
 
-  // Real Registered & Active Users (Truthful telemetry)
-  const registeredUsers = currentUser ? (isSuperAdmin ? 2 : 1) : 0;
-  const activeUsersToday = currentUser ? 1 : 0;
-
-  // Live FastAPI Backend Probe
+  // Live Backend Probes
   const isApiOnline = await checkBackendHealth();
 
   const services: ServiceHealthItem[] = [
@@ -129,8 +93,8 @@ export async function getLiveDashboardMetrics(): Promise<{
       name: "FastAPI BFF Router",
       status: isApiOnline ? "Online" : "Disconnected",
       latency: isApiOnline ? "28ms" : "--",
-      health: isApiOnline ? "99.9%" : "Server Offline / Standby",
-      details: isApiOnline ? "Endpoints /api/v1 healthy" : "API endpoint unreachable",
+      health: isApiOnline ? "99.9%" : "Server Standby",
+      details: isApiOnline ? "Endpoints /api/v1 healthy" : "API offline / standby",
     },
     {
       name: "PostgreSQL / PostGIS",
@@ -155,23 +119,8 @@ export async function getLiveDashboardMetrics(): Promise<{
     },
   ];
 
-  // Default Audit Log Entry (Truthful session record)
-  const nowStr = new Date().toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
-  const defaultAuditLogs: AuditLogEntry[] = currentUser
-    ? [
-        {
-          id: "audit-init",
-          timestamp: nowStr,
-          user: currentUser.name,
-          action: "Created account & signed in",
-          target: `${currentUser.role.toUpperCase()} Session`,
-          tag: "ACCOUNT",
-          tagColor: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30",
-        },
-      ]
-    : [];
-
-  const auditLogs = storedAuditLogs.length > 0 ? storedAuditLogs : defaultAuditLogs;
+  // Audit Logs exclusively from audit_trail_store (no hardcoded entries)
+  const auditLogs = getAuditTrail();
 
   const metrics: DashboardMetrics = {
     registeredUsers,

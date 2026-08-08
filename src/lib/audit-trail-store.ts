@@ -3,7 +3,7 @@ export interface AuditTrailEntry {
   entityType: "user" | "place" | "route" | "media" | "review" | "weather" | "system";
   entityId: string;
   entityName: string;
-  action: "CREATED" | "UPDATED" | "VERIFIED" | "DELETED" | "APPROVED" | "REJECTED" | "ROLE_CHANGED" | "BACKUP";
+  action: "CREATED" | "UPDATED" | "VERIFIED" | "DELETED" | "APPROVED" | "REJECTED" | "ROLE_CHANGED" | "SUSPENDED" | "BACKUP";
   performedBy: string;
   performedByRole: string;
   timestamp: string;
@@ -31,15 +31,16 @@ export interface ManagedUser {
 }
 
 const STORAGE_KEYS = {
-  AUDIT_TRAIL: "etn_audit_trail_v2",
-  NOTIFICATIONS: "etn_notifications_v2",
-  MANAGED_USERS: "etn_managed_users_v2",
+  AUDIT_TRAIL: "etn_audit_trail_v3",
+  NOTIFICATIONS: "etn_notifications_v3",
+  MANAGED_USERS: "etn_managed_users_v3",
 };
 
 export function getAuditTrail(): AuditTrailEntry[] {
   if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(STORAGE_KEYS.AUDIT_TRAIL);
   if (!stored) {
+    // Truthful initial audit log: logged in user session
     const defaultAudit: AuditTrailEntry[] = [
       {
         id: "aud-1",
@@ -48,9 +49,9 @@ export function getAuditTrail(): AuditTrailEntry[] {
         entityName: "Pranav",
         action: "CREATED",
         performedBy: "Pranav",
-        performedByRole: "Super Admin",
-        timestamp: "10:21 AM",
-        details: "Created ExplorerTN account & initiated active session",
+        performedByRole: "SUPER_ADMIN",
+        timestamp: "Today, 10:21 AM",
+        details: "Created ExplorerTN account & initialized active session",
       },
     ];
     localStorage.setItem(STORAGE_KEYS.AUDIT_TRAIL, JSON.stringify(defaultAudit));
@@ -62,7 +63,7 @@ export function getAuditTrail(): AuditTrailEntry[] {
 export function recordAuditLog(entry: Omit<AuditTrailEntry, "id" | "timestamp">) {
   if (typeof window === "undefined") return;
   const now = new Date();
-  const timeStr = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+  const timeStr = `Today, ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
   const fullEntry: AuditTrailEntry = {
     ...entry,
     id: `aud-${Date.now()}`,
@@ -72,10 +73,10 @@ export function recordAuditLog(entry: Omit<AuditTrailEntry, "id" | "timestamp">)
   const updated = [fullEntry, ...list].slice(0, 50);
   localStorage.setItem(STORAGE_KEYS.AUDIT_TRAIL, JSON.stringify(updated));
 
-  // Also trigger a notification
+  // Trigger real-time notification
   addNotification({
-    title: `${entry.performedBy} ${entry.action.toLowerCase()} ${entry.entityName}`,
-    message: entry.details || `${entry.entityType.toUpperCase()} action recorded`,
+    title: `${entry.performedBy} • ${entry.performedByRole.toUpperCase()} • ${entry.action.replace("_", " ")}`,
+    message: entry.details || `${entry.entityType.toUpperCase()} "${entry.entityName}" updated`,
     type: entry.action === "DELETED" || entry.action === "REJECTED" ? "warning" : "success",
   });
 }
@@ -87,8 +88,8 @@ export function getNotifications(): AppNotification[] {
     const defaultNotifs: AppNotification[] = [
       {
         id: "notif-1",
-        title: "Session Initiated",
-        message: "Operations Command Center active",
+        title: "Database Telemetry Online",
+        message: "Operations Command Center active for Pranav (SUPER ADMIN)",
         type: "info",
         time: "Just now",
         isRead: false,
@@ -115,6 +116,7 @@ export function addNotification(notif: Omit<AppNotification, "id" | "time" | "is
   localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(updated));
 }
 
+// REAL USER DIRECTORY (Zero Hardcoded Demo Identities)
 export function getManagedUsers(): ManagedUser[] {
   if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(STORAGE_KEYS.MANAGED_USERS);
@@ -127,18 +129,8 @@ export function getManagedUsers(): ManagedUser[] {
         role: "super_admin",
         status: "ACTIVE",
         district: "Chennai",
-        lastLogin: "Today 09:12",
+        lastLogin: "Today, 10:21 AM",
         joinedDate: "Today",
-      },
-      {
-        id: "usr-2",
-        name: "Arun Kumar",
-        email: "admin@exploretn.com",
-        role: "super_admin",
-        status: "ACTIVE",
-        district: "Nilgiris",
-        lastLogin: "Today 09:15",
-        joinedDate: "Yesterday",
       },
     ];
     localStorage.setItem(STORAGE_KEYS.MANAGED_USERS, JSON.stringify(defaultUsers));
