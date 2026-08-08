@@ -50,6 +50,11 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
   const [activeUserTab, setActiveUserTab] = useState<"info" | "permissions" | "activity" | "audit">("info");
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserRole, setNewUserRole] = useState<ManagedUser["role"]>("explorer");
+
   const currentUser = getCurrentAuthUser();
 
   useEffect(() => {
@@ -57,6 +62,43 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
       setUsers(getManagedUsers());
     }
   }, [isOpen]);
+
+  const handleAddUser = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserName || !newUserEmail) return;
+
+    const newUser: ManagedUser = {
+      id: `usr-${Date.now()}`,
+      name: newUserName,
+      email: newUserEmail,
+      role: newUserRole,
+      status: "ACTIVE",
+      district: "Tamil Nadu",
+      lastLogin: "Never",
+      joinedDate: "Today",
+    };
+
+    const updated = [newUser, ...users];
+    setUsers(updated);
+    saveManagedUsers(updated);
+
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+    recordAuditLog({
+      entityType: "user",
+      entityId: newUser.id,
+      entityName: newUser.name,
+      action: "CREATED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Created User "${newUser.name}" (${newUser.role.toUpperCase()})`,
+    });
+
+    setNewUserName("");
+    setNewUserEmail("");
+    setShowAddForm(false);
+  };
 
   const handleRoleChange = (userId: string, newRole: ManagedUser["role"]) => {
     const targetUser = users.find((u) => u.id === userId);
@@ -160,8 +202,57 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
           </button>
         </div>
 
-        {/* 360 User Detail Workspace OR User Table */}
-        {selectedUser ? (
+        {showAddForm ? (
+          <form onSubmit={handleAddUser} className="py-4 space-y-4 font-sans">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Add New Platform User</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">User Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Arun Kumar"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">Email Address</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="arun@exploretn.com"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-mono text-slate-400 uppercase">Platform Role</label>
+              <select
+                value={newUserRole}
+                onChange={(e) => setNewUserRole(e.target.value as any)}
+                className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400"
+              >
+                <option value="super_admin">Super Admin</option>
+                <option value="place_manager">Place Manager</option>
+                <option value="route_manager">Route Manager</option>
+                <option value="community_manager">Community Manager</option>
+                <option value="explorer">Explorer</option>
+              </select>
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" onClick={() => setShowAddForm(false)} variant="outline" size="sm" className="text-xs font-bold rounded-xl">
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">
+                Create User
+              </Button>
+            </div>
+          </form>
+        ) : selectedUser ? (
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
             <button
               onClick={() => setSelectedUser(null)}
@@ -252,7 +343,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                 />
               </div>
 
-              <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl">
+              <Button onClick={() => setShowAddForm(true)} size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl cursor-pointer">
                 <Plus className="size-3.5 mr-1" /> Add User
               </Button>
             </div>
@@ -353,6 +444,17 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(null);
   const [activePlaceTab, setActivePlaceTab] = useState<"overview" | "gps" | "gallery" | "routes" | "history">("overview");
 
+  // Create New Place Form State
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newPlaceName, setNewPlaceName] = useState("");
+  const [newPlaceDistrict, setNewPlaceDistrict] = useState("");
+  const [newPlaceCategory, setNewPlaceCategory] = useState("hill_station");
+  const [newPlaceLat, setNewPlaceLat] = useState("11.2333");
+  const [newPlaceLng, setNewPlaceLng] = useState("78.3333");
+  const [newPlaceTagline, setNewPlaceTagline] = useState("");
+
+  const currentUser = getCurrentAuthUser();
+
   const [lat, setLat] = useState<string>("");
   const [lng, setLng] = useState<string>("");
 
@@ -362,6 +464,67 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
       setLng(selectedPlace.coordinates[1].toString());
     }
   }, [selectedPlace]);
+
+  const handleCreatePlace = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newPlaceName || !newPlaceDistrict) return;
+
+    const newPlace: Place = {
+      slug: newPlaceName.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      name: newPlaceName,
+      district: newPlaceDistrict,
+      category: newPlaceCategory as any,
+      tagline: newPlaceTagline || "Scenic mountain destination",
+      description: `Scenic ${newPlaceCategory} destination located in ${newPlaceDistrict} district, Tamil Nadu.`,
+      coordinates: [parseFloat(newPlaceLat) || 11.2333, parseFloat(newPlaceLng) || 78.3333],
+      elevation: "1,200m MSL",
+      nearestTown: newPlaceDistrict,
+      distanceFromChennai: "320 km",
+      bestMonths: ["Oct", "Nov", "Dec", "Jan", "Feb"],
+      image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&auto=format&fit=crop",
+      heroImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=1600&auto=format&fit=crop",
+      activities: ["Trekking", "Photography", "Sightseeing"],
+      seasonalNotes: "Excellent weather during post-monsoon months.",
+      permitRequired: false,
+    };
+
+    const updated = [newPlace, ...placesList];
+    setPlacesList(updated);
+
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+    recordAuditLog({
+      entityType: "place",
+      entityId: newPlace.slug,
+      entityName: newPlace.name,
+      action: "CREATED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Created Place "${newPlace.name}" (${newPlace.district})`,
+    });
+
+    setNewPlaceName("");
+    setNewPlaceDistrict("");
+    setNewPlaceTagline("");
+    setShowAddForm(false);
+  };
+
+  const handleUpdateCoordinates = () => {
+    if (!selectedPlace) return;
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+    recordAuditLog({
+      entityType: "place",
+      entityId: selectedPlace.slug,
+      entityName: selectedPlace.name,
+      action: "UPDATED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Updated GPS Coordinates for "${selectedPlace.name}" [${lat}, ${lng}]`,
+    });
+  };
 
   const filtered = placesList.filter(
     (p) =>
@@ -394,7 +557,87 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
           </button>
         </div>
 
-        {selectedPlace ? (
+        {showAddForm ? (
+          <form onSubmit={handleCreatePlace} className="py-4 space-y-4 font-sans">
+            <h3 className="text-sm font-bold text-slate-900 dark:text-white">Create New Destination Node</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">Place Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Kolli Hills Viewpoint"
+                  value={newPlaceName}
+                  onChange={(e) => setNewPlaceName(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">District</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Namakkal"
+                  value={newPlaceDistrict}
+                  onChange={(e) => setNewPlaceDistrict(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">Category</label>
+                <select
+                  value={newPlaceCategory}
+                  onChange={(e) => setNewPlaceCategory(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-blue-600 dark:text-blue-400"
+                >
+                  <option value="hill_station">Hill Station</option>
+                  <option value="waterfall">Waterfall</option>
+                  <option value="heritage">Heritage Temple</option>
+                  <option value="wildlife">Wildlife Sanctuary</option>
+                  <option value="coastal">Coastal Beach</option>
+                </select>
+              </div>
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">Latitude</label>
+                <input
+                  type="text"
+                  value={newPlaceLat}
+                  onChange={(e) => setNewPlaceLat(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                />
+              </div>
+              <div>
+                <label className="text-[10px] font-mono text-slate-400 uppercase">Longitude</label>
+                <input
+                  type="text"
+                  value={newPlaceLng}
+                  onChange={(e) => setNewPlaceLng(e.target.value)}
+                  className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-mono text-slate-900 dark:text-white"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="text-[10px] font-mono text-slate-400 uppercase">Tagline / Short Summary</label>
+              <input
+                type="text"
+                placeholder="70 hairpin bends mountain trail"
+                value={newPlaceTagline}
+                onChange={(e) => setNewPlaceTagline(e.target.value)}
+                className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
+              />
+            </div>
+            <div className="flex justify-end gap-2 pt-2">
+              <Button type="button" onClick={() => setShowAddForm(false)} variant="outline" size="sm" className="text-xs font-bold rounded-xl">
+                Cancel
+              </Button>
+              <Button type="submit" size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl">
+                Save Destination Node
+              </Button>
+            </div>
+          </form>
+        ) : selectedPlace ? (
           <div className="flex-1 overflow-y-auto py-4 space-y-4">
             <button
               onClick={() => setSelectedPlace(null)}
@@ -471,6 +714,9 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
                       />
                     </div>
                   </div>
+                  <Button onClick={handleUpdateCoordinates} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl">
+                    Save GPS Coordinates
+                  </Button>
                 </div>
               )}
 
@@ -496,7 +742,7 @@ export function PlacesManagerModal({ isOpen, onClose }: ModalProps) {
                 />
               </div>
 
-              <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl">
+              <Button onClick={() => setShowAddForm(true)} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl cursor-pointer">
                 <Plus className="size-3.5 mr-1" /> Add Place
               </Button>
             </div>
