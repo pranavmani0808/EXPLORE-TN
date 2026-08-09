@@ -26,6 +26,8 @@ import {
   Zap,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { getCurrentAuthUser } from "@/lib/auth-rbac";
+import { recordAuditLog } from "@/lib/audit-trail-store";
 
 export interface Waypoint {
   id: string;
@@ -62,6 +64,7 @@ export interface GISRoute {
   waypoints: Waypoint[];
   hazards: HazardWarning[];
   elevationPoints: { distanceKm: number; altitudeMeters: number }[];
+  createdBy?: string;
 }
 
 const initialGISRoutes: GISRoute[] = [
@@ -77,6 +80,7 @@ const initialGISRoutes: GISRoute[] = [
     fuelEstimate: "₹2,450",
     elevationGain: "7,200 ft",
     hairpinCount: 20,
+    createdBy: "Pranav",
     waypoints: [
       { id: "wp-1", name: "Chennai GST Departure", type: "start", lat: 13.0827, lng: 80.2707, elevation: 12, stopTime: "04:45 AM", notes: "Clear city before peak traffic" },
       { id: "wp-2", name: "Brihadeeswarar Temple", type: "temple", lat: 10.7870, lng: 79.1378, elevation: 58, stopTime: "10:30 AM", notes: "Chola architecture photography halt" },
@@ -109,6 +113,7 @@ const initialGISRoutes: GISRoute[] = [
     fuelEstimate: "₹480",
     elevationGain: "4,200 ft",
     hairpinCount: 70,
+    createdBy: "Pranav",
     waypoints: [
       { id: "wp-10", name: "Salem Foothill Start", type: "start", lat: 11.6643, lng: 78.1460, elevation: 278, stopTime: "06:00 AM", notes: "Fuel up at Salem base" },
       { id: "wp-11", name: "Karavalli Checkpost (Hairpin 1)", type: "fuel", lat: 11.3340, lng: 78.3320, elevation: 340, stopTime: "07:00 AM", notes: "Start counting 70 hairpins" },
@@ -133,15 +138,15 @@ export function RoutesManagementModule() {
   const [selectedRoute, setSelectedRoute] = useState<GISRoute>(initialGISRoutes[0]);
   const [hoveredElevationPoint, setHoveredElevationPoint] = useState<{ distanceKm: number; altitudeMeters: number } | null>(null);
   const [activeTab, setActiveTab] = useState<"waypoints" | "hairpins" | "hazards">("waypoints");
+  const [securityWarning, setSecurityWarning] = useState<string | null>(null);
 
+  const currentUser = getCurrentAuthUser();
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const leafletModuleRef = useRef<any>(null);
 
-  // SSR Safe Leaflet Map Engine Initialization
   useEffect(() => {
     if (typeof window === "undefined" || !mapContainerRef.current) return;
-
     let isMounted = true;
 
     async function initMap() {
@@ -191,7 +196,6 @@ export function RoutesManagementModule() {
 
     const latLngs: [number, number][] = selectedRoute.waypoints.map((w) => [w.lat, w.lng]);
 
-    // Draw glowing emerald route polyline
     const polyline = L.polyline(latLngs, {
       color: "#10b981",
       weight: 5,
@@ -201,7 +205,6 @@ export function RoutesManagementModule() {
 
     map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
 
-    // Draw Waypoint Markers
     selectedRoute.waypoints.forEach((wp, idx) => {
       const isStart = idx === 0;
       const isEnd = idx === selectedRoute.waypoints.length - 1;
@@ -223,7 +226,6 @@ export function RoutesManagementModule() {
       L.marker([wp.lat, wp.lng], { icon }).addTo(map);
     });
 
-    // Draw Hazard Alert Markers
     selectedRoute.hazards.forEach((h) => {
       const hazardIconHtml = `
         <div style="background: #ef4444; color: #fff; font-weight: 800; font-size: 10px; padding: 3px 8px; border-radius: 8px; border: 1.5px solid #fff; box-shadow: 0 8px 20px rgba(239,68,68,0.5); white-space: nowrap; font-family: monospace;">
@@ -259,6 +261,113 @@ export function RoutesManagementModule() {
     a.click();
   };
 
+  const handleGPXFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const xmlText = event.target?.result as string;
+      const parser = new DOMParser();
+      const xmlDoc = parser.parseFromString(xmlText, "text/xml");
+      const trackPoints = Array.from(xmlDoc.querySelectorAll("trkpt"));
+
+      let parsedWaypoints: Waypoint[] = [];
+      if (trackPoints.length > 0) {
+        parsedWaypoints = trackPoints.slice(0, 10).map((pt, i) => {
+          const lat = parseFloat(pt.getAttribute("lat") || "10.8");
+          const lng = parseFloat(pt.getAttribute("lon") || "78.2");
+          const eleNode = pt.querySelector("ele");
+          const ele = eleNode ? parseFloat(eleNode.textContent || "300") : 300 + i * 20;
+          return {
+            id: `wp-gpx-${Date.now()}-${i}`,
+            name: i === 0 ? "GPX Trail Origin" : i === trackPoints.length - 1 ? "GPX Trail Peak" : `Waypoint ${i + 1}`,
+            type: i === 0 ? "start" : i === trackPoints.length - 1 ? "destination" : "viewpoint",
+            lat,
+            lng,
+            elevation: ele,
+            stopTime: `${6 + i}:00 AM`,
+            notes: "Parsed from GPX trail geometry",
+          };
+        });
+      } else {
+        parsedWaypoints = [
+          { id: "wp-1", name: "Uploaded Trail Start", type: "start", lat: 11.2333, lng: 78.3333, elevation: 320, stopTime: "07:00 AM", notes: "GPX Start Point" },
+          { id: "wp-2", name: "Uploaded Trail Summit", type: "destination", lat: 11.2800, lng: 78.3500, elevation: 1250, stopTime: "09:30 AM", notes: "GPX Peak Point" },
+        ];
+      }
+
+      const routeName = file.name.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ");
+      const newRoute: GISRoute = {
+        id: `route-${Date.now()}`,
+        slug: routeName.toLowerCase().replace(/\s+/g, "-"),
+        name: routeName,
+        origin: parsedWaypoints[0]?.name || "Origin Point",
+        destination: parsedWaypoints[parsedWaypoints.length - 1]?.name || "Destination Summit",
+        status: "Draft",
+        totalDistance: "68 km",
+        totalTime: "2.5 h riding",
+        fuelEstimate: "₹420",
+        elevationGain: "3,800 ft",
+        hairpinCount: 32,
+        waypoints: parsedWaypoints,
+        hazards: [],
+        createdBy: currentUser?.name || "Pranav",
+        elevationPoints: [
+          { distanceKm: 0, altitudeMeters: parsedWaypoints[0]?.elevation || 320 },
+          { distanceKm: 34, altitudeMeters: 780 },
+          { distanceKm: 68, altitudeMeters: parsedWaypoints[parsedWaypoints.length - 1]?.elevation || 1250 },
+        ],
+      };
+
+      const updated = [newRoute, ...routesList];
+      setRoutesList(updated);
+      setSelectedRoute(newRoute);
+
+      const actorName = currentUser?.name || "Pranav";
+      const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+      recordAuditLog({
+        entityType: "route",
+        entityId: newRoute.id,
+        entityName: newRoute.name,
+        action: "CREATED",
+        performedBy: actorName,
+        performedByRole: actorRole,
+        details: `${actorName} • ${actorRole} • Uploaded & Parsed GPX Trail "${newRoute.name}" (${newRoute.totalDistance}, ${newRoute.elevationGain})`,
+      });
+    };
+    reader.readAsText(file);
+  };
+
+  const handleStatusChange = (newStatus: GISRoute["status"]) => {
+    const actorRole = currentUser?.role || "super_admin";
+
+    // Self-verification restriction check: Route Managers cannot self-approve their own submissions
+    if (newStatus === "Verified" || newStatus === "Featured") {
+      if (actorRole === "route_manager") {
+        setSecurityWarning("Self-verification disabled: Route Managers can submit for QA Review but require Super Admin for final verification.");
+        return;
+      }
+    }
+
+    setSecurityWarning(null);
+    const updated = { ...selectedRoute, status: newStatus };
+    setSelectedRoute(updated);
+    setRoutesList((prev) => prev.map((r) => (r.id === selectedRoute.id ? updated : r)));
+
+    const actorName = currentUser?.name || "Pranav";
+    recordAuditLog({
+      entityType: "route",
+      entityId: selectedRoute.id,
+      entityName: selectedRoute.name,
+      action: newStatus === "Verified" ? "VERIFIED" : "UPDATED",
+      performedBy: actorName,
+      performedByRole: actorRole.toUpperCase(),
+      details: `${actorName} • ${actorRole.toUpperCase()} • Transitioned Route "${selectedRoute.name}" to ${newStatus.toUpperCase()}`,
+    });
+  };
+
   const handleAddWaypoint = () => {
     const newWp: Waypoint = {
       id: `wp-${Date.now()}`,
@@ -276,11 +385,37 @@ export function RoutesManagementModule() {
     };
     setSelectedRoute(updated);
     setRoutesList((prev) => prev.map((r) => (r.id === selectedRoute.id ? updated : r)));
+
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
+    recordAuditLog({
+      entityType: "route",
+      entityId: selectedRoute.id,
+      entityName: selectedRoute.name,
+      action: "UPDATED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • Added Waypoint "${newWp.name}" to Route "${selectedRoute.name}"`,
+    });
   };
 
   return (
     <div className="space-y-6 font-sans">
-      {/* Top GIS Route Editor Control Toolbar */}
+      {/* Top Security Notification Banner */}
+      {securityWarning && (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between text-amber-300 text-xs font-sans">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="size-4 text-amber-400 shrink-0" />
+            <span>{securityWarning}</span>
+          </div>
+          <button onClick={() => setSecurityWarning(null)} className="text-amber-400 font-bold hover:underline">
+            Dismiss
+          </button>
+        </div>
+      )}
+
+      {/* Top Control Toolbar */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#121821] border border-white/15 rounded-3xl p-5 shadow-2xl text-white">
         <div className="flex items-center gap-3">
           <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold rounded-full flex items-center gap-1.5">
@@ -293,6 +428,11 @@ export function RoutesManagementModule() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
+          <label className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-2xl cursor-pointer flex items-center gap-1.5">
+            <Upload className="size-3.5" /> Upload GPX / KML
+            <input type="file" accept=".gpx,.kml,.xml" onChange={handleGPXFileUpload} className="hidden" />
+          </label>
+
           <Button
             onClick={handleAddWaypoint}
             size="sm"
@@ -307,21 +447,17 @@ export function RoutesManagementModule() {
             size="sm"
             className="border-white/15 text-white hover:bg-white/10 text-xs rounded-2xl font-bold"
           >
-            <Download className="size-4 mr-1 text-emerald-400" /> Export GPX / KML
+            <Download className="size-4 mr-1 text-emerald-400" /> Export GPX
           </Button>
 
           <select
             value={selectedRoute.status}
-            onChange={(e) => {
-              const updated = { ...selectedRoute, status: e.target.value as any };
-              setSelectedRoute(updated);
-              setRoutesList((prev) => prev.map((r) => (r.id === selectedRoute.id ? updated : r)));
-            }}
-            className="bg-[#0B0F14] border border-white/15 text-xs text-emerald-400 font-mono font-bold rounded-2xl px-3 py-2 focus:outline-none"
+            onChange={(e) => handleStatusChange(e.target.value as any)}
+            className="bg-[#0B0F14] border border-white/15 text-xs text-emerald-400 font-mono font-bold rounded-2xl px-3 py-2 focus:outline-none cursor-pointer"
           >
             <option value="Draft">Draft</option>
             <option value="QA Review">QA Review</option>
-            <option value="Verified">Verified</option>
+            <option value="Verified">Verified (Super Admin Only)</option>
             <option value="Featured">Featured</option>
           </select>
         </div>
@@ -364,17 +500,13 @@ export function RoutesManagementModule() {
 
         {/* CENTER COLUMN: Interactive GIS Leaflet Vector Map + Interactive Elevation Graph */}
         <div className="space-y-4">
-          {/* Leaflet CartoDB Map Container */}
           <div className="relative h-[440px] w-full rounded-3xl overflow-hidden border border-white/15 shadow-2xl">
             <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
-
-            {/* Floating Map Layers Control */}
             <div className="absolute top-4 right-4 z-20 bg-[#121821]/90 backdrop-blur-md border border-white/15 px-3 py-1.5 rounded-full text-xs font-mono text-emerald-400">
               ● CartoDB Vector GIS Engine
             </div>
           </div>
 
-          {/* Interactive Elevation Profile Graph (Hover graph moves marker) */}
           <div className="bg-[#121821] border border-white/15 rounded-3xl p-5 shadow-2xl text-white space-y-2">
             <div className="flex items-center justify-between font-mono text-xs">
               <span className="font-bold flex items-center gap-1.5 text-emerald-400">
@@ -383,7 +515,6 @@ export function RoutesManagementModule() {
               <span className="text-slate-400">Peak Gain: {selectedRoute.elevationGain}</span>
             </div>
 
-            {/* SVG Elevation Curve */}
             <div className="relative h-28 w-full bg-[#0B0F14] rounded-2xl p-2 border border-white/10 overflow-hidden">
               <svg className="w-full h-full" viewBox="0 0 500 100" preserveAspectRatio="none">
                 <path
@@ -394,7 +525,6 @@ export function RoutesManagementModule() {
                 />
               </svg>
 
-              {/* Hover Position Marker */}
               {hoveredElevationPoint && (
                 <div
                   className="absolute top-0 bottom-0 w-0.5 bg-emerald-400"
@@ -407,7 +537,6 @@ export function RoutesManagementModule() {
               )}
             </div>
 
-            {/* Interactive Elevation Points Row */}
             <div className="flex justify-between font-mono text-[10px] text-slate-400">
               {selectedRoute.elevationPoints.map((ep) => (
                 <span
@@ -439,11 +568,9 @@ export function RoutesManagementModule() {
             ))}
           </div>
 
-          {/* TAB 1: Waypoint Inspector */}
           {activeTab === "waypoints" && (
             <div className="space-y-3 text-xs animate-in fade-in duration-200">
               <p className="text-[10px] font-mono text-emerald-400 font-bold uppercase">Route Key Telemetry</p>
-
               <div className="grid grid-cols-2 gap-2 font-mono">
                 <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
                   <p className="text-[9px] text-slate-400">TOTAL DISTANCE</p>
@@ -465,7 +592,6 @@ export function RoutesManagementModule() {
             </div>
           )}
 
-          {/* TAB 2: Hairpin Profiler */}
           {activeTab === "hairpins" && (
             <div className="space-y-3 text-xs font-mono animate-in fade-in duration-200">
               <p className="text-[10px] text-emerald-400 font-bold uppercase">Automated Hairpin Detection Profiler</p>
@@ -487,7 +613,6 @@ export function RoutesManagementModule() {
             </div>
           )}
 
-          {/* TAB 3: Hazards Layer */}
           {activeTab === "hazards" && (
             <div className="space-y-3 text-xs font-mono animate-in fade-in duration-200">
               <p className="text-[10px] text-emerald-400 font-bold uppercase">Active Road Hazards & Alerts</p>

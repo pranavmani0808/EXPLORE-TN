@@ -35,6 +35,8 @@ import {
 import { places as initialPlaces, Place, CategoryId } from "@/data/places";
 import { Button } from "@/components/ui/button";
 import { createPlaceNodeBackend, generatePlaceDescriptionAI, uploadMediaAssetPipeline } from "@/lib/api";
+import { getCurrentAuthUser } from "@/lib/auth-rbac";
+import { recordAuditLog } from "@/lib/audit-trail-store";
 
 export interface PlaceAuditLog {
   id: string;
@@ -53,7 +55,7 @@ export interface PlaceComment {
 }
 
 export interface ExtendedPlace extends Place {
-  status: "Draft" | "Pending" | "Verified" | "Featured" | "Rejected";
+  status: "Draft" | "Submitted" | "QA Review" | "Verified" | "Featured" | "Rejected";
   createdBy: string;
   updatedAt: string;
   lat: number;
@@ -69,7 +71,7 @@ export interface ExtendedPlace extends Place {
 const initialExtendedPlaces: ExtendedPlace[] = initialPlaces.map((p, idx) => ({
   ...p,
   status: idx % 2 === 0 ? "Verified" : "Featured",
-  createdBy: idx % 2 === 0 ? "Karthik Raja (Place Manager)" : "Arun Kumar (Super Admin)",
+  createdBy: "Pranav",
   updatedAt: `2026-08-0${(idx % 4) + 1} 09:15 AM`,
   lat: 13.2 - (p.y / 100) * 4.8,
   lng: 76.5 + (p.x / 100) * 3.8,
@@ -77,12 +79,11 @@ const initialExtendedPlaces: ExtendedPlace[] = initialPlaces.map((p, idx) => ({
   taluk: `${p.district} North`,
   village: `${p.name} Village`,
   auditLogs: [
-    { id: "log-1", who: "Arun Kumar", what: "Created spatial node", when: "2026-08-01 08:30 AM", ip: "192.168.1.1" },
-    { id: "log-2", who: "Karthik Raja", what: "Updated road condition telemetry", when: "2026-08-03 10:15 AM", ip: "192.168.1.4" },
+    { id: "log-1", who: "Pranav", what: "Created spatial node", when: "2026-08-01 08:30 AM", ip: "192.168.1.1" },
+    { id: "log-2", who: "Pranav", what: "Updated road condition telemetry", when: "2026-08-03 10:15 AM", ip: "192.168.1.4" },
   ],
   comments: [
-    { id: "c-1", user: "Karthik Raja", role: "Place Manager", comment: "Verified entrance parking lot and ticket counter.", time: "Yesterday 4:20 PM" },
-    { id: "c-2", user: "Deepa Sundaram", role: "Route Manager", comment: "Road approach has minor gravel patch near hairpin 4.", time: "Today 8:45 AM" },
+    { id: "c-1", user: "Pranav", role: "Super Admin", comment: "Verified entrance parking lot and ticket counter.", time: "Yesterday 4:20 PM" },
   ],
   nearbyPlaces: [
     { name: "Agaya Gangai Waterfalls", distance: "4.2 km", type: "Waterfalls" },
@@ -98,8 +99,10 @@ export function PlacesManagementModule() {
   const [districtFilter, setDistrictFilter] = useState<string>("all");
   const [selectedSlugs, setSelectedSlugs] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [securityWarning, setSecurityWarning] = useState<string | null>(null);
   const itemsPerPage = 6;
 
+  const currentUser = getCurrentAuthUser();
   const [inspectPlace, setInspectPlace] = useState<ExtendedPlace | null>(placesList[0]);
   const [activeInspectorTab, setActiveInspectorTab] = useState<"details" | "nearby" | "timeline" | "comments">("details");
 
@@ -127,7 +130,7 @@ export function PlacesManagementModule() {
     nearbyFuel: "IOC Station 5km",
     nearbyFood: "Local Halwa Stalls",
     heroImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
-    status: "Verified" as const,
+    status: "Draft" as const,
   });
 
   const filtered = placesList.filter((p) => {
@@ -157,9 +160,28 @@ export function PlacesManagementModule() {
   };
 
   const handleBulkVerify = () => {
+    const actorRole = currentUser?.role || "super_admin";
+    if (actorRole === "place_manager") {
+      setSecurityWarning("Self-verification disabled: Place Managers can submit places for review but require Super Admin for final verification.");
+      return;
+    }
+
+    setSecurityWarning(null);
     setPlacesList((prev) =>
       prev.map((p) => (selectedSlugs.includes(p.slug) ? { ...p, status: "Verified" } : p))
     );
+
+    const actorName = currentUser?.name || "Pranav";
+    recordAuditLog({
+      entityType: "place",
+      entityId: "bulk-verify",
+      entityName: `${selectedSlugs.length} Places`,
+      action: "VERIFIED",
+      performedBy: actorName,
+      performedByRole: actorRole.toUpperCase(),
+      details: `${actorName} • ${actorRole.toUpperCase()} • Bulk-verified ${selectedSlugs.length} destination nodes`,
+    });
+
     setSelectedSlugs([]);
   };
 
@@ -182,13 +204,16 @@ export function PlacesManagementModule() {
   };
 
   const handleWizardSubmit = async () => {
-    const backendRes = await createPlaceNodeBackend({
+    await createPlaceNodeBackend({
       name: wizardData.name || "New Explorer Spot",
       district: wizardData.district,
       category: wizardData.category,
       coordinates: { latitude: wizardData.lat, longitude: wizardData.lng },
       heroImage: wizardData.heroImage,
     });
+
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
 
     const created: ExtendedPlace = {
       slug: wizardData.name.toLowerCase().replace(/\s+/g, "-") || `place-${Date.now()}`,
@@ -198,9 +223,9 @@ export function PlacesManagementModule() {
       image: wizardData.heroImage,
       tagline: wizardData.description || "Newly added spatial place node",
       story: wizardData.description || "Verified by ExplorerTN Operations Center.",
-      rating: 4.9,
-      reviews: 1,
-      distanceFromChennai: "480 km",
+      rating: 5.0,
+      reviews: 0,
+      distanceFromChennai: "380 km",
       difficulty: "Easy",
       bestSeason: wizardData.bestSeason,
       roadCondition: wizardData.roadCondition,
@@ -208,14 +233,14 @@ export function PlacesManagementModule() {
       entryFee: wizardData.entryFee,
       timings: wizardData.timings,
       safety: "Verified safe",
-      weather: "22°C · Clear",
+      weather: "24°C · Clear",
       tips: ["Check timings before arrival"],
       nearbyFood: [wizardData.nearbyFood],
       nearbyFuel: [wizardData.nearbyFuel],
       x: 45,
       y: 55,
-      status: wizardData.status,
-      createdBy: "Arun Kumar (Super Admin)",
+      status: currentUser?.role === "place_manager" ? "Submitted" : "Verified",
+      createdBy: actorName,
       updatedAt: "Just now",
       lat: wizardData.lat,
       lng: wizardData.lng,
@@ -223,10 +248,10 @@ export function PlacesManagementModule() {
       taluk: wizardData.taluk,
       village: wizardData.village,
       auditLogs: [
-        { id: `log-${Date.now()}`, who: "Arun Kumar", what: "Created place node & synced with PostGIS backend", when: "Just now", ip: "192.168.1.1" },
+        { id: `log-${Date.now()}`, who: actorName, what: "Created place node & submitted for review", when: "Just now", ip: "127.0.0.1" },
       ],
       comments: [
-        { id: `c-${Date.now()}`, user: "Arun Kumar", role: "Super Admin", comment: "Synced live with PostGIS DB.", time: "Just now" },
+        { id: `c-${Date.now()}`, user: actorName, role: actorRole, comment: "Created new destination node", time: "Just now" },
       ],
       nearbyPlaces: [
         { name: "Nearest Fuel Station", distance: "3.5 km", type: "Fuel" },
@@ -238,6 +263,16 @@ export function PlacesManagementModule() {
     setInspectPlace(created);
     setWizardOpen(false);
     setWizardStep(1);
+
+    recordAuditLog({
+      entityType: "place",
+      entityId: created.slug,
+      entityName: created.name,
+      action: created.status === "Verified" ? "VERIFIED" : "SUBMITTED",
+      performedBy: actorName,
+      performedByRole: actorRole,
+      details: `${actorName} • ${actorRole} • ${created.status === "Verified" ? "Created & Verified" : "Submitted"} Place "${created.name}" (${created.district})`,
+    });
   };
 
   const handleAIGenerateStory = async () => {
@@ -256,10 +291,13 @@ export function PlacesManagementModule() {
 
   const handleAddComment = () => {
     if (!newCommentText.trim() || !inspectPlace) return;
+    const actorName = currentUser?.name || "Pranav";
+    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
+
     const newComment: PlaceComment = {
       id: `c-${Date.now()}`,
-      user: "Arun Kumar",
-      role: "Super Admin",
+      user: actorName,
+      role: actorRole,
       comment: newCommentText,
       time: "Just now",
     };
@@ -271,6 +309,19 @@ export function PlacesManagementModule() {
 
   return (
     <div className="space-y-6 font-sans">
+      {/* Top Security Warning Banner */}
+      {securityWarning && (
+        <div className="p-4 bg-amber-500/10 border border-amber-500/30 rounded-2xl flex items-center justify-between text-amber-300 text-xs font-sans">
+          <div className="flex items-center gap-2">
+            <AlertTriangle className="size-4 text-amber-400 shrink-0" />
+            <span>{securityWarning}</span>
+          </div>
+          <button onClick={() => setSecurityWarning(null)} className="text-amber-400 font-bold hover:underline">
+            Dismiss
+          </button>
+        </div>
+      )}
+
       {/* Places Header Controls */}
       <div className="flex flex-wrap items-center justify-between gap-4 bg-[#121821] border border-white/15 rounded-3xl p-5 shadow-2xl text-white">
         <div className="flex flex-wrap items-center gap-3">
@@ -293,7 +344,8 @@ export function PlacesManagementModule() {
             <option value="all">All Statuses</option>
             <option value="verified">Verified</option>
             <option value="featured">Featured</option>
-            <option value="pending">Pending</option>
+            <option value="submitted">Submitted</option>
+            <option value="draft">Draft</option>
           </select>
 
           <select
@@ -336,7 +388,7 @@ export function PlacesManagementModule() {
           <span>{selectedSlugs.length} Place(s) Selected</span>
           <div className="flex items-center gap-2">
             <button onClick={handleBulkVerify} className="px-3 py-1.5 bg-emerald-500 text-black font-bold rounded-xl text-xs">
-              Bulk Verify Selected
+              Bulk Verify Selected (Super Admin Only)
             </button>
             <button onClick={handleBulkDelete} className="px-3 py-1.5 bg-rose-500/20 text-rose-300 border border-rose-500/30 font-bold rounded-xl text-xs">
               Bulk Delete Selected
@@ -732,7 +784,7 @@ export function PlacesManagementModule() {
                   </div>
                 </div>
                 <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 font-mono text-[11px]">
-                  ✓ Verified by Operations Center (Arun Kumar) • Synced to PostGIS Backend DB
+                  ✓ Verified by Operations Center ({currentUser?.name || "Pranav"}) • Synced to PostGIS Backend DB
                 </div>
               </div>
             )}

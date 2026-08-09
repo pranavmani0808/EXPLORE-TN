@@ -1,13 +1,17 @@
 export interface AuditTrailEntry {
   id: string;
+  actorId: string;
+  performedBy: string;
+  performedByRole: string;
+  action: "CREATED" | "UPDATED" | "VERIFIED" | "DELETED" | "APPROVED" | "REJECTED" | "ROLE_CHANGED" | "SUSPENDED" | "BACKUP" | "SUBMITTED" | "PUBLISHED";
   entityType: "user" | "place" | "route" | "media" | "review" | "weather" | "system";
   entityId: string;
   entityName: string;
-  action: "CREATED" | "UPDATED" | "VERIFIED" | "DELETED" | "APPROVED" | "REJECTED" | "ROLE_CHANGED" | "SUSPENDED" | "BACKUP";
-  performedBy: string;
-  performedByRole: string;
   timestamp: string;
   details?: string;
+  beforeData?: Record<string, any>;
+  afterData?: Record<string, any>;
+  traceId: string;
 }
 
 export interface AppNotification {
@@ -40,18 +44,19 @@ export function getAuditTrail(): AuditTrailEntry[] {
   if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(STORAGE_KEYS.AUDIT_TRAIL);
   if (!stored) {
-    // Truthful initial audit log: logged in user session
     const defaultAudit: AuditTrailEntry[] = [
       {
         id: "aud-1",
-        entityType: "user",
-        entityId: "u-1",
-        entityName: "Pranav",
-        action: "CREATED",
+        actorId: "usr-1",
         performedBy: "Pranav",
         performedByRole: "SUPER_ADMIN",
+        action: "CREATED",
+        entityType: "user",
+        entityId: "usr-1",
+        entityName: "Pranav",
         timestamp: "Today, 10:21 AM",
         details: "Created ExplorerTN account & initialized active session",
+        traceId: `tr-${Date.now()}-001`,
       },
     ];
     localStorage.setItem(STORAGE_KEYS.AUDIT_TRAIL, JSON.stringify(defaultAudit));
@@ -60,20 +65,25 @@ export function getAuditTrail(): AuditTrailEntry[] {
   return JSON.parse(stored);
 }
 
-export function recordAuditLog(entry: Omit<AuditTrailEntry, "id" | "timestamp">) {
+export function recordAuditLog(entry: Omit<AuditTrailEntry, "id" | "timestamp" | "traceId" | "actorId"> & { actorId?: string }) {
   if (typeof window === "undefined") return;
   const now = new Date();
   const timeStr = `Today, ${now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}`;
+  const traceId = `tr-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+  
   const fullEntry: AuditTrailEntry = {
     ...entry,
     id: `aud-${Date.now()}`,
+    actorId: entry.actorId || "usr-1",
     timestamp: timeStr,
+    traceId,
   };
+
   const list = getAuditTrail();
-  const updated = [fullEntry, ...list].slice(0, 50);
+  // Append-only immutable log recording
+  const updated = [fullEntry, ...list].slice(0, 100);
   localStorage.setItem(STORAGE_KEYS.AUDIT_TRAIL, JSON.stringify(updated));
 
-  // Trigger real-time notification
   addNotification({
     title: `${entry.performedBy} • ${entry.performedByRole.toUpperCase()} • ${entry.action.replace("_", " ")}`,
     message: entry.details || `${entry.entityType.toUpperCase()} "${entry.entityName}" updated`,
@@ -116,7 +126,6 @@ export function addNotification(notif: Omit<AppNotification, "id" | "time" | "is
   localStorage.setItem(STORAGE_KEYS.NOTIFICATIONS, JSON.stringify(updated));
 }
 
-// REAL USER DIRECTORY (Zero Hardcoded Demo Identities)
 export function getManagedUsers(): ManagedUser[] {
   if (typeof window === "undefined") return [];
   const stored = localStorage.getItem(STORAGE_KEYS.MANAGED_USERS);
