@@ -24,6 +24,8 @@ import {
   Award,
   Layers,
   Upload,
+  AlertTriangle,
+  RefreshCw,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -43,17 +45,23 @@ interface ModalProps {
 }
 
 /* ==========================================================================
-   1. USER MANAGEMENT MODAL & 360° USER PANEL
+   1. USER MANAGEMENT MODAL & 360° USER PANEL (WITH SOFT DELETION & SAFEGUARDS)
    ========================================================================== */
 export function UserManagementModal({ isOpen, onClose }: ModalProps) {
   const [users, setUsers] = useState<ManagedUser[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedUser, setSelectedUser] = useState<ManagedUser | null>(null);
   const [activeUserTab, setActiveUserTab] = useState<"info" | "permissions" | "activity" | "audit">("info");
+  
+  // Add User Form State
   const [showAddForm, setShowAddForm] = useState(false);
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserRole, setNewUserRole] = useState<ManagedUser["role"]>("explorer");
+
+  // Soft Deletion Safeguard State
+  const [userToDelete, setUserToDelete] = useState<ManagedUser | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
 
   const currentUser = getCurrentAuthUser();
 
@@ -73,7 +81,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
       email: newUserEmail,
       role: newUserRole,
       status: "ACTIVE",
-      district: "Tamil Nadu",
+      district: "Tamil Nadu Wide",
       lastLogin: "Never",
       joinedDate: "Today",
     };
@@ -146,13 +154,15 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
       action: "SUSPENDED",
       performedBy: actorName,
       performedByRole: actorRole,
-      details: `${actorName} • ${actorRole} • Updated ${targetUser?.name || "User"} status to ${newStatus}`,
+      details: `${actorName} • ${actorRole} • ${newStatus === "INACTIVE" ? "Suspended" : "Reactivated"} User "${targetUser?.name || "User"}"`,
     });
   };
 
-  const handleDeleteUser = (userId: string) => {
-    const targetUser = users.find((u) => u.id === userId);
-    const updated = users.filter((u) => u.id !== userId);
+  const handleConfirmSoftDelete = () => {
+    if (!userToDelete || deleteConfirmText !== "DELETE") return;
+
+    // Soft deletion: mark user as INACTIVE / DELETED to preserve historical audit logs
+    const updated = users.map((u) => (u.id === userToDelete.id ? { ...u, status: "INACTIVE" as const } : u));
     setUsers(updated);
     saveManagedUsers(updated);
 
@@ -161,13 +171,16 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
 
     recordAuditLog({
       entityType: "user",
-      entityId: userId,
-      entityName: targetUser?.name || "User",
+      entityId: userToDelete.id,
+      entityName: userToDelete.name,
       action: "DELETED",
       performedBy: actorName,
       performedByRole: actorRole,
-      details: `${actorName} • ${actorRole} • Deleted user account "${targetUser?.name || "User"}"`,
+      details: `${actorName} • ${actorRole} • Soft-deleted user account "${userToDelete.name}" (Status set to INACTIVE)`,
     });
+
+    setUserToDelete(null);
+    setDeleteConfirmText("");
   };
 
   const filteredUsers = users.filter(
@@ -202,7 +215,45 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
           </button>
         </div>
 
-        {showAddForm ? (
+        {/* Soft Deletion Confirmation Sub-Modal */}
+        {userToDelete ? (
+          <div className="py-6 space-y-4 font-sans">
+            <div className="p-4 bg-rose-50 dark:bg-rose-500/10 border border-rose-200 dark:border-rose-500/30 rounded-2xl space-y-2">
+              <div className="flex items-center gap-2 text-rose-600 dark:text-rose-400 font-bold text-sm">
+                <AlertTriangle className="size-5" /> Confirm Account Soft Deletion
+              </div>
+              <p className="text-xs text-slate-600 dark:text-slate-300">
+                You are about to soft-delete user account <strong>"{userToDelete.name}"</strong> ({userToDelete.email}). This action will revoke platform access while preserving historical audit logs.
+              </p>
+              <div className="pt-2">
+                <label className="text-[10px] font-mono text-slate-500 dark:text-slate-400 uppercase">
+                  Type <span className="font-bold text-rose-600">DELETE</span> to confirm:
+                </label>
+                <input
+                  type="text"
+                  placeholder="DELETE"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  className="w-full h-9 px-3 mt-1 bg-white dark:bg-black/30 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-mono text-slate-900 dark:text-white focus:outline-none focus:border-rose-500"
+                />
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button onClick={() => { setUserToDelete(null); setDeleteConfirmText(""); }} variant="outline" size="sm" className="text-xs font-bold rounded-xl">
+                Cancel
+              </Button>
+              <Button
+                disabled={deleteConfirmText !== "DELETE"}
+                onClick={handleConfirmSoftDelete}
+                size="sm"
+                className="bg-rose-600 hover:bg-rose-700 disabled:opacity-50 text-white font-bold text-xs rounded-xl cursor-pointer"
+              >
+                Confirm Soft Delete
+              </Button>
+            </div>
+          </div>
+        ) : showAddForm ? (
           <form onSubmit={handleAddUser} className="py-4 space-y-4 font-sans">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">Add New Platform User</h3>
             <div className="grid grid-cols-2 gap-3">
@@ -211,7 +262,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Arun Kumar"
+                  placeholder="e.g. Santhosh"
                   value={newUserName}
                   onChange={(e) => setNewUserName(e.target.value)}
                   className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
@@ -222,7 +273,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                 <input
                   type="email"
                   required
-                  placeholder="arun@exploretn.com"
+                  placeholder="santhosh@exploretn.com"
                   value={newUserEmail}
                   onChange={(e) => setNewUserEmail(e.target.value)}
                   className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white"
@@ -360,65 +411,71 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200 dark:divide-white/10 font-mono">
-                  {filteredUsers.map((u) => (
-                    <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2.5">
-                          <span className="grid size-7 place-items-center rounded-lg bg-emerald-600 text-white font-black text-[10px]">
-                            {u.name.slice(0, 2).toUpperCase()}
-                          </span>
-                          <div>
-                            <p className="font-bold text-slate-900 dark:text-white font-sans">{u.name}</p>
-                            <p className="text-[10px] text-slate-500">{u.email}</p>
+                  {filteredUsers.map((u) => {
+                    const isSelf = currentUser && (u.id === currentUser.id || u.name === currentUser.name || u.email === currentUser.email);
+
+                    return (
+                      <tr key={u.id} className="hover:bg-slate-50 dark:hover:bg-white/5">
+                        <td className="py-3 px-3">
+                          <div className="flex items-center gap-2.5">
+                            <span className="grid size-7 place-items-center rounded-lg bg-emerald-600 text-white font-black text-[10px]">
+                              {u.name.slice(0, 2).toUpperCase()}
+                            </span>
+                            <div>
+                              <p className="font-bold text-slate-900 dark:text-white font-sans flex items-center gap-1.5">
+                                {u.name} {isSelf && <span className="text-[9px] font-mono text-emerald-600 dark:text-emerald-400 font-bold">(You)</span>}
+                              </p>
+                              <p className="text-[10px] text-slate-500">{u.email}</p>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 px-3">
-                        <select
-                          value={u.role}
-                          onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
-                          className="bg-transparent border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 focus:outline-none cursor-pointer"
-                        >
-                          <option value="super_admin">Super Admin</option>
-                          <option value="place_manager">Place Manager</option>
-                          <option value="route_manager">Route Manager</option>
-                          <option value="community_manager">Community Manager</option>
-                          <option value="explorer">Explorer</option>
-                        </select>
-                      </td>
-                      <td className="py-3 px-3">
-                        <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full border ${u.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" : "bg-rose-500/10 text-rose-600 border-rose-500/30"}`}>
-                          {u.status}
-                        </span>
-                      </td>
-                      <td className="py-3 px-3 text-slate-400 text-[11px]">{u.lastLogin}</td>
-                      <td className="py-3 px-3 text-right space-x-1 font-sans">
-                        <button
-                          onClick={() => setSelectedUser(u)}
-                          className="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
-                          title="View 360 Workspace"
-                        >
-                          <Eye className="size-4" />
-                        </button>
-                        <button
-                          onClick={() => handleToggleStatus(u.id)}
-                          className="p-1.5 text-amber-500 hover:text-amber-600 cursor-pointer"
-                          title="Toggle Status"
-                        >
-                          <Ban className="size-4" />
-                        </button>
-                        {u.id !== "usr-1" && (
+                        </td>
+                        <td className="py-3 px-3">
+                          <select
+                            value={u.role}
+                            onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
+                            className="bg-transparent border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 focus:outline-none cursor-pointer"
+                          >
+                            <option value="super_admin">Super Admin</option>
+                            <option value="place_manager">Place Manager</option>
+                            <option value="route_manager">Route Manager</option>
+                            <option value="community_manager">Community Manager</option>
+                            <option value="explorer">Explorer</option>
+                          </select>
+                        </td>
+                        <td className="py-3 px-3">
+                          <span className={`px-2 py-0.5 text-[9px] font-bold rounded-full border ${u.status === "ACTIVE" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" : "bg-rose-500/10 text-rose-600 border-rose-500/30"}`}>
+                            {u.status}
+                          </span>
+                        </td>
+                        <td className="py-3 px-3 text-slate-400 text-[11px]">{u.lastLogin}</td>
+                        <td className="py-3 px-3 text-right space-x-1 font-sans">
                           <button
-                            onClick={() => handleDeleteUser(u.id)}
-                            className="p-1.5 text-rose-500 hover:text-rose-600 cursor-pointer"
-                            title="Delete User"
+                            onClick={() => setSelectedUser(u)}
+                            className="p-1.5 text-slate-400 hover:text-slate-900 dark:hover:text-white cursor-pointer"
+                            title="View 360 Workspace"
+                          >
+                            <Eye className="size-4" />
+                          </button>
+                          <button
+                            disabled={isSelf}
+                            onClick={() => handleToggleStatus(u.id)}
+                            className="p-1.5 text-amber-500 hover:text-amber-600 disabled:opacity-30 cursor-pointer"
+                            title={isSelf ? "Self-suspension disabled" : "Toggle Status"}
+                          >
+                            <Ban className="size-4" />
+                          </button>
+                          <button
+                            disabled={isSelf}
+                            onClick={() => setUserToDelete(u)}
+                            className="p-1.5 text-rose-500 hover:text-rose-600 disabled:opacity-30 cursor-pointer"
+                            title={isSelf ? "Self-deletion disabled for security" : "Soft Delete User"}
                           >
                             <Trash2 className="size-4" />
                           </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
