@@ -2,16 +2,25 @@ import { PlaceApiRepository, AIApiRepository, MediaApiRepository, WeatherApiRepo
 
 export * from "./api-client";
 
-const API_BASE_URL =
-  (typeof process !== "undefined" && (process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL)) ||
-  "http://localhost:8000";
+function getApiBaseUrl(): string {
+  if (typeof window !== "undefined") {
+    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+    if (!isLocalhost) {
+      // In production deployment (e.g. Vercel), use origin base to prevent CORS loopback warnings
+      return window.location.origin;
+    }
+  }
+  return "http://localhost:8000";
+}
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function checkBackendHealth(): Promise<boolean> {
   try {
-    const response = await fetch(`${API_BASE_URL}/`);
+    const response = await fetch(`${API_BASE_URL}/healthz`);
     if (!response.ok) return false;
     const data = await response.json();
-    return data.status === "online";
+    return data.status === "Healthy" || data.status === "online";
   } catch {
     return false;
   }
