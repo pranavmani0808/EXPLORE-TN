@@ -45,6 +45,7 @@ import {
 import { getCurrentAuthUser } from "@/lib/auth-rbac";
 import { UserManagementModal, PlacesManagerModal } from "./entity-management-modals";
 import { getNotifications, AppNotification, recordAuditLog, getAuditTrail, AuditTrailEntry } from "@/lib/audit-trail-store";
+import { getAnalyticsEvents, AnalyticsEvent } from "@/lib/explorer-activity";
 
 interface ExecutiveCommandCenterProps {
   onNavigateTab: (tabId: string) => void;
@@ -54,6 +55,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
   const [metrics, setMetrics] = useState<DashboardMetrics | null>(null);
   const [services, setServices] = useState<ServiceHealthItem[]>([]);
   const [auditLogs, setAuditLogs] = useState<AuditTrailEntry[]>([]);
+  const [analyticsEvents, setAnalyticsEvents] = useState<AnalyticsEvent[]>([]);
   const [approvalList, setApprovalList] = useState<ApprovalQueueItem[]>([]);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -71,6 +73,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
     setMetrics(data.metrics);
     setServices(data.services);
     setAuditLogs(getAuditTrail());
+    setAnalyticsEvents(getAnalyticsEvents());
     setApprovalList(data.approvalQueue);
     setNotifications(getNotifications());
     setIsLoading(false);
@@ -98,51 +101,9 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
     });
 
     setTimeout(() => {
-      setBackupStatus("✅ Backup completed: snapshot_2026_08_08.sql (1.2 GB)");
+      setBackupStatus("✅ Backup completed: snapshot_2026_08_10.sql (1.2 GB)");
       loadData();
     }, 1200);
-  };
-
-  const handleApprove = (id: string, name: string) => {
-    const actorName = currentUser?.name || "Pranav";
-    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
-
-    setApprovalList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "APPROVED" } : item))
-    );
-
-    recordAuditLog({
-      entityType: "place",
-      entityId: id,
-      entityName: name,
-      action: "APPROVED",
-      performedBy: actorName,
-      performedByRole: actorRole,
-      details: `${actorName} • ${actorRole} • Approved "${name}"`,
-    });
-
-    loadData();
-  };
-
-  const handleReject = (id: string, name: string) => {
-    const actorName = currentUser?.name || "Pranav";
-    const actorRole = (currentUser?.role || "super_admin").toUpperCase();
-
-    setApprovalList((prev) =>
-      prev.map((item) => (item.id === id ? { ...item, status: "REJECTED" } : item))
-    );
-
-    recordAuditLog({
-      entityType: "place",
-      entityId: id,
-      entityName: name,
-      action: "REJECTED",
-      performedBy: actorName,
-      performedByRole: actorRole,
-      details: `${actorName} • ${actorRole} • Rejected "${name}"`,
-    });
-
-    loadData();
   };
 
   if (isLoading || !metrics) {
@@ -158,15 +119,13 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
     );
   }
 
-  const pendingApprovals = approvalList.filter((i) => i.status === "PENDING");
-
   return (
     <div className="space-y-6 font-sans animate-in fade-in duration-300">
       {/* 1. Truthful Telemetry Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4 p-4 rounded-3xl bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 text-xs font-mono shadow-sm text-slate-900 dark:text-white">
         <div className="flex items-center gap-4 flex-wrap">
           <span className="flex items-center gap-1.5 font-bold text-emerald-700 dark:text-emerald-400">
-            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Database Telemetry & Audit Logs Active
+            <span className="size-2 rounded-full bg-emerald-500 animate-ping" /> Database Telemetry & Analytics Active
           </span>
           <span className="text-slate-500">Storage: {metrics.storageUsedGB}</span>
           <span className="text-slate-500">• Latency: {metrics.avgLatencyMs}ms</span>
@@ -222,15 +181,6 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
 
           <Button
             size="sm"
-            onClick={() => onNavigateTab("cms")}
-            variant="outline"
-            className="border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-bold rounded-xl cursor-pointer"
-          >
-            <Plus className="size-3.5 mr-1 text-emerald-600 dark:text-emerald-400" /> Publish Story
-          </Button>
-
-          <Button
-            size="sm"
             onClick={() => setIsUserModalOpen(true)}
             variant="outline"
             className="border-slate-200 dark:border-white/15 text-slate-800 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-bold rounded-xl cursor-pointer"
@@ -256,7 +206,7 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         </div>
       )}
 
-      {/* 3. Clickable Metric Entry Point Cards (Zero Hardcoded Metrics) */}
+      {/* 3. Clickable Metric Entry Point Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-7 gap-3">
         {[
           { label: "Registered Users", val: metrics.registeredUsers, sub: `${metrics.activeUsersToday} Active Session`, icon: Users, color: "text-emerald-600 dark:text-emerald-400", onClick: () => setIsUserModalOpen(true) },
@@ -287,33 +237,41 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
         ))}
       </div>
 
-      {/* 4. Infrastructure Service Health Probes */}
+      {/* 4. Real Analytics Telemetry (Truthful Event Stream) */}
       <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
         <div className="flex items-center justify-between">
           <h3 className="text-base font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-            <Server className="size-5 text-emerald-600 dark:text-emerald-400" /> Infrastructure Service Health Probes
+            <Activity className="size-5 text-emerald-600 dark:text-emerald-400" /> Today's Product Analytics Stream
           </h3>
-          <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold">Live Health Probes</span>
+          <span className="text-xs font-mono text-emerald-700 dark:text-emerald-400 font-bold">
+            {analyticsEvents.length} Recorded Interaction Events Today
+          </span>
         </div>
 
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3 font-mono text-xs">
-          {services.map((srv) => (
-            <div key={srv.name} className="p-3.5 bg-slate-50 dark:bg-white/5 rounded-2xl border border-slate-200 dark:border-white/10 flex items-center justify-between">
-              <div>
-                <p className="font-bold text-slate-900 dark:text-white">{srv.name}</p>
-                <p className="text-[10px] text-slate-500 mt-0.5">{srv.details || `${srv.latency} latency`}</p>
+        {analyticsEvents.length === 0 ? (
+          <div className="p-8 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-center space-y-1 font-mono text-xs text-slate-500">
+            No activity recorded today.
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3 font-mono text-xs max-h-48 overflow-y-auto pr-1">
+            {analyticsEvents.map((evt) => (
+              <div key={evt.id} className="p-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl space-y-1">
+                <div className="flex items-center justify-between">
+                  <span className="px-2 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-bold rounded-full text-[9px] uppercase border border-emerald-500/20">
+                    {evt.eventType.replace("_", " ")}
+                  </span>
+                  <span className="text-[10px] text-slate-400">{evt.timestamp}</span>
+                </div>
+                <p className="font-sans text-xs text-slate-800 dark:text-white font-bold truncate">{evt.details || evt.eventType}</p>
+                <p className="text-[10px] text-slate-500">User: {evt.userName}</p>
               </div>
-              <span className={`px-2 py-0.5 font-extrabold text-[9px] rounded-full border uppercase ${srv.status === "Online" || srv.status === "Healthy" ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/30" : "bg-slate-200 text-slate-700 border-slate-300"}`}>
-                {srv.status}
-              </span>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* 5. Real Audit Log Feed (No Hardcoded Demo Identities) */}
+      {/* 5. Real Audit Log Feed */}
       <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-6">
-        {/* Real Audit Log Timeline */}
         <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -350,7 +308,6 @@ export function ExecutiveSaaSCommandCenter({ onNavigateTab }: ExecutiveCommandCe
           )}
         </div>
 
-        {/* Registered Users Summary (Zero Hardcoded Identities) */}
         <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
