@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { Send, Sparkles, Wallet, Fuel, CloudSun, Backpack, Download, Share2, Compass } from "lucide-react";
+import { Send, Sparkles, Wallet, Fuel, CloudSun, Backpack, Download, Share2, Compass, AlertCircle, Loader2 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
-import { scenicRoute } from "@/data/places";
+import { PlannerApiRepository, PlannerChatResponseDTO } from "@/lib/api-client/planner";
 
 export const Route = createFileRoute("/planner")({
   head: () => ({
@@ -25,32 +25,82 @@ export const Route = createFileRoute("/planner")({
   component: PlannerPage,
 });
 
-const seedChat = [
-  { role: "user", text: "2-day bike trip from Chennai, hills and waterfalls, budget ₹6,000." },
-  {
-    role: "assistant",
-    text: "Here's a 520 km ghat run: Chennai → Thanjavur → Dindigul → Kodaikanal. Two nights, one big climb, cold mornings. Fuel comes to about ₹2,450 on a 350cc.",
-  },
+const defaultPacking = [
+  "Rain shell",
+  "Grip gloves",
+  "Headlamp",
+  "2L water",
+  "Power bank",
+  "Cash ₹2,000",
+  "Tyre inflator",
 ];
 
-const packing = ["Rain shell", "Grip gloves", "Headlamp", "2L water", "Power bank", "Cash ₹2,000", "Tyre inflator"];
-
 function PlannerPage() {
-  const [messages, setMessages] = useState(seedChat);
+  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
+    {
+      role: "assistant",
+      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'one-day bike trip from Chennai with hills').",
+    },
+  ]);
   const [input, setInput] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const send = (e: React.FormEvent) => {
+  // Dynamic Planner Results State
+  const [timeline, setTimeline] = useState<Array<{ time: string; name: string; description: string }>>([
+    {
+      time: "06:00 AM",
+      name: "Start Location",
+      description: "Enter your starting city to generate a verified Tamil Nadu itinerary.",
+    },
+  ]);
+  const [budgetDisplay, setBudgetDisplay] = useState("₹3,000");
+  const [fuelEstimate, setFuelEstimate] = useState("₹720");
+  const [weatherDisplay, setWeatherDisplay] = useState("18–28°C");
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim()) return;
-    setMessages((m) => [
-      ...m,
-      { role: "user", text: input },
-      {
-        role: "assistant",
-        text: "Good call — I've folded that into the itinerary on the right. Adjust the days or budget any time and the timeline re-plans.",
-      },
-    ]);
+    if (!input.trim() || loading) return;
+
+    const userText = input.trim();
     setInput("");
+    setErrorMsg(null);
+    setMessages((prev) => [...prev, { role: "user", text: userText }]);
+    setLoading(true);
+
+    try {
+      const res: PlannerChatResponseDTO = await PlannerApiRepository.sendChatMessage(userText, conversationId);
+      setConversationId(res.conversationId);
+      
+      setMessages((prev) => [...prev, { role: "assistant", text: res.message }]);
+
+      // Update Dynamic Planner UI
+      if (res.timeline && res.timeline.length > 0) {
+        setTimeline(res.timeline);
+      }
+      if (res.plannerState?.budget) {
+        setBudgetDisplay(`₹${res.plannerState.budget.toLocaleString("en-IN")}`);
+      }
+      if (res.costEstimate?.fuelCost) {
+        setFuelEstimate(res.costEstimate.fuelCost);
+      }
+      if (res.weather?.tempRange) {
+        setWeatherDisplay(res.weather.tempRange);
+      }
+    } catch (err: any) {
+      const msg = err?.message || "Trip Copilot is temporarily unavailable.";
+      setErrorMsg(msg);
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          text: "Trip Copilot encountered an issue connecting to the backend. Please verify details and retry.",
+        },
+      ]);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -69,6 +119,14 @@ function PlannerPage() {
             </span>
             Trip copilot
           </p>
+
+          {errorMsg && (
+            <div className="mb-3 flex items-center gap-2 rounded-2xl border border-destructive/30 bg-destructive/10 p-3 text-xs text-destructive">
+              <AlertCircle className="size-4 shrink-0" />
+              <span>{errorMsg}</span>
+            </div>
+          )}
+
           <div className="flex-1 space-y-4 overflow-y-auto pr-1">
             {messages.map((m, i) => (
               <motion.div
@@ -84,17 +142,25 @@ function PlannerPage() {
                 )}
               </motion.div>
             ))}
+            {loading && (
+              <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                <Loader2 className="size-3.5 animate-spin text-primary" />
+                <span>Trip Copilot is querying PostGIS & computing route math...</span>
+              </div>
+            )}
           </div>
-          <form onSubmit={send} className="mt-4 flex items-center gap-2 rounded-2xl border border-border bg-background/50 p-2">
+
+          <form onSubmit={handleSubmit} className="mt-4 flex items-center gap-2 rounded-2xl border border-border bg-background/50 p-2">
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Add a stop, change the budget, ask about weather…"
               aria-label="Message the trip planner"
-              className="min-h-11 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground"
+              disabled={loading}
+              className="min-h-11 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
             />
-            <Button type="submit" size="icon" className="rounded-xl" aria-label="Send">
-              <Send className="size-4" />
+            <Button type="submit" size="icon" disabled={loading || !input.trim()} className="rounded-xl" aria-label="Send">
+              {loading ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
             </Button>
           </form>
         </div>
@@ -105,9 +171,9 @@ function PlannerPage() {
               <Sparkles className="size-4 text-gold" aria-hidden /> Generated itinerary
             </p>
             <ol className="mt-4 space-y-3 border-l border-border pl-5">
-              {scenicRoute.stops.map((s, i) => (
+              {timeline.map((s, i) => (
                 <motion.li
-                  key={s.name}
+                  key={i}
                   initial={{ opacity: 0, x: -12 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.08 }}
@@ -123,9 +189,9 @@ function PlannerPage() {
 
           <div className="grid gap-3 sm:grid-cols-3">
             {[
-              [Wallet, "Budget", "₹5,800"],
-              [Fuel, "Fuel", scenicRoute.fuelEstimate],
-              [CloudSun, "Weather", "16–31°C"],
+              [Wallet, "Budget", budgetDisplay],
+              [Fuel, "Fuel", fuelEstimate],
+              [CloudSun, "Weather", weatherDisplay],
             ].map(([Icon, label, value]) => {
               const I = Icon as typeof Wallet;
               return (
@@ -144,7 +210,7 @@ function PlannerPage() {
               <Backpack className="size-4 text-sunset" aria-hidden /> Packing checklist
             </p>
             <div className="mt-3 flex flex-wrap gap-2">
-              {packing.map((p) => (
+              {defaultPacking.map((p) => (
                 <span key={p} className="rounded-full border border-border px-3 py-1.5 text-xs text-muted-foreground">
                   {p}
                 </span>

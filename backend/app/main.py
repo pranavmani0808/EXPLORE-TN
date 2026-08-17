@@ -17,6 +17,7 @@ from backend.app.api.v1.places import router as places_router
 from backend.app.api.v1.health import router as health_router
 from backend.app.api.v1.admin import router as admin_router
 from backend.app.api.v1.jobs import router as jobs_router
+from backend.app.api.v1.planner import router as planner_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -90,6 +91,7 @@ app.include_router(health_router)
 app.include_router(places_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
 app.include_router(jobs_router, prefix=settings.API_V1_STR)
+app.include_router(planner_router, prefix=settings.API_V1_STR)
 
 if __name__ == "__main__":
     import uvicorn
