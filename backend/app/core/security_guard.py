@@ -43,6 +43,14 @@ class SecurityGuard:
         return url_str
 
     @staticmethod
+    def validate_ssrf_target(url_str: str) -> dict:
+        try:
+            SecurityGuard.validate_external_url(url_str)
+            return {"allowed": True, "reason": "Target URL passed SSRF security validation."}
+        except ValidationException as err:
+            return {"allowed": False, "reason": str(err)}
+
+    @staticmethod
     def sanitize_upload_filename(filename: str) -> str:
         r"""
         Path Traversal & Upload Security Engine:

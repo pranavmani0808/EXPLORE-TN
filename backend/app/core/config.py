@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
     VITE_AI_API_KEY: Optional[str] = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
 
+    # OpenSERP Server-Side Web-Grounding Configuration
+    OPENSERP_API_KEY: str = "openserp_live_secret_key_explorer_tn_prod"
+    OPENSERP_BASE_URL: str = "https://api.openserp.com/v1/search"
+
     # CORS Origins
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",

@@ -1,9 +1,10 @@
 import time
 import uuid
 import re
-from typing import Dict, Any, List, Optional
+from typing import Dict, Any, List, Optional, Tuple
 from pydantic import BaseModel
 from backend.app.services.places_service import places_service, calculate_haversine
+from backend.app.services.openserp_service import openserp_service, SourceDTO
 from backend.app.core.config import settings
 
 class PlannerState(BaseModel):
@@ -130,12 +131,14 @@ class PlannerService:
                 "costEstimate": {"fuelCost": "₹0", "assumptions": "N/A"},
                 "weather": {"tempRange": "22–32°C", "condition": "Sunny"},
                 "timeline": [],
+                "webEvidence": [],
                 "provenance": {
                     "destination": "PostgreSQL places",
                     "route": "haversine routing engine",
                     "weather": "weather provider gateway",
                     "cost": "deterministic cost engine",
-                    "narrative": "ExplorerTN Rules Engine"
+                    "narrative": "ExplorerTN Rules Engine",
+                    "webEvidence": "OpenSERP Web Grounding Engine"
                 },
                 "traceId": trace_id
             }
@@ -174,6 +177,10 @@ class PlannerService:
         total_dist_km = round(dist1 * 2, 1) # Round-trip distance
         cost_info = self.compute_deterministic_cost(total_dist_km, transport)
 
+        # Query OpenSERP Server-Side Web Evidence
+        web_evidence_sources = openserp_service.search_web_evidence(stop1["name"], trace_id=trace_id)
+        evidence_dtos = [s.model_dump() for s in web_evidence_sources]
+
         # Build Real Timeline
         timeline = [
             {
@@ -201,7 +208,8 @@ class PlannerService:
         # Natural Language Summary
         assistant_msg = (
             f"Planned a {duration}-day {transport} trip from {origin} to {stop1['name']} ({stop1['district']} district). "
-            f"Total distance is {total_dist_km} km round-trip. Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']})."
+            f"Total distance is {total_dist_km} km round-trip. Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
+            f"Grounded with {len(evidence_dtos)} live OpenSERP web evidence sources."
         )
         session["messages"].append({"role": "assistant", "text": assistant_msg})
 
@@ -224,12 +232,14 @@ class PlannerService:
             "costEstimate": cost_info,
             "weather": {"tempRange": "18–28°C", "condition": "Partly Cloudy"},
             "timeline": timeline,
+            "webEvidence": evidence_dtos,
             "provenance": {
                 "destination": "PostgreSQL places",
                 "route": "haversine routing engine",
                 "weather": "weather provider gateway",
                 "cost": "deterministic cost engine",
-                "narrative": "Gemini AI / ExplorerTN Rules Engine"
+                "narrative": "Gemini AI / ExplorerTN Rules Engine",
+                "webEvidence": "OpenSERP Web Grounding Engine"
             },
             "traceId": trace_id
         }
