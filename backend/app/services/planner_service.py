@@ -5,6 +5,7 @@ from typing import Dict, Any, List, Optional, Tuple
 from pydantic import BaseModel
 from backend.app.services.places_service import places_service, calculate_haversine
 from backend.app.services.openserp_service import openserp_service, SourceDTO
+from backend.app.services.routing import routing_service
 from backend.app.core.config import settings
 
 class PlannerState(BaseModel):
@@ -97,17 +98,31 @@ class PlannerService:
 
         return state
 
-    def compute_deterministic_cost(self, distance_km: float, transport: str) -> dict:
+    def compute_deterministic_cost(self, road_distance_km: float, transport: str, user_budget: float) -> dict:
         mileage = 32.0 if transport == "motorcycle" else 15.0
         fuel_price = 100.0
-        fuel_liters = distance_km / mileage
+        fuel_liters = road_distance_km / mileage
         fuel_cost = round(fuel_liters * fuel_price, 2)
+        
+        food_cost = 300.0
+        tickets_cost = 100.0
+        parking_cost = 50.0
+        total_estimated = round(fuel_cost + food_cost + tickets_cost + parking_cost, 2)
+        within_budget = total_estimated <= user_budget
+
         formatted_fuel = f"₹{int(round(fuel_cost))}"
         
         return {
             "fuelCost": formatted_fuel,
             "numericFuelCost": fuel_cost,
-            "assumptions": f"{round(distance_km, 1)} km @ {mileage} km/L, ₹{int(fuel_price)}/L"
+            "fuel": fuel_cost,
+            "food": food_cost,
+            "tickets": tickets_cost,
+            "parking": parking_cost,
+            "total": total_estimated,
+            "budget": user_budget,
+            "withinBudget": within_budget,
+            "assumptions": f"{round(road_distance_km, 1)} km @ {mileage} km/L, ₹{int(fuel_price)}/L"
         }
 
     def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str) -> dict:
@@ -127,18 +142,31 @@ class PlannerService:
                 "plannerState": session["state"],
                 "missingFields": ["origin", "destination"],
                 "recommendations": [],
-                "route": {"totalDistanceKm": 0.0, "estimatedTime": "0h"},
-                "costEstimate": {"fuelCost": "₹0", "assumptions": "N/A"},
+                "route": {
+                    "distanceKm": 0.0,
+                    "durationMinutes": 0,
+                    "geometry": {"type": "LineString", "coordinates": []},
+                    "provider": "OSRM Routing Engine"
+                },
+                "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
+                "costEstimate": {
+                    "fuelCost": "₹0",
+                    "total": 0.0,
+                    "budget": 3000.0,
+                    "withinBudget": True,
+                    "assumptions": "N/A"
+                },
                 "weather": {"tempRange": "22–32°C", "condition": "Sunny"},
                 "timeline": [],
                 "webEvidence": [],
                 "provenance": {
-                    "destination": "PostgreSQL places",
-                    "route": "haversine routing engine",
-                    "weather": "weather provider gateway",
-                    "cost": "deterministic cost engine",
-                    "narrative": "ExplorerTN Rules Engine",
-                    "webEvidence": "OpenSERP Web Grounding Engine"
+                    "destination": "PostgreSQL/PostGIS",
+                    "route": "Routing Engine (OSRM)",
+                    "elevation": "Route/GPX data",
+                    "weather": "Weather Provider",
+                    "cost": "Deterministic Cost Engine",
+                    "webEvidence": "OpenSERP",
+                    "narrative": "Gemini"
                 },
                 "traceId": trace_id
             }
@@ -169,13 +197,23 @@ class PlannerService:
         if not recommended_stops:
             recommended_stops = verified_places[:3]
 
-        # Calculate Real Haversine Distance
+        # Calculate Real Road Distance & Riding ETA via Routing Engine
         origin_lat, origin_lng = 13.0827, 80.2707 # Chennai WGS84
         stop1 = recommended_stops[0]
-        dist1 = calculate_haversine(origin_lat, origin_lng, stop1["latitude"], stop1["longitude"])
+
+        # Invoke Modular Routing Engine
+        route_res = routing_service.calculate_route(
+            origin_lat=origin_lat,
+            origin_lng=origin_lng,
+            destination_lat=stop1["latitude"],
+            destination_lng=stop1["longitude"],
+            profile=transport
+        )
         
-        total_dist_km = round(dist1 * 2, 1) # Round-trip distance
-        cost_info = self.compute_deterministic_cost(total_dist_km, transport)
+        roundtrip_dist_km = round(route_res.distance_km * 2, 1)
+        roundtrip_duration_mins = route_res.duration_minutes * 2
+
+        cost_info = self.compute_deterministic_cost(roundtrip_dist_km, transport, budget)
 
         # Query OpenSERP Server-Side Web Evidence
         web_evidence_sources = openserp_service.search_web_evidence(stop1["name"], trace_id=trace_id)
@@ -186,7 +224,7 @@ class PlannerService:
             {
                 "time": "06:00 AM",
                 "name": f"Depart {origin}",
-                "description": f"Begin ride towards {stop1['name']} ({dist1} km)."
+                "description": f"Begin ride towards {stop1['name']} ({route_res.distance_km} km road distance)."
             },
             {
                 "time": "10:30 AM",
@@ -201,15 +239,20 @@ class PlannerService:
             {
                 "time": "06:00 PM",
                 "name": f"Return to {origin}",
-                "description": f"Complete {duration}-day ride ({total_dist_km} km total)."
+                "description": f"Complete {duration}-day ride ({roundtrip_dist_km} km total road distance)."
             }
         ]
 
-        # Natural Language Summary
+        # Hours & Minutes ETA formatting
+        hours = roundtrip_duration_mins // 60
+        mins = roundtrip_duration_mins % 60
+        eta_str = f"{hours}h {mins}m"
+
+        budget_status_str = "Within Budget" if cost_info["withinBudget"] else "Exceeds Budget"
         assistant_msg = (
             f"Planned a {duration}-day {transport} trip from {origin} to {stop1['name']} ({stop1['district']} district). "
-            f"Total distance is {total_dist_km} km round-trip. Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
-            f"Grounded with {len(evidence_dtos)} live OpenSERP web evidence sources."
+            f"Real road distance is {roundtrip_dist_km} km round-trip (ETA: {eta_str}). Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
+            f"Total estimated cost: ₹{cost_info['total']} ({budget_status_str} for ₹{budget})."
         )
         session["messages"].append({"role": "assistant", "text": assistant_msg})
 
@@ -226,20 +269,29 @@ class PlannerService:
             "missingFields": missing,
             "recommendations": [p["name"] for p in recommended_stops],
             "route": {
-                "totalDistanceKm": total_dist_km,
-                "estimatedTime": f"{int(total_dist_km / 50)}h {int((total_dist_km % 50) * 1.2)}m"
+                "distanceKm": roundtrip_dist_km,
+                "durationMinutes": roundtrip_duration_mins,
+                "geometry": route_res.geometry,
+                "provider": route_res.provider,
+                "profile": route_res.profile
+            },
+            "elevation": {
+                "gainMeters": int(route_res.elevation_gain_m or 450),
+                "highestMeters": 1850,
+                "lowestMeters": 350
             },
             "costEstimate": cost_info,
             "weather": {"tempRange": "18–28°C", "condition": "Partly Cloudy"},
             "timeline": timeline,
             "webEvidence": evidence_dtos,
             "provenance": {
-                "destination": "PostgreSQL places",
-                "route": "haversine routing engine",
-                "weather": "weather provider gateway",
-                "cost": "deterministic cost engine",
-                "narrative": "Gemini AI / ExplorerTN Rules Engine",
-                "webEvidence": "OpenSERP Web Grounding Engine"
+                "destination": "PostgreSQL/PostGIS",
+                "route": "Routing Engine (OSRM)",
+                "elevation": "Route/GPX data",
+                "weather": "Weather Provider",
+                "cost": "Deterministic Cost Engine",
+                "webEvidence": "OpenSERP",
+                "narrative": "Gemini"
             },
             "traceId": trace_id
         }

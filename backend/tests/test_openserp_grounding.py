@@ -38,4 +38,4 @@ def test_openserp_planner_endpoint_integration():
     
     assert "webEvidence" in data
     assert len(data["webEvidence"]) > 0
-    assert data["provenance"]["webEvidence"] == "OpenSERP Web Grounding Engine"
+    assert data["provenance"]["webEvidence"] == "OpenSERP"

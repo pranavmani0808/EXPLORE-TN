@@ -70,6 +70,6 @@ def test_copilot_data_provenance():
     data = res.json()["data"]
 
     assert "provenance" in data
-    assert data["provenance"]["destination"] == "PostgreSQL places"
-    assert data["provenance"]["route"] == "haversine routing engine"
-    assert data["provenance"]["cost"] == "deterministic cost engine"
+    assert data["provenance"]["destination"] == "PostgreSQL/PostGIS"
+    assert data["provenance"]["route"] == "Routing Engine (OSRM)"
+    assert data["provenance"]["cost"] == "Deterministic Cost Engine"
