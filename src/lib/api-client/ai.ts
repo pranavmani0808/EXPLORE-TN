@@ -1,14 +1,12 @@
 import { AIGenerationDTO } from "./types";
-
-const API_BASE_URL =
-  (typeof process !== "undefined" && (process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL)) ||
-  "http://localhost:8000";
+import { getApiBaseUrl } from "./config";
 
 export class AIApiRepository {
   static async generatePlaceDescription(placeName: string, district: string): Promise<AIGenerationDTO> {
     const traceId = `tr-${Date.now()}`;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/ai/place-description`, {
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/v1/ai/place-description`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ placeName, district, traceId }),
@@ -31,7 +29,8 @@ export class AIApiRepository {
   static async generateTripPlan(origin: string, destination: string, days: number): Promise<{ itinerary: string; tokens: number; traceId: string }> {
     const traceId = `tr-${Date.now()}`;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/ai/trip-plan`, {
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/v1/ai/trip-plan`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ origin, destination, days, traceId }),

@@ -1,13 +1,11 @@
 import { PlaceDTO, PlaceExploreCompositeDTO, HomeExperienceDTO, TripExperienceDTO } from "./types";
-
-const API_BASE_URL =
-  (typeof process !== "undefined" && (process.env.NEXT_PUBLIC_API_URL || process.env.VITE_API_URL)) ||
-  "http://localhost:8000";
+import { getApiBaseUrl } from "./config";
 
 export class PlaceApiRepository {
   static async fetchPlaces(category?: string): Promise<PlaceDTO[]> {
     try {
-      const url = new URL(`${API_BASE_URL}/api/v1/discover`);
+      const baseUrl = getApiBaseUrl();
+      const url = new URL(`${baseUrl}/api/v1/discover`);
       if (category && category !== "All") {
         url.searchParams.append("category", category);
       }
@@ -23,153 +21,102 @@ export class PlaceApiRepository {
 
   // Experience-Oriented BFF Endpoint 1: Screen-Level Home Bundle
   static async fetchHomeExperience(): Promise<HomeExperienceDTO> {
-    const traceId = `exp-home-${Date.now()}`;
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/experience/home`);
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/v1/places/experience/home`);
       if (res.ok) {
-        const data = await res.json();
-        return { ...data, traceId };
+        const payload = await res.json();
+        if (payload.data && payload.data.hero) {
+          return payload.data;
+        }
       }
     } catch (err) {
-      console.warn("[PlaceApiRepository] Home Experience API offline, fallback bundle:", err);
+      console.warn("[PlaceApiRepository] BFF Home Experience offline, falling back:", err);
     }
-
     return {
-      heroSpotlight: {
-        id: "p-kolli",
-        name: "Kolli Hills 70 Hairpin Pass",
-        slug: "kolli-hills",
-        district: "Namakkal",
-        city: "Semmedu",
-        category: "hills",
-        coordinates: { latitude: 11.2721, longitude: 78.3412 },
-        elevationMeters: 1300,
-        heroImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
-        rating: 4.9,
-        reviewCount: 312,
-        difficulty: "Hard",
+      hero: {
+        eyebrow: "Tamil Nadu Ghats & Coasts",
+        title: "Curated trails for the serious explorer.",
+        description: "From 70 hairpin bends in Kolli Hills to misty shola forests in Nilgiris.",
+        primaryAction: { label: "Explore 14 Districts", href: "/explore" },
+        secondaryAction: { label: "View Ghat Routes", href: "/routes" },
+        imageAsset: "/assets/hero-ghats.jpg",
       },
-      trendingPlaces: [],
-      popularRoutes: [
-        { id: "r-1", name: "Chennai → Kodaikanal Ghat Run", distance: "520 km", hairpins: 20 },
-        { id: "r-2", name: "Salem → Kolli Hills Loop", distance: "75 km", hairpins: 70 },
+      stats: [
+        { label: "Verified Places", value: "128+" },
+        { label: "Ghat Routes", value: "42" },
+        { label: "District Guides", value: "14" },
+        { label: "Community Scouts", value: "1,240" },
       ],
-      weatherAlerts: [
-        { district: "Nilgiris", message: "Monsoon rainfall heavy near Pykara Basin", severity: "High" },
+      curatedCollections: [
+        {
+          id: "col-1",
+          slug: "hairpin-bends",
+          title: "The 70 Hairpin Pass",
+          itemCount: 8,
+          coverImage: "/assets/cat-hairpin.jpg",
+          tagline: "Kolli Hills & Valparai ghat runs",
+        },
+        {
+          id: "col-2",
+          slug: "shola-waterfalls",
+          title: "High Altitude Waterfalls",
+          itemCount: 12,
+          coverImage: "/assets/cat-waterfalls.jpg",
+          tagline: "Post-monsoon cascades in Nilgiris & Theni",
+        },
       ],
-      communityStories: [
-        { id: "s-1", title: "Top 10 Secret Waterfalls in Theni", author: "Arun Kumar" },
-      ],
-      traceId,
     };
   }
 
-  // Experience-Oriented BFF Endpoint 2: Place Explore Composite
-  static async fetchPlaceExploreComposite(slug: string): Promise<PlaceExploreCompositeDTO> {
-    const traceId = `bff-${Date.now()}`;
+  // Experience-Oriented BFF Endpoint 2: Screen-Level Explore Unified Bundle
+  static async fetchExploreExperience(filters?: { district?: string; category?: string; query?: string }): Promise<PlaceExploreCompositeDTO> {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/experience/place/${slug}`);
+      const baseUrl = getApiBaseUrl();
+      const url = new URL(`${baseUrl}/api/v1/places/experience/explore`);
+      if (filters?.district) url.searchParams.append("district", filters.district);
+      if (filters?.category) url.searchParams.append("category", filters.category);
+      if (filters?.query) url.searchParams.append("query", filters.query);
+
+      const res = await fetch(url.toString());
       if (res.ok) {
-        const data = await res.json();
-        return { ...data, traceId };
+        const payload = await res.json();
+        if (payload.data && payload.data.nodes) {
+          return payload.data;
+        }
       }
     } catch (err) {
-      console.warn("[PlaceApiRepository] Place Experience API offline, fallback bundle:", err);
+      console.warn("[PlaceApiRepository] BFF Explore Experience offline:", err);
     }
 
     return {
-      place: {
-        id: `p-${slug}`,
-        name: slug.replace(/-/g, " ").toUpperCase(),
-        slug,
-        district: "Theni",
-        city: "Periyakulam",
-        category: "waterfalls",
-        coordinates: { latitude: 10.2381, longitude: 77.4892 },
-        elevationMeters: 1036,
-        heroImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
-        rating: 4.9,
-        reviewCount: 42,
-        difficulty: "Moderate",
+      nodes: [],
+      activeFilters: {
+        district: filters?.district || "All Districts",
+        category: filters?.category || "All Categories",
+        query: filters?.query || "",
       },
-      weather: {
-        temp: "22°C",
-        rain: "84 mm/h",
-        fog: "Moderate Mist",
-        status: "Active Watch",
-        microclimate: "Ghat Plateau Microclimate",
+      spatialExtent: {
+        center: [10.2381, 77.4892],
+        zoom: 7,
       },
-      reviews: [
-        { id: "r-1", user: "RiderKarthik", comment: "Gravel section near hairpin 4 after rain.", rating: 5 },
-      ],
-      nearby: [
-        { name: "Suruli Basin Viewpoint", distance: "2.4 km", type: "Viewpoint" },
-        { name: "Karavalli Fuel Stop", distance: "5.1 km", type: "Fuel" },
-      ],
-      aiSummary: {
-        text: "Verified ExplorerTN Guide: Steep climb requiring low gear. High water discharge during monsoon.",
-        tokenCount: 280,
-      },
-      routeInfo: { distanceKm: 520, hairpins: 20, ridingTime: "11 h" },
-      traceId,
     };
   }
 
-  // Experience-Oriented BFF Endpoint 3: Complete Trip Bundle
-  static async fetchTripExperience(tripId: string): Promise<TripExperienceDTO> {
-    const traceId = `exp-trip-${Date.now()}`;
+  // Experience-Oriented BFF Endpoint 3: Screen-Level Single Place Page DTO
+  static async fetchTripExperience(slug: string): Promise<TripExperienceDTO | null> {
     try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/experience/trip/${tripId}`);
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/v1/places/experience/trip/${slug}`);
       if (res.ok) {
-        const data = await res.json();
-        return { ...data, traceId };
+        const payload = await res.json();
+        if (payload.data && payload.data.place) {
+          return payload.data;
+        }
       }
     } catch (err) {
-      console.warn("[PlaceApiRepository] Trip Experience API offline, fallback bundle:", err);
+      console.warn(`[PlaceApiRepository] BFF Trip Experience offline for slug ${slug}:`, err);
     }
-
-    return {
-      tripId,
-      origin: "Chennai",
-      destination: "Kodaikanal",
-      itinerary: [
-        { day: 1, title: "Chennai to Dindigul Plains", places: ["Brihadeeswarar Temple"], fuelStops: ["IOC GST Station"] },
-        { day: 2, title: "Batlagundu Hairpin Climb to Kodaikanal Lake", places: ["Kodaikanal Lake", "Pambar Shola Stream"], fuelStops: ["Kodaikanal Town Station"] },
-      ],
-      gpxTrackUrl: "/tracks/chennai-kodaikanal.gpx",
-      emergencyContacts: [{ service: "Ghat Patrol Rescue", phone: "108" }],
-      weatherForecast: "22°C · Clear Sky on Summit Pass",
-      traceId,
-    };
-  }
-
-  static async createPlace(place: Partial<PlaceDTO>): Promise<{ success: boolean; place: PlaceDTO }> {
-    try {
-      const res = await fetch(`${API_BASE_URL}/api/v1/places`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(place),
-      });
-      if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      return { success: true, place: data.place };
-    } catch (err) {
-      console.warn("[PlaceApiRepository] Created locally in repository engine:", err);
-      const fallback: PlaceDTO = {
-        id: `place-${Date.now()}`,
-        name: place.name || "New Explorer Spot",
-        slug: (place.name || "place").toLowerCase().replace(/\s+/g, "-"),
-        district: place.district || "Theni",
-        city: place.city || "Periyakulam",
-        category: place.category || "waterfalls",
-        coordinates: place.coordinates || { latitude: 10.2381, longitude: 77.4892 },
-        elevationMeters: place.elevationMeters || 1036,
-        heroImage: place.heroImage || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?w=800&q=80",
-        rating: 4.9,
-        reviewCount: 1,
-        difficulty: "Moderate",
-      };
-      return { success: true, place: fallback };
-    }
+    return null;
   }
 }

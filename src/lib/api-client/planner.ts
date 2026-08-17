@@ -1,12 +1,4 @@
-function getApiBaseUrl(): string {
-  if (typeof window !== "undefined") {
-    const isLocalhost = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-    if (!isLocalhost) {
-      return window.location.origin;
-    }
-  }
-  return "http://localhost:8000";
-}
+import { getApiBaseUrl } from "./config";
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -25,12 +17,30 @@ export interface PlannerChatResponseDTO {
   missingFields: string[];
   recommendations: string[];
   route: {
-    totalDistanceKm: number;
-    estimatedTime: string;
+    distanceKm: number;
+    durationMinutes: number;
+    geometry: {
+      type: string;
+      coordinates: number[][];
+    };
+    provider: string;
+    profile: string;
+  };
+  elevation?: {
+    gainMeters: number;
+    highestMeters: number;
+    lowestMeters: number;
   };
   costEstimate: {
     fuelCost: string;
     numericFuelCost?: number;
+    fuel?: number;
+    food?: number;
+    tickets?: number;
+    parking?: number;
+    total?: number;
+    budget?: number;
+    withinBudget?: boolean;
     assumptions: string;
   };
   weather: {
@@ -42,11 +52,20 @@ export interface PlannerChatResponseDTO {
     name: string;
     description: string;
   }>;
+  webEvidence?: Array<{
+    title: string;
+    snippet: string;
+    url: string;
+    domain: string;
+    retrievedAt: string;
+  }>;
   provenance: {
     destination: string;
     route: string;
+    elevation: string;
     weather: string;
     cost: string;
+    webEvidence: string;
     narrative: string;
   };
   traceId: string;
@@ -54,7 +73,8 @@ export interface PlannerChatResponseDTO {
 
 export class PlannerApiRepository {
   static async sendChatMessage(message: string, conversationId?: string): Promise<PlannerChatResponseDTO> {
-    const response = await fetch(`${API_BASE_URL}/api/v1/planner/chat`, {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/v1/planner/chat`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ message, conversationId }),
@@ -63,7 +83,7 @@ export class PlannerApiRepository {
     if (!response.ok) {
       const errBody = await response.json().catch(() => ({}));
       const traceId = errBody?.error?.traceId || response.headers.get("X-Trace-ID") || `tr-err-${Date.now()}`;
-      const msg = errBody?.error?.message || `Planner API error ${response.status}`;
+      const msg = errBody?.error?.message || `Planner API error HTTP ${response.status}`;
       throw new Error(`[TraceID: ${traceId}] ${msg}`);
     }
 
