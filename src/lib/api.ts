@@ -26,6 +26,17 @@ export async function checkBackendHealth(): Promise<boolean> {
   }
 }
 
+export async function fetchRealtimeBackendTelemetry() {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/v1/admin/telemetry`);
+    if (!response.ok) throw new Error(`HTTP error ${response.status}`);
+    const body = await response.json();
+    return body.data;
+  } catch {
+    return null;
+  }
+}
+
 export async function fetchAutocompleteSuggestions(query: string) {
   if (!query.trim()) return [];
   try {

@@ -8,6 +8,7 @@ class Settings(BaseSettings):
     
     # Database Settings
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/explorer_tn"
+    REDIS_URL: str = "redis://localhost:6379/0"
     
     # Security & JWT
     SUPABASE_JWT_SECRET: str = "super-secret-jwt-key-explorer-tn-production"

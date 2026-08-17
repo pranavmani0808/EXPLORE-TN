@@ -28,18 +28,23 @@ class PlaceCreate(BaseModel):
             raise ValueError(f"Longitude {v}°E falls outside Tamil Nadu WGS84 bounds ({TN_MIN_LNG}°E - {TN_MAX_LNG}°E).")
         return v
 
+class PlaceFeedbackCreate(BaseModel):
+    isAccurate: bool = True
+    issueCategory: Optional[str] = "road_condition"
+    comments: Optional[str] = None
+
 class PlaceResponse(BaseModel):
     id: str
     slug: str
     name: str
     district: str
     category: str
-    tagline: Optional[str]
-    description: Optional[str]
+    tagline: Optional[str] = None
+    description: Optional[str] = None
     latitude: float
     longitude: float
-    elevation: Optional[str]
-    verified: bool
+    elevation: Optional[str] = None
+    verified: bool = False
     createdBy: str
     verifiedBy: Optional[str] = None
     verifiedAt: Optional[str] = None

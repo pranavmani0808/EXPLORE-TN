@@ -1,8 +1,12 @@
 -- ==============================================================================
--- EXPLORERTN RBAC & AUDIT LOG SCHEME FOR SUPABASE POSTGRESQL + POSTGIS
+-- EXPLORERTN PRODUCTION POSTGRESQL + POSTGIS SPATIAL ARCHITECTURE
 -- ==============================================================================
 
--- 1. Create Enums for Platform Roles & User Status
+-- 0. Enable Required Extensions
+CREATE EXTENSION IF NOT EXISTS postgis;
+CREATE EXTENSION IF NOT EXISTS pg_trgm;
+
+-- 1. Create Enums for Platform Roles, User Status, Audit Actions & Place Lifecycle
 CREATE TYPE user_role AS ENUM (
   'explorer',
   'place_manager',
@@ -15,6 +19,14 @@ CREATE TYPE user_status AS ENUM (
   'active',
   'suspended',
   'pending'
+);
+
+CREATE TYPE place_lifecycle_state AS ENUM (
+  'DRAFT',
+  'SUBMITTED',
+  'QA_REVIEW',
+  'VERIFIED',
+  'PUBLISHED'
 );
 
 CREATE TYPE audit_action AS ENUM (
@@ -45,14 +57,11 @@ CREATE TABLE IF NOT EXISTS public.users (
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Index for fast RBAC lookups
 CREATE INDEX idx_users_role ON public.users(role);
 CREATE INDEX idx_users_email ON public.users(email);
 
--- Enable RLS on users
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
 
--- RLS Policies for Users
 CREATE POLICY "Public profiles are viewable by authenticated users"
   ON public.users FOR SELECT
   USING (auth.role() = 'authenticated');
@@ -70,14 +79,14 @@ CREATE POLICY "Super Admins can manage all users"
     )
   );
 
--- 3. Create Audit Logs Table
+-- 3. Create Audit Logs Table (STRICTLY APPEND-ONLY)
 CREATE TABLE IF NOT EXISTS public.audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   actor_id UUID REFERENCES public.users(id) ON DELETE SET NULL,
   actor_name TEXT NOT NULL,
   actor_role user_role NOT NULL,
   action audit_action NOT NULL,
-  entity_type TEXT NOT NULL, -- e.g. 'user', 'place', 'route', 'media', 'review'
+  entity_type TEXT NOT NULL,
   entity_id TEXT NOT NULL,
   entity_name TEXT NOT NULL,
   description TEXT,
@@ -86,12 +95,10 @@ CREATE TABLE IF NOT EXISTS public.audit_logs (
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
--- Index for audit search & timeline query
 CREATE INDEX idx_audit_logs_actor ON public.audit_logs(actor_id);
 CREATE INDEX idx_audit_logs_entity ON public.audit_logs(entity_type, entity_id);
 CREATE INDEX idx_audit_logs_created ON public.audit_logs(created_at DESC);
 
--- Enable RLS on audit_logs
 ALTER TABLE public.audit_logs ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Audit logs viewable by staff & super admins"
@@ -107,7 +114,9 @@ CREATE POLICY "Audit logs insertable by authenticated users"
   ON public.audit_logs FOR INSERT
   WITH CHECK (auth.role() = 'authenticated');
 
--- 4. Create Places Table
+-- Reject UPDATE & DELETE on audit_logs for ordinary application roles (Append-only immutability)
+
+-- 4. Create Places Table with PostGIS Geography (Point, 4326)
 CREATE TABLE IF NOT EXISTS public.places (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT UNIQUE NOT NULL,
@@ -119,19 +128,35 @@ CREATE TABLE IF NOT EXISTS public.places (
   latitude DOUBLE PRECISION NOT NULL,
   longitude DOUBLE PRECISION NOT NULL,
   elevation TEXT,
+  status place_lifecycle_state NOT NULL DEFAULT 'DRAFT',
   verified BOOLEAN NOT NULL DEFAULT FALSE,
+  location GEOMETRY(Point, 4326),
+  version INTEGER NOT NULL DEFAULT 1,
   created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  CONSTRAINT check_tn_wgs84_bounds CHECK (
+    latitude >= 8.0 AND latitude <= 13.6 AND
+    longitude >= 76.0 AND longitude <= 80.5
+  )
 );
+
+-- PostGIS GiST Spatial Index & B-Tree Indexes
+CREATE INDEX IF NOT EXISTS idx_places_location_gist ON public.places USING GIST(location);
+CREATE INDEX IF NOT EXISTS idx_places_slug ON public.places(slug);
+CREATE INDEX IF NOT EXISTS idx_places_district ON public.places(district);
+CREATE INDEX IF NOT EXISTS idx_places_category ON public.places(category);
+CREATE INDEX IF NOT EXISTS idx_places_status ON public.places(status);
+CREATE INDEX IF NOT EXISTS idx_places_trgm_name ON public.places USING GIN(name gin_trgm_ops);
 
 ALTER TABLE public.places ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Places are viewable by anyone"
+CREATE POLICY "Published places viewable by anyone"
   ON public.places FOR SELECT
-  USING (TRUE);
+  USING (deleted_at IS NULL AND (status = 'PUBLISHED' OR verified = TRUE));
 
-CREATE POLICY "Place Managers & Super Admins can insert/update places"
+CREATE POLICY "Place Managers & Super Admins can manage places"
   ON public.places FOR ALL
   USING (
     EXISTS (
@@ -140,7 +165,7 @@ CREATE POLICY "Place Managers & Super Admins can insert/update places"
     )
   );
 
--- 5. Create Routes Table
+-- 5. Create Routes Table with PostGIS LineString (LineString, 4326)
 CREATE TABLE IF NOT EXISTS public.routes (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   slug TEXT UNIQUE NOT NULL,
@@ -148,17 +173,23 @@ CREATE TABLE IF NOT EXISTS public.routes (
   district TEXT NOT NULL,
   difficulty TEXT NOT NULL,
   distance_km DOUBLE PRECISION NOT NULL,
+  elevation_gain_m DOUBLE PRECISION NOT NULL DEFAULT 0,
+  path GEOMETRY(LineString, 4326),
   verified BOOLEAN NOT NULL DEFAULT FALSE,
   created_by UUID REFERENCES public.users(id) ON DELETE SET NULL,
+  deleted_at TIMESTAMPTZ DEFAULT NULL,
   created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE INDEX IF NOT EXISTS idx_routes_path_gist ON public.routes USING GIST(path);
+CREATE INDEX IF NOT EXISTS idx_routes_slug ON public.routes(slug);
 
 ALTER TABLE public.routes ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Routes are viewable by anyone"
   ON public.routes FOR SELECT
-  USING (TRUE);
+  USING (deleted_at IS NULL);
 
 CREATE POLICY "Route Managers & Super Admins can manage routes"
   ON public.routes FOR ALL
@@ -169,11 +200,12 @@ CREATE POLICY "Route Managers & Super Admins can manage routes"
     )
   );
 
--- 6. RPC Function to Get Live Dashboard Telemetry Counts
+-- 6. RPC Function to Get Live Dashboard Telemetry Counts (with SECURITY DEFINER search_path)
 CREATE OR REPLACE FUNCTION public.get_dashboard_telemetry()
 RETURNS JSONB
 LANGUAGE plpgsql
 SECURITY DEFINER
+SET search_path = public, pg_temp
 AS $$
 DECLARE
   v_users_count INT;
@@ -186,10 +218,10 @@ DECLARE
 BEGIN
   SELECT COUNT(*) INTO v_users_count FROM public.users;
   SELECT COUNT(*) INTO v_active_today FROM public.users WHERE last_login >= NOW() - INTERVAL '24 hours';
-  SELECT COUNT(*) INTO v_places_count FROM public.places;
-  SELECT COUNT(*) INTO v_verified_places FROM public.places WHERE verified = TRUE;
-  SELECT COUNT(*) INTO v_pending_places FROM public.places WHERE verified = FALSE;
-  SELECT COUNT(*) INTO v_routes_count FROM public.routes;
+  SELECT COUNT(*) INTO v_places_count FROM public.places WHERE deleted_at IS NULL;
+  SELECT COUNT(*) INTO v_verified_places FROM public.places WHERE verified = TRUE AND deleted_at IS NULL;
+  SELECT COUNT(*) INTO v_pending_places FROM public.places WHERE verified = FALSE AND deleted_at IS NULL;
+  SELECT COUNT(*) INTO v_routes_count FROM public.routes WHERE deleted_at IS NULL;
   SELECT COUNT(*) INTO v_audit_count FROM public.audit_logs;
 
   RETURN jsonb_build_object(
@@ -208,7 +240,9 @@ $$;
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER
 LANGUAGE plpgsql
-SECURITY DEFINER AS $$
+SECURITY DEFINER
+SET search_path = public, pg_temp
+AS $$
 BEGIN
   INSERT INTO public.users (id, name, email, avatar_url, role, explorer_rank, xp)
   VALUES (
@@ -227,7 +261,6 @@ BEGIN
 END;
 $$;
 
--- Drop trigger if exists and recreate
 DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
 CREATE TRIGGER on_auth_user_created
   AFTER INSERT ON auth.users

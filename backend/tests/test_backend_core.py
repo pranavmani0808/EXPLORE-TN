@@ -95,3 +95,13 @@ def test_self_approval_restriction():
 
     # Clean up dependency override
     app.dependency_overrides.clear()
+
+# 6. Test Error Envelope Standard Format
+def test_error_envelope_formatting():
+    res = client.get("/api/v1/places/non-existent-id-9999")
+    assert res.status_code == 404
+    body = res.json()
+    assert "error" in body
+    assert "code" in body["error"]
+    assert "message" in body["error"]
+    assert "traceId" in body["error"]

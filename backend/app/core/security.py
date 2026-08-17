@@ -33,8 +33,18 @@ ROLE_PERMISSIONS: dict[str, Set[str]] = {
     }
 }
 
+class UnauthorizedException(APIException):
+    def __init__(self, message: str = "Invalid, tampered, or expired JWT authentication token."):
+        super().__init__(
+            status_code=401,
+            code="UNAUTHORIZED",
+            message=message,
+            details={"type": "AuthenticationError"}
+        )
+
 def decode_supabase_jwt(authorization: Optional[str] = Header(None)) -> UserContext:
     if not authorization or not authorization.startswith("Bearer "):
+        # Dev fallback when no authorization header is provided
         return UserContext(
             id="usr-1",
             name="Pranav",
@@ -56,13 +66,8 @@ def decode_supabase_jwt(authorization: Optional[str] = Header(None)) -> UserCont
             email=payload.get("email", "explorer@exploretn.com"),
             role=payload.get("app_metadata", {}).get("role", "explorer")
         )
-    except Exception:
-        return UserContext(
-            id="usr-1",
-            name="Pranav",
-            email="pranavviper7@gmail.com",
-            role="super_admin"
-        )
+    except Exception as err:
+        raise UnauthorizedException(f"Invalid or expired JWT token: {str(err)}")
 
 def check_permission(required_permission: str):
     def permission_checker(current_user: UserContext = Depends(decode_supabase_jwt)) -> UserContext:
