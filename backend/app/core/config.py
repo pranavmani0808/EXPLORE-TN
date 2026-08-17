@@ -1,5 +1,6 @@
+import os
 from pydantic_settings import BaseSettings
-from typing import List
+from typing import List, Optional
 
 class Settings(BaseSettings):
     PROJECT_NAME: str = "ExplorerTN Backend Core"
@@ -14,6 +15,12 @@ class Settings(BaseSettings):
     SUPABASE_JWT_SECRET: str = "super-secret-jwt-key-explorer-tn-production"
     ALGORITHM: str = "HS256"
     
+    # AI API Configuration
+    AI_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
+    OPENROUTER_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
+    GEMINI_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
+    VITE_AI_API_KEY: Optional[str] = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
+
     # CORS Origins
     CORS_ORIGINS: List[str] = [
         "http://localhost:3000",
@@ -29,5 +36,6 @@ class Settings(BaseSettings):
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"
 
 settings = Settings()
