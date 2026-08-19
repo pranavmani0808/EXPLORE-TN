@@ -3,7 +3,7 @@ import { CANONICAL_PLACES, ExplorerPlace, PlaceCategory } from "@/lib/data/canon
 import { MapPin, Star, ShieldCheck, ExternalLink, X, Search, Sparkles, Filter, Navigation, Compass } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { LocationExplorerPanel } from "@/components/site/location-explorer-panel";
+import { LocationMiniExplorer } from "@/components/site/location-mini-explorer";
 
 export function DedicatedMapModal({
   isOpen,
@@ -251,20 +251,19 @@ export function DedicatedMapModal({
         ))}
       </div>
 
-      {/* Location Explorer Panel (Left Overlay when Location/Place is selected) */}
+      {/* Contextual Location Mini-Explorer (Bottom-Right Sliding Panel) */}
       {selectedPlace && (
-        <div className="absolute top-28 left-5 bottom-6 w-80 sm:w-[420px] z-40 pointer-events-auto animate-in slide-in-from-left duration-300">
-          <LocationExplorerPanel
-            location={selectedPlace}
-            onClose={() => setSelectedPlace(null)}
-            onSelectPlaceOnMap={(place) => {
-              setSelectedPlace(place);
-              if (leafletMapRef.current) {
-                leafletMapRef.current.flyTo([place.latitude, place.longitude], 12, { animate: true, duration: 1.0 });
-              }
-            }}
-          />
-        </div>
+        <LocationMiniExplorer
+          location={selectedPlace}
+          isOpen={true}
+          onClose={() => setSelectedPlace(null)}
+          onSelectPlaceOnMap={(place) => {
+            setSelectedPlace(place);
+            if (leafletMapRef.current) {
+              leafletMapRef.current.flyTo([place.latitude, place.longitude], 11, { animate: true, duration: 1.0 });
+            }
+          }}
+        />
       )}
     </div>
   );
