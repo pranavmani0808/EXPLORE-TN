@@ -3,6 +3,7 @@ import { CANONICAL_PLACES, ExplorerPlace, PlaceCategory } from "@/lib/data/canon
 import { MapPin, Star, ShieldCheck, ExternalLink, X, Search, Sparkles, Filter, Navigation, Compass } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { LocationExplorerPanel } from "@/components/site/location-explorer-panel";
 
 export function DedicatedMapModal({
   isOpen,
@@ -121,12 +122,15 @@ export function DedicatedMapModal({
         iconAnchor: [13, 13],
       });
 
-      const marker = L.marker([place.latitude, place.longitude], { icon: customIcon }).addTo(map);
+      const marker = L.marker([place.latitude, place.longitude], {
+        icon: customIcon,
+        zIndexOffset: isSelected ? 1000 : 100,
+      }).addTo(map);
 
-      // Decluttered tooltip positioning
+      // Smart auto-directional decluttered tooltip positioning
       marker.bindTooltip(place.canonicalName || place.name, {
         permanent: isSelected,
-        direction: "top",
+        direction: "auto",
         offset: [0, -12],
         className: "custom-decluttered-map-tooltip",
       });
@@ -247,79 +251,19 @@ export function DedicatedMapModal({
         ))}
       </div>
 
-      {/* Selected Place Card (Bottom Overlay) */}
+      {/* Location Explorer Panel (Left Overlay when Location/Place is selected) */}
       {selectedPlace && (
-        <div className="absolute bottom-6 left-5 right-5 sm:left-auto sm:right-6 sm:w-[420px] z-40 pointer-events-auto animate-in slide-in-from-bottom duration-300">
-          <div className="rounded-3xl border border-white/15 bg-[#121821]/95 backdrop-blur-2xl p-5 text-white shadow-2xl">
-            <div className="relative h-40 w-full rounded-2xl overflow-hidden mb-4 bg-slate-900">
-              <img
-                src={selectedPlace.image}
-                alt={selectedPlace.name}
-                className="h-full w-full object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-[#121821] via-transparent to-transparent" />
-              <div className="absolute top-3 left-3 flex items-center gap-2">
-                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500 text-black uppercase font-mono">
-                  {selectedPlace.primaryCategory}
-                </span>
-                {selectedPlace.verified && (
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-blue-500/90 text-white flex items-center gap-1 backdrop-blur-md">
-                    <ShieldCheck className="w-3 h-3" /> Verified
-                  </span>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-3">
-              <div>
-                <div className="flex items-center justify-between">
-                  <h3 className="font-display text-lg font-bold text-white">{selectedPlace.name}</h3>
-                  {selectedPlace.rating && (
-                    <div className="flex items-center gap-1 text-xs font-bold text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded-md border border-amber-400/20">
-                      <Star className="w-3.5 h-3.5 fill-amber-400" />
-                      <span>{selectedPlace.rating}</span>
-                    </div>
-                  )}
-                </div>
-                <p className="text-xs text-slate-400 mt-0.5 flex items-center gap-1">
-                  <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span>
-                    {selectedPlace.district}, {selectedPlace.state}, {selectedPlace.country}
-                  </span>
-                </p>
-              </div>
-
-              <p className="text-xs text-slate-300 leading-relaxed line-clamp-2">
-                {selectedPlace.description}
-              </p>
-
-              {/* Action Buttons */}
-              <div className="grid grid-cols-2 gap-2 pt-2 border-t border-white/10">
-                <Button
-                  size="sm"
-                  onClick={() => handlePlanTrip(selectedPlace)}
-                  className="rounded-xl text-xs font-bold bg-emerald-500 hover:bg-emerald-400 text-black shadow-md"
-                >
-                  <Sparkles className="w-3.5 h-3.5 mr-1" /> Plan Trip
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    if (leafletMapRef.current) {
-                      leafletMapRef.current.flyTo([selectedPlace.latitude, selectedPlace.longitude], 14, {
-                        animate: true,
-                        duration: 1.0,
-                      });
-                    }
-                  }}
-                  className="rounded-xl text-xs font-semibold border-white/15 text-white hover:bg-white/10"
-                >
-                  <Navigation className="w-3.5 h-3.5 mr-1 text-emerald-400" /> Zoom to Location
-                </Button>
-              </div>
-            </div>
-          </div>
+        <div className="absolute top-28 left-5 bottom-6 w-80 sm:w-[420px] z-40 pointer-events-auto animate-in slide-in-from-left duration-300">
+          <LocationExplorerPanel
+            location={selectedPlace}
+            onClose={() => setSelectedPlace(null)}
+            onSelectPlaceOnMap={(place) => {
+              setSelectedPlace(place);
+              if (leafletMapRef.current) {
+                leafletMapRef.current.flyTo([place.latitude, place.longitude], 12, { animate: true, duration: 1.0 });
+              }
+            }}
+          />
         </div>
       )}
     </div>
