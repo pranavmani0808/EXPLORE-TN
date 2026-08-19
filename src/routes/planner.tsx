@@ -40,19 +40,19 @@ export const Route = createFileRoute("/planner")({
       {
         name: "description",
         content:
-          "Describe your weekend and get a Tamil Nadu itinerary with interactive road route map, distance, travel time, fuel cost, weather and packing list.",
+          "Describe your trip and get a verified itinerary with interactive road route map, distance, travel time, fuel cost, weather and packing list.",
       },
       { property: "og:title", content: "AI Trip Planner — ExplorerTN" },
       {
         property: "og:description",
-        content: "Itinerary, interactive road route map, budget, fuel and packing list for your next Tamil Nadu ride.",
+        content: "Itinerary, interactive road route map, budget, fuel and packing list for your next journey.",
       },
     ],
   }),
   component: PlannerPage,
 });
 
-// Well-known coordinates for map positioning fallbacks
+// Well-known canonical coordinates for map positioning fallbacks
 const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string }> = {
   madurai: { lat: 9.9252, lng: 78.1198, desc: "Meenakshi Amman Temple & Heritage City" },
   ooty: { lat: 11.4102, lng: 76.6950, desc: "Queen of Hill Stations (Nilgiris)" },
@@ -81,13 +81,14 @@ export function PlannerPage() {
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
       role: "assistant",
-      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'trip from chennai to madurai at 11 pm' or 'Plan a Paragliding trip to Bir Billing').",
+      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan a River Rafting trip to Rishikesh', 'Plan a Paragliding trip to Bir Billing', or 'trip from Chennai to Madurai').",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const initializedRef = useRef(false);
+  const activeRequestIdRef = useRef<string | null>(null);
 
   // Dynamic Route & Planner Response State
   const [plannerData, setPlannerData] = useState<PlannerChatResponseDTO | null>(null);
@@ -108,11 +109,24 @@ export function PlannerPage() {
     if (urlPrompt) {
       initializedRef.current = true;
       setErrorMsg(null);
-      setMessages((prev) => [...prev, { role: "user", text: urlPrompt }]);
+      
+      const requestId = crypto.randomUUID();
+      activeRequestIdRef.current = requestId;
+
+      setMessages([
+        {
+          role: "assistant",
+          text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests.",
+        },
+        { role: "user", text: urlPrompt },
+      ]);
       setLoading(true);
 
-      PlannerApiRepository.sendChatMessage(urlPrompt, conversationId)
+      // Start fresh session for explicit URL prompt to prevent state contamination
+      PlannerApiRepository.sendChatMessage(urlPrompt, undefined)
         .then((res: PlannerChatResponseDTO) => {
+          if (activeRequestIdRef.current !== requestId) return; // Prevent Stale Async Responses
+
           setConversationId(res.conversationId);
           setPlannerData(res);
           setMessages((prev) => [...prev, { role: "assistant", text: res.message }]);
@@ -121,9 +135,12 @@ export function PlannerPage() {
           }
         })
         .catch((err: any) => {
+          if (activeRequestIdRef.current !== requestId) return;
           setErrorMsg(err?.message || "Trip Copilot is temporarily unavailable.");
         })
-        .finally(() => setLoading(false));
+        .finally(() => {
+          if (activeRequestIdRef.current === requestId) setLoading(false);
+        });
     }
   }, []);
 
@@ -134,20 +151,26 @@ export function PlannerPage() {
     const userText = input.trim();
     setInput("");
     setErrorMsg(null);
+
+    const requestId = crypto.randomUUID();
+    activeRequestIdRef.current = requestId;
+
     setMessages((prev) => [...prev, { role: "user", text: userText }]);
     setLoading(true);
 
     try {
       const res: PlannerChatResponseDTO = await PlannerApiRepository.sendChatMessage(userText, conversationId);
+      if (activeRequestIdRef.current !== requestId) return; // Prevent Stale Async Responses
+
       setConversationId(res.conversationId);
       setPlannerData(res);
-      
       setMessages((prev) => [...prev, { role: "assistant", text: res.message }]);
 
       if (res.timeline && res.timeline.length > 0) {
         setTimeline(res.timeline);
       }
     } catch (err: any) {
+      if (activeRequestIdRef.current !== requestId) return;
       const msg = err?.message || "Trip Copilot is temporarily unavailable.";
       setErrorMsg(msg);
       setMessages((prev) => [
@@ -158,7 +181,7 @@ export function PlannerPage() {
         },
       ]);
     } finally {
-      setLoading(false);
+      if (activeRequestIdRef.current === requestId) setLoading(false);
     }
   };
 
@@ -167,7 +190,7 @@ export function PlannerPage() {
   const mapRoutePoints: Array<[number, number]> = rawCoords.map(([lng, lat]) => [lat, lng]);
 
   const originName = plannerData?.plannerState?.origin || "Chennai";
-  const destName = plannerData?.plannerState?.destination || "Madurai";
+  const destName = plannerData?.plannerState?.destination || "Destination";
   const overnightTravel = plannerData?.plannerState?.overnightTravel || false;
 
   const originCityKey = originName.toLowerCase();
@@ -279,7 +302,7 @@ export function PlannerPage() {
 
           {/* Right Column: Route Map & Feasibility Overview */}
           <div className="space-y-6 lg:col-span-6">
-            {/* Interactive OSRM Route Mapcn */}
+            {/* Interactive OSRM Route Map */}
             <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-900 shadow-sm relative h-[320px]">
               <Map center={[centerLat, centerLng]} zoom={mapZoom} className="size-full">
                 <MapControls />

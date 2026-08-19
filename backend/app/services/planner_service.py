@@ -10,6 +10,7 @@ from backend.app.services.intelligence.trip_intent import intent_extractor, Stru
 from backend.app.services.intelligence.trip_validator import trip_validator
 from backend.app.services.intelligence.route_validator import route_sanity_validator
 from backend.app.core.config import settings
+from backend.app.core.logger import structured_logger
 
 class PlannerState(BaseModel):
     origin: Optional[str] = "Chennai"
@@ -170,29 +171,27 @@ class PlannerService:
     def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str) -> dict:
         cid, session = self.get_or_create_conversation(conversation_id)
         
-        # 1. Independently parse current turn's intent & entities against previous clean state
         prev_state = session["state"]
         structured_intent = intent_extractor.extract_intent(user_message, prev_state)
         intent_type = structured_intent.intentCategory
 
-        if intent_type == "GREETING":
+        structured_logger.info(f"[TripCopilot] User request: '{user_message}'", trace_id=trace_id)
+
+        if structured_intent.intentCategory == "GREETING":
+            greeting_msg = (
+                "Hi! I am your ExplorerTN Trip Copilot. Tell me your starting city, budget, "
+                "or where you want to travel (e.g., 'Plan a River Rafting trip to Rishikesh', 'trip from Chennai to Madurai', or 'Plan a Paragliding trip to Bir Billing')."
+            )
             session["messages"].append({"role": "user", "text": user_message})
-            greeting_text = "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan a bike trip to Madurai')."
-            session["messages"].append({"role": "assistant", "text": greeting_text})
-            
+            session["messages"].append({"role": "assistant", "text": greeting_msg})
             return {
                 "conversationId": cid,
-                "message": greeting_text,
+                "message": greeting_msg,
                 "intent": "GREETING",
                 "plannerState": session["state"],
-                "missingFields": ["origin", "destination"],
-                "recommendations": [],
-                "route": {
-                    "distanceKm": 0.0,
-                    "durationMinutes": 0,
-                    "geometry": {"type": "LineString", "coordinates": []},
-                    "provider": "OSRM Routing Engine"
-                },
+                "missingFields": ["destination"],
+                "recommendations": ["Rishikesh", "Goa", "Madurai", "Ooty"],
+                "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
                 "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
                 "costEstimate": {
                     "fuelCost": "₹0",
@@ -205,32 +204,24 @@ class PlannerService:
                 "timeline": [],
                 "webEvidence": [],
                 "decisionFacts": {},
-                "validation": {"destinationMatch": True, "durationFeasible": True, "budgetFeasible": True, "warnings": []},
-                "provenance": {
-                    "destination": "PostgreSQL/PostGIS",
-                    "route": "Routing Engine (OSRM)",
-                    "elevation": "Route/GPX data",
-                    "weather": "Weather Provider",
-                    "cost": "Deterministic Cost Engine",
-                    "webEvidence": "OpenSERP",
-                    "narrative": "Gemini"
-                },
+                "validation": {"destinationMatch": False, "durationFeasible": True, "budgetFeasible": True, "warnings": []},
+                "provenance": {},
                 "traceId": trace_id
             }
 
         all_places = places_service.get_all_places()
         verified_places = [p for p in all_places if p.get("verified", True)]
 
-        # 2. State Mutation & Destination Resolution (BUG 3, 4, 5, 8 FIX)
         target_dest_name = structured_intent.destination or prev_state.get("destination") or "Madurai"
         resolved_dest_place = self.resolve_place_by_name(target_dest_name, verified_places)
 
-        # If user explicitly requested a NEW place in this turn and it failed resolution:
-        # DO NOT update session["state"] with the bad string! Return clarification and keep state clean!
+        dest_name_log = resolved_dest_place.get('name') if resolved_dest_place else 'Unresolved'
+        structured_logger.info(f"[DestinationResolver] Resolved canonical destination: {dest_name_log}", trace_id=trace_id)
+
         if structured_intent.destination and structured_intent.intentCategory not in ["FOOD_DISCOVERY", "ADD_STOP"] and not resolved_dest_place:
             clarification_msg = (
-                f"I couldn't confidently locate '{structured_intent.destination}' in my Tamil Nadu place database. "
-                f"Did you mean Madurai, Ooty, Kodaikanal, or Thirupparankundram?"
+                f"I couldn't confidently locate '{structured_intent.destination}' in my place database. "
+                f"Did you mean Rishikesh, Goa, Madurai, Ooty, or Bir Billing?"
             )
             session["messages"].append({"role": "user", "text": user_message})
             session["messages"].append({"role": "assistant", "text": clarification_msg})
@@ -239,9 +230,9 @@ class PlannerService:
                 "conversationId": cid,
                 "message": clarification_msg,
                 "intent": "CLARIFICATION_REQUIRED",
-                "plannerState": session["state"], # State stays 100% clean, untainted by failed query!
+                "plannerState": session["state"],
                 "missingFields": ["destination"],
-                "recommendations": ["Madurai", "Ooty", "Kodaikanal"],
+                "recommendations": ["Rishikesh", "Goa", "Madurai", "Ooty"],
                 "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
                 "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
                 "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": prev_state.get("budget") or 10000.0, "withinBudget": True, "assumptions": "N/A"},
@@ -254,11 +245,9 @@ class PlannerService:
                 "traceId": trace_id
             }
 
-        # Destination resolved successfully (or fell back to clean state)
         if not resolved_dest_place:
             resolved_dest_place = {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198}
 
-        # 3. Construct Clean Mutated State (BUG 5 FIX)
         merged_state = dict(prev_state)
         merged_state["destination"] = resolved_dest_place["name"]
         merged_state["origin"] = structured_intent.origin or prev_state.get("origin") or "Chennai"
@@ -267,25 +256,11 @@ class PlannerService:
         merged_state["departureTime"] = structured_intent.departureTime or prev_state.get("departureTime") or "06:00"
         merged_state["overnightTravel"] = structured_intent.overnightTravel or prev_state.get("overnightTravel", False)
         merged_state["interests"] = structured_intent.interests
-        
+        merged_state["trail"] = structured_intent.trail
+        merged_state["waypoints"] = structured_intent.waypoints
+
         if structured_intent.budget is not None:
             merged_state["budget"] = structured_intent.budget
-            
-        if structured_intent.trail:
-            merged_state["trail"] = structured_intent.trail
-
-        # Waypoint mutations
-        existing_wps = list(prev_state.get("waypoints", []))
-        for wp in structured_intent.waypoints:
-            if wp not in existing_wps and wp != resolved_dest_place["name"] and wp != merged_state["origin"]:
-                existing_wps.append(wp)
-        merged_state["waypoints"] = existing_wps
-
-        # Interest mutations
-        merged_interests = set(prev_state.get("interests", []))
-        for inter in structured_intent.interests:
-            merged_interests.add(inter)
-        merged_state["interests"] = list(merged_interests)
 
         # Food Spot Population (BUG 7 FIX)
         food_spots = self.get_local_food_spots(resolved_dest_place["name"])

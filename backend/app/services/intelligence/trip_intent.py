@@ -115,7 +115,8 @@ class IntentExtractor:
             "arupadai", "arupadai veedu", "six murugan", "6 murugan",
             "six abodes", "murugan circuit", "sacred murugan circuit", "all six abodes"
         ]
-        if any(kw in lower for kw in EXPLICIT_TRAIL_KEYWORDS) and intent_category != "GREETING":
+        has_explicit_trail = any(kw in lower for kw in EXPLICIT_TRAIL_KEYWORDS)
+        if has_explicit_trail and intent_category != "GREETING":
             trail = "arupadai-veedu"
             intent_category = "ARUPADAI_VEEDU_TRAIL"
             interests.add("spiritual")
@@ -146,16 +147,18 @@ class IntentExtractor:
             departure_time = "23:00"
             overnight_travel = True
 
-        # 4. Adventure Activity & Destination Direct Matching
+        # 4. Explicit Destination Override Rule
+        explicit_dest = None
+
+        # A. Check adventure destinations dictionary
         for adv_key, adv_name in cls.ADVENTURE_DESTINATIONS.items():
-            if adv_key in lower and not trail:
-                destination = adv_name
+            if adv_key in lower:
+                explicit_dest = adv_name
                 interests.add("adventure")
                 break
 
-        # 5. Pattern-based Origin & Destination Extraction
-        if not is_food_query and intent_category in ["PLAN_TRIP", "ADD_STOP"]:
-            # Clean prompt string by removing adventure action prefixes (e.g. "plan a surfing trip to goa, goa" -> "plan trip to goa")
+        # B. Check pattern-based origin & destination extraction
+        if not explicit_dest and not is_food_query and intent_category in ["PLAN_TRIP", "ADD_STOP"]:
             cleaned_lower = re.sub(
                 r"plan\s+a?\s*(?:surfing|paragliding|skydiving|scuba|scuba\s+diving|kayaking|river\s+rafting|rafting|hot-air\s+balloon|gondola|gondola\s+ride|sea\s+walking)?\s*(?:trip|ride|tour|experience)?\s*to\s+",
                 "to ",
@@ -169,16 +172,16 @@ class IntentExtractor:
                 raw_dest = re.sub(r"\s+at\s+\d+.*$", "", raw_dest, flags=re.IGNORECASE)
                 if len(raw_orig) > 2 and raw_orig.lower() not in ["a", "the"]:
                     origin = raw_orig
-                if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "hills", "waterfalls"] and not trail:
-                    destination = raw_dest
+                if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "hills", "waterfalls"]:
+                    explicit_dest = raw_dest
             else:
                 pattern_b = re.search(r"to\s+([a-zA-Z0-9\s,]+?)\s+from\s+([a-zA-Z0-9\s]+?)(?=\s+through|\s+via|\s+for|\s+at|\s+a|\s+one|\s+under|\s+budget|$)", cleaned_lower)
                 if pattern_b:
                     raw_dest = pattern_b.group(1).strip().split(",")[0].strip().capitalize()
                     raw_orig = pattern_b.group(2).strip().capitalize()
                     raw_dest = re.sub(r"\s+at\s+\d+.*$", "", raw_dest, flags=re.IGNORECASE)
-                    if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "hills", "waterfalls"] and not trail:
-                        destination = raw_dest
+                    if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "hills", "waterfalls"]:
+                        explicit_dest = raw_dest
                     if len(raw_orig) > 2 and raw_orig.lower() not in ["a", "the"]:
                         origin = raw_orig
                 else:
@@ -186,8 +189,18 @@ class IntentExtractor:
                     if pattern_c:
                         raw_dest = pattern_c.group(1).strip().split(",")[0].strip().capitalize()
                         raw_dest = re.sub(r"\s+at\s+\d+.*$", "", raw_dest, flags=re.IGNORECASE)
-                        if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "food", "spots"] and not trail:
-                            destination = raw_dest
+                        if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "food", "spots"]:
+                            explicit_dest = raw_dest
+
+        # DESTINATION OVERRIDE RULE:
+        # If the latest turn has an explicit destination:
+        # 1. OVERWRITE destination completely!
+        # 2. IF NOT an explicit trail request, WIPE OUT previous trail & waypoints completely!
+        if explicit_dest:
+            destination = explicit_dest
+            if not has_explicit_trail:
+                trail = None
+                waypoints = []
 
         # Clean city names
         if destination:
