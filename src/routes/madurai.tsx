@@ -19,369 +19,301 @@ import {
   Waves,
   Trees,
   X,
-  Info,
   CheckCircle2,
+  Eye,
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { RouteApiRepository, IsolatedRouteResultDTO } from "@/lib/api-client/routes";
-import heroImg from "@/assets/hero-ghats.jpg";
-import waterfallsImg from "@/assets/cat-waterfalls.jpg";
-import routesImg from "@/assets/cat-routes.jpg";
 import foodImg from "@/assets/cat-food.jpg";
 import templesImg from "@/assets/cat-temples.jpg";
 
 export const Route = createFileRoute("/madurai")({
   head: () => ({
     meta: [
-      { title: "Explore Madurai — Heritage, Nature & Taste Madurai | ExplorerTN" },
+      { title: "Explore Madurai — Temples, Tourist Places & Taste Madurai | ExplorerTN" },
       {
         name: "description",
         content:
-          "Discover Meenakshi Amman Temple, Thirumalai Nayakkar Mahal, Thirupparankundram, Alagar Kovil, Samanar Hills, Sirumalai, Vaigai Dam, Kumbakkarai Falls and famous Madurai food.",
+          "Discover Meenakshi Amman Temple, Thirupparankundram, Alagar Kovil, Pazhamudircholai, Thirumalai Nayakkar Mahal, Gandhi Museum, Samanar Hills, Vandiyur Teppakulam, Vaigai River, Jigarthanda and Madurai food.",
       },
       { property: "og:title", content: "Explore Madurai — ExplorerTN" },
       {
         property: "og:description",
         content:
-          "Madurai hub-and-spoke destination discovery, interactive maps, curated circuits, and AI Trip Planner integration.",
+          "Dedicated Madurai city guide covering ancient temples, historic landmarks, iconic local street food, interactive map, and AI Trip Planner integration.",
       },
     ],
   }),
   component: ExploreMaduraiPage,
 });
 
-export interface MaduraiDestination {
+export interface MaduraiPlace {
   id: string;
   name: string;
-  role: string;
-  district: string;
+  category: "Temple" | "Tourist Place";
+  subCategory: string;
+  district: "Madurai";
   state: "Tamil Nadu";
   country: "India";
   latitude: number;
   longitude: number;
-  category: string[];
   description: string;
   highlights: string[];
-  bestExperiences: string[];
   image: string;
-  approxDistanceKm?: number;
   recommendedDuration: string;
-  popularityRank: number;
+  approxDistanceKm: number;
 }
 
 export interface MaduraiFoodItem {
   id: string;
   name: string;
   category: string;
+  subTag: string;
   description: string;
   image: string;
   tags: string[];
 }
 
-// 11 Major Madurai Destinations & Excursions
-const MADURAI_DESTINATIONS: MaduraiDestination[] = [
+// Category 1: Madurai Temples (4 Cards)
+const MADURAI_TEMPLES: MaduraiPlace[] = [
   {
     id: "meenakshi-temple",
     name: "Meenakshi Amman Temple",
-    role: "Madurai's Primary Heritage Landmark",
+    category: "Temple",
+    subCategory: "Temple · Heritage",
     district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
     latitude: 9.9195,
     longitude: 78.1193,
-    category: ["Temple", "Heritage", "Architecture", "Culture", "Photography"],
-    description: "Historic Dravidian temple complex featuring 14 soaring gopurams, Ashta Shakti Mandapam, and 33,000 stone sculptures.",
-    highlights: ["1,000-Pillar Hall (Aayiram Kaal Mandapam)", "Golden Lotus Tank (Porthamarai Kulam)", "Soaring Southern Gopuram (170ft)"],
-    bestExperiences: ["Early morning deity procession", "Exploring 1,000-pillar hall art museum", "Evening lamp rituals & temple music"],
+    description:
+      "World-famous Dravidian architectural marvel featuring 14 multi-tiered painted gopurams, 1,000-pillar hall, and Golden Lotus tank.",
+    highlights: ["14 Soaring Multi-Tiered Gopurams", "Historic 1,000-Pillar Sculpted Hall", "Golden Lotus Sacred Tank"],
     image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 0,
     recommendedDuration: "2–3 Hours",
-    popularityRank: 1,
+    approxDistanceKm: 0,
   },
   {
     id: "thirupparankundram",
     name: "Thirupparankundram Murugan Temple",
-    role: "Temple + Hill Heritage",
+    category: "Temple",
+    subCategory: "Temple · Heritage",
     district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
     latitude: 9.8797,
     longitude: 78.071,
-    category: ["Temple", "Hill", "Heritage", "Culture", "Photography"],
-    description: "6th-century rock-cut cave temple carved into a massive granite hill celebrating the celestial wedding of Lord Murugan.",
-    highlights: ["Rock-Cut Cave Sanctuaries", "Hilltop Viewpoint of Madurai", "Historic Inscriptions"],
-    bestExperiences: ["Exploring ancient rock-carved sanctums", "Sunset view from Thirupparankundram hill ridge", "Attending evening pooja"],
+    description:
+      "6th-century rock-cut cave temple carved into a massive granite hill celebrating the celestial wedding of Lord Murugan.",
+    highlights: ["Historic Rock-Cut Cave Shrine", "Ancient Granite Hill Surroundings", "Sacred Murugan Heritage"],
     image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 8,
     recommendedDuration: "1.5 Hours",
-    popularityRank: 2,
+    approxDistanceKm: 8,
   },
   {
     id: "alagar-kovil",
     name: "Alagar Kovil",
-    role: "Temple + Mountain / Nature Excursion",
+    category: "Temple",
+    subCategory: "Temple · Heritage · Nature",
     district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
     latitude: 10.0742,
     longitude: 78.2136,
-    category: ["Temple", "Heritage", "Nature", "Hill", "Culture"],
-    description: "Nestled at the foot of Alagar Hills forest reserve. Ancient Vishnu shrine surrounded by lush green valley wilderness.",
-    highlights: ["Kallazhagar Shrine Architecture", "Alagar Hills Forest Canopy", "Holy Spring Water Dip"],
-    bestExperiences: ["Valley drive through Alagar forest", "Visiting sacred mountain stream", "Tasting traditional temple prasadam"],
+    description:
+      "Historic Vishnu temple situated at the foot of Alagar Hills forest reserve, renowned for intricate stone carvings and natural scenery.",
+    highlights: ["Kallazhagar Historic Vishnu Shrine", "Alagar Hills Forest Canopy", "Scenic Valley Surroundings"],
     image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 21,
     recommendedDuration: "2 Hours",
-    popularityRank: 3,
+    approxDistanceKm: 21,
   },
   {
     id: "pazhamudircholai",
-    name: "Pazhamudircholai Murugan Temple",
-    role: "Hill Temple + Forest Nature",
+    name: "Pazhamudircholai",
+    category: "Temple",
+    subCategory: "Temple · Hill",
     district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
     latitude: 10.0911,
     longitude: 78.2173,
-    category: ["Temple", "Hill", "Nature", "Forest", "Culture"],
-    description: "5th Arupadai Veedu shrine located deep inside evergreen Solaimalai hill forests above Alagar Kovil.",
-    highlights: ["Dense Hill Forest Drive", "Solaimalai Mountain Shrine", "Avvaiyar Rose-Apple Tree Spot"],
-    bestExperiences: ["Scenic hill road trip through Solaimalai hills", "Forest walking trail", "Panoramic view of Madurai countryside"],
+    description:
+      "5th Arupadai Veedu Murugan shrine nestled inside evergreen hill forests above Alagar Kovil along a scenic winding mountain road.",
+    highlights: ["Forested Hill Surroundings", "Solaimalai Mountain Shrine", "Scenic Mountain Route"],
     image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1000&q=80",
+    recommendedDuration: "1.5 Hours",
     approxDistanceKm: 24,
-    recommendedDuration: "1.5 Hours",
-    popularityRank: 4,
   },
-  {
-    id: "samanar-hills",
-    name: "Samanar Hills",
-    role: "Heritage + Hill + Viewpoint",
-    district: "Madurai",
-    state: "Tamil Nadu",
-    country: "India",
-    latitude: 9.9056,
-    longitude: 78.0538,
-    category: ["Heritage", "Hill", "Viewpoint", "History", "Photography"],
-    description: "Hill ridge in Keelakuyilkudi village featuring ancient Jain rock-cut beds, stone carvings, and panoramic sunset views over paddy fields.",
-    highlights: ["Settipodavu Jain Rock Sculptures", "Pechipallam Springs", "Panoramic Sunset Over Madurai Plains"],
-    bestExperiences: ["Climbing rock steps to Settipodavu caves", "Photography of 9th-century Jain bas-relief sculptures", "Sunset view over rural Madurai"],
-    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 10,
-    recommendedDuration: "2 Hours",
-    popularityRank: 5,
-  },
-  {
-    id: "gandhi-museum",
-    name: "Gandhi Memorial Museum",
-    role: "History & Cultural Education",
-    district: "Madurai",
-    state: "Tamil Nadu",
-    country: "India",
-    latitude: 9.9304,
-    longitude: 78.1384,
-    category: ["Museum", "History", "Culture", "Day Trips"],
-    description: "Housed in the historic Tamukkam Summer Palace of Nayak queens. One of five Gandhi Museums in India with freedom movement relics.",
-    highlights: ["Historic Tamukkam Palace", "Freedom Struggle Photo Gallery", "Peace Garden"],
-    bestExperiences: ["Guided history walk through freedom movement gallery", "Exploring Nayak queen summer palace architecture", "Quiet walk in peace gardens"],
-    image: "https://images.unsplash.com/photo-1589705298607-4e9640426b38?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 4,
-    recommendedDuration: "1.5 Hours",
-    popularityRank: 6,
-  },
+];
+
+// Category 2: Madurai Tourist Places (5 Cards)
+const MADURAI_TOURIST_PLACES: MaduraiPlace[] = [
   {
     id: "thirumalai-mahal",
     name: "Thirumalai Nayakkar Mahal",
-    role: "Palace Architecture & Heritage",
+    category: "Tourist Place",
+    subCategory: "Palace · Heritage · Architecture",
     district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
     latitude: 9.9158,
     longitude: 78.1232,
-    category: ["Palace", "Architecture", "Heritage", "History", "Photography"],
-    description: "1636 Indo-Saracenic palace built by King Thirumalai Nayak featuring massive white columns, stuccowork, and courtyard arches.",
-    highlights: ["Giant White Columns (82ft high)", "Swarga Vilasam Courtyard", "Sound & Light Evening Show"],
-    bestExperiences: ["Architectural photography of 82ft white columns", "Viewing celestial pavilion dome", "Evening light and sound show"],
+    description:
+      "1636 Indo-Saracenic palace constructed by King Thirumalai Nayak featuring massive 82ft white pillars, stuccowork, and courtyard arches.",
+    highlights: ["Grand Indo-Saracenic Architecture", "82ft Massive White Columns", "Swarga Vilasam Courtyard"],
     image: "https://images.unsplash.com/photo-1609946782701-7fa158869150?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 2,
     recommendedDuration: "1.5 Hours",
-    popularityRank: 7,
+    approxDistanceKm: 2,
   },
   {
-    id: "vaigai-dam",
-    name: "Vaigai Dam",
-    role: "Day Trip Reservoir & Nature",
-    district: "Theni / Madurai Border",
-    state: "Tamil Nadu",
-    country: "India",
-    latitude: 10.0551,
-    longitude: 77.591,
-    category: ["Dam", "Nature", "Viewpoint", "Family", "Photography", "Day Trips"],
-    description: "Massive reservoir across Vaigai River with manicured gardens, children's park, and sunset reservoir viewpoints.",
-    highlights: ["Vaigai Reservoir Water View", "Landscaped Flower Gardens", "Sunset Promenade"],
-    bestExperiences: ["Picnic along landscaped dam gardens", "Sunset view across Vaigai waters", "Scenic drive from Madurai"],
-    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 70,
-    recommendedDuration: "Half Day",
-    popularityRank: 8,
-  },
-  {
-    id: "kumbakkarai-falls",
-    name: "Kumbakkarai Falls",
-    role: "Waterfall Nature Day Trip",
-    district: "Theni",
-    state: "Tamil Nadu",
-    country: "India",
-    latitude: 10.1804,
-    longitude: 77.5303,
-    category: ["Waterfall", "Nature", "Adventure", "Photography", "Day Trips"],
-    description: "Cascading natural mountain stream flowing over granite rock formations at the foot of Kodaikanal hill slope.",
-    highlights: ["Natural Rock Pool Stream", "Kodaikanal Foothill Canopy", "Cool Water Spray"],
-    bestExperiences: ["Dipper pools in mountain stream", "Forest canopy photography", "Combining with Vaigai Dam day trip"],
-    image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 85,
-    recommendedDuration: "Half Day",
-    popularityRank: 9,
-  },
-  {
-    id: "sirumalai",
-    name: "Sirumalai",
-    role: "Offbeat Madurai Hill Escape",
-    district: "Dindigul",
-    state: "Tamil Nadu",
-    country: "India",
-    latitude: 10.1983,
-    longitude: 77.9944,
-    category: ["Hill", "Forest", "Nature", "Offbeat", "Road Trips"],
-    description: "Quiet forest hill valley at 1,600m with 18 hairpin bends, high biodiversity, and serene mountain roads.",
-    highlights: ["18 Hairpin Bend Climb", "Observation Tower View", "Quiet Hill Village Atmosphere"],
-    image: "https://images.unsplash.com/photo-1469854523086-cc02fe5d8800?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 48,
-    recommendedDuration: "Full Day",
-    popularityRank: 10,
-  },
-  {
-    id: "thirumangalam-rural",
-    name: "Thirumangalam / Rural Madurai",
-    role: "Local Culture & Countryside",
+    id: "gandhi-museum",
+    name: "Gandhi Memorial Museum",
+    category: "Tourist Place",
+    subCategory: "Museum · History · Culture",
     district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
-    latitude: 9.8242,
-    longitude: 77.9868,
-    category: ["Local", "Food", "Culture", "Countryside"],
-    description: "Experience rural Madurai agricultural life, terracotta Ayyanar horse pottery, and traditional village messes.",
-    highlights: ["Terracotta Ayyanar Horse Statues", "Paddy Field Scenery", "Authentic Village Mess Meal"],
-    bestExperiences: ["Exploring rural pottery workshops", "Village mess lunch on banana leaf", "Countryside photography drive"],
+    latitude: 9.9304,
+    longitude: 78.1384,
+    description:
+      "Housed in the historic Tamukkam Summer Palace of Nayak queens. One of five Gandhi Museums in India with freedom movement exhibits.",
+    highlights: ["Historical Freedom Struggle Exhibits", "17th-Century Tamukkam Palace", "Peace Garden Walk"],
+    image: "https://images.unsplash.com/photo-1589705298607-4e9640426b38?auto=format&fit=crop&w=1000&q=80",
+    recommendedDuration: "1.5 Hours",
+    approxDistanceKm: 4,
+  },
+  {
+    id: "samanar-hills",
+    name: "Samanar Hills",
+    category: "Tourist Place",
+    subCategory: "Heritage · Viewpoint · History",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9056,
+    longitude: 78.0538,
+    description:
+      "Rock hill complex in Keelakuyilkudi village containing 9th-century Jain rock-cut beds, stone carvings, and sweeping views of Madurai.",
+    highlights: ["Ancient Jain Rock-Cut Reliefs", "Scenic Hilltop Viewpoint", "Sunset Over Madurai Plains"],
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+    recommendedDuration: "2 Hours",
+    approxDistanceKm: 10,
+  },
+  {
+    id: "vandiyur-teppakulam",
+    name: "Vandiyur Mariamman Teppakulam",
+    category: "Tourist Place",
+    subCategory: "Landmark · Heritage · Photography",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9133,
+    longitude: 78.1517,
+    description:
+      "Massive 16-acre square temple tank built in 1645 by King Thirumalai Nayak, featuring central Maiya Mandapam island pavilion.",
+    highlights: ["16-Acre Massive Temple Tank", "Central Island Maiya Mandapam", "Evening Atmospheric Vibe"],
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+    recommendedDuration: "1 Hour",
+    approxDistanceKm: 4,
+  },
+  {
+    id: "vaigai-riverfront",
+    name: "Vaigai River / Vaigai Riverfront",
+    category: "Tourist Place",
+    subCategory: "City · Nature · Photography",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9280,
+    longitude: 78.1220,
+    description:
+      "Historic river corridor flowing through central Madurai, offering city bridge viewpoints and authentic local Madurai atmosphere.",
+    highlights: ["Vaigai River City Corridor", "Bridge Photography Vistas", "Local Madurai Urban Vibe"],
     image: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1000&q=80",
-    approxDistanceKm: 20,
-    recommendedDuration: "3 Hours",
-    popularityRank: 11,
+    recommendedDuration: "1 Hour",
+    approxDistanceKm: 1,
   },
 ];
 
-// Dedicated Taste Madurai Food Collection
-const MADURAI_FOOD_ITEMS: MaduraiFoodItem[] = [
+// Category 3: Taste Madurai Food Cards (7 Cards)
+const TASTE_MADURAI_FOOD: MaduraiFoodItem[] = [
   {
     id: "jigarthanda",
-    name: "Famous Madurai Jigarthanda",
-    category: "Beverage / Dessert",
-    description: "Cooling legendary dessert drink made with almond gum (badam pisin), nannari syrup, condensed milk, and topped with basundi ice cream.",
+    name: "Jigarthanda",
+    category: "Drink · Local Specialty",
+    subTag: "Madurai Specialty",
+    description:
+      "Cooling legendary dessert drink made with badam pisin (almond gum), nannari syrup, condensed milk, and topped with basundi ice cream.",
     image: foodImg,
-    tags: ["Legendary", "Cooling", "Sweet", "Must Try"],
-  },
-  {
-    id: "bun-parotta",
-    name: "Madurai Bun Parotta",
-    category: "Street Food Specialty",
-    description: "Golden-fried multi-layered fluffy dough shaped like a soft bun, crispy on the outside and pillow-soft inside, served with hot spicy salna.",
-    image: foodImg,
-    tags: ["Crispy", "Fluffy", "Spicy Salna", "Iconic"],
+    tags: ["Legendary", "Cooling", "Sweet", "Iconic"],
   },
   {
     id: "kari-dosa",
-    name: "Madurai Kari Dosa",
-    category: "Non-Veg Delicacy",
-    description: "3-tiered thick dosa layered with plain batter, fluffy omelette, and topped generously with fiery minced mutton masala fry.",
+    name: "Kari Dosa",
+    category: "Food · Local Specialty",
+    subTag: "Madurai Specialty",
+    description:
+      "3-tiered thick dosa layered with crisp batter, fluffy egg omelette, and topped generously with fiery minced mutton masala fry.",
     image: foodImg,
-    tags: ["Minced Mutton", "3-Tier Dosa", "Fiery", "Dinner Special"],
+    tags: ["Minced Mutton", "3-Tier Dosa", "Spicy", "Dinner Special"],
   },
   {
-    id: "soft-idli",
-    name: "Madurai Soft Idli & Chutneys",
-    category: "South Indian Breakfast",
-    description: "Steaming, cloud-soft rice cakes served on banana leaf with coconut, tomato, coriander chutneys, and piping hot sambar.",
+    id: "madurai-parotta",
+    name: "Madurai Parotta",
+    category: "Street Food · Local Specialty",
+    subTag: "Madurai Specialty",
+    description:
+      "Multi-layered flaky golden parotta kneaded and beaten on marble slabs, served piping hot with spicy non-veg or veg salna.",
     image: foodImg,
-    tags: ["Melt in Mouth", "Banana Leaf", "Breakfast", "Classic"],
+    tags: ["Flaky", "Golden", "Spicy Salna", "Street Favorite"],
   },
   {
-    id: "breakfast-mess",
-    name: "Traditional South Indian Mess Feast",
-    category: "Mess Meal",
-    description: "Ghee Ven Pongal, crispy Medu Vada, Podi Ghee Roast Dosa, and authentic brass-tumbler South Indian filter coffee.",
+    id: "idli",
+    name: "Idli",
+    category: "Breakfast · South Indian",
+    subTag: "Madurai Specialty",
+    description:
+      "Steaming cloud-soft rice cakes served on fresh banana leaf with coconut, coriander, tomato chutneys, and hot sambar.",
     image: foodImg,
-    tags: ["Pongal & Vada", "Filter Coffee", "Ghee Roast"],
+    tags: ["Melt in Mouth", "Banana Leaf", "Breakfast Classic"],
+  },
+  {
+    id: "kothu-parotta",
+    name: "Kothu Parotta",
+    category: "Street Food",
+    description:
+      "Shredded parotta minced on hot iron griddle with eggs, chicken or mutton gravy, onions, and aromatic South Indian spices.",
+    image: foodImg,
+    tags: ["Minced Parotta", "Iron Griddle", "Late Night"],
+  },
+  {
+    id: "bun-parotta",
+    name: "Bun Parotta",
+    category: "Local Specialty",
+    subTag: "Madurai Specialty",
+    description:
+      "Deep-fried soft bun-shaped parotta, crispy golden on the outside and pillow-soft inside, paired with rich mutton gravy.",
+    image: foodImg,
+    tags: ["Crispy", "Pillow Soft", "Unique Texture"],
   },
   {
     id: "street-food",
-    name: "Madurai Night Street Food Culture",
-    category: "Night Food Walk",
-    description: "Vibrant late-night street food stalls serving Kothu Parotta, Mutton Sukka, Brain Fry, and hot tea till midnight.",
+    name: "Madurai Street Food",
+    category: "Street Food · Local Experience",
+    subTag: "Madurai Experience",
+    description:
+      "Vibrant street food discovery around Meenakshi temple and Town Hall Road serving Mutton Sukka, Brain Fry, and hot tea.",
     image: foodImg,
-    tags: ["Late Night", "Kothu Parotta", "Street Vibe"],
+    tags: ["Late Night Walk", "Authentic Eats", "Town Hall Road"],
   },
 ];
-
-// Curated Madurai Circuits
-interface MaduraiCircuit {
-  id: string;
-  name: string;
-  description: string;
-  stopIds: string[];
-}
-
-const MADURAI_CIRCUITS: MaduraiCircuit[] = [
-  {
-    id: "circuit-heritage",
-    name: "Circuit 1 — Madurai Heritage",
-    description: "Madurai → Meenakshi Amman Temple → Thirumalai Nayakkar Mahal → Gandhi Museum",
-    stopIds: ["meenakshi-temple", "thirumalai-mahal", "gandhi-museum"],
-  },
-  {
-    id: "circuit-temple-hills",
-    name: "Circuit 2 — Madurai Temple & Hills",
-    description: "Madurai → Thirupparankundram → Alagar Kovil → Pazhamudircholai",
-    stopIds: ["thirupparankundram", "alagar-kovil", "pazhamudircholai"],
-  },
-  {
-    id: "circuit-nature",
-    name: "Circuit 3 — Madurai Nature Escape",
-    description: "Madurai → Sirumalai Hill Reserve → Vaigai Dam Reservoir",
-    stopIds: ["sirumalai", "vaigai-dam"],
-  },
-  {
-    id: "circuit-waterfall",
-    name: "Circuit 4 — Madurai Waterfall Escape",
-    description: "Madurai → Kumbakkarai Falls Day Trip",
-    stopIds: ["kumbakkarai-falls"],
-  },
-  {
-    id: "circuit-culture-food",
-    name: "Circuit 5 — Madurai Culture & Food Walk",
-    description: "Madurai → Samanar Hills → Local Markets → Taste Madurai Food Walk",
-    stopIds: ["samanar-hills", "thirumangalam-rural"],
-  },
-];
-
-const CATEGORIES = ["All", "Heritage", "Temples", "Culture", "Food", "Hills", "Waterfalls", "Nature", "Adventure", "Day Trips"];
 
 export function ExploreMaduraiPage() {
   const navigate = useNavigate();
-  const [selectedCategory, setSelectedCategory] = useState("All");
-  const [selectedCircuit, setSelectedCircuit] = useState<string>("circuit-heritage");
-  const [activeDestination, setActiveDestination] = useState<MaduraiDestination>(MADURAI_DESTINATIONS[0]);
-  const [selectedSort, setSelectedSort] = useState<"Recommended" | "Closest" | "Heritage" | "Nature" | "Food">("Recommended");
-  const [detailModalDestination, setDetailModalDestination] = useState<MaduraiDestination | null>(null);
+  const [activeTab, setActiveTab] = useState<"temples" | "tourist-places" | "food">("temples");
+  const [selectedPlace, setSelectedPlace] = useState<MaduraiPlace>(MADURAI_TEMPLES[0]);
+  const [detailModalPlace, setDetailModalPlace] = useState<MaduraiPlace | null>(null);
 
   const [routeMetrics, setRouteMetrics] = useState<{ distanceKm: number; durationMins: number } | null>(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
@@ -390,15 +322,19 @@ export function ExploreMaduraiPage() {
   const leafletMapRef = useRef<any>(null);
   const leafletModuleRef = useRef<any>(null);
 
-  // Recalculate Isolated Route from Madurai Hub to Active Excursion Destination
+  const templesSectionRef = useRef<HTMLDivElement>(null);
+  const touristPlacesSectionRef = useRef<HTMLDivElement>(null);
+  const foodSectionRef = useRef<HTMLDivElement>(null);
+
+  // Recalculate Isolated Route from Madurai Central Hub to Selected Place
   useEffect(() => {
     setIsCalculatingRoute(true);
 
     const maduraiHub = { name: "Madurai Central Hub", latitude: 9.9252, longitude: 78.1198 };
     const req = {
-      requestId: `route-madurai-${activeDestination.id}-${Date.now()}`,
+      requestId: `route-madurai-city-${selectedPlace.id}-${Date.now()}`,
       origin: maduraiHub,
-      destination: { name: activeDestination.name, latitude: activeDestination.latitude, longitude: activeDestination.longitude },
+      destination: { name: selectedPlace.name, latitude: selectedPlace.latitude, longitude: selectedPlace.longitude },
       travelMode: "driving" as const,
     };
 
@@ -406,21 +342,21 @@ export function ExploreMaduraiPage() {
       .then((res: IsolatedRouteResultDTO) => {
         setRouteMetrics({ distanceKm: res.distanceKm, durationMins: res.durationMinutes });
         if (leafletMapRef.current && leafletModuleRef.current) {
-          drawRouteOnMap(maduraiHub, activeDestination, res.geometry.coordinates);
+          drawRouteOnMap(maduraiHub, selectedPlace, res.geometry.coordinates);
         }
       })
       .catch(() => {
         // Fallback spatial calculation
-        const dLat = activeDestination.latitude - maduraiHub.latitude;
-        const dLng = activeDestination.longitude - maduraiHub.longitude;
-        const approxKm = Math.round(Math.sqrt(dLat * dLat + dLng * dLng) * 110 * 1.3);
-        setRouteMetrics({ distanceKm: approxKm, durationMins: Math.round((approxKm / 35) * 60) });
+        const dLat = selectedPlace.latitude - maduraiHub.latitude;
+        const dLng = selectedPlace.longitude - maduraiHub.longitude;
+        const approxKm = Math.round(Math.sqrt(dLat * dLat + dLng * dLng) * 110 * 1.2);
+        setRouteMetrics({ distanceKm: approxKm, durationMins: Math.round((approxKm / 30) * 60) });
         if (leafletMapRef.current && leafletModuleRef.current) {
-          drawFallbackMap(maduraiHub, activeDestination);
+          drawFallbackMap(maduraiHub, selectedPlace);
         }
       })
       .finally(() => setIsCalculatingRoute(false));
-  }, [activeDestination]);
+  }, [selectedPlace]);
 
   // Leaflet Map Initialization
   useEffect(() => {
@@ -442,7 +378,7 @@ export function ExploreMaduraiPage() {
 
       const map = L.map(mapContainerRef.current, {
         center: [9.9252, 78.1198],
-        zoom: 10,
+        zoom: 11,
         zoomControl: true,
         attributionControl: false,
       });
@@ -466,7 +402,7 @@ export function ExploreMaduraiPage() {
     };
   }, []);
 
-  const drawRouteOnMap = (hub: { name: string; latitude: number; longitude: number }, dest: MaduraiDestination, coordinates: number[][]) => {
+  const drawRouteOnMap = (hub: { name: string; latitude: number; longitude: number }, place: MaduraiPlace, coordinates: number[][]) => {
     const map = leafletMapRef.current;
     const L = leafletModuleRef.current;
     if (!map || !L) return;
@@ -489,53 +425,56 @@ export function ExploreMaduraiPage() {
       map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
     }
 
-    // Madurai Hub Pin
+    // Madurai Central Hub Pin
     const hubIcon = L.divIcon({
-      className: "madurai-hub-pin",
-      html: `<div style="background: #3b82f6; color: #fff; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 9999px; border: 2px solid #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.5); white-space: nowrap; font-family: sans-serif;">📍 Hub: Madurai</div>`,
+      className: "madurai-city-hub-pin",
+      html: `<div style="background: #3b82f6; color: #fff; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 9999px; border: 2px solid #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.5); white-space: nowrap; font-family: sans-serif;">📍 Madurai City</div>`,
       iconSize: [120, 28],
       iconAnchor: [60, 14],
     });
     L.marker([hub.latitude, hub.longitude], { icon: hubIcon }).addTo(map);
 
-    // Destination Pin
-    const destIcon = L.divIcon({
-      className: "madurai-dest-pin",
-      html: `<div style="background: #10b981; color: #000; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 9999px; border: 2px solid #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.5); white-space: nowrap; font-family: sans-serif;">🎯 ${dest.name}</div>`,
+    // Selected Place Pin
+    const placeIcon = L.divIcon({
+      className: "madurai-place-pin",
+      html: `<div style="background: #10b981; color: #000; font-weight: 800; font-size: 11px; padding: 4px 10px; border-radius: 9999px; border: 2px solid #fff; box-shadow: 0 6px 18px rgba(0,0,0,0.5); white-space: nowrap; font-family: sans-serif;">🎯 ${place.name}</div>`,
       iconSize: [140, 28],
       iconAnchor: [70, 14],
     });
-    L.marker([dest.latitude, dest.longitude], { icon: destIcon }).addTo(map);
+    L.marker([place.latitude, place.longitude], { icon: placeIcon }).addTo(map);
   };
 
-  const drawFallbackMap = (hub: { name: string; latitude: number; longitude: number }, dest: MaduraiDestination) => {
+  const drawFallbackMap = (hub: { name: string; latitude: number; longitude: number }, place: MaduraiPlace) => {
     const map = leafletMapRef.current;
     const L = leafletModuleRef.current;
     if (!map || !L) return;
 
     const points: [number, number][] = [
       [hub.latitude, hub.longitude],
-      [dest.latitude, dest.longitude],
+      [place.latitude, place.longitude],
     ];
     const polyline = L.polyline(points, { color: "#10b981", weight: 3, opacity: 0.8, dashArray: "6, 6" }).addTo(map);
     map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
   };
 
-  // Filter & Sort
-  const filteredDestinations = MADURAI_DESTINATIONS.filter((item) => {
-    if (selectedCategory === "All") return true;
-    if (selectedCategory === "Temples") return item.category.includes("Temple");
-    return item.category.includes(selectedCategory);
-  }).sort((a, b) => {
-    if (selectedSort === "Closest") return (a.approxDistanceKm || 0) - (b.approxDistanceKm || 0);
-    if (selectedSort === "Heritage") return a.category.includes("Heritage") ? -1 : 1;
-    if (selectedSort === "Nature") return a.category.includes("Nature") ? -1 : 1;
-    if (selectedSort === "Food") return a.category.includes("Food") ? -1 : 1;
-    return a.popularityRank - b.popularityRank;
-  });
+  const scrollToTab = (tab: "temples" | "tourist-places" | "food") => {
+    setActiveTab(tab);
+    if (tab === "temples" && templesSectionRef.current) {
+      templesSectionRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (tab === "tourist-places" && touristPlacesSectionRef.current) {
+      touristPlacesSectionRef.current.scrollIntoView({ behavior: "smooth" });
+    } else if (tab === "food" && foodSectionRef.current) {
+      foodSectionRef.current.scrollIntoView({ behavior: "smooth" });
+    }
+  };
 
-  const handlePlanTrip = (dest: MaduraiDestination) => {
-    const promptText = `Plan a trip from Madurai to ${dest.name}, Tamil Nadu.`;
+  const handlePlanVisit = (place: MaduraiPlace) => {
+    const promptText = `Plan a Madurai trip visit to ${place.name}, Tamil Nadu.`;
+    navigate({ to: "/planner", search: { prompt: promptText } });
+  };
+
+  const handlePlanFoodTour = (food: MaduraiFoodItem) => {
+    const promptText = `Plan a Madurai food tour featuring ${food.name}.`;
     navigate({ to: "/planner", search: { prompt: promptText } });
   };
 
@@ -543,234 +482,273 @@ export function ExploreMaduraiPage() {
     <AppShell>
       {/* Hero Header */}
       <PageHeader
-        eyebrow="MADURAI · TAMIL NADU"
+        eyebrow="MADURAI, TAMIL NADU, INDIA"
         title="Explore Madurai"
-        description="Temples, ancient heritage, local food, hills, waterfalls and unforgettable day trips from the heart of Tamil Nadu."
+        description="Ancient temples, historic landmarks and the iconic flavors of Madurai."
       />
 
       <div className="mx-auto max-w-6xl px-4 pb-16 sm:px-6">
-        {/* Curated Madurai Circuits */}
-        <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-elevate mb-8">
-          <div className="flex items-center justify-between gap-2 mb-4">
-            <div className="flex items-center gap-2 text-primary font-mono text-xs font-semibold uppercase tracking-wider">
-              <Compass className="size-4 text-primary" />
-              <span>Curated Madurai Circuits</span>
+        {/* Category Navigation Tabs */}
+        <div className="flex items-center justify-center gap-3 mb-8">
+          {[
+            { id: "temples", label: "🛕 Temples" },
+            { id: "tourist-places", label: "📍 Tourist Places" },
+            { id: "food", label: "🍽️ Taste Madurai" },
+          ].map((t) => (
+            <button
+              key={t.id}
+              type="button"
+              onClick={() => scrollToTab(t.id as any)}
+              className={`px-5 py-2.5 rounded-2xl text-xs font-bold transition cursor-pointer border ${
+                activeTab === t.id
+                  ? "bg-primary text-primary-foreground border-primary shadow-md"
+                  : "bg-card border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
+              }`}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
+
+        {/* Interactive Madurai City Map */}
+        <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-elevate mb-12">
+          <div className="flex items-center justify-between p-4 border-b border-border bg-card/60">
+            <div className="flex items-center gap-2 text-xs font-bold text-foreground uppercase tracking-wider font-mono">
+              <Navigation className="size-4 text-primary" />
+              <span>Madurai Route: City Hub → {selectedPlace.name}</span>
             </div>
             {routeMetrics && (
-              <div className="flex items-center gap-3 text-xs font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
-                <span>Distance: {routeMetrics.distanceKm} km</span>
-                <span>•</span>
-                <span>Est: {Math.floor(routeMetrics.durationMins / 60)}h {routeMetrics.durationMins % 60}m</span>
+              <div className="text-xs font-mono font-bold text-primary bg-primary/10 px-3 py-1 rounded-full border border-primary/20">
+                {routeMetrics.distanceKm === 0 ? "In City Center" : `${routeMetrics.distanceKm} km · Est: ${routeMetrics.durationMins} mins`}
               </div>
             )}
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {MADURAI_CIRCUITS.map((circuit) => {
-              const isSelected = selectedCircuit === circuit.id;
+          <div className="relative h-[340px] sm:h-[400px] w-full bg-background">
+            <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
+          </div>
+        </div>
+
+        {/* SECTION 1: TEMPLES */}
+        <div ref={templesSectionRef} className="mb-14 scroll-mt-24">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-xl">🛕</span>
+            <h2 className="font-display text-2xl font-bold text-foreground">Madurai Temples</h2>
+          </div>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+            {MADURAI_TEMPLES.map((temple) => {
+              const isSelected = selectedPlace.id === temple.id;
               return (
-                <button
-                  key={circuit.id}
-                  type="button"
-                  onClick={() => {
-                    setSelectedCircuit(circuit.id);
-                    const firstStop = MADURAI_DESTINATIONS.find((d) => d.id === circuit.stopIds[0]);
-                    if (firstStop) setActiveDestination(firstStop);
-                  }}
-                  className={`text-left p-3.5 rounded-2xl border transition cursor-pointer ${
-                    isSelected
-                      ? "bg-primary/15 border-primary text-foreground shadow-sm"
-                      : "bg-secondary/60 border-border/80 text-muted-foreground hover:bg-secondary hover:text-foreground"
+                <motion.div
+                  key={temple.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex flex-col rounded-3xl border bg-card overflow-hidden shadow-elevate transition group ${
+                    isSelected ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/40"
                   }`}
                 >
-                  <p className="text-xs font-bold text-foreground mb-1">{circuit.name}</p>
-                  <p className="text-[11px] text-muted-foreground line-clamp-1">{circuit.description}</p>
-                </button>
+                  <div
+                    onClick={() => setDetailModalPlace(temple)}
+                    className="relative h-44 w-full overflow-hidden bg-secondary cursor-pointer"
+                  >
+                    <img
+                      src={temple.image}
+                      alt={temple.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = templesImg;
+                      }}
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-background/80 backdrop-blur-md text-primary border border-primary/20">
+                        {temple.subCategory}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-4">
+                    <h3
+                      onClick={() => setDetailModalPlace(temple)}
+                      className="font-display text-base font-bold text-foreground group-hover:text-primary transition-colors mb-1 cursor-pointer"
+                    >
+                      {temple.name}
+                    </h3>
+                    <p className="text-[11px] text-muted-foreground leading-relaxed mb-3 flex-1 line-clamp-2">
+                      {temple.description}
+                    </p>
+
+                    <div className="space-y-1 mb-4">
+                      {temple.highlights.slice(0, 2).map((h) => (
+                        <div key={h} className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                          <span className="size-1 rounded-full bg-primary" />
+                          <span className="truncate">{h}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-auto pt-3 border-t border-border/60">
+                      <Button
+                        variant={isSelected ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlace(temple);
+                          window.scrollTo({ top: 250, behavior: "smooth" });
+                        }}
+                        className={`rounded-xl text-xs font-semibold ${
+                          isSelected ? "bg-primary text-primary-foreground" : "border-border hover:bg-secondary"
+                        }`}
+                      >
+                        <RouteIcon className="size-3 mr-1" /> Explore
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handlePlanVisit(temple)}
+                        className="rounded-xl text-xs font-bold bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+                      >
+                        <Sparkles className="size-3 mr-1" /> Plan Visit
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
               );
             })}
           </div>
         </div>
 
-        {/* Hub-and-Spoke Interactive Map */}
-        <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-elevate mb-10">
-          <div className="flex items-center justify-between p-4 border-b border-border bg-card/60">
-            <div className="flex items-center gap-2 text-xs font-bold text-foreground uppercase tracking-wider font-mono">
-              <Navigation className="size-4 text-primary" />
-              <span>Hub-and-Spoke Route: Madurai → {activeDestination.name}</span>
-            </div>
-            <span className="text-[10px] font-mono text-primary px-2.5 py-0.5 bg-primary/10 rounded-full border border-primary/20 font-semibold">
-              Isolated Route Engine
-            </span>
+        {/* SECTION 2: TOURIST PLACES */}
+        <div ref={touristPlacesSectionRef} className="mb-14 scroll-mt-24">
+          <div className="flex items-center gap-2 mb-6">
+            <span className="text-xl">📍</span>
+            <h2 className="font-display text-2xl font-bold text-foreground">Madurai Tourist Places</h2>
           </div>
 
-          <div className="relative h-[360px] sm:h-[440px] w-full bg-background">
-            <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
-          </div>
-        </div>
-
-        {/* Category Filters & Sort Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-          <div className="flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar">
-            <Filter className="size-4 text-muted-foreground shrink-0 mr-1" />
-            {CATEGORIES.map((cat) => (
-              <button
-                key={cat}
-                type="button"
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-3.5 py-1.5 rounded-full text-xs font-semibold whitespace-nowrap transition cursor-pointer border ${
-                  selectedCategory === cat
-                    ? "bg-primary text-primary-foreground border-primary shadow-sm"
-                    : "bg-card border-border text-muted-foreground hover:bg-secondary hover:text-foreground"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
-
-          <div className="flex items-center gap-2">
-            <SlidersHorizontal className="size-3.5 text-muted-foreground" />
-            <span className="text-xs font-mono text-muted-foreground">Sort:</span>
-            <select
-              value={selectedSort}
-              onChange={(e) => setSelectedSort(e.target.value as any)}
-              className="h-8 bg-secondary border border-border rounded-xl px-3 text-xs font-semibold text-foreground focus:outline-none focus:border-primary cursor-pointer"
-            >
-              <option value="Recommended">Recommended</option>
-              <option value="Closest">Closest Distance</option>
-              <option value="Heritage">Heritage First</option>
-              <option value="Nature">Nature First</option>
-              <option value="Food">Food Special</option>
-            </select>
-          </div>
-        </div>
-
-        {/* 11 Destination Cards Grid */}
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 mb-14">
-          {filteredDestinations.map((dest) => {
-            const isActive = activeDestination.id === dest.id;
-            return (
-              <motion.div
-                key={dest.id}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.35 }}
-                className={`flex flex-col rounded-3xl border bg-card overflow-hidden shadow-elevate transition group ${
-                  isActive ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/40"
-                }`}
-              >
-                {/* Image Banner */}
-                <div
-                  onClick={() => setDetailModalDestination(dest)}
-                  className="relative h-48 w-full overflow-hidden bg-secondary cursor-pointer"
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {MADURAI_TOURIST_PLACES.map((place) => {
+              const isSelected = selectedPlace.id === place.id;
+              return (
+                <motion.div
+                  key={place.id}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ duration: 0.3 }}
+                  className={`flex flex-col rounded-3xl border bg-card overflow-hidden shadow-elevate transition group ${
+                    isSelected ? "border-primary ring-2 ring-primary/30" : "border-border hover:border-primary/40"
+                  }`}
                 >
-                  <img
-                    src={dest.image}
-                    alt={dest.name}
-                    loading="lazy"
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = templesImg;
-                    }}
-                    className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                  <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
-                  <div className="absolute top-3 left-3 flex flex-wrap gap-1.5">
-                    {dest.category.slice(0, 2).map((c) => (
-                      <span
-                        key={c}
-                        className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-background/80 backdrop-blur-md text-primary border border-primary/20"
-                      >
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Card Body */}
-                <div className="flex flex-1 flex-col p-5">
-                  <h3
-                    onClick={() => setDetailModalDestination(dest)}
-                    className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors mb-0.5 cursor-pointer"
+                  <div
+                    onClick={() => setDetailModalPlace(place)}
+                    className="relative h-48 w-full overflow-hidden bg-secondary cursor-pointer"
                   >
-                    {dest.name}
-                  </h3>
-                  <p className="text-[11px] text-primary font-mono font-semibold mb-2">
-                    {dest.role} · {dest.approxDistanceKm === 0 ? "In City Center" : `~${dest.approxDistanceKm} km from Madurai`}
-                  </p>
-
-                  <p className="text-xs text-muted-foreground leading-relaxed mb-4 flex-1">
-                    {dest.description}
-                  </p>
-
-                  {/* Highlights List */}
-                  <div className="mb-4 space-y-1">
-                    {dest.highlights.map((h) => (
-                      <div key={h} className="text-[11px] text-muted-foreground flex items-center gap-1.5">
-                        <span className="size-1 rounded-full bg-primary" />
-                        <span>{h}</span>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Action Buttons */}
-                  <div className="grid grid-cols-2 gap-2 mt-auto pt-3 border-t border-border/60">
-                    <Button
-                      variant={isActive ? "default" : "outline"}
-                      size="sm"
-                      onClick={() => {
-                        setActiveDestination(dest);
-                        window.scrollTo({ top: 350, behavior: "smooth" });
+                    <img
+                      src={place.image}
+                      alt={place.name}
+                      loading="lazy"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = templesImg;
                       }}
-                      className={`rounded-xl text-xs font-semibold ${
-                        isActive ? "bg-primary text-primary-foreground" : "border-border hover:bg-secondary"
-                      }`}
-                    >
-                      <RouteIcon className="size-3.5 mr-1" /> Explore Route →
-                    </Button>
-                    <Button
-                      size="sm"
-                      onClick={() => handlePlanTrip(dest)}
-                      className="rounded-xl text-xs font-bold bg-secondary hover:bg-secondary/80 text-foreground border border-border"
-                    >
-                      <Sparkles className="size-3.5 mr-1" /> Plan Trip
-                    </Button>
+                      className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/20 to-transparent" />
+                    <div className="absolute top-3 left-3">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-background/80 backdrop-blur-md text-primary border border-primary/20">
+                        {place.subCategory}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </motion.div>
-            );
-          })}
+
+                  <div className="flex flex-1 flex-col p-5">
+                    <h3
+                      onClick={() => setDetailModalPlace(place)}
+                      className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors mb-1 cursor-pointer"
+                    >
+                      {place.name}
+                    </h3>
+                    <p className="text-xs text-muted-foreground leading-relaxed mb-4 flex-1">
+                      {place.description}
+                    </p>
+
+                    <div className="space-y-1 mb-4">
+                      {place.highlights.map((h) => (
+                        <div key={h} className="text-[11px] text-muted-foreground flex items-center gap-1.5">
+                          <span className="size-1 rounded-full bg-primary" />
+                          <span>{h}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2 mt-auto pt-3 border-t border-border/60">
+                      <Button
+                        variant={isSelected ? "default" : "outline"}
+                        size="sm"
+                        onClick={() => {
+                          setSelectedPlace(place);
+                          window.scrollTo({ top: 250, behavior: "smooth" });
+                        }}
+                        className={`rounded-xl text-xs font-semibold ${
+                          isSelected ? "bg-primary text-primary-foreground" : "border-border hover:bg-secondary"
+                        }`}
+                      >
+                        <RouteIcon className="size-3.5 mr-1" /> Explore
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={() => handlePlanVisit(place)}
+                        className="rounded-xl text-xs font-bold bg-secondary hover:bg-secondary/80 text-foreground border border-border"
+                      >
+                        <Sparkles className="size-3.5 mr-1" /> Plan Visit
+                      </Button>
+                    </div>
+                  </div>
+                </motion.div>
+              );
+            })}
+          </div>
         </div>
 
-        {/* Dedicated "Taste Madurai" Food Section */}
-        <div className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-elevate mb-12">
+        {/* SECTION 3: TASTE MADURAI */}
+        <div ref={foodSectionRef} className="rounded-3xl border border-border bg-card p-6 sm:p-8 shadow-elevate mb-12 scroll-mt-24">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <span className="text-xs font-mono font-bold text-primary uppercase tracking-wider">CULINARY CAPITAL</span>
+              <span className="text-xs font-mono font-bold text-primary uppercase tracking-wider">ICONIC FLAVORS</span>
               <h2 className="font-display text-2xl font-bold text-foreground">Taste Madurai</h2>
               <p className="text-xs text-muted-foreground mt-1">
-                Legendary street foods, Jigarthanda, Bun Parotta, Kari Dosa, and melt-in-mouth soft idlis.
+                Legendary street foods, Jigarthanda, Bun Parotta, Kari Dosa, and soft idlis.
               </p>
             </div>
             <Utensils className="size-6 text-primary hidden sm:block" />
           </div>
 
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {MADURAI_FOOD_ITEMS.map((food) => (
-              <div key={food.id} className="rounded-2xl border border-border/80 bg-secondary/50 p-4 transition hover:border-primary/30">
+            {TASTE_MADURAI_FOOD.map((food) => (
+              <div key={food.id} className="flex flex-col rounded-2xl border border-border/80 bg-secondary/50 p-4 transition hover:border-primary/30">
                 <div className="flex items-center justify-between mb-2">
-                  <h4 className="font-display text-sm font-bold text-foreground">{food.name}</h4>
+                  <h4 className="font-display text-base font-bold text-foreground">{food.name}</h4>
                   <span className="text-[10px] font-mono text-primary px-2 py-0.5 bg-primary/10 rounded-full border border-primary/20">
                     {food.category}
                   </span>
                 </div>
-                <p className="text-xs text-muted-foreground leading-relaxed mb-3">{food.description}</p>
-                <div className="flex flex-wrap gap-1">
-                  {food.tags.map((t) => (
-                    <span key={t} className="text-[10px] px-2 py-0.5 rounded-md bg-card border border-border text-muted-foreground">
-                      #{t}
-                    </span>
-                  ))}
+                <p className="text-xs text-muted-foreground leading-relaxed mb-3 flex-1">{food.description}</p>
+                <div className="flex items-center justify-between pt-3 border-t border-border/50 mt-auto">
+                  <div className="flex flex-wrap gap-1">
+                    {food.tags.slice(0, 2).map((t) => (
+                      <span key={t} className="text-[10px] px-2 py-0.5 rounded-md bg-card border border-border text-muted-foreground">
+                        #{t}
+                      </span>
+                    ))}
+                  </div>
+                  <Button
+                    size="sm"
+                    onClick={() => handlePlanFoodTour(food)}
+                    className="rounded-xl text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Sparkles className="size-3 mr-1" /> Discover
+                  </Button>
                 </div>
               </div>
             ))}
@@ -780,10 +758,10 @@ export function ExploreMaduraiPage() {
         {/* CTA Footer Banner */}
         <div className="rounded-3xl border border-primary/30 bg-primary/10 p-6 sm:p-10 text-center backdrop-blur-md">
           <h3 className="font-display text-2xl font-bold text-foreground mb-2">
-            Ready to explore Madurai heritage & nature?
+            Ready to experience Madurai city & food?
           </h3>
           <p className="text-sm text-muted-foreground max-w-xl mx-auto mb-6">
-            Get instant road directions, temple timings guidance, food walk stops, and customized itineraries with AI Trip Copilot.
+            Get instant temple directions, heritage walking routes, street food stops, and customized itineraries with AI Trip Copilot.
           </p>
           <Button
             size="lg"
@@ -792,20 +770,20 @@ export function ExploreMaduraiPage() {
                 to: "/planner",
                 search: {
                   prompt:
-                    "Plan a 2-day Madurai heritage and food trip covering Meenakshi Amman Temple, Thirumalai Nayakkar Mahal, Thirupparankundram, Alagar Kovil and Jigarthanda food walk.",
+                    "Plan a Madurai city trip covering Meenakshi Amman Temple, Thirumalai Nayakkar Mahal, Gandhi Museum, and a Jigarthanda & Kari Dosa food tour.",
                 },
               })
             }
             className="rounded-2xl bg-primary text-primary-foreground font-bold px-8 py-6 shadow-lg hover:bg-primary/90 transition text-sm"
           >
-            <Sparkles className="size-5 mr-2" /> Plan Complete Madurai Trip with AI Copilot
+            <Sparkles className="size-5 mr-2" /> Plan Madurai City Trip with AI Copilot
           </Button>
         </div>
       </div>
 
-      {/* Destination Detail Modal */}
+      {/* Place Detail Modal */}
       <AnimatePresence>
-        {detailModalDestination && (
+        {detailModalPlace && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
@@ -813,61 +791,52 @@ export function ExploreMaduraiPage() {
               exit={{ opacity: 0, scale: 0.95 }}
               className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border bg-card shadow-2xl p-6 text-foreground"
             >
-              {/* Close Button */}
               <button
                 type="button"
-                onClick={() => setDetailModalDestination(null)}
+                onClick={() => setDetailModalPlace(null)}
                 className="absolute top-4 right-4 p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground cursor-pointer z-10"
               >
                 <X className="size-5" />
               </button>
 
-              {/* Modal Banner */}
               <div className="relative h-56 w-full rounded-2xl overflow-hidden mb-5 bg-secondary">
                 <img
-                  src={detailModalDestination.image}
-                  alt={detailModalDestination.name}
+                  src={detailModalPlace.image}
+                  alt={detailModalPlace.name}
                   className="h-full w-full object-cover"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
                 <div className="absolute bottom-4 left-4 right-4">
-                  <div className="flex flex-wrap gap-1.5 mb-2">
-                    {detailModalDestination.category.map((c) => (
-                      <span key={c} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground">
-                        {c}
-                      </span>
-                    ))}
-                  </div>
-                  <h2 className="font-display text-2xl font-bold text-foreground">{detailModalDestination.name}</h2>
-                  <p className="text-xs text-primary font-mono font-semibold">{detailModalDestination.role}</p>
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground mb-2 inline-block">
+                    {detailModalPlace.subCategory}
+                  </span>
+                  <h2 className="font-display text-2xl font-bold text-foreground">{detailModalPlace.name}</h2>
                 </div>
               </div>
 
-              {/* Modal Body */}
               <div className="space-y-4">
                 <div>
                   <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold mb-1">About Destination</h4>
-                  <p className="text-xs text-foreground leading-relaxed">{detailModalDestination.description}</p>
+                  <p className="text-xs text-foreground leading-relaxed">{detailModalPlace.description}</p>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 bg-secondary/50 p-3.5 rounded-2xl border border-border/80">
                   <div>
-                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Distance from Madurai</span>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Distance from City Center</span>
                     <p className="text-xs font-bold text-primary">
-                      {detailModalDestination.approxDistanceKm === 0 ? "In City Center" : `~${detailModalDestination.approxDistanceKm} km`}
+                      {detailModalPlace.approxDistanceKm === 0 ? "In City Center" : `~${detailModalPlace.approxDistanceKm} km`}
                     </p>
                   </div>
                   <div>
                     <span className="text-[10px] font-mono text-muted-foreground uppercase">Recommended Duration</span>
-                    <p className="text-xs font-bold text-foreground">{detailModalDestination.recommendedDuration}</p>
+                    <p className="text-xs font-bold text-foreground">{detailModalPlace.recommendedDuration}</p>
                   </div>
                 </div>
 
-                {/* Highlights & Best Experiences */}
                 <div>
                   <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold mb-2">Key Highlights</h4>
                   <div className="space-y-1.5">
-                    {detailModalDestination.highlights.map((h) => (
+                    {detailModalPlace.highlights.map((h) => (
                       <div key={h} className="text-xs text-foreground flex items-center gap-2">
                         <CheckCircle2 className="size-3.5 text-primary shrink-0" />
                         <span>{h}</span>
@@ -876,42 +845,27 @@ export function ExploreMaduraiPage() {
                   </div>
                 </div>
 
-                {detailModalDestination.bestExperiences && detailModalDestination.bestExperiences.length > 0 && (
-                  <div>
-                    <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold mb-2">Best Experiences</h4>
-                    <div className="space-y-1.5">
-                      {detailModalDestination.bestExperiences.map((exp) => (
-                        <div key={exp} className="text-xs text-muted-foreground flex items-center gap-2">
-                          <span className="size-1.5 rounded-full bg-primary shrink-0" />
-                          <span>{exp}</span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Action Buttons */}
                 <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
                   <Button
                     variant="outline"
                     onClick={() => {
-                      setActiveDestination(detailModalDestination);
-                      setDetailModalDestination(null);
-                      window.scrollTo({ top: 350, behavior: "smooth" });
+                      setSelectedPlace(detailModalPlace);
+                      setDetailModalPlace(null);
+                      window.scrollTo({ top: 250, behavior: "smooth" });
                     }}
                     className="rounded-xl text-xs font-semibold border-border hover:bg-secondary"
                   >
-                    <RouteIcon className="size-3.5 mr-1" /> Calculate Route
+                    <RouteIcon className="size-3.5 mr-1" /> Explore Route
                   </Button>
                   <Button
                     onClick={() => {
-                      const dest = detailModalDestination;
-                      setDetailModalDestination(null);
-                      handlePlanTrip(dest);
+                      const place = detailModalPlace;
+                      setDetailModalPlace(null);
+                      handlePlanVisit(place);
                     }}
                     className="rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
                   >
-                    <Sparkles className="size-3.5 mr-1" /> Plan Trip with AI
+                    <Sparkles className="size-3.5 mr-1" /> Plan Visit with AI
                   </Button>
                 </div>
               </div>

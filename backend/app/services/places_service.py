@@ -1009,6 +1009,46 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-19T10:00:00Z",
                 "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 48. Vandiyur Mariamman Teppakulam
+            "vandiyur-teppakulam": {
+                "id": "p-vandiyur-teppakulam",
+                "slug": "vandiyur-teppakulam",
+                "name": "Vandiyur Mariamman Teppakulam",
+                "district": "Madurai",
+                "category": "heritage",
+                "tagline": "Massive 16-acre square temple tank with central Maiya Mandapam island pavilion",
+                "description": "Historic temple tank built in 1645 by King Thirumalai Nayak, site of the annual Float Festival.",
+                "latitude": 9.9133,
+                "longitude": 78.1517,
+                "elevation": "101m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 49. Vaigai Riverfront
+            "vaigai-riverfront": {
+                "id": "p-vaigai-riverfront",
+                "slug": "vaigai-riverfront",
+                "name": "Vaigai Riverfront",
+                "district": "Madurai",
+                "category": "landmark",
+                "tagline": "Scenic city riverfront promenade, historic bridge vistas & local urban pulse",
+                "description": "Historic river corridor flowing through central Madurai, venue for the Chithirai festival river crossing.",
+                "latitude": 9.9280,
+                "longitude": 78.1220,
+                "elevation": "100m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
             }
         }
         self._audit_logs: List[dict] = []
