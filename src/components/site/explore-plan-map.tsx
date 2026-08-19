@@ -280,6 +280,13 @@ export function ExplorePlanMap({
 
         const marker = L.marker([place.latitude, place.longitude], { icon: customIcon }).addTo(map);
 
+        marker.bindTooltip(`${idx === 0 ? "START" : idx}. ${place.canonicalName || place.name}`, {
+          permanent: idx === selectedStopIndex,
+          direction: "top",
+          offset: [0, -16],
+          className: "custom-decluttered-map-tooltip",
+        });
+
         const legDist = idx > 0 && segmentData[idx] ? `${segmentData[idx].distanceKm} km` : "Starting Hub";
         const legDuration = idx > 0 && segmentData[idx] ? `${segmentData[idx].durationMins} min` : "0 min";
 

@@ -83,7 +83,7 @@ export function DedicatedMapModal({
     };
   }, [isOpen]);
 
-  // Render Real WGS84 Markers on Map
+  // Render Real WGS84 Decluttered Markers on Map
   const renderMarkers = () => {
     const map = leafletMapRef.current;
     const L = leafletModuleRef.current;
@@ -96,21 +96,40 @@ export function DedicatedMapModal({
       const isSelected = selectedPlace?.id === place.id;
 
       const customIcon = L.divIcon({
-        className: `custom-leaflet-marker-${place.id}`,
+        className: `custom-leaflet-pin-${place.id}`,
         html: `
-          <div class="relative flex items-center justify-center cursor-pointer group">
-            ${isSelected ? '<span class="absolute -inset-2 rounded-full bg-emerald-500/40 animate-ping"></span>' : ''}
-            <div style="background: ${isSelected ? '#10b981' : '#121821'}; color: ${isSelected ? '#000000' : '#ffffff'}; border: 1.5px solid ${isSelected ? '#34d399' : '#334155'}; padding: 5px 12px; border-radius: 9999px; font-weight: 800; font-size: 11px; font-family: sans-serif; white-space: nowrap; box-shadow: 0 10px 25px rgba(0,0,0,0.6); display: flex; align-items: center; gap: 4px;">
-              <span style="display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: ${isSelected ? '#000000' : '#10b981'}; margin-right: 4px;"></span>
-              ${place.name}
+          <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            ${isSelected ? '<span style="position: absolute; width: 36px; height: 36px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
+            <div style="
+              background: ${isSelected ? '#10b981' : '#0f172a'};
+              color: ${isSelected ? '#000000' : '#ffffff'};
+              border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
+              width: ${isSelected ? '26px' : '18px'};
+              height: ${isSelected ? '26px' : '18px'};
+              border-radius: 50%;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+              transition: all 0.2s ease;
+            ">
+              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${isSelected ? '#000000' : '#38bdf8'};"></span>
             </div>
           </div>
         `,
-        iconSize: [140, 32],
-        iconAnchor: [70, 16],
+        iconSize: [26, 26],
+        iconAnchor: [13, 13],
       });
 
       const marker = L.marker([place.latitude, place.longitude], { icon: customIcon }).addTo(map);
+
+      // Decluttered tooltip positioning
+      marker.bindTooltip(place.canonicalName || place.name, {
+        permanent: isSelected,
+        direction: "top",
+        offset: [0, -12],
+        className: "custom-decluttered-map-tooltip",
+      });
 
       marker.on("click", () => {
         setSelectedPlace(place);
