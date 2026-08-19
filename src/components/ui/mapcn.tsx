@@ -42,6 +42,7 @@ export interface MapContextType {
   hoveredMarkerId: string | null;
   setHoveredMarkerId: (id: string | null) => void;
   isLoaded: boolean;
+  leafletMap: any;
 }
 
 const MapContext = createContext<MapContextType | null>(null);
@@ -83,7 +84,7 @@ export interface MapProps {
 }
 
 export function Map({
-  center: initialCenter = [10.8, 78.7], // Default Tamil Nadu center
+  center: initialCenter = [10.5, 78.5], // Default Tamil Nadu center
   zoom: initialZoom = 7,
   style: initialStyle = "dark",
   className,
@@ -97,17 +98,130 @@ export function Map({
   const [hoveredMarkerId, setHoveredMarkerId] = useState<string | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const mapContainerRef = useRef<HTMLDivElement>(null);
+  const leafletMapRef = useRef<any>(null);
+  const tileLayerRef = useRef<any>(null);
+  const leafletModuleRef = useRef<any>(null);
+
+  // Initialize Leaflet Map Base Layer
   useEffect(() => {
-    setIsLoaded(true);
+    if (typeof window === "undefined") return;
+    let isMounted = true;
+
+    async function initLeaflet() {
+      try {
+        const L = await import("leaflet");
+        await import("leaflet/dist/leaflet.css");
+
+        if (!isMounted || !mapContainerRef.current || leafletMapRef.current) return;
+
+        leafletModuleRef.current = L;
+
+        const map = L.map(mapContainerRef.current, {
+          center: initialCenter,
+          zoom: initialZoom,
+          zoomControl: false,
+          attributionControl: false,
+          dragging: interactive,
+          scrollWheelZoom: interactive,
+          touchZoom: interactive,
+          doubleClickZoom: interactive,
+        });
+
+        const getTileUrl = (s: MapStyle) => {
+          if (s === "satellite") {
+            return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+          }
+          if (s === "outdoors") {
+            return "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png";
+          }
+          return "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+        };
+
+        const tileLayer = L.tileLayer(getTileUrl(initialStyle), {
+          maxZoom: 19,
+          subdomains: "abcd",
+        }).addTo(map);
+
+        tileLayerRef.current = tileLayer;
+        leafletMapRef.current = map;
+
+        // Synchronize map pan & zoom state
+        const handleMapMove = () => {
+          if (!map) return;
+          const c = map.getCenter();
+          setCenter([c.lat, c.lng]);
+          setZoom(map.getZoom());
+        };
+
+        map.on("move", handleMapMove);
+        map.on("zoomend", handleMapMove);
+
+        setIsLoaded(true);
+      } catch (err) {
+        console.error("Leaflet Mapcn initialization fallback", err);
+        setIsLoaded(true);
+      }
+    }
+
+    initLeaflet();
+
+    return () => {
+      isMounted = false;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
+    };
   }, []);
+
+  // Update Leaflet Tile Layer on Style Switch
+  useEffect(() => {
+    const map = leafletMapRef.current;
+    const L = leafletModuleRef.current;
+    if (!map || !L) return;
+
+    if (tileLayerRef.current) {
+      map.removeLayer(tileLayerRef.current);
+    }
+
+    const tileUrl =
+      style === "satellite"
+        ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        : style === "outdoors"
+        ? "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        : "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+
+    const newTiles = L.tileLayer(tileUrl, { maxZoom: 19, subdomains: "abcd" });
+    newTiles.addTo(map);
+    tileLayerRef.current = newTiles;
+  }, [style]);
+
+  // Synchronize programmatic center/zoom updates
+  const handleSetCenter = (newCenter: [number, number]) => {
+    setCenter(newCenter);
+    if (leafletMapRef.current) {
+      leafletMapRef.current.setView(newCenter, zoom);
+    }
+  };
+
+  const handleSetZoom = (newZoom: number | ((prev: number) => number)) => {
+    setZoom((prev) => {
+      const nextZoom = typeof newZoom === "function" ? newZoom(prev) : newZoom;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.setZoom(nextZoom);
+      }
+      return nextZoom;
+    });
+  };
 
   return (
     <MapContext.Provider
       value={{
         center,
         zoom,
-        setZoom,
-        setCenter,
+        setZoom: handleSetZoom,
+        setCenter: handleSetCenter,
         style,
         setStyle,
         selectedMarkerId,
@@ -115,6 +229,7 @@ export function Map({
         hoveredMarkerId,
         setHoveredMarkerId,
         isLoaded,
+        leafletMap: leafletMapRef.current,
       }}
     >
       <div
@@ -126,8 +241,11 @@ export function Map({
           className,
         )}
       >
-        {/* Background Grid & Stylized Canvas */}
-        <div className="absolute inset-0 pointer-events-none opacity-20 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px]" />
+        {/* Leaflet Real Tile Map Container */}
+        <div ref={mapContainerRef} className="absolute inset-0 size-full z-0" />
+
+        {/* Fallback Background Grid */}
+        <div className="absolute inset-0 pointer-events-none opacity-10 bg-[radial-gradient(#10b981_1px,transparent_1px)] [background-size:16px_16px] z-1" />
 
         {/* Child Layers & Map Elements */}
         {children}
@@ -156,22 +274,31 @@ export function MapMarker({
 }: MapMarkerProps) {
   const generatedId = useId();
   const markerId = customId || generatedId;
-  const { center, zoom, selectedMarkerId, setSelectedMarkerId, hoveredMarkerId, setHoveredMarkerId } =
+  const { center, zoom, selectedMarkerId, setSelectedMarkerId, hoveredMarkerId, setHoveredMarkerId, leafletMap } =
     useMap();
 
-  // Convert lat/lng to percentage offset relative to center & zoom
-  const latDiff = latitude - center[0];
-  const lngDiff = longitude - center[1];
-  const scale = Math.pow(2, zoom - 7);
+  let leftPct = 50 + (longitude - center[1]) * 15 * Math.pow(2, zoom - 7);
+  let topPct = 50 - (latitude - center[0]) * 25 * Math.pow(2, zoom - 7);
 
-  const leftPct = 50 + lngDiff * 15 * scale;
-  const topPct = 50 - latDiff * 25 * scale;
+  // Precise Leaflet Point Conversion
+  if (leafletMap) {
+    try {
+      const container = leafletMap.getContainer();
+      const point = leafletMap.latLngToContainerPoint([latitude, longitude]);
+      if (container && container.clientWidth && container.clientHeight) {
+        leftPct = (point.x / container.clientWidth) * 100;
+        topPct = (point.y / container.clientHeight) * 100;
+      }
+    } catch {
+      // Fallback to haversine math calculation
+    }
+  }
 
   const isSelected = selectedMarkerId === markerId;
   const isHovered = hoveredMarkerId === markerId;
 
   // Don't render markers off-screen
-  if (leftPct < -10 || leftPct > 110 || topPct < -10 || topPct > 110) {
+  if (leftPct < -15 || leftPct > 115 || topPct < -15 || topPct > 115) {
     return null;
   }
 
@@ -203,7 +330,7 @@ export interface MarkerContentProps {
 }
 
 export function MarkerContent({ children, className }: MarkerContentProps) {
-  const { isSelected, isHovered } = useMarker();
+  const { isSelected } = useMarker();
 
   return (
     <motion.div
@@ -249,7 +376,7 @@ export interface MarkerPopupProps {
 }
 
 export function MarkerPopup({ children, title, rating, className }: MarkerPopupProps) {
-  const { isSelected, markerId } = useMarker();
+  const { isSelected } = useMarker();
   const { setSelectedMarkerId } = useMap();
 
   if (!isSelected) return null;
@@ -305,7 +432,7 @@ export function MarkerTooltip({ children, className }: MarkerTooltipProps) {
   return (
     <div
       className={cn(
-        "pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-popover/90 px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-md backdrop-blur-md",
+        "pointer-events-none absolute bottom-full left-1/2 mb-2 -translate-x-1/2 whitespace-nowrap rounded-lg border border-border bg-popover/90 px-2.5 py-1 text-xs font-medium text-popover-foreground shadow-md backdrop-blur-md z-30",
         className,
       )}
     >
@@ -323,13 +450,20 @@ export interface MapPopupProps {
 }
 
 export function MapPopup({ latitude, longitude, children, className }: MapPopupProps) {
-  const { center, zoom } = useMap();
-  const latDiff = latitude - center[0];
-  const lngDiff = longitude - center[1];
-  const scale = Math.pow(2, zoom - 7);
+  const { center, zoom, leafletMap } = useMap();
+  let leftPct = 50 + (longitude - center[1]) * 15 * Math.pow(2, zoom - 7);
+  let topPct = 50 - (latitude - center[0]) * 25 * Math.pow(2, zoom - 7);
 
-  const leftPct = 50 + lngDiff * 15 * scale;
-  const topPct = 50 - latDiff * 25 * scale;
+  if (leafletMap) {
+    try {
+      const container = leafletMap.getContainer();
+      const point = leafletMap.latLngToContainerPoint([latitude, longitude]);
+      if (container && container.clientWidth && container.clientHeight) {
+        leftPct = (point.x / container.clientWidth) * 100;
+        topPct = (point.y / container.clientHeight) * 100;
+      }
+    } catch {}
+  }
 
   if (leftPct < -10 || leftPct > 110 || topPct < -10 || topPct > 110) {
     return null;
@@ -385,7 +519,7 @@ export function MapControls({ position = "top-right", className }: MapControlsPr
         <div className="h-px bg-border" />
         <button
           onClick={() => {
-            setCenter([10.8, 78.7]);
+            setCenter([10.5, 78.5]);
             setZoom(7);
           }}
           className="p-2 text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
@@ -426,11 +560,52 @@ export interface MapRouteProps {
 
 export function MapRoute({
   coordinates,
-  color = "#10b981",
-  weight = 3,
+  color = "#f59e0b",
+  weight = 4,
   animated = false,
   className,
 }: MapRouteProps) {
+  const { leafletMap } = useMap();
+  const polylineRef = useRef<any>(null);
+
+  useEffect(() => {
+    if (!leafletMap || !coordinates || coordinates.length < 2) return;
+
+    let active = true;
+
+    async function renderLeafletPolyline() {
+      const L = await import("leaflet");
+      if (!active || !leafletMap) return;
+
+      if (polylineRef.current) {
+        leafletMap.removeLayer(polylineRef.current);
+      }
+
+      const polyline = L.polyline(coordinates, {
+        color: color,
+        weight: weight,
+        opacity: 0.9,
+        lineCap: "round",
+        lineJoin: "round",
+        dashArray: animated ? "6, 8" : undefined,
+      }).addTo(leafletMap);
+
+      polylineRef.current = polyline;
+    }
+
+    renderLeafletPolyline();
+
+    return () => {
+      active = false;
+      if (polylineRef.current && leafletMap) {
+        try {
+          leafletMap.removeLayer(polylineRef.current);
+        } catch {}
+      }
+    };
+  }, [leafletMap, coordinates, color, weight, animated]);
+
+  // Fallback SVG polyline if Leaflet map is initializing
   const { center, zoom } = useMap();
   const scale = Math.pow(2, zoom - 7);
 
@@ -438,8 +613,18 @@ export function MapRoute({
 
   const pointsString = coordinates
     .map(([lat, lng]) => {
-      const x = 50 + (lng - center[1]) * 15 * scale;
-      const y = 50 - (lat - center[0]) * 25 * scale;
+      let x = 50 + (lng - center[1]) * 15 * scale;
+      let y = 50 - (lat - center[0]) * 25 * scale;
+      if (leafletMap) {
+        try {
+          const container = leafletMap.getContainer();
+          const point = leafletMap.latLngToContainerPoint([lat, lng]);
+          if (container && container.clientWidth && container.clientHeight) {
+            x = (point.x / container.clientWidth) * 100;
+            y = (point.y / container.clientHeight) * 100;
+          }
+        } catch {}
+      }
       return `${x},${y}`;
     })
     .join(" ");
@@ -450,7 +635,7 @@ export function MapRoute({
         points={pointsString}
         fill="none"
         stroke={color}
-        strokeWidth={weight * 0.3}
+        strokeWidth={weight * 0.35}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeDasharray={animated ? "4 4" : undefined}
@@ -536,7 +721,6 @@ export function MapClusterLayer({ data, radius = 40, className }: MapClusterLaye
 
   if (!data || data.length === 0) return null;
 
-  // Simple zoom-based marker aggregator
   const isClustered = zoom < 7;
 
   if (!isClustered) {

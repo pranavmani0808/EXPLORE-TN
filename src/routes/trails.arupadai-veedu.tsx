@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
@@ -47,6 +47,7 @@ export const Route = createFileRoute("/trails/arupadai-veedu")({
 export function ArupadaiVeeduTrailPage() {
   const navigate = useNavigate();
   const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
+  const [osrmRoutePoints, setOsrmRoutePoints] = useState<Array<[number, number]>>([]);
 
   const handleAddToTrip = (slug: string) => {
     setAddedTrips((prev) => ({ ...prev, [slug]: true }));
@@ -58,10 +59,43 @@ export function ArupadaiVeeduTrailPage() {
     });
   };
 
-  // Convert 6 temple coordinates to Mapcn route array [lat, lng]
-  const trailRoutePoints: Array<[number, number]> = arupadaiVeeduTemples
+  // Static fallback pin coordinates
+  const staticTempleCoords: Array<[number, number]> = arupadaiVeeduTemples
     .map((t) => t.coords)
     .filter((c): c is [number, number] => c !== undefined);
+
+  // Fetch real multi-waypoint OSRM road geometry from backend
+  useEffect(() => {
+    let active = true;
+
+    async function fetchTrailRoute() {
+      try {
+        const res = await fetch("/api/v1/planner/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: "Plan an Arupadai Veedu trip" }),
+        });
+        if (!res.ok) return;
+        const json = await res.json();
+        const coords = json?.data?.route?.geometry?.coordinates;
+        if (active && coords && Array.isArray(coords) && coords.length > 0) {
+          // OSRM coordinates are [lng, lat], convert to [lat, lng] for Leaflet
+          const pts: Array<[number, number]> = coords.map(([lng, lat]: [number, number]) => [lat, lng]);
+          setOsrmRoutePoints(pts);
+        }
+      } catch (err) {
+        console.warn("Could not load OSRM road route for trail map, fallback to pins", err);
+      }
+    }
+
+    fetchTrailRoute();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
+  const displayRoutePoints = osrmRoutePoints.length > 0 ? osrmRoutePoints : staticTempleCoords;
 
   return (
     <AppShell>
@@ -74,7 +108,7 @@ export function ArupadaiVeeduTrailPage() {
           className="absolute inset-0 size-full object-cover object-center opacity-65 z-0"
         />
 
-        {/* Layer 1: Dark Translucent Gradient Overlay (NO White Gradients) */}
+        {/* Layer 1: Dark Translucent Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/65 to-slate-950 z-1" />
 
         {/* Layer 2: Hero Content */}
@@ -145,15 +179,15 @@ export function ArupadaiVeeduTrailPage() {
         </div>
       </section>
 
-      {/* Main Content Container with Dark Background & Smooth Transition */}
+      {/* Main Content Container with Dark Background & Interactive Mapcn Dev Map */}
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        {/* Interactive Mapcn Map Section */}
+        {/* Interactive Mapcn.dev Route Map Section */}
         <div className="mb-14 space-y-3">
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold">Interactive Trail Map</h2>
               <p className="text-sm text-muted-foreground">
-                All 6 Arupadai Veedu temple coordinates verified via PostgreSQL / PostGIS.
+                Mapcn.dev Leaflet tile map with real OSRM road route geometry & PostGIS coordinates.
               </p>
             </div>
             <Button onClick={handlePlanWithAI} variant="outline" size="sm" className="rounded-xl">
@@ -161,20 +195,20 @@ export function ArupadaiVeeduTrailPage() {
             </Button>
           </div>
 
-          <div className="glass overflow-hidden rounded-3xl p-2 shadow-elevate">
-            <Map center={[10.5, 78.5]} zoom={7} style="dark" className="h-[380px] w-full rounded-2xl border-0">
+          <div className="glass overflow-hidden rounded-3xl p-2 shadow-elevate border border-amber-500/20">
+            <Map center={[10.5, 78.5]} zoom={7} style="dark" className="h-[420px] w-full rounded-2xl border-0">
               <MapControls position="top-right" />
 
-              {/* Render Animated Route Line Across All 6 Temples */}
-              {trailRoutePoints.length > 1 && (
-                <MapRoute coordinates={trailRoutePoints} animated color="#f59e0b" weight={3.5} />
+              {/* Render Animated OSRM Multi-Waypoint Road Route Line */}
+              {displayRoutePoints.length > 1 && (
+                <MapRoute coordinates={displayRoutePoints} animated color="#f59e0b" weight={4} />
               )}
 
               {/* Render All 6 Temple Markers */}
               {arupadaiVeeduTemples.map((temple, idx) => (
                 <MapMarker key={temple.slug} latitude={temple.coords![0]} longitude={temple.coords![1]}>
                   <MarkerContent>
-                    <span className="flex size-6 items-center justify-center rounded-full bg-amber-500 font-bold text-[10px] text-black ring-4 ring-amber-500/30">
+                    <span className="flex size-6 items-center justify-center rounded-full bg-amber-500 font-bold text-[10px] text-black ring-4 ring-amber-500/40 shadow-lg">
                       {idx + 1}
                     </span>
                   </MarkerContent>
