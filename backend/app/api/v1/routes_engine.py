@@ -5,7 +5,7 @@ from backend.app.services.routing.service import routing_service
 
 router = APIRouter(tags=["Isolated Route Engine"])
 
-@router.post("/v1/routes/calculate", response_model=Dict[str, Any])
+@router.post("/routes/calculate", response_model=Dict[str, Any])
 @router.post("/routes", response_model=Dict[str, Any])
 async def calculate_route_endpoint(request: IsolatedRouteRequestDTO):
     if not request.origin or not request.destination:
