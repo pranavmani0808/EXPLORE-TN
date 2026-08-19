@@ -22,8 +22,8 @@ def test_wgs84_geofence_validation():
         "name": "Kodaikanal Lake View",
         "district": "Dindigul",
         "category": "hill_station",
-        "latitude": 10.2381,
-        "longitude": 77.4892,
+        "latitude": 10.2500,
+        "longitude": 77.5000,
         "tagline": "Scenic high altitude star shaped lake"
     }
     res_valid = client.post("/api/v1/places", json=valid_payload)
