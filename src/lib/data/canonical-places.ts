@@ -246,6 +246,27 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
 
   // --- THENI COLLECTION ---
   {
+    id: "theni",
+    name: "Theni Town Hub",
+    slug: "theni",
+    district: "Theni",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.0104,
+    longitude: 77.4768,
+    categories: ["tourist-places"],
+    primaryCategory: "tourist-places",
+    tagline: "Central hub & gateway to Western Ghats nature trails",
+    description: "District headquarters of Theni, serving as the central starting point for nature circuits.",
+    image: heroImg,
+    rating: 4.5,
+    reviewsCount: 1500,
+    verified: true,
+    tags: ["Theni Hub", "Gateway", "Western Ghats"],
+    highlights: ["Theni Bus Terminus", "Market Square", "Gateway to Ghat Roads"],
+    aliases: ["Theni", "Theni City", "Theni Hub"],
+  },
+  {
     id: "meghamalai",
     name: "Meghamalai",
     slug: "meghamalai",
