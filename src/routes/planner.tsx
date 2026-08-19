@@ -1,10 +1,37 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { motion } from "motion/react";
-import { Send, Sparkles, Wallet, Fuel, CloudSun, Backpack, Download, Share2, Compass, AlertCircle, Loader2 } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import {
+  Send,
+  Sparkles,
+  Wallet,
+  Fuel,
+  CloudSun,
+  Backpack,
+  Download,
+  Share2,
+  Compass,
+  AlertCircle,
+  Loader2,
+  MapPin,
+  Clock,
+  Navigation,
+  ShieldAlert,
+  CheckCircle2,
+} from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { PlannerApiRepository, PlannerChatResponseDTO } from "@/lib/api-client/planner";
+import {
+  Map,
+  MapMarker,
+  MarkerContent,
+  MarkerLabel,
+  MarkerPopup,
+  MarkerTooltip,
+  MapControls,
+  MapRoute,
+} from "@/components/ui/map";
 
 export const Route = createFileRoute("/planner")({
   head: () => ({
@@ -13,12 +40,12 @@ export const Route = createFileRoute("/planner")({
       {
         name: "description",
         content:
-          "Describe your weekend and get a Tamil Nadu itinerary with timeline, budget, fuel estimate, weather and a packing checklist.",
+          "Describe your weekend and get a Tamil Nadu itinerary with interactive road route map, distance, travel time, fuel cost, weather and packing list.",
       },
       { property: "og:title", content: "AI Trip Planner — ExplorerTN" },
       {
         property: "og:description",
-        content: "Itinerary, budget, fuel and packing list for your next Tamil Nadu ride.",
+        content: "Itinerary, interactive road route map, budget, fuel and packing list for your next Tamil Nadu ride.",
       },
     ],
   }),
@@ -35,29 +62,27 @@ const defaultPacking = [
   "Tyre inflator",
 ];
 
-function PlannerPage() {
+export function PlannerPage() {
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
       role: "assistant",
-      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'one-day bike trip from Chennai with hills').",
+      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'one-day bike trip from Chennai to Ooty via Madurai').",
     },
   ]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Dynamic Planner Results State
+  // Dynamic Route & Planner Response State
+  const [plannerData, setPlannerData] = useState<PlannerChatResponseDTO | null>(null);
   const [timeline, setTimeline] = useState<Array<{ time: string; name: string; description: string }>>([
     {
       time: "06:00 AM",
       name: "Start Location",
-      description: "Enter your starting city to generate a verified Tamil Nadu itinerary.",
+      description: "Enter your starting city to generate a verified Tamil Nadu itinerary and road route.",
     },
   ]);
-  const [budgetDisplay, setBudgetDisplay] = useState("₹3,000");
-  const [fuelEstimate, setFuelEstimate] = useState("₹720");
-  const [weatherDisplay, setWeatherDisplay] = useState("18–28°C");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,21 +97,12 @@ function PlannerPage() {
     try {
       const res: PlannerChatResponseDTO = await PlannerApiRepository.sendChatMessage(userText, conversationId);
       setConversationId(res.conversationId);
+      setPlannerData(res);
       
       setMessages((prev) => [...prev, { role: "assistant", text: res.message }]);
 
-      // Update Dynamic Planner UI
       if (res.timeline && res.timeline.length > 0) {
         setTimeline(res.timeline);
-      }
-      if (res.plannerState?.budget) {
-        setBudgetDisplay(`₹${res.plannerState.budget.toLocaleString("en-IN")}`);
-      }
-      if (res.costEstimate?.fuelCost) {
-        setFuelEstimate(res.costEstimate.fuelCost);
-      }
-      if (res.weather?.tempRange) {
-        setWeatherDisplay(res.weather.tempRange);
       }
     } catch (err: any) {
       const msg = err?.message || "Trip Copilot is temporarily unavailable.";
@@ -103,21 +119,52 @@ function PlannerPage() {
     }
   };
 
+  // Extract Route Coordinates & Markers from API response
+  const rawCoords = plannerData?.route?.geometry?.coordinates || [];
+  // Convert [lng, lat] GeoJSON to [lat, lng] for Mapcn components
+  const mapRoutePoints: Array<[number, number]> = rawCoords.map(([lng, lat]) => [lat, lng]);
+
+  const originName = plannerData?.plannerState?.origin || "Chennai";
+  const destName = plannerData?.plannerState?.destination || "Ooty";
+  const waypointsList = plannerData?.plannerState?.waypoints || [];
+
+  const distanceKm = plannerData?.route?.distanceKm || 0;
+  const durationMins = plannerData?.route?.durationMinutes || 0;
+  const hours = Math.floor(durationMins / 60);
+  const mins = durationMins % 60;
+  const durationDisplay = durationMins > 0 ? `${hours}h ${mins}m` : "N/A";
+
+  const fuelCostDisplay = plannerData?.costEstimate?.fuelCost || "₹0";
+  const totalCostDisplay = plannerData?.costEstimate?.total ? `₹${plannerData.costEstimate.total.toLocaleString("en-IN")}` : "₹3,000";
+  const budgetDisplay = plannerData?.plannerState?.budget ? `₹${plannerData.plannerState.budget.toLocaleString("en-IN")}` : "₹3,000";
+  const weatherDisplay = plannerData?.weather?.tempRange ? `${plannerData.weather.tempRange} (${plannerData.weather.condition || 'Clear'})` : "18–28°C";
+
+  const warnings = plannerData?.validation?.warnings || [];
+  const durationFeasible = plannerData?.validation?.durationFeasible ?? true;
+
   return (
     <AppShell>
       <PageHeader
-        eyebrow="AI Planner"
+        eyebrow="AI Planner & Real Road Routing"
         title="Plan the whole ride in one conversation"
-        description="Tell it where you are, how long you have and what you love. It returns a timeline, a budget, fuel maths, weather and a packing list."
+        description="Tell it where you are, how long you have and what you love. It returns a verified road map, route distance, travel time, fuel cost, weather and packing list."
       />
 
-      <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-24 sm:px-6 lg:grid-cols-[1fr_1fr]">
-        <div className="glass flex h-[560px] flex-col rounded-4xl p-5 shadow-elevate">
-          <p className="mb-4 flex items-center gap-2 text-sm font-medium">
-            <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground">
-              <Compass className="size-4" aria-hidden />
+      <div className="mx-auto grid max-w-6xl gap-6 px-4 pb-24 sm:px-6 lg:grid-cols-[1fr_1.1fr]">
+        {/* Left Column: Chat Conversation Panel */}
+        <div className="glass flex h-[640px] flex-col rounded-4xl p-5 shadow-elevate">
+          <p className="mb-4 flex items-center justify-between text-sm font-medium">
+            <span className="flex items-center gap-2">
+              <span className="grid size-8 place-items-center rounded-xl bg-primary text-primary-foreground">
+                <Compass className="size-4" aria-hidden />
+              </span>
+              Trip copilot
             </span>
-            Trip copilot
+            {plannerData?.traceId && (
+              <span className="rounded-md border border-border/50 bg-background/50 px-2 py-0.5 font-mono text-[10px] text-muted-foreground">
+                {plannerData.traceId}
+              </span>
+            )}
           </p>
 
           {errorMsg && (
@@ -138,14 +185,16 @@ function PlannerPage() {
                 {m.role === "user" ? (
                   <p className="max-w-[85%] rounded-2xl bg-primary px-4 py-3 text-sm text-primary-foreground">{m.text}</p>
                 ) : (
-                  <p className="max-w-[92%] text-sm leading-relaxed text-foreground">{m.text}</p>
+                  <div className="max-w-[95%] rounded-2xl border border-border/60 bg-card/60 p-4 text-sm leading-relaxed text-foreground backdrop-blur-md">
+                    <p className="whitespace-pre-line">{m.text}</p>
+                  </div>
                 )}
               </motion.div>
             ))}
             {loading && (
               <div className="flex items-center gap-2 text-xs text-muted-foreground">
                 <Loader2 className="size-3.5 animate-spin text-primary" />
-                <span>Trip Copilot is querying PostGIS & computing route math...</span>
+                <span>Querying PostGIS, calculating OSRM road geometry & fuel math...</span>
               </div>
             )}
           </div>
@@ -154,7 +203,7 @@ function PlannerPage() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Add a stop, change the budget, ask about weather…"
+              placeholder="e.g. plan a trip to ooty from chennai through madurai"
               aria-label="Message the trip planner"
               disabled={loading}
               className="min-h-11 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
@@ -165,10 +214,132 @@ function PlannerPage() {
           </form>
         </div>
 
+        {/* Right Column: Interactive Route Map, Route Metrics & Itinerary */}
         <div className="space-y-4">
+          {/* Feasibility Alert Banner */}
+          {!durationFeasible && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-200 shadow-md backdrop-blur-md"
+            >
+              <div className="flex items-start gap-3">
+                <ShieldAlert className="mt-0.5 size-5 text-amber-400 shrink-0" />
+                <div>
+                  <h4 className="font-display text-xs font-bold uppercase tracking-wider text-amber-400">
+                    Trip Feasibility Warning
+                  </h4>
+                  {warnings.map((w, idx) => (
+                    <p key={idx} className="mt-1 text-xs text-amber-200/90 leading-relaxed">
+                      {w}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Interactive Mapcn.dev Route Map Card */}
+          <div className="glass overflow-hidden rounded-4xl p-2 shadow-elevate">
+            <div className="flex items-center justify-between px-4 py-2">
+              <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
+                <Navigation className="size-3.5 text-emerald-400" /> Interactive OSRM Road Map
+              </p>
+              {mapRoutePoints.length > 0 && (
+                <span className="rounded-full bg-emerald-500/10 px-2.5 py-0.5 text-[10px] font-bold text-emerald-400">
+                  {plannerData?.route?.provider || "OSRM Engine"}
+                </span>
+              )}
+            </div>
+
+            <Map center={[10.8, 78.7]} zoom={6} style="dark" className="h-[280px] w-full rounded-3xl border-0">
+              <MapControls position="top-right" />
+
+              {/* Render OSRM Road Geometry LineString */}
+              {mapRoutePoints.length > 1 && (
+                <MapRoute coordinates={mapRoutePoints} animated color="#10b981" weight={3.5} />
+              )}
+
+              {/* Origin Marker */}
+              <MapMarker latitude={13.0827} longitude={80.2707}>
+                <MarkerContent>
+                  <span className="relative flex size-3">
+                    <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
+                    <span className="relative inline-flex size-3 rounded-full bg-emerald-500 ring-2 ring-emerald-500/30" />
+                  </span>
+                </MarkerContent>
+                <MarkerLabel>Origin: {originName}</MarkerLabel>
+              </MapMarker>
+
+              {/* Destination Marker */}
+              {destName.toLowerCase().includes("ooty") && (
+                <MapMarker latitude={11.4102} longitude={76.6950}>
+                  <MarkerContent>
+                    <span className="flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-emerald-500/30">
+                      <MapPin className="size-2.5 text-white" />
+                    </span>
+                  </MarkerContent>
+                  <MarkerLabel>Destination: Ooty</MarkerLabel>
+                  <MarkerTooltip>Queen of Hill Stations (Nilgiris)</MarkerTooltip>
+                  <MarkerPopup title="Ooty (Nilgiris)" rating={4.8}>
+                    <p className="text-xs text-muted-foreground">2,240m elevation hill station in Nilgiris.</p>
+                  </MarkerPopup>
+                </MapMarker>
+              )}
+
+              {/* Waypoint Marker */}
+              {waypointsList.some((w) => w.toLowerCase().includes("madurai")) && (
+                <MapMarker latitude={9.9252} longitude={78.1198}>
+                  <MarkerContent>
+                    <span className="size-3 rounded-full bg-amber-400 ring-2 ring-amber-400/30" />
+                  </MarkerContent>
+                  <MarkerLabel>Waypoint: Madurai</MarkerLabel>
+                </MapMarker>
+              )}
+            </Map>
+          </div>
+
+          {/* Route Metrics Summary Grid */}
+          <div className="grid gap-3 sm:grid-cols-4">
+            <div className="rounded-3xl border border-border bg-card p-3.5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Navigation className="size-3 text-emerald-400" /> Distance
+              </p>
+              <p className="mt-1.5 font-display text-base font-bold text-foreground">
+                {distanceKm > 0 ? `${distanceKm.toLocaleString("en-IN")} km` : "0 km"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Round-trip road</p>
+            </div>
+
+            <div className="rounded-3xl border border-border bg-card p-3.5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Clock className="size-3 text-sky-400" /> Riding Time
+              </p>
+              <p className="mt-1.5 font-display text-base font-bold text-foreground">{durationDisplay}</p>
+              <p className="text-[10px] text-muted-foreground">OSRM Riding ETA</p>
+            </div>
+
+            <div className="rounded-3xl border border-border bg-card p-3.5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Fuel className="size-3 text-amber-400" /> Fuel Cost
+              </p>
+              <p className="mt-1.5 font-display text-base font-bold text-foreground">{fuelCostDisplay}</p>
+              <p className="text-[10px] text-muted-foreground">@ 32 km/L mileage</p>
+            </div>
+
+            <div className="rounded-3xl border border-border bg-card p-3.5">
+              <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
+                <Wallet className="size-3 text-purple-400" /> Total Cost
+              </p>
+              <p className="mt-1.5 font-display text-base font-bold text-foreground">{totalCostDisplay}</p>
+              <p className="text-[10px] text-muted-foreground">Budget: {budgetDisplay}</p>
+            </div>
+          </div>
+
+          {/* Generated Timeline Card */}
           <div className="glass rounded-4xl p-5 shadow-elevate">
             <p className="flex items-center gap-2 text-sm font-medium">
-              <Sparkles className="size-4 text-gold" aria-hidden /> Generated itinerary
+              <Sparkles className="size-4 text-gold" aria-hidden /> Verified Itinerary Timeline
             </p>
             <ol className="mt-4 space-y-3 border-l border-border pl-5">
               {timeline.map((s, i) => (
@@ -187,24 +358,7 @@ function PlannerPage() {
             </ol>
           </div>
 
-          <div className="grid gap-3 sm:grid-cols-3">
-            {[
-              [Wallet, "Budget", budgetDisplay],
-              [Fuel, "Fuel", fuelEstimate],
-              [CloudSun, "Weather", weatherDisplay],
-            ].map(([Icon, label, value]) => {
-              const I = Icon as typeof Wallet;
-              return (
-                <div key={label as string} className="rounded-3xl border border-border bg-card p-4">
-                  <p className="flex items-center gap-2 text-[11px] uppercase tracking-wide text-muted-foreground">
-                    <I className="size-3.5 text-primary" aria-hidden /> {label as string}
-                  </p>
-                  <p className="mt-2 font-display text-lg font-semibold">{value as string}</p>
-                </div>
-              );
-            })}
-          </div>
-
+          {/* Packing Checklist Card */}
           <div className="glass rounded-4xl p-5">
             <p className="flex items-center gap-2 text-sm font-medium">
               <Backpack className="size-4 text-sunset" aria-hidden /> Packing checklist
