@@ -1,23 +1,34 @@
-import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
-import { Compass, Map, Route, Sparkles, Users, Bell, Search, Menu, Sun, Moon, Mic, Server, Flame, Mountain, Landmark } from "lucide-react";
-import { motion } from "motion/react";
+import { useEffect, useState, useRef } from "react";
+import { Link, useLocation } from "@tanstack/react-router";
+import {
+  Compass,
+  Map,
+  Route,
+  Sparkles,
+  Users,
+  Bell,
+  Search,
+  Menu,
+  Sun,
+  Moon,
+  Mic,
+  Server,
+  Flame,
+  Mountain,
+  Landmark,
+  ChevronDown,
+  Waves,
+  Utensils,
+  Footprints,
+  Trees,
+  CloudRain,
+  X,
+} from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ProfileMenu } from "@/components/site/profile-menu";
 import { cn } from "@/lib/utils";
 import { checkBackendHealth } from "@/lib/api";
-
-const links = [
-  { to: "/explore", label: "Explore", icon: Map },
-  { to: "/routes", label: "Routes", icon: Route },
-  { to: "/western-ghats", label: "Western Ghats", icon: Mountain },
-  { to: "/hills-of-tn", label: "TN Hills", icon: Mountain },
-  { to: "/madurai", label: "Madurai", icon: Landmark },
-  { to: "/hill-escapes", label: "Hills", icon: Mountain },
-  { to: "/coastal-heritage", label: "Coastal", icon: Compass },
-  { to: "/theni", label: "Theni", icon: Flame },
-  { to: "/planner", label: "AI Planner", icon: Sparkles },
-];
 
 function useTheme() {
   const [dark, setDark] = useState(true);
@@ -38,11 +49,46 @@ function useTheme() {
   return { dark, toggle };
 }
 
+// Explore Dropdown Content Items
+const DISCOVER_COLLECTIONS = [
+  { to: "/explore", label: "Tamil Nadu", desc: "Full-screen spatial map & catalog", icon: Map },
+  { to: "/madurai", label: "Madurai", desc: "Temples, landmarks & street food", icon: Landmark },
+  { to: "/theni", label: "Theni", desc: "Waterfalls, tea estates & river trails", icon: Flame },
+  { to: "/hills-of-tn", label: "TN Hills", desc: "Kolli, Yelagiri, Gingee & Kalrayan", icon: Mountain },
+  { to: "/western-ghats", label: "Western Ghats", desc: "Kinnakorai, Mullayanagiri & Agumbe", icon: Trees },
+  { to: "/coastal-heritage", label: "Coastal Routes", desc: "Chennai to Dhanushkodi road trip", icon: Compass },
+];
+
+const EXPERIENCE_ITEMS = [
+  { to: "/explore?cat=temples", label: "Temples", icon: Landmark },
+  { to: "/explore?cat=waterfalls", label: "Waterfalls", icon: CloudRain },
+  { to: "/hill-escapes", label: "Hills", icon: Mountain },
+  { to: "/explore?cat=beaches", label: "Beaches", icon: Waves },
+  { to: "/madurai", label: "Food Trails", icon: Utensils },
+  { to: "/explore?cat=adventure", label: "Adventure", icon: Footprints },
+];
+
 export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
+  const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const [exploreMenuOpen, setExploreMenuOpen] = useState(false);
   const [isBackendLive, setIsBackendLive] = useState(false);
   const { dark, toggle } = useTheme();
+
+  const menuTimeoutRef = useRef<any>(null);
+
+  const pathname = location.pathname;
+
+  // Active check for Explore hierarchy (includes all destination sub-pages)
+  const isExploreActive =
+    pathname === "/explore" ||
+    pathname === "/madurai" ||
+    pathname === "/theni" ||
+    pathname === "/hills-of-tn" ||
+    pathname === "/western-ghats" ||
+    pathname === "/coastal-heritage" ||
+    pathname === "/hill-escapes";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -51,6 +97,17 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
     checkBackendHealth().then((isOnline) => setIsBackendLive(isOnline));
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
+
+  const handleMouseEnterExplore = () => {
+    if (menuTimeoutRef.current) clearTimeout(menuTimeoutRef.current);
+    setExploreMenuOpen(true);
+  };
+
+  const handleMouseLeaveExplore = () => {
+    menuTimeoutRef.current = setTimeout(() => {
+      setExploreMenuOpen(false);
+    }, 150);
+  };
 
   return (
     <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-6 font-sans">
@@ -82,44 +139,165 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           )}
         </div>
 
-        {/* Center: Navigation Links */}
-        <div className="hidden items-center gap-2 lg:flex">
-          {links.map((l) => (
+        {/* Center: Scalable Primary Navigation (5 Main Items) */}
+        <div className="hidden items-center gap-1.5 lg:flex">
+          {/* 1. Explore Popover Menu */}
+          <div
+            className="relative"
+            onMouseEnter={handleMouseEnterExplore}
+            onMouseLeave={handleMouseLeaveExplore}
+          >
             <Link
-              key={l.to}
-              to={l.to}
-              className="rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-              activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+              to="/explore"
+              className={cn(
+                "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white",
+                isExploreActive
+                  ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30"
+                  : "text-slate-600 dark:text-[#A1A8B3]",
+              )}
             >
-              {l.label}
+              <Map className="size-4" />
+              <span>Explore</span>
+              <ChevronDown className={`size-3.5 transition-transform ${exploreMenuOpen ? "rotate-180 text-emerald-400" : ""}`} />
             </Link>
-          ))}
+
+            {/* Explore Hover/Click Dropdown Popover */}
+            <AnimatePresence>
+              {exploreMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute top-full left-0 mt-3 w-[540px] rounded-3xl border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#121821]/95 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-900 dark:text-white"
+                >
+                  <div className="grid grid-cols-2 gap-6">
+                    {/* Discover Column */}
+                    <div>
+                      <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1">
+                        <Compass className="size-3" /> Discover Regions
+                      </div>
+                      <div className="space-y-1">
+                        {DISCOVER_COLLECTIONS.map((c) => {
+                          const Icon = c.icon;
+                          return (
+                            <Link
+                              key={c.to}
+                              to={c.to}
+                              onClick={() => setExploreMenuOpen(false)}
+                              className="flex items-start gap-2.5 p-2 rounded-2xl transition hover:bg-slate-100 dark:hover:bg-white/10 group"
+                            >
+                              <Icon className="size-4 text-emerald-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
+                              <div>
+                                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                  {c.label}
+                                </div>
+                                <div className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
+                                  {c.desc}
+                                </div>
+                              </div>
+                            </Link>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Experiences Column */}
+                    <div>
+                      <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1">
+                        <Sparkles className="size-3" /> Experiences
+                      </div>
+                      <div className="grid grid-cols-2 gap-1.5">
+                        {EXPERIENCE_ITEMS.map((exp) => {
+                          const Icon = exp.icon;
+                          return (
+                            <Link
+                              key={exp.label}
+                              to={exp.to}
+                              onClick={() => setExploreMenuOpen(false)}
+                              className="flex items-center gap-2 p-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition"
+                            >
+                              <Icon className="size-3.5 text-emerald-500 shrink-0" />
+                              <span>{exp.label}</span>
+                            </Link>
+                          );
+                        })}
+                      </div>
+
+                      <div className="mt-4 p-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-[11px] text-slate-700 dark:text-slate-300">
+                        💡 Explore 52+ canonical destinations with Leaflet dark map tiles & isolated route engine.
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
+          {/* 2. Routes */}
+          <Link
+            to="/routes"
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+          >
+            <Route className="size-4" />
+            <span>Routes</span>
+          </Link>
+
+          {/* 3. Adventures */}
+          <Link
+            to="/adventures"
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+          >
+            <Footprints className="size-4" />
+            <span>Adventures</span>
+          </Link>
+
+          {/* 4. AI Planner */}
+          <Link
+            to="/planner"
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+          >
+            <Sparkles className="size-4 text-emerald-500" />
+            <span>AI Planner</span>
+          </Link>
+
+          {/* 5. Community */}
+          <Link
+            to="/community"
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+          >
+            <Users className="size-4" />
+            <span>Community</span>
+          </Link>
         </div>
 
-        {/* Right Section: Search Bar & Profile Hover Menu */}
+        {/* Right Section: Search Bar & Profile Controls */}
         <div className="flex items-center gap-3 ml-auto shrink-0">
           {/* Search Bar */}
           <motion.button
             type="button"
             onClick={onSearch}
-            initial={{ width: 280 }}
-            whileHover={{ width: 360 }}
-            whileFocus={{ width: 360 }}
+            initial={{ width: 240 }}
+            whileHover={{ width: 300 }}
+            whileFocus={{ width: 300 }}
             transition={{ type: "spring", stiffness: 250, damping: 24 }}
-            className="hidden md:flex h-[52px] items-center justify-between gap-3 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/72 px-4 backdrop-blur-[24px] shadow-sm transition-all hover:border-emerald-500/50 hover:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] cursor-pointer group"
+            className="hidden md:flex h-[46px] items-center justify-between gap-3 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/72 px-4 backdrop-blur-[24px] shadow-sm transition-all hover:border-emerald-500/50 hover:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] cursor-pointer group"
           >
-            <div className="flex items-center gap-2.5 min-w-0">
-              <Search className="size-5 text-slate-400 dark:text-[#A1A8B3] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors shrink-0" aria-hidden />
-              <span className="truncate text-sm font-medium text-slate-500 dark:text-[#A1A8B3] group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                Search waterfalls, routes, tea estates...
+            <div className="flex items-center gap-2 min-w-0">
+              <Search className="size-4 text-slate-400 dark:text-[#A1A8B3] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors shrink-0" aria-hidden />
+              <span className="truncate text-xs font-medium text-slate-500 dark:text-[#A1A8B3] group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
+                Search places & routes...
               </span>
             </div>
 
-            <div className="flex items-center gap-2 shrink-0">
-              <kbd className="inline-flex items-center rounded-lg border border-slate-200 dark:border-white/15 bg-slate-100 dark:bg-white/5 px-2 py-0.5 text-xs font-mono text-slate-500 dark:text-[#A1A8B3]">
+            <div className="flex items-center gap-1.5 shrink-0">
+              <kbd className="inline-flex items-center rounded-md border border-slate-200 dark:border-white/15 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-slate-500 dark:text-[#A1A8B3]">
                 ⌘ K
               </kbd>
-              <Mic className="size-4 text-slate-400 dark:text-[#A1A8B3] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-opacity" />
             </div>
           </motion.button>
 
@@ -127,19 +305,30 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <button
             type="button"
             onClick={onSearch}
-            className="flex md:hidden size-11 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/72 backdrop-blur-[24px] text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white"
+            className="flex md:hidden size-10 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/72 backdrop-blur-[24px] text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white"
             aria-label="Search"
           >
-            <Search className="size-5" />
+            <Search className="size-4" />
           </button>
 
-          {/* Controls & Profile Menu */}
+          {/* Utility Controls & Profile Menu */}
           <div className="hidden items-center gap-2 sm:flex">
-            <Button variant="ghost" size="icon" className="rounded-full size-11 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50 text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm" aria-label="Notifications">
-              <Bell className="size-5" />
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full size-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50 text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
+              aria-label="Notifications"
+            >
+              <Bell className="size-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="rounded-full size-11 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50 text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm" onClick={toggle} aria-label="Toggle theme">
-              {dark ? <Sun className="size-5 text-amber-400" /> : <Moon className="size-5 text-slate-700" />}
+            <Button
+              variant="ghost"
+              size="icon"
+              className="rounded-full size-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50 text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm cursor-pointer"
+              onClick={toggle}
+              aria-label="Toggle theme"
+            >
+              {dark ? <Sun className="size-4 text-amber-400" /> : <Moon className="size-4 text-slate-700" />}
             </Button>
 
             <ProfileMenu dark={dark} toggleTheme={toggle} />
@@ -148,37 +337,111 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden rounded-full size-11 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50"
+            className="lg:hidden rounded-full size-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50"
             onClick={() => setOpen((o) => !o)}
             aria-label="Open menu"
             aria-expanded={open}
           >
-            <Menu className="size-5" />
+            {open ? <X className="size-5" /> : <Menu className="size-5" />}
           </Button>
         </div>
       </nav>
 
-      {/* Mobile Drawer */}
+      {/* Structured Mobile Drawer */}
       {open && (
-        <div className="mx-auto mt-3 max-w-[1400px] rounded-3xl p-4 lg:hidden border border-slate-200 dark:border-white/15 shadow-xl bg-white/95 dark:bg-[#121821]/95 backdrop-blur-[24px] text-slate-900 dark:text-white">
-          {links.map((l) => (
-            <Link
-              key={l.to}
-              to={l.to}
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-3 rounded-2xl px-4 py-3 text-base font-bold text-slate-600 dark:text-muted-foreground hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-              activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400" }}
-            >
-              <l.icon className="size-5" aria-hidden />
-              {l.label}
-            </Link>
-          ))}
+        <div className="mx-auto mt-3 max-w-[1400px] rounded-3xl p-5 lg:hidden border border-slate-200 dark:border-white/15 shadow-2xl bg-white/95 dark:bg-[#121821]/95 backdrop-blur-[24px] text-slate-900 dark:text-white space-y-4 max-h-[85vh] overflow-y-auto">
+          {/* Primary Navigation */}
+          <div>
+            <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
+              Primary Navigation
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {[
+                { to: "/explore", label: "Explore", icon: Map },
+                { to: "/routes", label: "Routes", icon: Route },
+                { to: "/adventures", label: "Adventures", icon: Footprints },
+                { to: "/planner", label: "AI Planner", icon: Sparkles },
+                { to: "/community", label: "Community", icon: Users },
+              ].map((l) => {
+                const Icon = l.icon;
+                return (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10"
+                    activeProps={{ className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" }}
+                  >
+                    <Icon className="size-4 text-emerald-500" />
+                    <span>{l.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <hr className="border-slate-200 dark:border-white/10" />
+
+          {/* Discover Collections */}
+          <div>
+            <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
+              Discover Destinations
+            </div>
+            <div className="grid grid-cols-2 gap-1.5">
+              {DISCOVER_COLLECTIONS.map((c) => {
+                const Icon = c.icon;
+                return (
+                  <Link
+                    key={c.to}
+                    to={c.to}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
+                  >
+                    <Icon className="size-3.5 text-emerald-500" />
+                    <span>{c.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <hr className="border-slate-200 dark:border-white/10" />
+
+          {/* Experiences */}
+          <div>
+            <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
+              Experiences
+            </div>
+            <div className="grid grid-cols-3 gap-1.5">
+              {EXPERIENCE_ITEMS.map((exp) => {
+                const Icon = exp.icon;
+                return (
+                  <Link
+                    key={exp.label}
+                    to={exp.to}
+                    onClick={() => setOpen(false)}
+                    className="flex items-center gap-1.5 p-2 rounded-xl text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
+                  >
+                    <Icon className="size-3.5 text-emerald-500" />
+                    <span>{exp.label}</span>
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+
+          <hr className="border-slate-200 dark:border-white/10" />
+
           <button
+            type="button"
             onClick={toggle}
-            className="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-base font-bold text-slate-600 dark:text-muted-foreground hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
+            className="flex w-full items-center justify-between rounded-2xl px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5"
           >
-            {dark ? <Sun className="size-4" /> : <Moon className="size-4" />}
-            {dark ? "Light mode" : "Dark mode"}
+            <span className="flex items-center gap-2">
+              {dark ? <Sun className="size-4 text-amber-400" /> : <Moon className="size-4 text-slate-700" />}
+              {dark ? "Light mode" : "Dark mode"}
+            </span>
+            <span className="text-[10px] text-slate-400 font-mono">Toggle</span>
           </button>
         </div>
       )}
@@ -187,22 +450,47 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 }
 
 export function MobileTabBar() {
+  const location = useLocation();
+  const pathname = location.pathname;
+
+  const isExploreActive =
+    pathname === "/explore" ||
+    pathname === "/madurai" ||
+    pathname === "/theni" ||
+    pathname === "/hills-of-tn" ||
+    pathname === "/western-ghats" ||
+    pathname === "/coastal-heritage" ||
+    pathname === "/hill-escapes";
+
   return (
     <nav
       className="fixed inset-x-3 bottom-3 z-50 flex items-center justify-around rounded-2xl px-2 py-2 sm:hidden bg-white/90 dark:bg-[#121821]/90 backdrop-blur-[24px] border border-slate-200 dark:border-white/15 shadow-lg"
-      aria-label="Mobile"
+      aria-label="Mobile Bottom Bar"
     >
-      {[{ to: "/", label: "Home", icon: Compass }, ...links.slice(0, 3)].map((l) => (
-        <Link
-          key={l.to}
-          to={l.to}
-          className="flex min-h-11 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium text-slate-600 dark:text-muted-foreground"
-          activeProps={{ className: "text-emerald-600 dark:text-emerald-400 font-bold" }}
-        >
-          <l.icon className="size-5" aria-hidden />
-          {l.label}
-        </Link>
-      ))}
+      {[
+        { to: "/", label: "Home", icon: Compass, isActive: pathname === "/" },
+        { to: "/explore", label: "Explore", icon: Map, isActive: isExploreActive },
+        { to: "/routes", label: "Routes", icon: Route, isActive: pathname === "/routes" },
+        { to: "/planner", label: "AI Planner", icon: Sparkles, isActive: pathname === "/planner" },
+        { to: "/community", label: "Community", icon: Users, isActive: pathname === "/community" },
+      ].map((l) => {
+        const Icon = l.icon;
+        return (
+          <Link
+            key={l.to}
+            to={l.to}
+            className={cn(
+              "flex min-h-11 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium transition-colors",
+              l.isActive
+                ? "text-emerald-600 dark:text-emerald-400 font-bold"
+                : "text-slate-600 dark:text-muted-foreground",
+            )}
+          >
+            <Icon className="size-5" aria-hidden />
+            {l.label}
+          </Link>
+        );
+      })}
     </nav>
   );
 }
