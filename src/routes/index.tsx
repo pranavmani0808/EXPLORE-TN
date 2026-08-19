@@ -94,8 +94,8 @@ function Index() {
         onClose={() => setIsDedicatedMapOpen(false)}
       />
 
-      {/* Hero Header */}
-      <section className="relative min-h-[85vh] overflow-hidden">
+      {/* Dark Mountain Hero Header with Atmospheric Transition */}
+      <section className="relative min-h-[75vh] sm:min-h-[82vh] overflow-hidden bg-[#0B0F14]">
         <motion.img
           src={heroImg}
           alt="Misty Western Ghats at sunrise in Tamil Nadu"
@@ -104,27 +104,33 @@ function Index() {
           initial={{ scale: 1.12 }}
           animate={{ scale: 1 }}
           transition={{ duration: 2.4, ease: "easeOut" }}
-          className="absolute inset-0 size-full object-cover"
+          className="absolute inset-0 size-full object-cover opacity-60"
         />
-        <div className="absolute inset-0 bg-background/78" />
-        <div className="absolute inset-0 bg-fade-bottom" />
+        {/* Dark Vignette & Top Tint Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0F14]/85 via-[#0B0F14]/40 to-transparent" />
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-32 sm:px-6 sm:pt-40">
+        {/* Layered Mountain Dissolve Fade Downward */}
+        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#031417]/85 to-[#0B0F14] pointer-events-none" />
+
+        {/* Subtle Ambient Emerald/Teal Atmospheric Fog Glow */}
+        <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[850px] h-[260px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
+
+        <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-32 sm:px-6 sm:pt-40">
           <div className="max-w-3xl">
             <motion.p
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wide"
+              className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wide text-white border-white/10"
             >
-              <Compass className="size-3.5 text-primary" aria-hidden /> Map-First Spatial Platform · 1,240 places · 38 districts
+              <Compass className="size-3.5 text-emerald-400" aria-hidden /> Map-First Spatial Platform · 1,240 places · 38 districts
             </motion.p>
 
             <motion.h1
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2, duration: 0.7 }}
-              className="mt-6 text-5xl font-extrabold leading-[0.95] sm:text-7xl"
+              className="mt-6 text-5xl font-extrabold leading-[0.95] sm:text-7xl text-white"
             >
               Tamil Nadu,
               <br />
@@ -135,7 +141,7 @@ function Index() {
               initial={{ opacity: 0, y: 24 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.32, duration: 0.7 }}
-              className="mt-6 max-w-xl text-base text-muted-foreground sm:text-lg"
+              className="mt-6 max-w-xl text-base text-slate-300 sm:text-lg"
             >
               Hidden waterfalls, seventy-hairpin ghat roads, Arupadai Veedu sacred temple trails, and midnight food crawls —
               mapped, verified and built for map-first spatial exploration.
@@ -150,13 +156,13 @@ function Index() {
               <button
                 type="button"
                 onClick={() => setSearchOpen(true)}
-                className="glass-strong flex w-full max-w-xl items-center gap-3 rounded-2xl px-5 py-4 text-left shadow-elevate transition-shadow hover:shadow-glow"
+                className="glass-strong flex w-full max-w-xl items-center gap-3 rounded-2xl px-5 py-4 text-left shadow-elevate transition-shadow hover:shadow-glow bg-[#121821]/85 border-white/15 text-white"
               >
-                <Search className="size-5 text-primary" aria-hidden />
-                <span className="flex-1 text-sm text-muted-foreground sm:text-base">
+                <Search className="size-5 text-emerald-400" aria-hidden />
+                <span className="flex-1 text-sm text-slate-300 sm:text-base">
                   Where do you want to disappear this weekend?
                 </span>
-                <span className="hidden rounded-lg border border-border px-2 py-1 text-xs text-muted-foreground sm:block">
+                <span className="hidden rounded-lg border border-white/20 bg-white/5 px-2 py-1 text-xs text-slate-300 sm:block">
                   ⌘K
                 </span>
               </button>
@@ -166,7 +172,7 @@ function Index() {
                   <button
                     key={s}
                     onClick={() => setSearchOpen(true)}
-                    className="glass rounded-full px-3.5 py-2 text-xs font-medium text-muted-foreground transition-colors hover:text-foreground"
+                    className="glass rounded-full px-3.5 py-2 text-xs font-medium text-slate-300 transition-colors hover:text-white hover:border-emerald-500/40 bg-white/5 border-white/10"
                   >
                     {s}
                   </button>
@@ -177,16 +183,16 @@ function Index() {
         </div>
       </section>
 
-      {/* Prominent Google Map Feature Section on Home Page */}
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      {/* Prominent Google Map Feature Section on Home Page — Seamless Dark Continuation */}
+      <section className="relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-4 sm:px-6 -mt-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
               <MapPin className="size-4 text-emerald-400" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Core Map Experience</span>
+              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Core Map Experience</span>
             </div>
-            <h2 className="mt-2 text-3xl font-bold sm:text-4xl">Interactive Spatial Explorer</h2>
-            <p className="mt-1 text-sm text-muted-foreground">The heart of ExplorerTN — click pins, filter layers, and discover trails.</p>
+            <h2 className="mt-2 text-3xl font-bold sm:text-4xl text-white">Interactive Spatial Explorer</h2>
+            <p className="mt-1 text-sm text-slate-400">The heart of ExplorerTN — click pins, filter layers, and discover trails.</p>
           </div>
 
           <Button 
