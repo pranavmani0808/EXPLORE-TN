@@ -12,17 +12,18 @@ from backend.app.services.intelligence.route_validator import route_sanity_valid
 from backend.app.core.config import settings
 
 class PlannerState(BaseModel):
-    origin: Optional[str] = None
-    destination: Optional[str] = None
+    origin: Optional[str] = "Chennai"
+    destination: Optional[str] = "Madurai"
     waypoints: List[str] = []
     trail: Optional[str] = None
-    durationDays: Optional[int] = 3
+    durationDays: Optional[int] = 1
     budget: Optional[float] = None
     transport: Optional[str] = "motorcycle"
     departureTime: Optional[str] = "06:00"
     overnightTravel: Optional[bool] = False
     interests: List[str] = []
-    travelers: Optional[int] = 1
+    foodPreferences: List[str] = []
+    foodStops: List[dict] = []
 
 class PlannerService:
     def __init__(self):
@@ -43,13 +44,15 @@ class PlannerService:
         lower = text.lower().strip()
         if lower in ["hi", "hello", "hey", "greetings", "good morning", "good evening"]:
             return "GREETING"
+        if any(k in lower for k in ["food", "foods", "eat", "restaurant", "mess", "biryani", "jigarthanda", "parotta", "taste", "dining"]):
+            return "FOOD_DISCOVERY"
         if "weather" in lower or "rain" in lower or "temperature" in lower:
             return "WEATHER_QUERY"
         if "cost" in lower or "budget" in lower or "fuel" in lower or "price" in lower or "under" in lower:
             return "COST_QUERY"
         if "make it" in lower and ("day" in lower or "days" in lower):
             return "CHANGE_DURATION"
-        if any(k in lower for k in ["arupadai", "six murugan", "6 murugan", "six abodes"]):
+        if any(k in lower for k in ["arupadai", "six murugan", "6 murugan", "six abodes", "murugan circuit"]):
             return "ARUPADAI_VEEDU_TRAIL"
         return "PLAN_TRIP"
 
@@ -81,16 +84,18 @@ class PlannerService:
         }
 
     def resolve_place_by_name(self, name: str, verified_places: List[dict]) -> Optional[dict]:
+        if not name:
+            return None
         clean_target = name.strip().lower()
-        
-        for p in verified_places:
-            p_name = p.get("name", "").lower()
-            p_dist = p.get("district", "").lower()
-            p_slug = p.get("slug", "").lower()
-            if clean_target in p_name or p_name in clean_target or clean_target == p_dist or clean_target in p_slug:
-                return p
 
+        # 1. Well-Known Tamil Nadu Geocoder Dictionary (CHECKED FIRST BEFORE DISTRICT MATCHING - BUG 1 & 6 FIX)
         KNOWN_GEOLOCATIONS = {
+            "madurai": {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198, "verified": True, "category": "city", "tagline": "Cultural & Culinary Capital of Tamil Nadu"},
+            "chennai": {"name": "Chennai", "district": "Chennai", "latitude": 13.0827, "longitude": 80.2707, "verified": True, "category": "city", "tagline": "Capital City"},
+            "ooty": {"name": "Ooty", "district": "Nilgiris", "latitude": 11.4102, "longitude": 76.6950, "verified": True, "category": "hill_station", "tagline": "Queen of Hill Stations"},
+            "aruppukottai": {"name": "Aruppukottai", "district": "Virudhunagar", "latitude": 9.5085, "longitude": 78.0991, "verified": True, "category": "city", "tagline": "Heritage Weaver Town near Madurai"},
+            "kodaikanal": {"name": "Kodaikanal", "district": "Dindigul", "latitude": 10.2381, "longitude": 77.4892, "verified": True, "category": "hill_station", "tagline": "Princess of Hill Stations"},
+            "valparai": {"name": "Valparai", "district": "Coimbatore", "latitude": 10.3270, "longitude": 76.9554, "verified": True, "category": "hill_station", "tagline": "70 Hairpin Pass Ghat Run"},
             "thiruttani": {"name": "Thiruttani Murugan Temple", "district": "Tiruvallur", "latitude": 13.1788, "longitude": 79.6074, "verified": True, "category": "temple", "tagline": "1st Arupadai Veedu"},
             "thiruttani murugan temple": {"name": "Thiruttani Murugan Temple", "district": "Tiruvallur", "latitude": 13.1788, "longitude": 79.6074, "verified": True, "category": "temple", "tagline": "1st Arupadai Veedu"},
             "swamimalai": {"name": "Swamimalai Murugan Temple", "district": "Thanjavur", "latitude": 10.9567, "longitude": 79.3274, "verified": True, "category": "temple", "tagline": "2nd Arupadai Veedu"},
@@ -103,25 +108,58 @@ class PlannerService:
             "pazhamudircholai murugan temple": {"name": "Pazhamudircholai Murugan Temple", "district": "Madurai", "latitude": 10.0911, "longitude": 78.2173, "verified": True, "category": "temple", "tagline": "5th Arupadai Veedu"},
             "thirupparankundram": {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710, "verified": True, "category": "temple", "tagline": "6th Arupadai Veedu"},
             "thirupparankundram murugan temple": {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710, "verified": True, "category": "temple", "tagline": "6th Arupadai Veedu"},
-            "madurai": {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198, "verified": True, "category": "city", "tagline": "Cultural Capital of Tamil Nadu"},
-            "chennai": {"name": "Chennai", "district": "Chennai", "latitude": 13.0827, "longitude": 80.2707, "verified": True, "category": "city", "tagline": "Capital City"},
-            "ooty": {"name": "Ooty", "district": "Nilgiris", "latitude": 11.4102, "longitude": 76.6950, "verified": True, "category": "hill_station", "tagline": "Queen of Hill Stations"},
-            "kodaikanal": {"name": "Kodaikanal", "district": "Dindigul", "latitude": 10.2381, "longitude": 77.4892, "verified": True, "category": "hill_station", "tagline": "Princess of Hill Stations"},
-            "valparai": {"name": "Valparai", "district": "Coimbatore", "latitude": 10.3270, "longitude": 76.9554, "verified": True, "category": "hill_station", "tagline": "70 Hairpin Pass Ghat Run"},
         }
 
         if clean_target in KNOWN_GEOLOCATIONS:
             return KNOWN_GEOLOCATIONS[clean_target]
 
+        # 2. Exact Name Match in DB
+        for p in verified_places:
+            if clean_target == p.get("name", "").lower() or clean_target == p.get("slug", "").lower():
+                return p
+
+        # 3. Substring Name Match (Only if exact match failed)
+        for p in verified_places:
+            p_name = p.get("name", "").lower()
+            if clean_target in p_name:
+                return p
+
         return None
+
+    def get_local_food_spots(self, destination_name: str) -> List[dict]:
+        dest_lower = destination_name.lower()
+        if "madurai" in dest_lower:
+            return [
+                {"name": "Murugan Idli Shop", "location": "West Masi St, Madurai", "specialty": "Famous Soft Melt-in-mouth Idlis & 4 Chutneys", "category": "local_cuisine"},
+                {"name": "Madurai Famous Jigarthanda", "location": "Town Hall Rd, Madurai", "specialty": "Traditional Almond Gum & Nannari Cooling Dessert", "category": "dessert"},
+                {"name": "Simmakkal Konar Kadai", "location": "Simmakkal, Madurai", "specialty": "Original Mutton Kari Dosa & Brain Fry", "category": "non_veg_legend"},
+                {"name": "Amma Mess", "location": "K.K. Nagar, Madurai", "specialty": "Ayirai Meen Curry & Bone Marrow Omelette", "category": "non_veg_legend"}
+            ]
+        elif "chennai" in dest_lower:
+            return [
+                {"name": "Ratna Cafe", "location": "Triplicane, Chennai", "specialty": "Piping Hot Piping Sambar Idli", "category": "local_cuisine"},
+                {"name": "Buhari Hotel", "location": "Mount Road, Chennai", "specialty": "Original 1965 Heritage Chicken 65", "category": "non_veg_legend"}
+            ]
+        elif "ooty" in dest_lower:
+            return [
+                {"name": "Kingstar Confectionery", "location": "Commercial Rd, Ooty", "specialty": "Handmade Ooty Fudge & Chocolates", "category": "bakery"},
+                {"name": "Nahars Sidewalk Cafe", "location": "Charing Cross, Ooty", "specialty": "Woodfired Pizza & Hot Chocolate", "category": "cafe"}
+            ]
+        return [
+            {"name": f"Traditional {destination_name} Mess", "location": destination_name, "specialty": "Banana Leaf Meal & Local Delicacies", "category": "local_cuisine"}
+        ]
 
     def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str) -> dict:
         cid, session = self.get_or_create_conversation(conversation_id)
-        intent_type = self.classify_intent(user_message)
+        
+        # 1. Independently parse current turn's intent & entities against previous clean state
+        prev_state = session["state"]
+        structured_intent = intent_extractor.extract_intent(user_message, prev_state)
+        intent_type = structured_intent.intentCategory
 
         if intent_type == "GREETING":
             session["messages"].append({"role": "user", "text": user_message})
-            greeting_text = "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan an Arupadai Veedu trip from Chennai')."
+            greeting_text = "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan a bike trip to Madurai')."
             session["messages"].append({"role": "assistant", "text": greeting_text})
             
             return {
@@ -162,67 +200,92 @@ class PlannerService:
                 "traceId": trace_id
             }
 
-        structured_intent = intent_extractor.extract_intent(user_message, session["state"])
-        
-        prev_state = session["state"]
-        merged_state = structured_intent.model_dump()
-        if prev_state.get("trail"):
-            merged_state["trail"] = prev_state["trail"]
-            if not merged_state.get("waypoints") and prev_state.get("waypoints"):
-                merged_state["waypoints"] = prev_state["waypoints"]
-            if not merged_state.get("destination") and prev_state.get("destination"):
-                merged_state["destination"] = prev_state["destination"]
-
-        session["state"] = merged_state
-        session["messages"].append({"role": "user", "text": user_message})
-
         all_places = places_service.get_all_places()
         verified_places = [p for p in all_places if p.get("verified", True)]
 
-        # 1. Resolve Destination & Enforce Destination Integrity Guard
-        requested_dest = merged_state.get("destination")
-        resolved_dest_place = None
-        if requested_dest:
-            resolved_dest_place = self.resolve_place_by_name(requested_dest, verified_places)
+        # 2. State Mutation & Destination Resolution (BUG 3, 4, 5, 8 FIX)
+        target_dest_name = structured_intent.destination or prev_state.get("destination") or "Madurai"
+        resolved_dest_place = self.resolve_place_by_name(target_dest_name, verified_places)
 
-            if not resolved_dest_place:
-                clarification_msg = (
-                    f"I couldn't confidently locate '{requested_dest}' in my Tamil Nadu place database. "
-                    f"Did you mean Thirupparankundram, Palani, Thiruttani, or Madurai?"
-                )
-                session["messages"].append({"role": "assistant", "text": clarification_msg})
-                return {
-                    "conversationId": cid,
-                    "message": clarification_msg,
-                    "intent": "CLARIFICATION_REQUIRED",
-                    "plannerState": session["state"],
-                    "missingFields": ["destination"],
-                    "recommendations": ["Thiruttani Murugan Temple", "Palani Murugan Temple", "Tiruchendur Murugan Temple"],
-                    "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
-                    "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
-                    "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": merged_state.get("budget") or 10000.0, "withinBudget": True, "assumptions": "N/A"},
-                    "weather": {"tempRange": "18–28°C", "condition": "Partly Cloudy"},
-                    "timeline": [],
-                    "webEvidence": [],
-                    "decisionFacts": {"requestedDestination": requested_dest, "resolvedDestination": None, "destinationMatch": False},
-                    "validation": {"destinationMatch": False, "durationFeasible": True, "budgetFeasible": True, "warnings": [f"Requested destination '{requested_dest}' unresolved."]},
-                    "provenance": {"destination": "PostgreSQL/PostGIS", "route": "Routing Engine (OSRM)", "cost": "Deterministic Cost Engine", "webEvidence": "OpenSERP", "narrative": "Gemini"},
-                    "traceId": trace_id
-                }
+        # If user explicitly requested a NEW place in this turn and it failed resolution:
+        # DO NOT update session["state"] with the bad string! Return clarification and keep state clean!
+        if structured_intent.destination and structured_intent.intentCategory not in ["FOOD_DISCOVERY", "ADD_STOP"] and not resolved_dest_place:
+            clarification_msg = (
+                f"I couldn't confidently locate '{structured_intent.destination}' in my Tamil Nadu place database. "
+                f"Did you mean Madurai, Ooty, Kodaikanal, or Thirupparankundram?"
+            )
+            session["messages"].append({"role": "user", "text": user_message})
+            session["messages"].append({"role": "assistant", "text": clarification_msg})
+            
+            return {
+                "conversationId": cid,
+                "message": clarification_msg,
+                "intent": "CLARIFICATION_REQUIRED",
+                "plannerState": session["state"], # State stays 100% clean, untainted by failed query!
+                "missingFields": ["destination"],
+                "recommendations": ["Madurai", "Ooty", "Kodaikanal"],
+                "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
+                "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
+                "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": prev_state.get("budget") or 10000.0, "withinBudget": True, "assumptions": "N/A"},
+                "weather": {"tempRange": "18–28°C", "condition": "Partly Cloudy"},
+                "timeline": [],
+                "webEvidence": [],
+                "decisionFacts": {"requestedDestination": structured_intent.destination, "resolvedDestination": None, "destinationMatch": False},
+                "validation": {"destinationMatch": False, "durationFeasible": True, "budgetFeasible": True, "warnings": [f"Requested destination '{structured_intent.destination}' unresolved."]},
+                "provenance": {"destination": "PostgreSQL/PostGIS", "route": "Routing Engine (OSRM)", "cost": "Deterministic Cost Engine", "webEvidence": "OpenSERP", "narrative": "Gemini"},
+                "traceId": trace_id
+            }
 
+        # Destination resolved successfully (or fell back to clean state)
         if not resolved_dest_place:
-            resolved_dest_place = {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710}
+            resolved_dest_place = {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198}
 
-        # 2. Resolve Origin & Waypoints
-        resolved_origin_place = self.resolve_place_by_name(merged_state.get("origin") or "Chennai", verified_places) or {"name": "Chennai", "latitude": 13.0827, "longitude": 80.2707}
+        # 3. Construct Clean Mutated State (BUG 5 FIX)
+        merged_state = dict(prev_state)
+        merged_state["destination"] = resolved_dest_place["name"]
+        merged_state["origin"] = structured_intent.origin or prev_state.get("origin") or "Chennai"
+        merged_state["transport"] = structured_intent.transport or prev_state.get("transport") or "motorcycle"
+        merged_state["durationDays"] = structured_intent.durationDays or prev_state.get("durationDays") or 1
+        merged_state["departureTime"] = structured_intent.departureTime or prev_state.get("departureTime") or "06:00"
+        merged_state["overnightTravel"] = structured_intent.overnightTravel or prev_state.get("overnightTravel", False)
+        
+        if structured_intent.budget is not None:
+            merged_state["budget"] = structured_intent.budget
+            
+        if structured_intent.trail:
+            merged_state["trail"] = structured_intent.trail
+
+        # Waypoint mutations
+        existing_wps = list(prev_state.get("waypoints", []))
+        for wp in structured_intent.waypoints:
+            if wp not in existing_wps and wp != resolved_dest_place["name"] and wp != merged_state["origin"]:
+                existing_wps.append(wp)
+        merged_state["waypoints"] = existing_wps
+
+        # Interest mutations
+        merged_interests = set(prev_state.get("interests", []))
+        for inter in structured_intent.interests:
+            merged_interests.add(inter)
+        merged_state["interests"] = list(merged_interests)
+
+        # Food Spot Population (BUG 7 FIX)
+        food_spots = self.get_local_food_spots(resolved_dest_place["name"])
+        merged_state["foodStops"] = food_spots
+
+        # Save clean mutated state to conversation session
+        session["state"] = merged_state
+        session["messages"].append({"role": "user", "text": user_message})
+
+        # 4. Resolve Origin & Waypoint Places for OSRM Route Engine
+        resolved_origin_place = self.resolve_place_by_name(merged_state["origin"], verified_places) or {"name": "Chennai", "latitude": 13.0827, "longitude": 80.2707}
         
         resolved_waypoints = []
-        for wp_name in merged_state.get("waypoints", []):
+        for wp_name in merged_state["waypoints"]:
             wp_place = self.resolve_place_by_name(wp_name, verified_places)
             if wp_place and wp_place["name"] != resolved_origin_place["name"] and wp_place["name"] != resolved_dest_place["name"]:
                 resolved_waypoints.append(wp_place)
 
-        # 3. Multi-Waypoint Route Construction & OSRM Routing
+        # 5. Route Construction & OSRM Distance Calculation
         route_sequence = [resolved_origin_place] + resolved_waypoints + [resolved_dest_place]
         
         one_way_dist_km = 0.0
@@ -238,7 +301,7 @@ class PlannerService:
                 origin_lng=p_start["longitude"],
                 destination_lat=p_end["latitude"],
                 destination_lng=p_end["longitude"],
-                profile=merged_state.get("transport", "motorcycle")
+                profile=merged_state["transport"]
             )
             one_way_dist_km += leg_res.distance_km
             one_way_duration_mins += leg_res.duration_minutes
@@ -258,7 +321,7 @@ class PlannerService:
                 origin_lng=p_start["longitude"],
                 destination_lat=p_end["latitude"],
                 destination_lng=p_end["longitude"],
-                profile=merged_state.get("transport", "motorcycle")
+                profile=merged_state["transport"]
             )
             if leg_res.geometry and "coordinates" in leg_res.geometry:
                 combined_coords.extend(leg_res.geometry["coordinates"])
@@ -273,9 +336,9 @@ class PlannerService:
             trace_id=trace_id
         )
 
-        # 4. Deterministic Cost & Feasibility Validation
+        # 6. Deterministic Cost & Feasibility Validation
         user_budget = merged_state.get("budget") or 10000.0
-        cost_info = self.compute_deterministic_cost(total_road_dist_km, merged_state.get("transport", "motorcycle"), user_budget)
+        cost_info = self.compute_deterministic_cost(total_road_dist_km, merged_state["transport"], user_budget)
 
         validation_report = trip_validator.validate_trip(
             intent=structured_intent,
@@ -285,11 +348,11 @@ class PlannerService:
             total_estimated_cost=cost_info["total"]
         )
 
-        # 5. OpenSERP Grounded Web Evidence Query
+        # 7. OpenSERP Grounded Web Evidence Query
         web_evidence_sources = openserp_service.search_web_evidence(resolved_dest_place["name"], trace_id=trace_id)
         evidence_dtos = [s.model_dump() for s in web_evidence_sources]
 
-        # 6. Timeline Generation
+        # 8. Timeline Generation
         hours = total_duration_mins // 60
         mins = total_duration_mins % 60
         eta_str = f"{hours}h {mins}m"
@@ -297,111 +360,91 @@ class PlannerService:
         timeline = []
         if merged_state.get("trail") == "arupadai-veedu":
             timeline.extend([
-                {
-                    "time": "Day 1 — 06:00 AM",
-                    "name": f"Depart {resolved_origin_place['name']}",
-                    "description": f"Begin Arupadai Veedu sacred trail from {resolved_origin_place['name']}."
-                },
-                {
-                    "time": "Day 1 — 08:30 AM",
-                    "name": "1. Thiruttani Murugan Temple",
-                    "description": "1st Arupadai Veedu atop Tanigai hill (365 steps)."
-                },
-                {
-                    "time": "Day 1 — 02:00 PM",
-                    "name": "2. Swamimalai Murugan Temple",
-                    "description": "2nd Arupadai Veedu near Kumbakonam (Pranava Mantra shrine)."
-                },
-                {
-                    "time": "Day 2 — 07:30 AM",
-                    "name": "3. Palani Murugan Temple",
-                    "description": "3rd Arupadai Veedu (Navapashanam Dhandayuthapani shrine)."
-                },
-                {
-                    "time": "Day 2 — 03:00 PM",
-                    "name": "4. Tiruchendur Murugan Temple",
-                    "description": "4th Arupadai Veedu on the shore of Bay of Bengal."
-                },
-                {
-                    "time": "Day 3 — 08:30 AM",
-                    "name": "5. Pazhamudircholai Murugan Temple",
-                    "description": "5th Arupadai Veedu in dense Solaimalai hill forest."
-                },
-                {
-                    "time": "Day 3 — 11:30 AM",
-                    "name": "6. Thirupparankundram Murugan Temple",
-                    "description": "6th Arupadai Veedu rock-cut cave shrine."
-                },
-                {
-                    "time": f"Day {merged_state.get('durationDays', 3)} — 07:00 PM",
-                    "name": f"Return to {resolved_origin_place['name']}",
-                    "description": f"Complete sacred 6-temple trail ({total_road_dist_km} km total road distance)."
-                }
+                {"time": "Day 1 — 06:00 AM", "name": f"Depart {resolved_origin_place['name']}", "description": f"Begin Arupadai Veedu sacred trail from {resolved_origin_place['name']}."},
+                {"time": "Day 1 — 08:30 AM", "name": "1. Thiruttani Murugan Temple", "description": "1st Arupadai Veedu atop Tanigai hill (365 steps)."},
+                {"time": "Day 1 — 02:00 PM", "name": "2. Swamimalai Murugan Temple", "description": "2nd Arupadai Veedu near Kumbakonam (Pranava Mantra shrine)."},
+                {"time": "Day 2 — 07:30 AM", "name": "3. Palani Murugan Temple", "description": "3rd Arupadai Veedu (Navapashanam Dhandayuthapani shrine)."},
+                {"time": "Day 2 — 03:00 PM", "name": "4. Tiruchendur Murugan Temple", "description": "4th Arupadai Veedu on the shore of Bay of Bengal."},
+                {"time": "Day 3 — 08:30 AM", "name": "5. Pazhamudircholai Murugan Temple", "description": "5th Arupadai Veedu in dense Solaimalai hill forest."},
+                {"time": "Day 3 — 11:30 AM", "name": "6. Thirupparankundram Murugan Temple", "description": "6th Arupadai Veedu rock-cut cave shrine."},
+                {"time": f"Day {merged_state.get('durationDays', 3)} — 07:00 PM", "name": f"Return to {resolved_origin_place['name']}", "description": f"Complete sacred 6-temple trail ({total_road_dist_km} km total road distance)."}
             ])
         else:
-            timeline.extend([
-                {
-                    "time": "06:00 AM",
-                    "name": f"Depart {resolved_origin_place['name']}",
-                    "description": f"Begin ride towards {resolved_dest_place['name']}."
-                },
-                {
-                    "time": "02:30 PM",
-                    "name": resolved_dest_place["name"],
-                    "description": f"Explore {resolved_dest_place.get('tagline', 'Target destination')}."
-                },
-                {
-                    "time": "06:00 PM",
-                    "name": f"Return to {resolved_origin_place['name']}",
-                    "description": f"Complete {merged_state.get('durationDays', 1)}-day ride ({total_road_dist_km} km total road distance)."
-                }
-            ])
+            timeline.append({
+                "time": "06:00 AM",
+                "name": f"Depart {resolved_origin_place['name']}",
+                "description": f"Begin ride towards {resolved_dest_place['name']}."
+            })
 
-        # 7. Natural Language Assistant Message Generation
+            # Add Waypoint stops if any
+            for wp in resolved_waypoints:
+                timeline.append({
+                    "time": "11:30 AM",
+                    "name": f"Stop at {wp['name']}",
+                    "description": f"Explore {wp.get('tagline', 'En-route stop')}."
+                })
+
+            # Add Destination & Food Spots
+            food_summary = ", ".join([f"{f['name']} ({f['specialty']})" for f in food_spots[:2]])
+            timeline.append({
+                "time": "02:30 PM",
+                "name": resolved_dest_place["name"],
+                "description": f"Explore {resolved_dest_place.get('tagline', 'Target destination')}. Local Food Highlights: {food_summary}."
+            })
+
+            timeline.append({
+                "time": "06:00 PM",
+                "name": f"Return to {resolved_origin_place['name']}",
+                "description": f"Complete {merged_state['durationDays']}-day ride ({total_road_dist_km} km total road distance)."
+            })
+
+        # 9. Natural Language Assistant Message Generation
         warning_prefix = ""
         if not validation_report.durationFeasible and not merged_state.get("overnightTravel"):
             warning_prefix = (
-                f"⚠️ Feasibility Alert: A {merged_state.get('durationDays', 1)}-day trip with {validation_report.totalRidingHours}h riding time "
+                f"⚠️ Feasibility Alert: A {merged_state['durationDays']}-day trip with {validation_report.totalRidingHours}h riding time "
                 f"exceeds daily riding limit (10h/day). I recommend 2–3 days for this route.\n\n"
             )
         elif validation_report.warnings:
             warning_prefix = f"⚠️ Advisories:\n" + "\n".join(validation_report.warnings) + "\n\n"
 
         budget_status_str = "Within Budget" if cost_info["withinBudget"] else "Exceeds Budget"
-        trail_title = "Arupadai Veedu 6-Temple Sacred Trail" if merged_state.get("trail") == "arupadai-veedu" else f"trip to {resolved_dest_place['name']}"
+        
+        food_narrative = ""
+        if "food" in merged_state["interests"] or intent_type == "FOOD_DISCOVERY":
+            top_foods = [f"{f['name']} ({f['specialty']})" for f in food_spots[:3]]
+            food_narrative = f" Food Highlights in {resolved_dest_place['name']}: {', '.join(top_foods)}."
 
         assistant_msg = (
             f"{warning_prefix}"
-            f"Planned your {merged_state.get('durationDays', 3)}-day {merged_state.get('transport', 'motorcycle')} {trail_title} from {resolved_origin_place['name']}. "
-            f"Real road distance across all shrines is {total_road_dist_km} km round-trip (ETA: {eta_str}). "
+            f"Planned your {merged_state['durationDays']}-day {merged_state['transport']} trip to {resolved_dest_place['name']} from {resolved_origin_place['name']}."
+            f"{food_narrative} "
+            f"Real road distance across all stops is {total_road_dist_km} km round-trip (ETA: {eta_str}). "
             f"Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
             f"Total estimated cost: ₹{cost_info['total']} ({budget_status_str} for ₹{user_budget})."
         )
         session["messages"].append({"role": "assistant", "text": assistant_msg})
-
-        missing = []
-        if not merged_state.get("destination"):
-            missing.append("destination")
 
         return {
             "conversationId": cid,
             "message": assistant_msg,
             "intent": intent_type,
             "plannerState": session["state"],
-            "missingFields": missing,
+            "missingFields": [],
             "recommendations": [resolved_dest_place["name"]] + [wp["name"] for wp in resolved_waypoints],
             "route": {
                 "distanceKm": total_road_dist_km,
                 "durationMinutes": total_duration_mins,
                 "geometry": {"type": "LineString", "coordinates": combined_coords},
                 "provider": "OSRM Routing Engine",
-                "profile": merged_state.get("transport", "motorcycle")
+                "profile": merged_state["transport"]
             },
-            "elevation": {"gainMeters": 650, "highestMeters": 420, "lowestMeters": 50},
+            "elevation": {"gainMeters": 450, "highestMeters": 350, "lowestMeters": 50},
             "costEstimate": cost_info,
-            "weather": {"tempRange": "22–34°C", "condition": "Sunny & Spiritual"},
+            "weather": {"tempRange": "24–34°C", "condition": "Sunny"},
             "timeline": timeline,
             "webEvidence": evidence_dtos,
+            "foodStops": food_spots,
             "decisionFacts": validation_report.decisionFacts,
             "validation": validation_report.model_dump(),
             "provenance": {
