@@ -240,11 +240,6 @@ export function FullscreenRouteMap({
           subdomains: "abcd",
         }).addTo(map);
 
-        // Auto-collapse panel when user starts panning/zooming on map
-        map.on("dragstart zoomstart", () => {
-          setPanelState("compact");
-        });
-
         leafletMapRef.current = map;
         polylineGroupRef.current = L.layerGroup().addTo(map);
 
