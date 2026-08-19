@@ -536,15 +536,17 @@ export function FullscreenRouteMap({
 
       {/* Floating Directions Panel: Desktop TOP-LEFT (top-20 left-4), Mobile Bottom Sheet (z-index: 40 / 200) */}
       <aside
+        onWheel={(e) => e.stopPropagation()}
+        onTouchMove={(e) => e.stopPropagation()}
         className={`absolute z-40 transition-all duration-300 pointer-events-auto ${
           panelState === "hidden"
             ? "-left-96 top-20"
             : panelState === "compact"
             ? "left-4 top-20 w-80 sm:w-96 max-h-48"
-            : "left-4 top-20 w-80 sm:w-[380px] max-h-[calc(100dvh-110px)] max-sm:top-auto max-sm:bottom-4 max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:max-h-[70vh]"
+            : "left-4 top-20 w-80 sm:w-[380px] h-[calc(100dvh-100px)] max-h-[calc(100dvh-100px)] max-sm:top-auto max-sm:bottom-4 max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:h-[70vh] max-sm:max-h-[70vh]"
         }`}
       >
-        <div className="h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-5 shadow-2xl flex flex-col overflow-hidden text-white">
+        <div className="w-full h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white overscroll-contain">
           {/* Drag Handle Bar */}
           <div
             onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
@@ -739,183 +741,186 @@ export function FullscreenRouteMap({
             </div>
           )}
 
-          {/* EXPANDED ROUTE ITINERARY & STOPS LIST */}
-          {selectedOrigin && selectedDestination && panelState === "expanded" && activePanelTab === "timeline" && (
-            <div className="flex-1 overflow-y-auto py-2 space-y-3 pr-1">
-              <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs">
-                <div>
-                  <div className="font-bold text-emerald-400">Total Journey Distance</div>
-                  <div className="text-lg font-black text-white mt-0.5">{totalDistanceKm} km</div>
-                </div>
-                <div className="text-right">
-                  <div className="font-bold text-emerald-400">Driving ETA</div>
-                  <div className="text-lg font-black text-white mt-0.5">{durationString}</div>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                  Journey Timeline ({stops.length} Stops)
-                </div>
-                {stops.map((stop, idx) => {
-                  const isSelected = idx === selectedStopIndex;
-                  const legInfo = idx > 0 && segmentData[idx - 1];
-
-                  return (
-                    <div
-                      key={stop.id}
-                      onClick={() => {
-                        setSelectedStopIndex(idx);
-                        if (leafletMapRef.current) {
-                          leafletMapRef.current.flyTo([stop.latitude, stop.longitude], 11, { animate: true });
-                        }
-                      }}
-                      className={`p-3 rounded-xl border transition cursor-pointer ${
-                        isSelected
-                          ? "bg-emerald-500/20 border-emerald-500/50"
-                          : "bg-white/5 border-white/10 hover:bg-white/10"
-                      }`}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
-                          <span className="grid size-5 place-items-center rounded-full bg-emerald-500 text-black font-extrabold text-[10px]">
-                            {idx === 0 ? "S" : idx}
-                          </span>
-                          <span className="text-xs font-bold text-white">{stop.canonicalName || stop.name}</span>
-                        </div>
-                        <span className="text-[10px] text-slate-400 font-mono">{stop.district}</span>
-                      </div>
-
-                      {legInfo && (
-                        <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center justify-between pt-1 border-t border-white/10">
-                          <span>Segment Drive: {legInfo.distanceKm} km</span>
-                          <span>ETA: {legInfo.durationMins} min</span>
-                        </div>
-                      )}
-
-                      <div className="mt-2 flex items-center gap-2">
-                        <a
-                          href={`https://www.google.com/maps/dir/?api=1&destination=${stop.latitude},${stop.longitude}&travelmode=driving`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="px-2.5 py-1 rounded-md bg-emerald-500 text-black font-bold text-[10px] hover:bg-emerald-400 transition"
-                        >
-                          Navigate →
-                        </a>
-                      </div>
+          {/* EXPANDED ROUTE ITINERARY & STOPS SCROLL CONTAINER */}
+          {selectedOrigin && selectedDestination && panelState === "expanded" && (
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-3 pr-1.5 custom-scrollbar">
+              {activePanelTab === "timeline" && (
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs">
+                    <div>
+                      <div className="font-bold text-emerald-400">Total Journey Distance</div>
+                      <div className="text-lg font-black text-white mt-0.5">{totalDistanceKm} km</div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
-          )}
-
-          {/* PHASE 2: INTELLIGENT REST, MEAL & OVERNIGHT RECOMMENDATION ENGINE VIEW */}
-          {selectedOrigin && selectedDestination && panelState === "expanded" && activePanelTab === "suggestions" && (
-            <div className="flex-1 overflow-y-auto py-2 space-y-3 pr-1">
-              {/* Departure Time Controls */}
-              <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs">
-                <span className="text-slate-300 font-medium flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5 text-emerald-400" /> Departure Time:
-                </span>
-                <select
-                  value={departureTime}
-                  onChange={(e) => setDepartureTime(e.target.value)}
-                  className="bg-[#121821] border border-white/20 rounded-lg px-2.5 py-1 text-emerald-400 font-bold focus:outline-none cursor-pointer text-xs"
-                >
-                  {["05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM"].map((t) => (
-                    <option key={t} value={t}>{t}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Long Journey Mode Active Banner */}
-              {recommendationResult?.isLongJourney && (
-                <div className="p-3 bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-purple-500/20 border border-emerald-500/40 rounded-xl text-xs space-y-1">
-                  <div className="font-extrabold text-emerald-300 flex items-center gap-1.5">
-                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-                    LONG JOURNEY MODE ACTIVATED
+                    <div className="text-right">
+                      <div className="font-bold text-emerald-400">Driving ETA</div>
+                      <div className="text-lg font-black text-white mt-0.5">{durationString}</div>
+                    </div>
                   </div>
-                  <div className="text-[11px] text-slate-300">
-                    Route Distance: <span className="font-mono text-emerald-400 font-bold">{totalDistanceKm} km</span> · Expected Arrival: <span className="font-mono text-sky-300 font-bold">{recommendationResult.expectedArrivalTime}</span>
+
+                  <div className="space-y-2">
+                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                      Journey Timeline ({stops.length} Stops)
+                    </div>
+                    {stops.map((stop, idx) => {
+                      const isSelected = idx === selectedStopIndex;
+                      const legInfo = idx > 0 && segmentData[idx - 1];
+
+                      return (
+                        <div
+                          key={stop.id}
+                          onClick={() => {
+                            setSelectedStopIndex(idx);
+                            if (leafletMapRef.current) {
+                              leafletMapRef.current.flyTo([stop.latitude, stop.longitude], 11, { animate: true });
+                            }
+                          }}
+                          className={`p-3 rounded-xl border transition cursor-pointer ${
+                            isSelected
+                              ? "bg-emerald-500/20 border-emerald-500/50"
+                              : "bg-white/5 border-white/10 hover:bg-white/10"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                              <span className="grid size-5 place-items-center rounded-full bg-emerald-500 text-black font-extrabold text-[10px]">
+                                {idx === 0 ? "S" : idx}
+                              </span>
+                              <span className="text-xs font-bold text-white">{stop.canonicalName || stop.name}</span>
+                            </div>
+                            <span className="text-[10px] text-slate-400 font-mono">{stop.district}</span>
+                          </div>
+
+                          {legInfo && (
+                            <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center justify-between pt-1 border-t border-white/10">
+                              <span>Segment Drive: {legInfo.distanceKm} km</span>
+                              <span>ETA: {legInfo.durationMins} min</span>
+                            </div>
+                          )}
+
+                          <div className="mt-2 flex items-center gap-2">
+                            <a
+                              href={`https://www.google.com/maps/dir/?api=1&destination=${stop.latitude},${stop.longitude}&travelmode=driving`}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-2.5 py-1 rounded-md bg-emerald-500 text-black font-bold text-[10px] hover:bg-emerald-400 transition"
+                            >
+                              Navigate →
+                            </a>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               )}
 
-              {/* Recommendations List */}
-              {(!recommendationResult || recommendationResult.recommendations.length === 0) ? (
-                <div className="p-6 text-center text-xs text-slate-400 bg-white/5 border border-white/10 rounded-xl">
-                  {totalDistanceKm < 150 ? (
-                    <p>Short route ({totalDistanceKm} km) — Rest & meal stops are not required for trips under 150 km.</p>
-                  ) : (
-                    <p>No rest stops found within 5 km corridor detour of this route.</p>
-                  )}
-                </div>
-              ) : (
-                <div className="space-y-2.5">
-                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                    Suggested Stops Along Route Corridor ({recommendationResult.recommendations.length})
+              {activePanelTab === "suggestions" && (
+                <div className="space-y-3">
+                  {/* Departure Time Controls */}
+                  <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs">
+                    <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                      <Clock className="w-3.5 h-3.5 text-emerald-400" /> Departure Time:
+                    </span>
+                    <select
+                      value={departureTime}
+                      onChange={(e) => setDepartureTime(e.target.value)}
+                      className="bg-[#121821] border border-white/20 rounded-lg px-2.5 py-1 text-emerald-400 font-bold focus:outline-none cursor-pointer text-xs"
+                    >
+                      {["05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM"].map((t) => (
+                        <option key={t} value={t}>{t}</option>
+                      ))}
+                    </select>
                   </div>
 
-                  {recommendationResult.recommendations.map((rec) => {
-                    const isAlreadyAdded = waypoints.some((w) => w.id === rec.placeId);
-                    const CategoryIcon = rec.category === "tea" ? Coffee : rec.category === "fuel" ? Fuel : rec.category === "hotel" ? Hotel : Utensils;
-                    const catBg = rec.category === "tea" ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : rec.category === "fuel" ? "bg-sky-500/20 text-sky-300 border-sky-500/40" : rec.category === "hotel" ? "bg-purple-500/20 text-purple-300 border-purple-500/40" : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
-
-                    return (
-                      <div
-                        key={rec.placeId}
-                        className="p-3 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl space-y-2 text-xs transition"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold flex items-center gap-1 ${catBg}`}>
-                                <CategoryIcon className="w-3 h-3" />
-                                {rec.category.toUpperCase()}
-                              </span>
-                              <span className="text-[10px] text-emerald-400 font-mono font-bold">
-                                ETA ~ {rec.estimatedArrivalTime}
-                              </span>
-                            </div>
-                            <h4 className="font-bold text-white text-xs mt-1">{rec.name}</h4>
-                            <p className="text-[11px] text-slate-300 mt-0.5">{rec.tagline}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-white/10">
-                          <span>{rec.routeDistanceFromOriginKm} km from start</span>
-                          <span>{rec.detourDistanceKm} km detour</span>
-                          {rec.rating && <span className="text-amber-400 font-bold">★ {rec.rating}</span>}
-                        </div>
-
-                        <p className="text-[10px] text-emerald-300 italic">{rec.reason}</p>
-
-                        <div className="pt-1 flex items-center justify-end">
-                          <button
-                            type="button"
-                            onClick={() => handleAddRecommendedStop(rec)}
-                            disabled={isAlreadyAdded}
-                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                              isAlreadyAdded
-                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
-                                : "bg-emerald-500 text-black hover:bg-emerald-400"
-                            }`}
-                          >
-                            {isAlreadyAdded ? (
-                              <>
-                                <Check className="w-3.5 h-3.5" /> Added as Stop
-                              </>
-                            ) : (
-                              <>
-                                <Plus className="w-3.5 h-3.5" /> Add Stop to Route
-                              </>
-                            )}
-                          </button>
-                        </div>
+                  {/* Long Journey Mode Active Banner */}
+                  {recommendationResult?.isLongJourney && (
+                    <div className="p-3 bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-purple-500/20 border border-emerald-500/40 rounded-xl text-xs space-y-1">
+                      <div className="font-extrabold text-emerald-300 flex items-center gap-1.5">
+                        <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+                        LONG JOURNEY MODE ACTIVATED
                       </div>
-                    );
-                  })}
+                      <div className="text-[11px] text-slate-300">
+                        Route Distance: <span className="font-mono text-emerald-400 font-bold">{totalDistanceKm} km</span> · Expected Arrival: <span className="font-mono text-sky-300 font-bold">{recommendationResult.expectedArrivalTime}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Recommendations List */}
+                  {(!recommendationResult || recommendationResult.recommendations.length === 0) ? (
+                    <div className="p-6 text-center text-xs text-slate-400 bg-white/5 border border-white/10 rounded-xl">
+                      {totalDistanceKm < 150 ? (
+                        <p>Short route ({totalDistanceKm} km) — Rest & meal stops are not required for trips under 150 km.</p>
+                      ) : (
+                        <p>No rest stops found within 5 km corridor detour of this route.</p>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="space-y-2.5">
+                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                        Suggested Stops Along Route Corridor ({recommendationResult.recommendations.length})
+                      </div>
+
+                      {recommendationResult.recommendations.map((rec) => {
+                        const isAlreadyAdded = waypoints.some((w) => w.id === rec.placeId);
+                        const CategoryIcon = rec.category === "tea" ? Coffee : rec.category === "fuel" ? Fuel : rec.category === "hotel" ? Hotel : Utensils;
+                        const catBg = rec.category === "tea" ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : rec.category === "fuel" ? "bg-sky-500/20 text-sky-300 border-sky-500/40" : rec.category === "hotel" ? "bg-purple-500/20 text-purple-300 border-purple-500/40" : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+
+                        return (
+                          <div
+                            key={rec.placeId}
+                            className="p-3 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl space-y-2 text-xs transition"
+                          >
+                            <div className="flex items-start justify-between gap-2">
+                              <div>
+                                <div className="flex items-center gap-2">
+                                  <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold flex items-center gap-1 ${catBg}`}>
+                                    <CategoryIcon className="w-3 h-3" />
+                                    {rec.category.toUpperCase()}
+                                  </span>
+                                  <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                                    ETA ~ {rec.estimatedArrivalTime}
+                                  </span>
+                                </div>
+                                <h4 className="font-bold text-white text-xs mt-1">{rec.name}</h4>
+                                <p className="text-[11px] text-slate-300 mt-0.5">{rec.tagline}</p>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-white/10">
+                              <span>{rec.routeDistanceFromOriginKm} km from start</span>
+                              <span>{rec.detourDistanceKm} km detour</span>
+                              {rec.rating && <span className="text-amber-400 font-bold">★ {rec.rating}</span>}
+                            </div>
+
+                            <p className="text-[10px] text-emerald-300 italic">{rec.reason}</p>
+
+                            <div className="pt-1 flex items-center justify-end">
+                              <button
+                                type="button"
+                                onClick={() => handleAddRecommendedStop(rec)}
+                                disabled={isAlreadyAdded}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                                  isAlreadyAdded
+                                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
+                                    : "bg-emerald-500 text-black hover:bg-emerald-400"
+                                }`}
+                              >
+                                {isAlreadyAdded ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" /> Added as Stop
+                                  </>
+                                ) : (
+                                  <>
+                                    <Plus className="w-3.5 h-3.5" /> Add Stop to Route
+                                  </>
+                                )}
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
