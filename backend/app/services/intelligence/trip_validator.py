@@ -60,18 +60,25 @@ class TripValidator:
                 f"Resolved place was '{resolved_dest_name or 'None'}'."
             )
 
-        # 2. Riding Feasibility Check
+        # 2. Riding Feasibility & Overnight Mode Evaluation
         total_riding_hours = round(total_route_duration_mins / 60.0, 1)
         max_allowed_hours = cls.MAX_DRIVING_HOURS_PER_DAY * intent.durationDays
-        duration_feasible = total_riding_hours <= max_allowed_hours
 
-        if not duration_feasible:
-            recommended_days = max(2, int((total_riding_hours / cls.MAX_DRIVING_HOURS_PER_DAY) + 0.99))
+        if intent.overnightTravel:
+            duration_feasible = True
             warnings.append(
-                f"A {intent.durationDays}-day {intent.transport} trip with {total_riding_hours}h total riding time "
-                f"exceeds recommended daily riding limit ({cls.MAX_DRIVING_HOURS_PER_DAY}h/day). "
-                f"Recommended duration: {recommended_days} days."
+                f"🌙 Overnight Travel Advisory: Depart {intent.departureTime} (Day 1) for overnight travel. "
+                f"Ensure proper rest stops on National Highway."
             )
+        else:
+            duration_feasible = total_riding_hours <= max_allowed_hours
+            if not duration_feasible:
+                recommended_days = max(2, int((total_riding_hours / cls.MAX_DRIVING_HOURS_PER_DAY) + 0.99))
+                warnings.append(
+                    f"A {intent.durationDays}-day {intent.transport} trip with {total_riding_hours}h total riding time "
+                    f"exceeds recommended daily riding limit ({cls.MAX_DRIVING_HOURS_PER_DAY}h/day). "
+                    f"Recommended duration: {recommended_days} days."
+                )
 
         # 3. Budget Feasibility Check
         user_budget = intent.budget or 3000.0
@@ -90,6 +97,8 @@ class TripValidator:
             "destinationMatch": destination_match,
             "transport": intent.transport,
             "durationDays": intent.durationDays,
+            "departureTime": intent.departureTime,
+            "overnightTravel": intent.overnightTravel,
             "totalRidingHours": total_riding_hours,
             "durationFeasible": duration_feasible,
             "userBudget": user_budget,

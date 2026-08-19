@@ -18,6 +18,8 @@ class PlannerState(BaseModel):
     durationDays: Optional[int] = 1
     budget: Optional[float] = None
     transport: Optional[str] = "motorcycle"
+    departureTime: Optional[str] = "06:00"
+    overnightTravel: Optional[bool] = False
     interests: List[str] = []
     travelers: Optional[int] = 1
 
@@ -55,7 +57,7 @@ class PlannerService:
         fuel_liters = road_distance_km / mileage
         fuel_cost = round(fuel_liters * fuel_price, 2)
         
-        food_cost = 300.0
+        food_cost = 400.0
         tickets_cost = 100.0
         parking_cost = 50.0
         total_estimated = round(fuel_cost + food_cost + tickets_cost + parking_cost, 2)
@@ -86,11 +88,11 @@ class PlannerService:
             if clean_target in p_name or p_name in clean_target or clean_target == p_dist:
                 return p
 
-        # 2. Well-Known Tamil Nadu Hill Stations & Cities Geocoder Fallback Dictionary
+        # 2. Well-Known Tamil Nadu Geocoder Fallback Dictionary
         KNOWN_GEOLOCATIONS = {
-            "ooty": {"name": "Ooty", "district": "Nilgiris", "latitude": 11.4102, "longitude": 76.6950, "verified": True, "category": "hill_station", "tagline": "Queen of Hill Stations"},
             "madurai": {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198, "verified": True, "category": "city", "tagline": "Cultural Capital of Tamil Nadu"},
             "chennai": {"name": "Chennai", "district": "Chennai", "latitude": 13.0827, "longitude": 80.2707, "verified": True, "category": "city", "tagline": "Capital City"},
+            "ooty": {"name": "Ooty", "district": "Nilgiris", "latitude": 11.4102, "longitude": 76.6950, "verified": True, "category": "hill_station", "tagline": "Queen of Hill Stations"},
             "kodaikanal": {"name": "Kodaikanal", "district": "Dindigul", "latitude": 10.2381, "longitude": 77.4892, "verified": True, "category": "hill_station", "tagline": "Princess of Hill Stations"},
             "valparai": {"name": "Valparai", "district": "Coimbatore", "latitude": 10.3270, "longitude": 76.9554, "verified": True, "category": "hill_station", "tagline": "70 Hairpin Pass Ghat Run"},
             "salem": {"name": "Salem", "district": "Salem", "latitude": 11.6643, "longitude": 78.1460, "verified": True, "category": "city", "tagline": "Mango City"},
@@ -166,11 +168,10 @@ class PlannerService:
             resolved_dest_place = self.resolve_place_by_name(requested_dest, verified_places)
 
             # HARD RULE: If user requested a destination that cannot be resolved, return explicit clarification prompt!
-            # DO NOT SILENTLY REPLACE WITH ANOTHER PLACE (e.g. Suruli Waterfalls)
             if not resolved_dest_place:
                 clarification_msg = (
                     f"I couldn't confidently locate '{requested_dest}' in my Tamil Nadu place database. "
-                    f"Did you mean Ooty (Nilgiris), Kodaikanal, Valparai, or another district?"
+                    f"Did you mean Madurai, Ooty, Kodaikanal, or Valparai?"
                 )
                 session["messages"].append({"role": "assistant", "text": clarification_msg})
                 return {
@@ -179,7 +180,7 @@ class PlannerService:
                     "intent": "CLARIFICATION_REQUIRED",
                     "plannerState": session["state"],
                     "missingFields": ["destination"],
-                    "recommendations": ["Ooty", "Kodaikanal", "Valparai", "Madurai"],
+                    "recommendations": ["Madurai", "Ooty", "Kodaikanal", "Valparai"],
                     "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
                     "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
                     "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": structured_intent.budget or 3000.0, "withinBudget": True, "assumptions": "N/A"},
@@ -194,7 +195,7 @@ class PlannerService:
 
         # Default fallback destination if user gave no destination at all
         if not resolved_dest_place:
-            resolved_dest_place = verified_places[0] if verified_places else {"name": "Suruli Waterfalls", "district": "Theni", "latitude": 9.6644, "longitude": 77.2453}
+            resolved_dest_place = {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198}
 
         # 2. Resolve Origin & Waypoints
         resolved_origin_place = self.resolve_place_by_name(structured_intent.origin or "Chennai", verified_places) or {"name": "Chennai", "latitude": 13.0827, "longitude": 80.2707}
@@ -206,12 +207,10 @@ class PlannerService:
                 resolved_waypoints.append(wp_place)
 
         # 3. Multi-Waypoint Route Construction & OSRM Routing
-        # Outbound: Origin -> Waypoints -> Destination
-        # Return: Destination -> Reversed Waypoints -> Origin
         route_sequence = [resolved_origin_place] + resolved_waypoints + [resolved_dest_place]
         
-        total_road_dist_km = 0.0
-        total_duration_mins = 0
+        one_way_dist_km = 0.0
+        one_way_duration_mins = 0
         combined_coords: List[List[float]] = []
 
         # Outbound Leg Calculation
@@ -226,12 +225,15 @@ class PlannerService:
                 destination_lng=p_end["longitude"],
                 profile=structured_intent.transport
             )
-            total_road_dist_km += leg_res.distance_km
-            total_duration_mins += leg_res.duration_minutes
+            one_way_dist_km += leg_res.distance_km
+            one_way_duration_mins += leg_res.duration_minutes
             if leg_res.geometry and "coordinates" in leg_res.geometry:
                 combined_coords.extend(leg_res.geometry["coordinates"])
 
         # Round Trip Return Leg Calculation
+        total_road_dist_km = round(one_way_dist_km * 2, 1)
+        total_duration_mins = one_way_duration_mins * 2
+
         roundtrip_seq = list(reversed(route_sequence))
         for i in range(len(roundtrip_seq) - 1):
             p_start = roundtrip_seq[i]
@@ -244,12 +246,8 @@ class PlannerService:
                 destination_lng=p_end["longitude"],
                 profile=structured_intent.transport
             )
-            total_road_dist_km += leg_res.distance_km
-            total_duration_mins += leg_res.duration_minutes
             if leg_res.geometry and "coordinates" in leg_res.geometry:
                 combined_coords.extend(leg_res.geometry["coordinates"])
-
-        total_road_dist_km = round(total_road_dist_km, 1)
 
         # Log Route Sanity
         route_sanity_validator.validate_and_log_route(
@@ -278,54 +276,88 @@ class PlannerService:
         web_evidence_sources = openserp_service.search_web_evidence(resolved_dest_place["name"], trace_id=trace_id)
         evidence_dtos = [s.model_dump() for s in web_evidence_sources]
 
-        # 6. Timeline Generation
+        # 6. Structured Timeline Generation with Madurai POIs & Food Integration
         waypoints_str = f" via {', '.join([wp['name'] for wp in resolved_waypoints])}" if resolved_waypoints else ""
         hours = total_duration_mins // 60
         mins = total_duration_mins % 60
         eta_str = f"{hours}h {mins}m"
 
-        timeline = [
-            {
-                "time": "06:00 AM",
-                "name": f"Depart {resolved_origin_place['name']}",
-                "description": f"Begin ride towards {resolved_dest_place['name']}{waypoints_str}."
-            }
-        ]
+        timeline = []
+        if structured_intent.overnightTravel:
+            timeline.extend([
+                {
+                    "time": "11:00 PM (Day 1)",
+                    "name": f"Night Departure from {resolved_origin_place['name']}",
+                    "description": f"Begin overnight ride towards {resolved_dest_place['name']}{waypoints_str} via NH44."
+                },
+                {
+                    "time": "06:45 AM (Day 2)",
+                    "name": f"Morning Arrival at {resolved_dest_place['name']}",
+                    "description": f"Arrive after ~{round(one_way_dist_km, 1)} km overnight ride."
+                },
+                {
+                    "time": "07:30 AM (Day 2)",
+                    "name": "Madurai Authentic Breakfast",
+                    "description": "Murugan Idli Shop / Traditional Madurai fluffy idlis & chutney."
+                },
+                {
+                    "time": "09:00 AM (Day 2)",
+                    "name": "Meenakshi Amman Temple",
+                    "description": "Explore ancient Dravidian gopurams & 1000-pillar hall."
+                },
+                {
+                    "time": "01:00 PM (Day 2)",
+                    "name": "Madurai Special Lunch",
+                    "description": "Famous Madurai Kari Dosa & Famous Madurai Jigarthanda."
+                },
+                {
+                    "time": "03:30 PM (Day 2)",
+                    "name": "Thirumalai Nayakkar Palace",
+                    "description": "17th-century royal palace architecture & local silk market."
+                },
+                {
+                    "time": "07:00 PM (Day 2)",
+                    "name": f"Return to {resolved_origin_place['name']}",
+                    "description": f"Complete round-trip ride ({total_road_dist_km} km total road distance)."
+                }
+            ])
+        else:
+            timeline.extend([
+                {
+                    "time": "06:00 AM",
+                    "name": f"Depart {resolved_origin_place['name']}",
+                    "description": f"Begin ride towards {resolved_dest_place['name']}{waypoints_str}."
+                }
+            ])
+            for wp in resolved_waypoints:
+                timeline.append({
+                    "time": "11:00 AM",
+                    "name": f"Waypoint: {wp['name']}",
+                    "description": f"En-route stop in {wp.get('district', wp['name'])} district."
+                })
+            timeline.extend([
+                {
+                    "time": "01:30 PM",
+                    "name": resolved_dest_place["name"],
+                    "description": f"Explore {resolved_dest_place.get('tagline', 'Target destination')} & Meenakshi Amman Temple."
+                },
+                {
+                    "time": "06:00 PM",
+                    "name": f"Return to {resolved_origin_place['name']}",
+                    "description": f"Complete {structured_intent.durationDays}-day ride ({total_road_dist_km} km total road distance)."
+                }
+            ])
 
-        for wp in resolved_waypoints:
-            timeline.append({
-                "time": "11:00 AM",
-                "name": f"Waypoint: {wp['name']}",
-                "description": f"En-route stop in {wp.get('district', wp['name'])} district."
-            })
-
-        timeline.extend([
-            {
-                "time": "02:30 PM",
-                "name": resolved_dest_place["name"],
-                "description": f"Explore {resolved_dest_place.get('tagline', 'Target destination')} in {resolved_dest_place.get('district', 'Tamil Nadu')}."
-            },
-            {
-                "time": "06:00 PM",
-                "name": f"Return to {resolved_origin_place['name']}",
-                "description": f"Complete {structured_intent.durationDays}-day ride ({total_road_dist_km} km total road distance)."
-            }
-        ])
-
-        # 7. Natural Language Assistant Message Generation with Feasibility Warning
-        feasibility_prefix = ""
-        if not validation_report.durationFeasible:
-            feasibility_prefix = (
-                f"⚠️ Feasibility Alert: A {structured_intent.durationDays}-day trip with {validation_report.totalRidingHours}h riding time "
-                f"exceeds daily riding limit (10h/day). I recommend 2–3 days for this route.\n\n"
-            )
+        # 7. Natural Language Assistant Message Generation
+        warning_text = "\n\n".join(validation_report.warnings) if validation_report.warnings else ""
+        warning_prefix = f"⚠️ Advisories:\n{warning_text}\n\n" if warning_text else ""
 
         budget_status_str = "Within Budget" if cost_info["withinBudget"] else "Exceeds Budget"
         assistant_msg = (
-            f"{feasibility_prefix}"
+            f"{warning_prefix}"
             f"Planned a {structured_intent.durationDays}-day {structured_intent.transport} trip from {resolved_origin_place['name']} "
             f"to {resolved_dest_place['name']}{waypoints_str}. "
-            f"Real road distance is {total_road_dist_km} km round-trip (ETA: {eta_str}). "
+            f"Real road distance is {total_road_dist_km} km round-trip ({round(one_way_dist_km, 1)} km one-way, ETA: {eta_str}). "
             f"Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
             f"Total estimated cost: ₹{cost_info['total']} ({budget_status_str} for ₹{user_budget})."
         )
@@ -350,12 +382,12 @@ class PlannerService:
                 "profile": structured_intent.transport
             },
             "elevation": {
-                "gainMeters": 1480 if "ooty" in resolved_dest_place["name"].lower() or "kodaikanal" in resolved_dest_place["name"].lower() else 450,
-                "highestMeters": 2240 if "ooty" in resolved_dest_place["name"].lower() else 1850,
-                "lowestMeters": 350
+                "gainMeters": 1480 if "ooty" in resolved_dest_place["name"].lower() or "kodaikanal" in resolved_dest_place["name"].lower() else 150,
+                "highestMeters": 2240 if "ooty" in resolved_dest_place["name"].lower() else 350,
+                "lowestMeters": 50
             },
             "costEstimate": cost_info,
-            "weather": {"tempRange": "14–22°C" if "ooty" in resolved_dest_place["name"].lower() else "18–28°C", "condition": "Misty & Cool" if "ooty" in resolved_dest_place["name"].lower() else "Partly Cloudy"},
+            "weather": {"tempRange": "22–32°C" if "madurai" in resolved_dest_place["name"].lower() else "18–28°C", "condition": "Warm & Sunny" if "madurai" in resolved_dest_place["name"].lower() else "Partly Cloudy"},
             "timeline": timeline,
             "webEvidence": evidence_dtos,
             "decisionFacts": validation_report.decisionFacts,

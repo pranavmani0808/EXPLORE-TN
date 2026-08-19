@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "motion/react";
+import { motion } from "motion/react";
 import {
   Send,
   Sparkles,
@@ -17,7 +17,7 @@ import {
   Clock,
   Navigation,
   ShieldAlert,
-  CheckCircle2,
+  Moon,
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -62,12 +62,23 @@ const defaultPacking = [
   "Tyre inflator",
 ];
 
+// Well-known coordinates for Mapcn marker fallback positioning
+const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string }> = {
+  madurai: { lat: 9.9252, lng: 78.1198, desc: "Meenakshi Amman Temple & Heritage City" },
+  ooty: { lat: 11.4102, lng: 76.6950, desc: "Queen of Hill Stations (Nilgiris)" },
+  kodaikanal: { lat: 10.2381, lng: 77.4892, desc: "Princess of Hill Stations (Dindigul)" },
+  valparai: { lat: 10.3270, lng: 76.9554, desc: "70 Hairpin Pass Ghat Run" },
+  chennai: { lat: 13.0827, lng: 80.2707, desc: "Capital City Departure Point" },
+  salem: { lat: 11.6643, lng: 78.1460, desc: "Mango City En-Route Stop" },
+  trichy: { lat: 10.7905, lng: 78.7047, desc: "Rockfort Heritage City" },
+};
+
 export function PlannerPage() {
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
       role: "assistant",
-      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'one-day bike trip from Chennai to Ooty via Madurai').",
+      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'trip from chennai to madurai at 11 pm' or 'one-day bike trip to ooty').",
     },
   ]);
   const [input, setInput] = useState("");
@@ -121,12 +132,15 @@ export function PlannerPage() {
 
   // Extract Route Coordinates & Markers from API response
   const rawCoords = plannerData?.route?.geometry?.coordinates || [];
-  // Convert [lng, lat] GeoJSON to [lat, lng] for Mapcn components
   const mapRoutePoints: Array<[number, number]> = rawCoords.map(([lng, lat]) => [lat, lng]);
 
   const originName = plannerData?.plannerState?.origin || "Chennai";
-  const destName = plannerData?.plannerState?.destination || "Ooty";
+  const destName = plannerData?.plannerState?.destination || "Madurai";
   const waypointsList = plannerData?.plannerState?.waypoints || [];
+  const overnightTravel = plannerData?.plannerState?.overnightTravel || false;
+
+  const destLower = destName.toLowerCase();
+  const destCoord = CITY_COORDINATES[destLower] || { lat: 9.9252, lng: 78.1198, desc: `${destName} Destination` };
 
   const distanceKm = plannerData?.route?.distanceKm || 0;
   const durationMins = plannerData?.route?.durationMinutes || 0;
@@ -137,10 +151,9 @@ export function PlannerPage() {
   const fuelCostDisplay = plannerData?.costEstimate?.fuelCost || "₹0";
   const totalCostDisplay = plannerData?.costEstimate?.total ? `₹${plannerData.costEstimate.total.toLocaleString("en-IN")}` : "₹3,000";
   const budgetDisplay = plannerData?.plannerState?.budget ? `₹${plannerData.plannerState.budget.toLocaleString("en-IN")}` : "₹3,000";
-  const weatherDisplay = plannerData?.weather?.tempRange ? `${plannerData.weather.tempRange} (${plannerData.weather.condition || 'Clear'})` : "18–28°C";
+  const weatherDisplay = plannerData?.weather?.tempRange ? `${plannerData.weather.tempRange} (${plannerData.weather.condition || 'Clear'})` : "22–32°C";
 
   const warnings = plannerData?.validation?.warnings || [];
-  const durationFeasible = plannerData?.validation?.durationFeasible ?? true;
 
   return (
     <AppShell>
@@ -203,7 +216,7 @@ export function PlannerPage() {
             <input
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="e.g. plan a trip to ooty from chennai through madurai"
+              placeholder="e.g. trip from chennai to madurai at 11 pm"
               aria-label="Message the trip planner"
               disabled={loading}
               className="min-h-11 flex-1 bg-transparent px-3 text-sm outline-none placeholder:text-muted-foreground disabled:opacity-50"
@@ -216,21 +229,29 @@ export function PlannerPage() {
 
         {/* Right Column: Interactive Route Map, Route Metrics & Itinerary */}
         <div className="space-y-4">
-          {/* Feasibility Alert Banner */}
-          {!durationFeasible && (
+          {/* Feasibility Alert / Overnight Advisory Banner */}
+          {warnings.length > 0 && (
             <motion.div
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
-              className="rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-200 shadow-md backdrop-blur-md"
+              className={
+                overnightTravel
+                  ? "rounded-3xl border border-indigo-500/30 bg-indigo-500/10 p-4 text-indigo-200 shadow-md backdrop-blur-md"
+                  : "rounded-3xl border border-amber-500/30 bg-amber-500/10 p-4 text-amber-200 shadow-md backdrop-blur-md"
+              }
             >
               <div className="flex items-start gap-3">
-                <ShieldAlert className="mt-0.5 size-5 text-amber-400 shrink-0" />
+                {overnightTravel ? (
+                  <Moon className="mt-0.5 size-5 text-indigo-400 shrink-0" />
+                ) : (
+                  <ShieldAlert className="mt-0.5 size-5 text-amber-400 shrink-0" />
+                )}
                 <div>
-                  <h4 className="font-display text-xs font-bold uppercase tracking-wider text-amber-400">
-                    Trip Feasibility Warning
+                  <h4 className="font-display text-xs font-bold uppercase tracking-wider">
+                    {overnightTravel ? "🌙 Overnight Travel Plan" : "⚠️ Trip Feasibility Warning"}
                   </h4>
                   {warnings.map((w, idx) => (
-                    <p key={idx} className="mt-1 text-xs text-amber-200/90 leading-relaxed">
+                    <p key={idx} className="mt-1 text-xs leading-relaxed opacity-90">
                       {w}
                     </p>
                   ))}
@@ -271,24 +292,22 @@ export function PlannerPage() {
                 <MarkerLabel>Origin: {originName}</MarkerLabel>
               </MapMarker>
 
-              {/* Destination Marker */}
-              {destName.toLowerCase().includes("ooty") && (
-                <MapMarker latitude={11.4102} longitude={76.6950}>
-                  <MarkerContent>
-                    <span className="flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-emerald-500/30">
-                      <MapPin className="size-2.5 text-white" />
-                    </span>
-                  </MarkerContent>
-                  <MarkerLabel>Destination: Ooty</MarkerLabel>
-                  <MarkerTooltip>Queen of Hill Stations (Nilgiris)</MarkerTooltip>
-                  <MarkerPopup title="Ooty (Nilgiris)" rating={4.8}>
-                    <p className="text-xs text-muted-foreground">2,240m elevation hill station in Nilgiris.</p>
-                  </MarkerPopup>
-                </MapMarker>
-              )}
+              {/* Destination Marker (Dynamic) */}
+              <MapMarker latitude={destCoord.lat} longitude={destCoord.lng}>
+                <MarkerContent>
+                  <span className="flex size-4 items-center justify-center rounded-full bg-emerald-600 ring-4 ring-emerald-500/30">
+                    <MapPin className="size-2.5 text-white" />
+                  </span>
+                </MarkerContent>
+                <MarkerLabel>Destination: {destName}</MarkerLabel>
+                <MarkerTooltip>{destCoord.desc}</MarkerTooltip>
+                <MarkerPopup title={destName} rating={4.8}>
+                  <p className="text-xs text-muted-foreground">{destCoord.desc}</p>
+                </MarkerPopup>
+              </MapMarker>
 
               {/* Waypoint Marker */}
-              {waypointsList.some((w) => w.toLowerCase().includes("madurai")) && (
+              {waypointsList.some((w) => w.toLowerCase().includes("madurai")) && destName.toLowerCase() !== "madurai" && (
                 <MapMarker latitude={9.9252} longitude={78.1198}>
                   <MarkerContent>
                     <span className="size-3 rounded-full bg-amber-400 ring-2 ring-amber-400/30" />
