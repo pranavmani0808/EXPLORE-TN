@@ -34,6 +34,9 @@ import {
 } from "@/components/ui/map";
 
 export const Route = createFileRoute("/planner")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    prompt: search.prompt as string | undefined,
+  }),
   head: () => ({
     meta: [
       { title: "AI Trip Planner — ExplorerTN" },
@@ -94,6 +97,32 @@ export function PlannerPage() {
       description: "Enter your starting city to generate a verified Tamil Nadu itinerary and road route.",
     },
   ]);
+
+  const routeSearch = Route.useSearch();
+
+  useEffect(() => {
+    const urlPrompt = routeSearch?.prompt || (typeof window !== "undefined" ? new URLSearchParams(window.location.search).get("prompt") : null);
+    if (urlPrompt && !initializedRef.current) {
+      initializedRef.current = true;
+      setErrorMsg(null);
+      setMessages((prev) => [...prev, { role: "user", text: urlPrompt }]);
+      setLoading(true);
+
+      PlannerApiRepository.sendChatMessage(urlPrompt, conversationId)
+        .then((res: PlannerChatResponseDTO) => {
+          setConversationId(res.conversationId);
+          setPlannerData(res);
+          setMessages((prev) => [...prev, { role: "assistant", text: res.message }]);
+          if (res.timeline && res.timeline.length > 0) {
+            setTimeline(res.timeline);
+          }
+        })
+        .catch((err: any) => {
+          setErrorMsg(err?.message || "Trip Copilot is temporarily unavailable.");
+        })
+        .finally(() => setLoading(false));
+    }
+  }, [routeSearch]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdventuresRouteImport } from './routes/adventures'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as LoginRouteImport } from './routes/login'
@@ -19,6 +20,7 @@ import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RoutesRouteImport } from './routes/routes'
 import { Route as PlaceSlugRouteImport } from './routes/place.$slug'
+import { Route as TrailsArupadaiVeeduRouteImport } from './routes/trails.arupadai-veedu'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -28,6 +30,11 @@ const IndexRoute = IndexRouteImport.update({
 const AdminRoute = AdminRouteImport.update({
   id: '/admin',
   path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdventuresRoute = AdventuresRouteImport.update({
+  id: '/adventures',
+  path: '/adventures',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CommunityRoute = CommunityRouteImport.update({
@@ -70,10 +77,16 @@ const PlaceSlugRoute = PlaceSlugRouteImport.update({
   path: '/place/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrailsArupadaiVeeduRoute = TrailsArupadaiVeeduRouteImport.update({
+  id: '/trails/arupadai-veedu',
+  path: '/trails/arupadai-veedu',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/adventures': typeof AdventuresRoute
   '/community': typeof CommunityRoute
   '/explore': typeof ExploreRoute
   '/login': typeof LoginRoute
@@ -82,10 +95,12 @@ export interface FileRoutesByFullPath {
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/adventures': typeof AdventuresRoute
   '/community': typeof CommunityRoute
   '/explore': typeof ExploreRoute
   '/login': typeof LoginRoute
@@ -94,11 +109,13 @@ export interface FileRoutesByTo {
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
+  '/adventures': typeof AdventuresRoute
   '/community': typeof CommunityRoute
   '/explore': typeof ExploreRoute
   '/login': typeof LoginRoute
@@ -107,12 +124,14 @@ export interface FileRoutesById {
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
     | '/admin'
+    | '/adventures'
     | '/community'
     | '/explore'
     | '/login'
@@ -121,10 +140,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/routes'
     | '/place/$slug'
+    | '/trails/arupadai-veedu'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/admin'
+    | '/adventures'
     | '/community'
     | '/explore'
     | '/login'
@@ -133,10 +154,12 @@ export interface FileRouteTypes {
     | '/profile'
     | '/routes'
     | '/place/$slug'
+    | '/trails/arupadai-veedu'
   id:
     | '__root__'
     | '/'
     | '/admin'
+    | '/adventures'
     | '/community'
     | '/explore'
     | '/login'
@@ -145,11 +168,13 @@ export interface FileRouteTypes {
     | '/profile'
     | '/routes'
     | '/place/$slug'
+    | '/trails/arupadai-veedu'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
+  AdventuresRoute: typeof AdventuresRoute
   CommunityRoute: typeof CommunityRoute
   ExploreRoute: typeof ExploreRoute
   LoginRoute: typeof LoginRoute
@@ -158,6 +183,7 @@ export interface RootRouteChildren {
   ProfileRoute: typeof ProfileRoute
   RoutesRoute: typeof RoutesRoute
   PlaceSlugRoute: typeof PlaceSlugRoute
+  TrailsArupadaiVeeduRoute: typeof TrailsArupadaiVeeduRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -174,6 +200,13 @@ declare module '@tanstack/react-router' {
       path: '/admin'
       fullPath: '/admin'
       preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/adventures': {
+      id: '/adventures'
+      path: '/adventures'
+      fullPath: '/adventures'
+      preLoaderRoute: typeof AdventuresRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/community': {
@@ -232,12 +265,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaceSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trails/arupadai-veedu': {
+      id: '/trails/arupadai-veedu'
+      path: '/trails/arupadai-veedu'
+      fullPath: '/trails/arupadai-veedu'
+      preLoaderRoute: typeof TrailsArupadaiVeeduRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
+  AdventuresRoute: AdventuresRoute,
   CommunityRoute: CommunityRoute,
   ExploreRoute: ExploreRoute,
   LoginRoute: LoginRoute,
@@ -246,6 +287,7 @@ const rootRouteChildren: RootRouteChildren = {
   ProfileRoute: ProfileRoute,
   RoutesRoute: RoutesRoute,
   PlaceSlugRoute: PlaceSlugRoute,
+  TrailsArupadaiVeeduRoute: TrailsArupadaiVeeduRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

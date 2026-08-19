@@ -7,9 +7,11 @@ import { AppShell } from "@/components/site/app-shell";
 import { GoogleMapHero } from "@/components/site/google-map-hero";
 import { DedicatedMapModal } from "@/components/site/dedicated-map-modal";
 import { PlaceCard } from "@/components/site/place-card";
+import { AdventureCard } from "@/components/site/adventure-card";
 import { SearchPanel } from "@/components/site/search-panel";
 import { Button } from "@/components/ui/button";
 import { categories, places, scenicRoute, arupadaiVeeduTemples } from "@/data/places";
+import { adventureActivities } from "@/data/adventures";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -322,6 +324,25 @@ function Index() {
                 </div>
               </Link>
             </motion.div>
+          ))}
+        </div>
+      </Section>
+
+      {/* Adventure Activities Section */}
+      <Section
+        title="⚡ Adventure Activities across India"
+        subtitle="Paragliding, skydiving, river rafting, scuba diving and gondola rides — discover high-adrenaline experiences."
+        action={
+          <Button asChild variant="ghost" className="rounded-xl font-bold">
+            <Link to="/adventures">
+              Explore All 10 Adventures <ArrowRight className="size-4" />
+            </Link>
+          </Button>
+        }
+      >
+        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {adventureActivities.slice(0, 6).map((activity) => (
+            <AdventureCard key={activity.id} activity={activity} />
           ))}
         </div>
       </Section>

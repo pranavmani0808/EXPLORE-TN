@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { Compass, Map, Route, Sparkles, Users, Bell, Search, Menu, Sun, Moon, Mic, Server } from "lucide-react";
+import { Compass, Map, Route, Sparkles, Users, Bell, Search, Menu, Sun, Moon, Mic, Server, Flame } from "lucide-react";
 import { motion } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ProfileMenu } from "@/components/site/profile-menu";
@@ -10,6 +10,7 @@ import { checkBackendHealth } from "@/lib/api";
 const links = [
   { to: "/explore", label: "Explore", icon: Map },
   { to: "/routes", label: "Routes", icon: Route },
+  { to: "/adventures", label: "Adventures", icon: Flame },
   { to: "/planner", label: "AI Planner", icon: Sparkles },
   { to: "/community", label: "Community", icon: Users },
 ];
