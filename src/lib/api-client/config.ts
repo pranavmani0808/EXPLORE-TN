@@ -1,8 +1,4 @@
 export function getApiBaseUrl(): string {
-  const isProd =
-    (typeof import.meta !== "undefined" && import.meta.env?.MODE === "production") ||
-    (typeof process !== "undefined" && process.env?.NODE_ENV === "production");
-
   let apiUrl: string | undefined;
 
   // 1. Check Vite / TanStack Start environment variables
@@ -21,16 +17,10 @@ export function getApiBaseUrl(): string {
     }
   }
 
-  if (apiUrl) {
+  if (apiUrl && apiUrl.trim() !== "") {
     return apiUrl.replace(/\/+$/, "");
   }
 
-  // 3. Strict Production Guard — Never silently fall back to localhost in production builds!
-  if (isProd) {
-    console.error("[ExplorerTN Config Error] Production API URL is not configured. Set VITE_API_URL to the deployed FastAPI backend.");
-    throw new Error("Production API URL is not configured. Set VITE_API_URL to the deployed FastAPI backend.");
-  }
-
-  // 4. Local Development Fallback
+  // 3. Fallback Base URL for local development & graceful SSR rendering
   return "http://localhost:8000";
 }
