@@ -52,17 +52,7 @@ export const Route = createFileRoute("/planner")({
   component: PlannerPage,
 });
 
-const defaultPacking = [
-  "Rain shell",
-  "Grip gloves",
-  "Headlamp",
-  "2L water",
-  "Power bank",
-  "Cash ₹2,000",
-  "Tyre inflator",
-];
-
-// Well-known coordinates for Mapcn marker fallback positioning
+// Well-known coordinates for map positioning fallbacks
 const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string }> = {
   madurai: { lat: 9.9252, lng: 78.1198, desc: "Meenakshi Amman Temple & Heritage City" },
   ooty: { lat: 11.4102, lng: 76.6950, desc: "Queen of Hill Stations (Nilgiris)" },
@@ -71,6 +61,19 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string 
   chennai: { lat: 13.0827, lng: 80.2707, desc: "Capital City Departure Point" },
   salem: { lat: 11.6643, lng: 78.1460, desc: "Mango City En-Route Stop" },
   trichy: { lat: 10.7905, lng: 78.7047, desc: "Rockfort Heritage City" },
+  goa: { lat: 15.6868, lng: 73.7042, desc: "Goa Surfing & Coastal Beach" },
+  "bir billing": { lat: 32.0365, lng: 76.7196, desc: "Bir Billing Paragliding Takeoff Point" },
+  bir: { lat: 32.0365, lng: 76.7196, desc: "Bir Billing Paragliding Takeoff Point" },
+  mysore: { lat: 12.2958, lng: 76.6394, desc: "Mysore Skydiving Dropzone" },
+  jaipur: { lat: 26.9124, lng: 75.7873, desc: "Jaipur Hot Air Balloon Launch" },
+  havelock: { lat: 12.0000, lng: 92.9800, desc: "Havelock Island Scuba Reef" },
+  "havelock island": { lat: 12.0000, lng: 92.9800, desc: "Havelock Island Scuba Reef" },
+  zanskar: { lat: 33.4833, lng: 76.8833, desc: "Zanskar River Kayaking Rapids" },
+  "zanskar river": { lat: 33.4833, lng: 76.8833, desc: "Zanskar River Kayaking Rapids" },
+  rishikesh: { lat: 30.0869, lng: 78.2676, desc: "Rishikesh Ganges Rafting Point" },
+  kovalam: { lat: 8.4004, lng: 76.9787, desc: "Kovalam Lighthouse Surf Break" },
+  gulmarg: { lat: 34.0484, lng: 74.3805, desc: "Gulmarg Gondola & Alpine Snow Peak" },
+  "elephant beach": { lat: 11.9961, lng: 92.9515, desc: "Elephant Beach Sea Walk" },
 };
 
 export function PlannerPage() {
@@ -92,7 +95,7 @@ export function PlannerPage() {
     {
       time: "06:00 AM",
       name: "Start Location",
-      description: "Enter your starting city to generate a verified Tamil Nadu itinerary and road route.",
+      description: "Enter your starting city to generate a verified itinerary and road route.",
     },
   ]);
 
@@ -159,22 +162,38 @@ export function PlannerPage() {
     }
   };
 
-  // Extract Route Coordinates & Markers from API response
+  // Extract Route Coordinates & Markers dynamically from API response
   const rawCoords = plannerData?.route?.geometry?.coordinates || [];
   const mapRoutePoints: Array<[number, number]> = rawCoords.map(([lng, lat]) => [lat, lng]);
 
   const originName = plannerData?.plannerState?.origin || "Chennai";
   const destName = plannerData?.plannerState?.destination || "Madurai";
-  const waypointsList = plannerData?.plannerState?.waypoints || [];
   const overnightTravel = plannerData?.plannerState?.overnightTravel || false;
 
   const originCityKey = originName.toLowerCase();
   const destCityKey = destName.toLowerCase();
 
-  const originPos = CITY_COORDINATES[originCityKey] || { lat: 13.0827, lng: 80.2707, desc: `${originName} Departure` };
-  const destPos = CITY_COORDINATES[destCityKey] || { lat: 9.9252, lng: 78.1198, desc: `${destName} Target Destination` };
+  // Dynamic start & end coordinates derived directly from OSRM geometry or geocoder dictionary
+  const originPos = mapRoutePoints.length > 0
+    ? { lat: mapRoutePoints[0][0], lng: mapRoutePoints[0][1], desc: `${originName} Departure` }
+    : (CITY_COORDINATES[originCityKey] || { lat: 13.0827, lng: 80.2707, desc: `${originName} Departure` });
 
-  const missingFields = plannerData?.missingFields || [];
+  const destPos = mapRoutePoints.length > 0
+    ? { lat: mapRoutePoints[mapRoutePoints.length - 1][0], lng: mapRoutePoints[mapRoutePoints.length - 1][1], desc: `${destName} Target Destination` }
+    : (CITY_COORDINATES[destCityKey] || { lat: 9.9252, lng: 78.1198, desc: `${destName} Target Destination` });
+
+  // Map viewport center & responsive auto-zoom calculation
+  const centerLat = (originPos.lat + destPos.lat) / 2;
+  const centerLng = (originPos.lng + destPos.lng) / 2;
+  const latDiff = Math.abs(originPos.lat - destPos.lat);
+  const lngDiff = Math.abs(originPos.lng - destPos.lng);
+  const maxDiff = Math.max(latDiff, lngDiff);
+
+  let mapZoom = 7;
+  if (maxDiff > 14) mapZoom = 4;
+  else if (maxDiff > 7) mapZoom = 5;
+  else if (maxDiff > 3) mapZoom = 6;
+
   const warnings = plannerData?.validation?.warnings || [];
   const costEstimate = plannerData?.costEstimate;
 
@@ -262,7 +281,7 @@ export function PlannerPage() {
           <div className="space-y-6 lg:col-span-6">
             {/* Interactive OSRM Route Mapcn */}
             <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-900 shadow-sm relative h-[320px]">
-              <Map center={[originPos.lat, originPos.lng]} zoom={7} className="size-full">
+              <Map center={[centerLat, centerLng]} zoom={mapZoom} className="size-full">
                 <MapControls />
                 {mapRoutePoints.length > 0 && (
                   <MapRoute coordinates={mapRoutePoints} color="#10b981" weight={4} dashArray="6,8" />
