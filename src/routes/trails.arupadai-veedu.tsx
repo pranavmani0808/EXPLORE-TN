@@ -5,12 +5,10 @@ import {
   Sparkles,
   MapPin,
   Navigation,
-  Compass,
   ArrowRight,
   Plus,
   Check,
   Calendar,
-  ShieldCheck,
   Flame,
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
@@ -67,68 +65,78 @@ export function ArupadaiVeeduTrailPage() {
 
   return (
     <AppShell>
-      {/* Hero Banner Section */}
-      <section className="relative min-h-[60vh] overflow-hidden">
+      {/* Premium Dark Hero Banner Section */}
+      <section className="relative min-h-[65vh] w-full overflow-hidden bg-slate-950 text-white">
+        {/* Layer 0: Background Temple Hero Image */}
         <img
           src={arupadaiVeeduTemples[2]!.image}
           alt="Arupadai Veedu Trail - Sacred Murugan Abodes"
-          className="absolute inset-0 size-full object-cover"
+          className="absolute inset-0 size-full object-cover object-center opacity-65 z-0"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-background via-background/60 to-background/30" />
-        <div className="absolute inset-0 bg-fade-bottom" />
 
-        <div className="relative mx-auto max-w-6xl px-4 pb-12 pt-28 sm:px-6 sm:pt-36">
+        {/* Layer 1: Dark Translucent Gradient Overlay (NO White Gradients) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-950/65 to-slate-950 z-1" />
+
+        {/* Layer 2: Hero Content */}
+        <div className="relative z-10 mx-auto max-w-6xl px-4 pb-16 pt-28 sm:px-6 sm:pt-36">
           <div className="max-w-3xl">
+            {/* Sacred Circuit Badge */}
             <motion.p
               initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-semibold uppercase tracking-wider text-amber-400"
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/40 bg-slate-900/80 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-amber-400 backdrop-blur-md shadow-md"
             >
               <Flame className="size-3.5 text-amber-400" /> Sacred Tamil Nadu Circuit
             </motion.p>
 
+            {/* Title */}
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-4 text-4xl font-extrabold leading-tight sm:text-6xl"
+              className="mt-4 text-4xl font-extrabold leading-tight text-white sm:text-6xl tracking-tight"
             >
               ARUPADAI VEEDU
               <br />
-              <span className="text-gradient font-black">Six Sacred Abodes</span>
+              <span className="bg-gradient-to-r from-amber-300 via-amber-400 to-amber-500 bg-clip-text text-transparent font-black">
+                Six Sacred Abodes
+              </span>
             </motion.h1>
 
+            {/* Description */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-4 text-base text-muted-foreground sm:text-lg"
+              className="mt-4 text-base font-medium leading-relaxed text-slate-200 sm:text-lg max-w-2xl"
             >
               Journey through the six sacred abodes of Lord Murugan across Tamil Nadu — from hilltops to sea shores.
             </motion.p>
 
+            {/* CTA & Metadata Badges */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
-              className="mt-8 flex flex-wrap items-center gap-4"
+              className="mt-8 flex flex-col gap-6 sm:flex-row sm:items-center sm:gap-6"
             >
               <Button
                 onClick={handlePlanWithAI}
                 size="lg"
-                className="rounded-xl bg-amber-500 font-bold text-black hover:bg-amber-600 shadow-lg shadow-amber-500/20"
+                className="rounded-xl bg-amber-500 px-6 py-6 font-extrabold text-slate-950 hover:bg-amber-400 shadow-xl shadow-amber-500/25 transition-all"
               >
-                <Sparkles className="mr-2 size-4" /> Plan this trail with AI <ArrowRight className="ml-2 size-4" />
+                <Sparkles className="mr-2 size-4 text-slate-950" /> Plan this trail with AI{" "}
+                <ArrowRight className="ml-2 size-4 text-slate-950" />
               </Button>
 
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <span className="flex items-center gap-1.5">
+              <div className="flex flex-wrap items-center gap-3">
+                <span className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/90 px-3.5 py-1.5 text-xs font-semibold text-slate-100 backdrop-blur-md shadow-sm">
                   <MapPin className="size-3.5 text-emerald-400" /> 6 Sacred Shrines
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/90 px-3.5 py-1.5 text-xs font-semibold text-slate-100 backdrop-blur-md shadow-sm">
                   <Navigation className="size-3.5 text-sky-400" /> ~1,200 km Circuit
                 </span>
-                <span className="flex items-center gap-1.5">
+                <span className="flex items-center gap-2 rounded-full border border-slate-700/80 bg-slate-900/90 px-3.5 py-1.5 text-xs font-semibold text-slate-100 backdrop-blur-md shadow-sm">
                   <Calendar className="size-3.5 text-purple-400" /> Recommended: 3–4 Days
                 </span>
               </div>
@@ -137,7 +145,7 @@ export function ArupadaiVeeduTrailPage() {
         </div>
       </section>
 
-      {/* Main Content Container */}
+      {/* Main Content Container with Dark Background & Smooth Transition */}
       <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
         {/* Interactive Mapcn Map Section */}
         <div className="mb-14 space-y-3">
