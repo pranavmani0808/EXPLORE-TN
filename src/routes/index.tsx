@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { Search, ArrowRight, Compass, Mountain, Sparkles, MapPin, Maximize2 } from "lucide-react";
+import { Search, ArrowRight, Compass, Mountain, Sparkles, MapPin, Maximize2, Flame, Plus, Check } from "lucide-react";
 import heroImg from "@/assets/hero-ghats.jpg";
 import { AppShell } from "@/components/site/app-shell";
 import { GoogleMapHero } from "@/components/site/google-map-hero";
@@ -9,7 +9,7 @@ import { DedicatedMapModal } from "@/components/site/dedicated-map-modal";
 import { PlaceCard } from "@/components/site/place-card";
 import { SearchPanel } from "@/components/site/search-panel";
 import { Button } from "@/components/ui/button";
-import { categories, places, scenicRoute } from "@/data/places";
+import { categories, places, scenicRoute, arupadaiVeeduTemples } from "@/data/places";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -18,12 +18,12 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "Map-first discovery of Tamil Nadu: hidden waterfalls, ghat road rides, temple trails, food crawls, viewpoints and weekend escapes.",
+          "Map-first discovery of Tamil Nadu: hidden waterfalls, ghat road rides, temple trails, Arupadai Veedu sacred circuit, food crawls, viewpoints and weekend escapes.",
       },
       { property: "og:title", content: "ExplorerTN — Discover hidden Tamil Nadu" },
       {
         property: "og:description",
-        content: "Hidden waterfalls, scenic ghat roads, temple trails and food routes across Tamil Nadu.",
+        content: "Hidden waterfalls, scenic ghat roads, Arupadai Veedu temple trails and food routes across Tamil Nadu.",
       },
     ],
   }),
@@ -31,12 +31,12 @@ export const Route = createFileRoute("/")({
 });
 
 const suggestions = [
+  "Arupadai Veedu trip",
   "Weekend bike ride",
   "Hidden waterfalls",
   "Best food in Madurai",
   "Temples near Thanjavur",
   "Sunrise trekking",
-  "Photography spots",
 ];
 
 function Section({
@@ -65,9 +65,15 @@ function Section({
 }
 
 function Index() {
+  const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDedicatedMapOpen, setIsDedicatedMapOpen] = useState(false);
+  const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
   const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
+
+  const handleAddToTrip = (slug: string) => {
+    setAddedTrips((prev) => ({ ...prev, [slug]: true }));
+  };
 
   return (
     <AppShell>
@@ -122,7 +128,7 @@ function Index() {
               transition={{ delay: 0.32, duration: 0.7 }}
               className="mt-6 max-w-xl text-base text-muted-foreground sm:text-lg"
             >
-              Hidden waterfalls, seventy-hairpin ghat roads, midnight food trails and ridge-top sunrises —
+              Hidden waterfalls, seventy-hairpin ghat roads, Arupadai Veedu sacred temple trails, and midnight food crawls —
               mapped, verified and built for map-first spatial exploration.
             </motion.p>
 
@@ -186,6 +192,89 @@ function Index() {
         <GoogleMapHero apiKey={GOOGLE_MAPS_KEY} />
       </section>
 
+      {/* ================================================== */}
+      {/* CURATED FEATURED TRAIL: ARUPADAI VEEDU TRAIL */}
+      {/* ================================================== */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="glass-strong overflow-hidden rounded-4xl p-6 sm:p-10 shadow-elevate border border-amber-500/20">
+          <div className="flex flex-wrap items-end justify-between gap-6 border-b border-border/60 pb-6">
+            <div>
+              <div className="flex items-center gap-2">
+                <Flame className="size-4 text-amber-400" />
+                <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
+                  EXPLORE SACRED TAMIL NADU
+                </span>
+              </div>
+              <h2 className="mt-2 text-3xl font-extrabold sm:text-5xl">🛕 Arupadai Veedu Trail</h2>
+              <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
+                Journey through the six sacred abodes of Lord Murugan across Tamil Nadu.
+              </p>
+            </div>
+
+            <Button asChild size="lg" className="rounded-xl bg-amber-500 text-black hover:bg-amber-600 font-bold shadow-lg shadow-amber-500/20">
+              <Link to="/trails/arupadai-veedu">
+                Explore Trail <ArrowRight className="ml-2 size-4" />
+              </Link>
+            </Button>
+          </div>
+
+          {/* Six Destination Cards */}
+          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {arupadaiVeeduTemples.map((temple, idx) => {
+              const isAdded = addedTrips[temple.slug];
+              return (
+                <div
+                  key={temple.slug}
+                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-elevate transition-all hover:border-amber-500/40"
+                >
+                  <div className="absolute left-3 top-3 z-10 rounded-full bg-black/70 px-3 py-1 text-xs font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
+                    {String(idx + 1).padStart(2, "0")} / 06
+                  </div>
+
+                  <div className="relative h-44 overflow-hidden">
+                    <img
+                      src={temple.image}
+                      alt={temple.name}
+                      loading="lazy"
+                      className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
+                  </div>
+
+                  <div className="flex flex-1 flex-col p-4">
+                    <p className="text-[11px] font-semibold text-amber-400">{temple.district} District</p>
+                    <h3 className="mt-1 font-display text-base font-bold">{temple.name}</h3>
+                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{temple.tagline}</p>
+
+                    <div className="mt-4 grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
+                      <Button asChild variant="outline" size="sm" className="rounded-xl text-[11px]">
+                        <Link to="/place/$slug" params={{ slug: temple.slug }}>
+                          View Place
+                        </Link>
+                      </Button>
+
+                      <Button
+                        onClick={() => handleAddToTrip(temple.slug)}
+                        size="sm"
+                        variant={isAdded ? "secondary" : "default"}
+                        className={
+                          isAdded
+                            ? "rounded-xl text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            : "rounded-xl text-[11px] bg-amber-500 text-black hover:bg-amber-600 font-semibold"
+                        }
+                      >
+                        {isAdded ? <Check className="mr-1 size-3 text-emerald-400" /> : <Plus className="mr-1 size-3" />}
+                        {isAdded ? "Added" : "Add to Trip"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      </section>
+
       {/* Trending */}
       <Section
         title="Trending this week"
@@ -217,7 +306,7 @@ function Index() {
               transition={{ delay: i * 0.05 }}
             >
               <Link
-                to="/explore"
+                to={c.id === "spiritual" ? "/trails/arupadai-veedu" : "/explore"}
                 className="group relative block h-48 overflow-hidden rounded-3xl border border-border"
               >
                 <img
@@ -233,80 +322,6 @@ function Index() {
                 </div>
               </Link>
             </motion.div>
-          ))}
-        </div>
-      </Section>
-
-      {/* Hidden gems */}
-      <Section title="Hidden gems" subtitle="Places locals know and maps forget.">
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="lg:col-span-2">
-            <PlaceCard place={places[7]!} size="lg" />
-          </div>
-          <div className="grid gap-6">
-            <PlaceCard place={places[6]!} />
-            <PlaceCard place={places[4]!} />
-          </div>
-        </div>
-      </Section>
-
-      {/* Scenic route teaser */}
-      <section className="relative overflow-hidden py-16 sm:py-24">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6">
-          <div className="glass-strong grid gap-8 overflow-hidden rounded-4xl p-6 shadow-elevate sm:p-10 lg:grid-cols-2 lg:items-center">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">Route Explorer</p>
-              <h2 className="mt-3 text-3xl font-bold sm:text-5xl">{scenicRoute.name}</h2>
-              <p className="mt-4 text-muted-foreground">{scenicRoute.summary}</p>
-              <dl className="mt-6 grid grid-cols-2 gap-4 sm:grid-cols-4">
-                {[
-                  ["Distance", scenicRoute.totalDistance],
-                  ["Riding", scenicRoute.totalTime],
-                  ["Fuel", scenicRoute.fuelEstimate],
-                  ["Season", scenicRoute.bestSeason],
-                ].map(([k, v]) => (
-                  <div key={k} className="rounded-2xl border border-border bg-card/50 p-3">
-                    <dt className="text-[11px] uppercase tracking-wide text-muted-foreground">{k}</dt>
-                    <dd className="mt-1 font-display text-sm font-semibold">{v}</dd>
-                  </div>
-                ))}
-              </dl>
-              <Button asChild size="lg" className="mt-6 rounded-xl">
-                <Link to="/routes">
-                  Ride the timeline <ArrowRight className="size-4" />
-                </Link>
-              </Button>
-            </div>
-            <div className="grid gap-3 sm:grid-cols-2">
-              {scenicRoute.stops.slice(1, 5).map((s) => (
-                <div key={s.name} className="overflow-hidden rounded-3xl border border-border bg-card">
-                  <img src={s.image} alt={s.name} loading="lazy" className="h-28 w-full object-cover" />
-                  <div className="p-3">
-                    <p className="font-display text-sm font-semibold">{s.name}</p>
-                    <p className="text-xs text-muted-foreground">{s.distance} · {s.weather}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Community */}
-      <Section
-        title="Travel stories"
-        subtitle="Journals, photo dumps and community picks from the road."
-        action={
-          <Button asChild variant="ghost" className="rounded-xl">
-            <Link to="/community">
-              Open feed <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        }
-      >
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {places.slice(3, 6).map((p) => (
-            <PlaceCard key={p.slug} place={p} />
           ))}
         </div>
       </Section>

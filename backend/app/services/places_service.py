@@ -45,6 +45,150 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-08T10:00:00Z",
                 "createdAt": "2026-08-08T10:00:00Z"
+            },
+            # 1. Thiruttani Murugan Temple
+            "thiruttani-murugan-temple": {
+                "id": "p-thiruttani",
+                "slug": "thiruttani-murugan-temple",
+                "name": "Thiruttani Murugan Temple",
+                "district": "Tiruvallur",
+                "category": "temple",
+                "tagline": "1st Arupadai Veedu — Hilltop abode where Murugan found tranquility",
+                "description": "Located on Tanigai hill in Tiruvallur district, Thiruttani Murugan Temple features 365 steps representing each day of the year. It marks where Lord Murugan found peace after vanquishing Surapadman.",
+                "latitude": 13.1788,
+                "longitude": 79.6074,
+                "elevation": "215m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-15T10:00:00Z",
+                "createdAt": "2026-08-15T10:00:00Z",
+                "image": "/src/assets/temples/thiruttani.jpg",
+                "trailSlug": "arupadai-veedu",
+                "trailOrder": 1,
+                "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
+            },
+            # 2. Swamimalai Murugan Temple
+            "swamimalai-murugan-temple": {
+                "id": "p-swamimalai",
+                "slug": "swamimalai-murugan-temple",
+                "name": "Swamimalai Murugan Temple",
+                "district": "Thanjavur",
+                "category": "temple",
+                "tagline": "2nd Arupadai Veedu — Abode where Lord Murugan taught the Pranava Mantra to Lord Shiva",
+                "description": "Situated on a 60-foot artificial hillock near Kumbakonam, Swamimalai features 60 steps representing the 60 Tamil calendar years. Lord Murugan presides here as Balamurugan or Swaminatha Swami.",
+                "latitude": 10.9567,
+                "longitude": 79.3274,
+                "elevation": "45m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-15T10:00:00Z",
+                "createdAt": "2026-08-15T10:00:00Z",
+                "image": "/src/assets/temples/swamimalai.jpg",
+                "trailSlug": "arupadai-veedu",
+                "trailOrder": 2,
+                "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
+            },
+            # 3. Palani Murugan Temple
+            "palani-murugan-temple": {
+                "id": "p-palani",
+                "slug": "palani-murugan-temple",
+                "name": "Palani Murugan Temple",
+                "district": "Dindigul",
+                "category": "temple",
+                "tagline": "3rd Arupadai Veedu — Sacred Sivagiri hill abode of Lord Dhandayuthapani Swamy",
+                "description": "Perched atop the steep Sivagiri hill in Palani, Dindigul district, this world-renowned shrine houses the sacred idol consecrated by Sage Bhogar using Navapashanam (nine medicinal herbal minerals).",
+                "latitude": 10.4497,
+                "longitude": 77.5204,
+                "elevation": "420m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-15T10:00:00Z",
+                "createdAt": "2026-08-15T10:00:00Z",
+                "image": "/src/assets/temples/palani.jpg",
+                "trailSlug": "arupadai-veedu",
+                "trailOrder": 3,
+                "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
+            },
+            # 4. Tiruchendur Murugan Temple
+            "tiruchendur-murugan-temple": {
+                "id": "p-tiruchendur",
+                "slug": "tiruchendur-murugan-temple",
+                "name": "Tiruchendur Murugan Temple",
+                "district": "Thoothukudi",
+                "category": "temple",
+                "tagline": "4th Arupadai Veedu — Seashore abode where Murugan vanquished Surapadman",
+                "description": "The only Arupadai Veedu shrine located right on the seashore of the Gulf of Mannar in Tiruchendur, Thoothukudi district. It commemorates Lord Murugan's victory over the demon Surapadman.",
+                "latitude": 8.4962,
+                "longitude": 78.1288,
+                "elevation": "5m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-15T10:00:00Z",
+                "createdAt": "2026-08-15T10:00:00Z",
+                "image": "/src/assets/temples/tiruchendur.jpg",
+                "trailSlug": "arupadai-veedu",
+                "trailOrder": 4,
+                "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
+            },
+            # 5. Pazhamudircholai Murugan Temple
+            "pazhamudircholai-murugan-temple": {
+                "id": "p-pazhamudircholai",
+                "slug": "pazhamudircholai-murugan-temple",
+                "name": "Pazhamudircholai Murugan Temple",
+                "district": "Madurai",
+                "category": "temple",
+                "tagline": "5th Arupadai Veedu — Dense forest hill shrine of Solaimalai",
+                "description": "Nestled amidst dense evergreen forests atop the Solaimalai hill range near Alagar Kovil in Madurai district. Famous for the legendary episode where Lord Murugan tested Tamil poetess Avvaiyar.",
+                "latitude": 10.0911,
+                "longitude": 78.2173,
+                "elevation": "380m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-15T10:00:00Z",
+                "createdAt": "2026-08-15T10:00:00Z",
+                "image": "/src/assets/temples/pazhamudircholai.jpg",
+                "trailSlug": "arupadai-veedu",
+                "trailOrder": 5,
+                "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
+            },
+            # 6. Thirupparankundram Murugan Temple
+            "thirupparankundram-murugan-temple": {
+                "id": "p-thirupparankundram",
+                "slug": "thirupparankundram-murugan-temple",
+                "name": "Thirupparankundram Murugan Temple",
+                "district": "Madurai",
+                "category": "temple",
+                "tagline": "6th Arupadai Veedu — Ancient rock-cut cave shrine where Murugan married Deivayanai",
+                "description": "A 6th-century rock-cut cave temple carved into a massive granite hill on the outskirts of Madurai city, celebrating the celestial marriage of Lord Murugan to Deivayanai.",
+                "latitude": 9.8797,
+                "longitude": 78.0710,
+                "elevation": "120m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-15T10:00:00Z",
+                "createdAt": "2026-08-15T10:00:00Z",
+                "image": "/src/assets/temples/thirupparankundram.jpg",
+                "trailSlug": "arupadai-veedu",
+                "trailOrder": 6,
+                "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
             }
         }
         self._audit_logs: List[dict] = []
@@ -55,15 +199,10 @@ class PlacesService:
         for p in self._places_db.values():
             p_norm = p["name"].lower().strip().replace(" ", "")
             dist = calculate_haversine(lat, lng, p["latitude"], p["longitude"])
-            
-            # Match 1: Exact or near name match within 5km radius
             if norm_name == p_norm and dist < 5.0:
                 return True, f"Identical place name '{p['name']}' found {dist} km away."
-            
-            # Match 2: Extreme physical proximity (< 0.5km)
             if dist < 0.5:
                 return True, f"Existing destination '{p['name']}' located within {dist} km radius."
-                
         return False, ""
 
     def submit_place_feedback(self, place_id: str, feedback_in: PlaceFeedbackCreate, user: UserContext, trace_id: str) -> dict:
@@ -134,7 +273,6 @@ class PlacesService:
         return place_record
 
     def create_place_with_lifecycle(self, name: str, district: str, category: str, latitude: float, longitude: float, tagline: str, user: UserContext) -> dict:
-        # Validate WGS84 coordinate bounds
         if latitude < 8.0 or latitude > 13.6 or longitude < 76.0 or longitude > 80.5:
             raise ValidationException(f"Latitude/Longitude ({latitude}°N, {longitude}°E) falls outside Tamil Nadu WGS84 bounds (8.0°N-13.6°N, 76.0°E-80.5°E).")
 
