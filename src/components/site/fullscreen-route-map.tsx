@@ -20,7 +20,7 @@ import {
   Plus,
 } from "lucide-react";
 import { CANONICAL_PLACES, resolvePlaceById, ExplorerPlace } from "@/lib/data/canonical-places";
-import { RouteApiRepository, IsolatedRouteResultDTO } from "@/lib/api-client/routes";
+import { RouteApiRepository, IsolatedRouteResultDTO, RouteOption } from "@/lib/api-client/routes";
 import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
 
 export interface FullscreenRouteMapProps {
@@ -50,7 +50,12 @@ export function FullscreenRouteMap({
     return initialDestinationPlaceId ? resolvePlaceById(initialDestinationPlaceId) : null;
   });
   const [waypoints, setWaypoints] = useState<ExplorerPlace[]>([]);
+  const [excludedStopIds, setExcludedStopIds] = useState<Set<string>>(new Set());
   const [travelMode, setTravelMode] = useState<"driving" | "motorcycle" | "walking" | "cycling">(initialTravelMode);
+
+  // Alternative Routes State
+  const [availableRoutes, setAvailableRoutes] = useState<RouteOption[]>([]);
+  const [selectedRouteId, setSelectedRouteId] = useState<string>("fastest");
 
   // Panel State & Phase 2 Recommendations Tab
   const [panelState, setPanelState] = useState<"expanded" | "compact" | "hidden">("expanded");
@@ -86,6 +91,35 @@ export function FullscreenRouteMap({
       if (p) setSelectedDestination(p);
     }
   }, [initialOriginPlaceId, initialDestinationPlaceId]);
+
+  // Fetch Alternative Routes when Origin/Destination/TravelMode changes
+  useEffect(() => {
+    if (!selectedOrigin || !selectedDestination) {
+      setAvailableRoutes([]);
+      setSelectedRouteId("fastest");
+      return;
+    }
+
+    RouteApiRepository.fetchAlternativeRoutes({
+      requestId: `alt-${Date.now()}`,
+      origin: {
+        latitude: selectedOrigin.latitude,
+        longitude: selectedOrigin.longitude,
+        name: selectedOrigin.canonicalName || selectedOrigin.name,
+      },
+      destination: {
+        latitude: selectedDestination.latitude,
+        longitude: selectedDestination.longitude,
+        name: selectedDestination.canonicalName || selectedDestination.name,
+      },
+      travelMode,
+    }).then((routes) => {
+      setAvailableRoutes(routes);
+      if (routes.length > 0 && !routes.some((r) => r.id === selectedRouteId)) {
+        setSelectedRouteId(routes[0].id);
+      }
+    });
+  }, [selectedOrigin, selectedDestination, travelMode]);
 
   // Click-Away Listener to Close Search Dropdown when clicking outside
   useEffect(() => {
@@ -171,7 +205,7 @@ export function FullscreenRouteMap({
     return `${hrs} hr ${mins} min`;
   }, [totalDurationMins]);
 
-  // Phase 2: Calculate Intelligent Rest, Meal & Overnight Recommendations
+  // Phase 2: Calculate Intelligent Rest, Meal & Overnight Recommendations along the Selected Route Corridor
   const recommendationResult = useMemo(() => {
     if (!selectedOrigin || !selectedDestination || segmentData.length === 0) return null;
     const combinedPolyline = segmentData.flatMap((seg) => seg.polyline || []);
@@ -186,7 +220,7 @@ export function FullscreenRouteMap({
     });
   }, [selectedOrigin, selectedDestination, segmentData, totalDistanceKm, totalDurationMins, departureTime]);
 
-  // Add Recommended Stop to Route Waypoints & Trigger Real Road Network Recalculation
+  // User-Controlled Stop Management: Add Recommended Stop
   const handleAddRecommendedStop = (candidate: RouteStopCandidate) => {
     const placeObj: ExplorerPlace = candidate.placeObject || {
       id: candidate.placeId,
@@ -209,9 +243,25 @@ export function FullscreenRouteMap({
       tags: ["rest-stop", candidate.category],
     };
 
-    if (waypoints.some((w) => w.id === placeObj.id)) return;
+    setExcludedStopIds((prev) => {
+      const next = new Set(prev);
+      next.delete(candidate.placeId);
+      return next;
+    });
 
-    setWaypoints((prev) => [...prev, placeObj]);
+    if (!waypoints.some((w) => w.id === placeObj.id)) {
+      setWaypoints((prev) => [...prev, placeObj]);
+    }
+  };
+
+  // User-Controlled Stop Management: Remove Stop
+  const handleRemoveRecommendedStop = (placeId: string) => {
+    setWaypoints((prev) => prev.filter((w) => w.id !== placeId));
+    setExcludedStopIds((prev) => {
+      const next = new Set(prev);
+      next.add(placeId);
+      return next;
+    });
   };
 
   // Calculate Route via Provider-Agnostic Backend Route Engine
@@ -226,6 +276,22 @@ export function FullscreenRouteMap({
     activeRequestIdRef.current = requestId;
     setRouteLoading(true);
     setRouteError(null);
+
+    // If an alternative route (e.g. ECR Scenic) is selected and no custom waypoints are added yet,
+    // use that route option's geometry directly!
+    const activeRouteOpt = availableRoutes.find((r) => r.id === selectedRouteId);
+
+    if (activeRouteOpt && waypoints.length === 0 && activeRouteOpt.geometry.length > 0) {
+      setSegmentData([
+        {
+          distanceKm: activeRouteOpt.distanceKm,
+          durationMins: activeRouteOpt.durationMins,
+          polyline: activeRouteOpt.geometry,
+        },
+      ]);
+      setRouteLoading(false);
+      return;
+    }
 
     const calculateAllSegments = async () => {
       const segments: Array<{ distanceKm: number; durationMins: number; polyline: [number, number][] }> = [];
@@ -248,7 +314,7 @@ export function FullscreenRouteMap({
             travelMode,
           });
 
-          if (activeRequestIdRef.current !== requestId) return; // Discard stale response!
+          if (activeRequestIdRef.current !== requestId) return;
 
           const segInfo = {
             distanceKm: res.summary.distanceKm,
@@ -273,7 +339,7 @@ export function FullscreenRouteMap({
     };
 
     calculateAllSegments();
-  }, [selectedOrigin, selectedDestination, waypoints, travelMode]);
+  }, [selectedOrigin, selectedDestination, waypoints, travelMode, selectedRouteId, availableRoutes]);
 
   // Leaflet Map Initialization & Lifecycle Management
   useEffect(() => {
@@ -685,6 +751,43 @@ export function FullscreenRouteMap({
               )}
             </div>
 
+            {/* ROUTE OPTIONS SELECTOR GRID */}
+            {availableRoutes.length > 1 && (
+              <div className="pt-2 border-t border-white/10 shrink-0 space-y-1.5">
+                <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
+                  <span>Route Options ({availableRoutes.length})</span>
+                  <span className="text-emerald-400 text-[9px] font-semibold">Real Road Geometry</span>
+                </div>
+                <div className="grid grid-cols-2 gap-2">
+                  {availableRoutes.map((routeOpt) => {
+                    const isSelected = selectedRouteId === routeOpt.id;
+                    return (
+                      <button
+                        key={routeOpt.id}
+                        type="button"
+                        onClick={() => setSelectedRouteId(routeOpt.id)}
+                        className={`p-2 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
+                          isSelected
+                            ? "bg-emerald-500/15 border-emerald-500/60 text-white shadow-lg"
+                            : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20"
+                        }`}
+                      >
+                        <div className="flex items-center justify-between w-full">
+                          <span className={`w-2 h-2 rounded-full ${isSelected ? "bg-emerald-400 animate-pulse" : "bg-slate-500"}`}></span>
+                          <span className="text-[10px] font-mono font-bold text-emerald-400">{routeOpt.distanceKm} km</span>
+                        </div>
+                        <div className="font-bold text-xs mt-1 truncate text-white">{routeOpt.name}</div>
+                        <div className="text-[10px] text-slate-400 truncate mt-0.5">{routeOpt.description}</div>
+                        <div className="text-[10px] font-mono text-slate-300 mt-1 font-semibold">
+                          ETA ~ {Math.floor(routeOpt.durationMins / 60)}h {routeOpt.durationMins % 60}m
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
             {geoError && <p className="text-[10px] text-rose-400 px-1">{geoError}</p>}
             {routeError && (
               <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 space-y-2">
@@ -797,7 +900,7 @@ export function FullscreenRouteMap({
                             </div>
                           )}
 
-                          <div className="mt-2 flex items-center gap-2">
+                          <div className="mt-2 flex items-center justify-between gap-2 pt-1 border-t border-white/10">
                             <a
                               href={`https://www.google.com/maps/dir/?api=1&destination=${stop.latitude},${stop.longitude}&travelmode=driving`}
                               target="_blank"
@@ -806,6 +909,18 @@ export function FullscreenRouteMap({
                             >
                               Navigate →
                             </a>
+                            {idx > 0 && idx < stops.length - 1 && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveRecommendedStop(stop.id);
+                                }}
+                                className="px-2 py-1 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 font-bold text-[10px] transition cursor-pointer"
+                              >
+                                Remove Stop
+                              </button>
+                            )}
                           </div>
                         </div>
                       );
@@ -861,14 +976,21 @@ export function FullscreenRouteMap({
                       </div>
 
                       {recommendationResult.recommendations.map((rec) => {
-                        const isAlreadyAdded = waypoints.some((w) => w.id === rec.placeId);
+                        const isAdded = waypoints.some((w) => w.id === rec.placeId);
+                        const isExcluded = excludedStopIds.has(rec.placeId);
                         const CategoryIcon = rec.category === "tea" ? Coffee : rec.category === "fuel" ? Fuel : rec.category === "hotel" ? Hotel : Utensils;
                         const catBg = rec.category === "tea" ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : rec.category === "fuel" ? "bg-sky-500/20 text-sky-300 border-sky-500/40" : rec.category === "hotel" ? "bg-purple-500/20 text-purple-300 border-purple-500/40" : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
 
                         return (
                           <div
                             key={rec.placeId}
-                            className="p-3 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl space-y-2 text-xs transition"
+                            className={`p-3 border rounded-xl space-y-2 text-xs transition ${
+                              isAdded
+                                ? "bg-emerald-500/10 border-emerald-500/40"
+                                : isExcluded
+                                ? "bg-white/5 border-white/10 opacity-80"
+                                : "bg-white/5 border-white/10 hover:border-white/20"
+                            }`}
                           >
                             <div className="flex items-start justify-between gap-2">
                               <div>
@@ -894,27 +1016,43 @@ export function FullscreenRouteMap({
 
                             <p className="text-[10px] text-emerald-300 italic">{rec.reason}</p>
 
-                            <div className="pt-1 flex items-center justify-end">
-                              <button
-                                type="button"
-                                onClick={() => handleAddRecommendedStop(rec)}
-                                disabled={isAlreadyAdded}
-                                className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                                  isAlreadyAdded
-                                    ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
-                                    : "bg-emerald-500 text-black hover:bg-emerald-400"
-                                }`}
-                              >
-                                {isAlreadyAdded ? (
+                            <div className="pt-1.5 flex items-center justify-between border-t border-white/10">
+                              <span className="text-[10px] font-mono text-slate-400">
+                                {isAdded ? (
+                                  <span className="text-emerald-400 font-bold flex items-center gap-1">
+                                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Part of Itinerary
+                                  </span>
+                                ) : isExcluded ? (
+                                  <span className="text-slate-400 italic">Removed from Itinerary</span>
+                                ) : (
+                                  <span className="text-slate-400">Suggested Corridor Stop</span>
+                                )}
+                              </span>
+
+                              <div className="flex items-center gap-2">
+                                {isAdded ? (
                                   <>
-                                    <Check className="w-3.5 h-3.5" /> Added as Stop
+                                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold flex items-center gap-1">
+                                      <Check className="w-3.5 h-3.5 text-emerald-400" /> Added
+                                    </span>
+                                    <button
+                                      type="button"
+                                      onClick={() => handleRemoveRecommendedStop(rec.placeId)}
+                                      className="px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer active:scale-95"
+                                    >
+                                      Remove
+                                    </button>
                                   </>
                                 ) : (
-                                  <>
-                                    <Plus className="w-3.5 h-3.5" /> Add Stop to Route
-                                  </>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleAddRecommendedStop(rec)}
+                                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[11px] font-extrabold transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-md"
+                                  >
+                                    <Plus className="w-3.5 h-3.5" /> Add Stop
+                                  </button>
                                 )}
-                              </button>
+                              </div>
                             </div>
                           </div>
                         );
