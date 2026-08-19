@@ -27,7 +27,8 @@ export type PlaceCategory =
 
 export interface ExplorerPlace {
   id: string;
-  name: string;
+  canonicalName: string;
+  name: string; // backward compatibility alias
   slug: string;
   district: string;
   state: string;
@@ -42,6 +43,7 @@ export interface ExplorerPlace {
   rating?: number;
   reviewsCount?: number;
   verified: boolean;
+  source?: string;
   tags: string[];
   highlights?: string[];
   aliases?: string[];
@@ -52,10 +54,34 @@ export interface ExplorerPlace {
   };
 }
 
+export type PlaceReference = {
+  placeId: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+};
+
+export type PlanningContext = {
+  requestId: string;
+  origin?: PlaceReference;
+  destinations: PlaceReference[];
+  travelMode?: string;
+  selectedCircuitId?: string;
+  createdAt: string;
+};
+
+export class DestinationResolutionError extends Error {
+  constructor(public query: string) {
+    super(`DestinationResolutionError: Unable to resolve place '${query}' through Canonical Place Engine.`);
+    this.name = "DestinationResolutionError";
+  }
+}
+
 export const CANONICAL_PLACES: ExplorerPlace[] = [
   // --- MADURAI COLLECTION ---
   {
     id: "meenakshi-amman-temple",
+    canonicalName: "Meenakshi Amman Temple",
     name: "Meenakshi Amman Temple",
     slug: "meenakshi-amman-temple",
     district: "Madurai",
@@ -71,12 +97,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 14200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Meenakshi", "Madurai Temple", "Gopuram", "Golden Lotus"],
     highlights: ["14 Soaring Gopurams", "1000-Pillar Hall", "Golden Lotus Tank"],
     aliases: ["Meenakshi Temple", "Madurai Meenakshi Temple"],
   },
   {
     id: "thirupparankundram-temple",
+    canonicalName: "Thirupparankundram Murugan Temple",
     name: "Thirupparankundram Murugan Temple",
     slug: "thirupparankundram-temple",
     district: "Madurai",
@@ -92,12 +120,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 3890,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Rock-Cut", "Cave Temple", "Murugan", "Granite Hill"],
     highlights: ["6th-Century Rock-Cut Shrine", "Granite Hill Viewpoint", "1st Arupadai Veedu"],
     aliases: ["Thirupparankundram", "Thiruparankundram"],
   },
   {
     id: "alagar-kovil",
+    canonicalName: "Alagar Kovil",
     name: "Alagar Kovil",
     slug: "alagar-kovil",
     district: "Madurai",
@@ -113,12 +143,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 2450,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Vishnu Temple", "Alagar Hills", "Forest Reserve"],
     highlights: ["Kallazhagar Shrine", "Alagar Hills Canopy", "Stone Sculptures"],
     aliases: ["Azhagarkovil", "Alagar Temple"],
   },
   {
     id: "pazhamudircholai-temple",
+    canonicalName: "Pazhamudircholai Murugan Temple",
     name: "Pazhamudircholai",
     slug: "pazhamudircholai-temple",
     district: "Madurai",
@@ -134,12 +166,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 3100,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Solaimalai", "Forest Temple", "Murugan", "Hill Drive"],
     highlights: ["Hilltop Forest Shrine", "Solaimalai Mountain Road", "Natural Springs"],
     aliases: ["Solaimalai Murugan Temple", "Pazhamudhircholai"],
   },
   {
     id: "samanar-hills",
+    canonicalName: "Samanar Hills",
     name: "Samanar Hills",
     slug: "samanar-hills",
     district: "Madurai",
@@ -155,12 +189,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 1820,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Jain Heritage", "Rock Beds", "Sunset Point", "Madurai Views"],
     highlights: ["Ancient Jain Bas-Reliefs", "Panoramic Madurai Plains View", "Keelakuyilkudi Village"],
     aliases: ["Samanar Malai", "Keelakuyilkudi Hills"],
   },
   {
     id: "thirumalai-mahal",
+    canonicalName: "Thirumalai Nayakkar Mahal",
     name: "Thirumalai Nayakkar Mahal",
     slug: "thirumalai-mahal",
     district: "Madurai",
@@ -176,12 +212,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 5600,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Nayak Palace", "Indo-Saracenic", "Giant Pillars", "Light & Sound Show"],
     highlights: ["82ft Giant White Columns", "Swarga Vilasam Courtyard", "Evening Light Show"],
     aliases: ["Thirumalai Nayak Palace", "Madurai Palace"],
   },
   {
     id: "gandhi-museum-madurai",
+    canonicalName: "Gandhi Memorial Museum",
     name: "Gandhi Memorial Museum",
     slug: "gandhi-museum-madurai",
     district: "Madurai",
@@ -197,12 +235,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 2900,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Freedom Struggle", "Tamukkam Palace", "Peace Garden"],
     highlights: ["Gandhi Freedom Relics", "Tamukkam Summer Palace", "Quiet Garden Walk"],
     aliases: ["Gandhi Museum Madurai", "Tamukkam Palace"],
   },
   {
     id: "vandiyur-teppakulam",
+    canonicalName: "Vandiyur Mariamman Teppakulam",
     name: "Vandiyur Mariamman Teppakulam",
     slug: "vandiyur-teppakulam",
     district: "Madurai",
@@ -218,12 +258,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 2150,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Temple Tank", "Maiya Mandapam", "Float Festival"],
     highlights: ["16-Acre Square Water Tank", "Maiya Mandapam Island", "Evening Stroll Promenade"],
     aliases: ["Mariamman Teppakulam", "Madurai Teppakulam"],
   },
   {
     id: "vaigai-riverfront",
+    canonicalName: "Vaigai Riverfront",
     name: "Vaigai Riverfront",
     slug: "vaigai-riverfront",
     district: "Madurai",
@@ -239,6 +281,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.3,
     reviewsCount: 850,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Vaigai River", "Bridge View", "Chithirai Festival"],
     highlights: ["Vaigai River Bridge Vistas", "City Waterway Walk", "Chithirai River Crossing Venue"],
     aliases: ["Vaigai River", "Vaigai Bank Madurai"],
@@ -247,6 +290,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
   // --- THENI COLLECTION ---
   {
     id: "theni",
+    canonicalName: "Theni Town Hub",
     name: "Theni Town Hub",
     slug: "theni",
     district: "Theni",
@@ -262,12 +306,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.5,
     reviewsCount: 1500,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Theni Hub", "Gateway", "Western Ghats"],
     highlights: ["Theni Bus Terminus", "Market Square", "Gateway to Ghat Roads"],
     aliases: ["Theni", "Theni City", "Theni Hub"],
   },
   {
     id: "meghamalai",
+    canonicalName: "Meghamalai",
     name: "Meghamalai",
     slug: "meghamalai",
     district: "Theni",
@@ -283,12 +329,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 3410,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["High Waves", "Tea Estates", "Cloud Forest", "Western Ghats"],
     highlights: ["High Waves Tea Plantations", "Meghamalai Dam Reservoir", "18 Hairpin Bend Mountain Drive"],
     aliases: ["High Wavy Mountains", "Megamalai"],
   },
   {
     id: "suruli-waterfalls",
+    canonicalName: "Suruli Waterfalls",
     name: "Suruli Waterfalls",
     slug: "suruli-waterfalls",
     district: "Theni",
@@ -304,12 +352,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 4120,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Suruli Falls", "150ft Waterfalls", "Rock Caves", "Cumbum"],
     highlights: ["150ft 2-Tier Water Cascade", "18 Rock-Cut Cave Shrines", "Dense Teak Forest Walk"],
     aliases: ["Suruli Falls", "Suruli Waterfalls Theni"],
   },
   {
     id: "cumbum-valley-vineyards",
+    canonicalName: "Cumbum Valley Vineyards",
     name: "Cumbum Valley Vineyards",
     slug: "cumbum-valley-vineyards",
     district: "Theni",
@@ -325,12 +375,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 1240,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Grape Farms", "Muscat Grapes", "Agro Tourism", "Cumbum Valley"],
     highlights: ["Year-Round Muscat Grape Harvest", "Farm Tasting & Grape Picking", "Scenic Valley Background"],
     aliases: ["Cumbum Vineyards", "Theni Grape City"],
   },
   {
     id: "ellapatti-river-walk",
+    canonicalName: "Ellapatti River Walk",
     name: "Ellapatti River Walk",
     slug: "ellapatti-river-walk",
     district: "Theni",
@@ -346,12 +398,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.5,
     reviewsCount: 680,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Mountain Stream", "Bamboo Groves", "Offbeat Trail"],
     highlights: ["Shallow Mountain Stream Bathing", "Shaded Bamboo Canopy", "Quiet Nature Walk"],
     aliases: ["Ellapatti River", "Ellapatti Stream"],
   },
   {
     id: "chinna-suruli-waterfalls",
+    canonicalName: "Chinna Suruli Waterfalls",
     name: "Chinna Suruli Waterfalls",
     slug: "chinna-suruli-waterfalls",
     district: "Theni",
@@ -367,12 +421,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.5,
     reviewsCount: 940,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Chinna Suruli", "Wild Cascade", "Kombaitholu"],
     highlights: ["Secluded Natural Pool", "Wild Forest Backdrop", "Less Crowded Cascade"],
     aliases: ["Chinna Suruli", "Cloudland Falls"],
   },
   {
     id: "kumbakkarai-falls",
+    canonicalName: "Kumbakkarai Falls",
     name: "Kumbakkarai Falls",
     slug: "kumbakkarai-falls",
     district: "Theni",
@@ -388,12 +444,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 3800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Kodaikanal Foothills", "Granite Pools", "Periyakulam"],
     highlights: ["Natural Granite Rock Water Basins", "Crystal Clear Mountain Water", "Foothill Trekking Base"],
     aliases: ["Kumbakkarai", "Kumbakkarai Waterfalls"],
   },
   {
     id: "thottipalam-aqueduct",
+    canonicalName: "Thottipalam Aqueduct",
     name: "Thottipalam Aqueduct",
     slug: "thottipalam-aqueduct",
     district: "Theni",
@@ -409,12 +467,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.4,
     reviewsCount: 520,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Aqueduct Bridge", "British Engineering", "Canal Walk"],
     highlights: ["Elevated Masonry Canal Bridge", "Scenic Paddy Field Vistas", "Historic Water Engineering"],
     aliases: ["Thottipalam", "Theni Aqueduct"],
   },
   {
     id: "vaigai-dam",
+    canonicalName: "Vaigai Dam Reservoir",
     name: "Vaigai Dam Reservoir",
     slug: "vaigai-dam",
     district: "Theni",
@@ -430,12 +490,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.5,
     reviewsCount: 4200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Vaigai Dam", "Reservoir", "Flower Gardens", "Andipatti"],
     highlights: ["111ft High Masonry Dam Wall", "Lush Flower Gardens & Illumination", "Sunset Over Reservoir Waters"],
     aliases: ["Vaigai Dam", "Vaigai Reservoir"],
   },
   {
     id: "kurangani-hill-village",
+    canonicalName: "Kurangani Hill Village",
     name: "Kurangani Hill Village",
     slug: "kurangani-hill-village",
     district: "Theni",
@@ -451,12 +513,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 1890,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Kurangani Trek", "Top Station Trail", "Shola Grassland"],
     highlights: ["Basecamp for Top Station Mountain Trail", "Central Station Valley View", "Shola Forest Reserve"],
     aliases: ["Kurangani", "Kurangani Hills"],
   },
   {
     id: "top-station-viewpoint",
+    canonicalName: "Top Station Viewpoint",
     name: "Top Station Viewpoint",
     slug: "top-station-viewpoint",
     district: "Theni",
@@ -472,6 +536,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 6100,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Top Station", "Cloud Sea", "Neelakurinji", "High Elevation"],
     highlights: ["1,700m High Summit Viewpoint", "Sea of Clouds Morning Vista", "Historic Ropeway Terminal"],
     aliases: ["Top Station", "Topstation Viewpoint"],
@@ -480,6 +545,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
   // --- TAMIL NADU HILLS & HERITAGE ---
   {
     id: "kolli-hills",
+    canonicalName: "Kolli Hills",
     name: "Kolli Hills",
     slug: "kolli-hills",
     district: "Namakkal",
@@ -495,12 +561,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 4500,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["70 Hairpin Bends", "Agaya Gangai", "Spice Plantations"],
     highlights: ["70 Continuous Hairpin Bends", "300ft Agaya Gangai Waterfall", "Arapaleeswarar Temple"],
     aliases: ["Kolli Malai", "Kolli Hills Namakkal"],
   },
   {
     id: "yelagiri",
+    canonicalName: "Yelagiri",
     name: "Yelagiri",
     slug: "yelagiri",
     district: "Tirupathur",
@@ -516,12 +584,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.5,
     reviewsCount: 4100,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Punganoor Lake", "Swamimalai", "Jalagamparai"],
     highlights: ["Punganoor Lake Boating", "Swamimalai Peak Trek", "Nature Park & Orchards"],
     aliases: ["Yelagiri Hills", "Elagiri"],
   },
   {
     id: "kalrayan-hills",
+    canonicalName: "Kalrayan Hills",
     name: "Kalrayan Hills",
     slug: "kalrayan-hills",
     district: "Kallakurichi",
@@ -537,12 +607,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.4,
     reviewsCount: 1120,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Periyar Falls", "Megam Falls", "Gomukhi Dam"],
     highlights: ["Periyar Cascading Waterfalls", "Gomukhi Reservoir Valley", "Botanical Garden Walk"],
     aliases: ["Kalvarayan Hills", "Kalrayan"],
   },
   {
     id: "gingee-fort",
+    canonicalName: "Gingee Fort",
     name: "Gingee Fort",
     slug: "gingee-fort",
     district: "Villupuram",
@@ -558,12 +630,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 3900,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Rajagiri Citadel", "Troy of East", "Kalyan Mahal"],
     highlights: ["800ft Steep Rajagiri Rock Climb", "7-Tier Kalyan Mahal Pavilion", "Granite Fortification Walls"],
     aliases: ["Senji Fort", "Gingee Citadel"],
   },
   {
     id: "tharangambadi",
+    canonicalName: "Tharangambadi",
     name: "Tharangambadi",
     slug: "tharangambadi",
     district: "Mayiladuthurai",
@@ -579,12 +653,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 2800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Fort Dansborg", "Danish Heritage", "Coromandel Coast"],
     highlights: ["1620 Fort Dansborg Sea Citadel", "Governor's Bungalow", "Sea Promenade Walk"],
-    aliases: ["Tranquebar", "Tharangambadi Tranquebar"],
+    aliases: ["Tranquebar", "Tharangambadi Tranquebar", "Tranquebar Tamil Nadu"],
   },
   {
     id: "panchamalai",
+    canonicalName: "Panchamalai — Salem",
     name: "Panchamalai — Salem",
     slug: "panchamalai",
     district: "Salem",
@@ -600,6 +676,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.3,
     reviewsCount: 650,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Salem Hills", "Unexplored", "Green Ridge"],
     highlights: ["Unexplored Green Mountain Ridges", "Rural Agricultural Drives", "Panorama Sunset View"],
     aliases: ["Panchamalai Hills", "Salem Panchamalai"],
@@ -608,6 +685,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
   // --- COASTAL & HERITAGE ROAD TRIP ---
   {
     id: "chennai",
+    canonicalName: "Chennai",
     name: "Chennai",
     slug: "chennai",
     district: "Chennai",
@@ -623,12 +701,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 18500,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Marina Beach", "ECR Gateway", "Kapaleeshwarar"],
     highlights: ["Marina Beach Coastal Corridor", "17th-Century Kapaleeshwarar Shrine", "San Thome Basilica"],
     aliases: ["Madras", "Chennai City"],
   },
   {
     id: "east-coast-road",
+    canonicalName: "East Coast Road",
     name: "East Coast Road",
     slug: "east-coast-road",
     district: "Chengalpattu",
@@ -644,12 +724,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 7800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["ECR Road Trip", "Ocean Drive", "Coastal Highway"],
     highlights: ["Oceanfront Bay of Bengal Views", "Seaside Cafes & Resorts", "Covelong Beach Access"],
     aliases: ["ECR", "ECR Highway"],
   },
   {
     id: "mahabalipuram",
+    canonicalName: "Mahabalipuram",
     name: "Mahabalipuram",
     slug: "mahabalipuram",
     district: "Chengalpattu",
@@ -665,12 +747,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 12400,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Shore Temple", "Pancha Rathas", "Arjuna's Penance", "UNESCO"],
     highlights: ["8th-Century Shore Temple", "Pancha Rathas Rock Monoliths", "Arjuna's Penance Bas-Relief"],
     aliases: ["Mamallapuram", "Mahabalipuram Shore Temple"],
   },
   {
     id: "puducherry",
+    canonicalName: "Puducherry",
     name: "Puducherry",
     slug: "puducherry",
     district: "Puducherry",
@@ -686,12 +770,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 15600,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["French Quarter", "Promenade Beach", "Auroville", "White Town"],
     highlights: ["Rock Beach Promenade Walk", "White Town French Villas", "Auroville Matrimandir Dome"],
     aliases: ["Pondicherry", "Pondy"],
   },
   {
     id: "pichavaram",
+    canonicalName: "Pichavaram Mangrove Forest",
     name: "Pichavaram Mangrove Forest",
     slug: "pichavaram",
     district: "Cuddalore",
@@ -707,12 +793,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 4200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Mangrove Boating", "Root Tunnels", "Bird Sanctuary"],
     highlights: ["Narrow Mangrove Root Canopy Boating", "4,400 Interconnected Water Channels", "Resident & Migratory Waterbirds"],
     aliases: ["Pichavaram Mangroves", "Pichavaram Boating"],
   },
   {
     id: "nagore",
+    canonicalName: "Nagore",
     name: "Nagore",
     slug: "nagore",
     district: "Nagapattinam",
@@ -728,12 +816,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 1950,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Nagore Dargah", "Coastal Shrine", "500-Year Heritage"],
     highlights: ["Nagore Dargah Minarets", "Kandoori Festival Venue", "Coromandel Pilgrim Town"],
     aliases: ["Nagore Dargah", "Nagore Shrine"],
   },
   {
     id: "velankanni",
+    canonicalName: "Velankanni",
     name: "Velankanni",
     slug: "velankanni",
     district: "Nagapattinam",
@@ -749,12 +839,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 8400,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Velankanni Basilica", "Lourdes of East", "Sea Coast Shrine"],
     highlights: ["Gothic Style White Basilica", "Seashore Prayer Complex", "Annual Feast Celebrations"],
     aliases: ["Velankanni Shrine", "Our Lady of Good Health"],
   },
   {
     id: "thanjavur",
+    canonicalName: "Thanjavur",
     name: "Thanjavur",
     slug: "thanjavur",
     district: "Thanjavur",
@@ -770,12 +862,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 11200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Big Temple", "Brihadeeswarar", "Chola UNESCO", "Thanjavur Palace"],
     highlights: ["216ft Granite Temple Vimana", "Monolithic Nandi Statue", "Maratha Palace & Saraswathi Mahal"],
     aliases: ["Tanjore", "Thanjavur Big Temple"],
   },
   {
     id: "karaikudi",
+    canonicalName: "Karaikudi",
     name: "Karaikudi",
     slug: "karaikudi",
     district: "Sivaganga",
@@ -791,12 +885,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 4100,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Chettinad Mansions", "Athangudi Tiles", "Chettinad Cuisine"],
     highlights: ["1000-Window Palatial Mansions", "Athangudi Handmade Tile Works", "Authentic Chettinad Feast"],
     aliases: ["Chettinad Karaikudi", "Karaikudi Mansions"],
   },
   {
     id: "pamban-bridge",
+    canonicalName: "Pamban Bridge",
     name: "Pamban Bridge",
     slug: "pamban-bridge",
     district: "Ramanathapuram",
@@ -812,12 +908,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 7600,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Sea Bridge", "Pamban Rail Bridge", "Scherzer Lift"],
     highlights: ["2.06km Open Sea Railway Viaduct", "Scherzer Rolling Lift Span", "Panoramic Ocean Vistas"],
     aliases: ["Pamban Rail Bridge", "Pamban Sea Bridge"],
   },
   {
     id: "rameswaram",
+    canonicalName: "Rameswaram",
     name: "Rameswaram",
     slug: "rameswaram",
     district: "Ramanathapuram",
@@ -833,12 +931,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 13800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Ramanathaswamy", "22 Theerthams", "Pillar Corridor"],
     highlights: ["World's Longest 1,212-Pillar Corridor", "22 Sacred Bathing Wells (Theerthams)", "Agni Theertham Sea Bath"],
     aliases: ["Rameshwaram", "Ramanathaswamy Temple"],
   },
   {
     id: "dhanushkodi",
+    canonicalName: "Dhanushkodi",
     name: "Dhanushkodi",
     slug: "dhanushkodi",
     district: "Ramanathapuram",
@@ -854,12 +954,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 9800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Ghost Town", "Arichal Munai", "Two Oceans", "1964 Cyclone Ruins"],
     highlights: ["Arichal Munai Two-Ocean Confluence", "1964 Cyclone Submerged Church Ruins", "Ocean End Point Road Drive"],
     aliases: ["Dhanushkodi Ghost Town", "Arichal Munai"],
   },
   {
     id: "kanniyakumari",
+    canonicalName: "Kanniyakumari",
     name: "Kanniyakumari",
     slug: "kanniyakumari",
     district: "Kanniyakumari",
@@ -875,6 +977,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 16400,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Southernmost Tip", "Vivekananda Rock", "Thiruvalluvar Statue", "Triveni Sangam"],
     highlights: ["133ft Monolithic Thiruvalluvar Statue", "Vivekananda Rock Island Memorial", "Triveni Sangam Sunrise & Sunset"],
     aliases: ["Kanyakumari", "Cape Comorin"],
@@ -883,6 +986,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
   // --- HILL ESCAPES FROM CHENNAI ---
   {
     id: "horsley-hills",
+    canonicalName: "Horsley Hills",
     name: "Horsley Hills",
     slug: "horsley-hills",
     district: "Chittoor",
@@ -898,12 +1002,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.6,
     reviewsCount: 2900,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Ooty of Andhra", "Eucalyptus", "Kalyani Banyan Tree"],
     highlights: ["1,290m High Eucalyptus Ridge", "Kalyani Giant Banyan Tree", "Wind Rocks Viewpoint"],
     aliases: ["Horsley Hills Andhra", "Yenugu Mallama Konda"],
   },
   {
     id: "yercaud",
+    canonicalName: "Yercaud",
     name: "Yercaud",
     slug: "yercaud",
     district: "Salem",
@@ -919,12 +1025,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 8200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Emerald Lake", "20 Hairpin Bends", "Pagoda Point", "Shevaroy Hills"],
     highlights: ["Emerald Lake Boating & Park", "20 Hairpin Bend Mountain Drive", "Pagoda Point Sunset View"],
     aliases: ["Yercaud Hills", "Shevaroy Hills"],
   },
   {
     id: "sirumalai",
+    canonicalName: "Sirumalai",
     name: "Sirumalai",
     slug: "sirumalai",
     district: "Dindigul",
@@ -940,12 +1048,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.5,
     reviewsCount: 1400,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["18 Hairpin Bends", "Sirumalai Banana", "Offbeat Valley"],
     highlights: ["18 Hairpin Bend Mountain Drive", "Sanjeevani Hills Viewpoint", "Hill Banana Plantations"],
     aliases: ["Sirumalai Hills", "Sirumalai Valley"],
   },
   {
     id: "kodaikanal",
+    canonicalName: "Kodaikanal",
     name: "Kodaikanal",
     slug: "kodaikanal",
     district: "Dindigul",
@@ -961,12 +1071,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 19800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Kodai Lake", "Pillar Rocks", "Coaker's Walk", "Pine Forest"],
     highlights: ["Star-Shaped Kodai Lake Boating", "Pillar Rocks 400ft Cliff Vistas", "Coaker's Walk Misty Promenade"],
     aliases: ["Kodai", "Kodaikanal Hills"],
   },
   {
     id: "palani-hills",
+    canonicalName: "Palani Hills",
     name: "Palani Hills",
     slug: "palani-hills",
     district: "Dindigul",
@@ -982,12 +1094,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 2200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Palani Range", "Shola Forest", "Western Ghats"],
     highlights: ["Shola Forest Reserve Trails", "High Altitude Mountain Streams", "Panoramic Foothill Overlooks"],
     aliases: ["Palani Mountain Range", "Palani Hills Reserve"],
   },
   {
     id: "kotagiri",
+    canonicalName: "Kotagiri",
     name: "Kotagiri",
     slug: "kotagiri",
     district: "The Nilgiris",
@@ -1003,12 +1117,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 3900,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Catherine Falls", "Kodanad Viewpoint", "Nilgiri Tea"],
     highlights: ["Kodanad Viewpoint Valley Vistas", "250ft 2-Tier Catherine Falls", "High-Altitude Tea Estate Walks"],
     aliases: ["Kotagiri Hills", "Kothagiri"],
   },
   {
     id: "coonoor",
+    canonicalName: "Coonoor",
     name: "Coonoor",
     slug: "coonoor",
     district: "The Nilgiris",
@@ -1024,6 +1140,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 7800,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Sim's Park", "Dolphin's Nose", "Toy Train", "Nilgiri Tea"],
     highlights: ["Sim's Park Botanical Gardens", "Dolphin's Nose Cliff Viewpoint", "UNESCO Heritage Nilgiri Mountain Railway"],
     aliases: ["Coonoor Hills", "Coimbatore Coonoor"],
@@ -1032,6 +1149,7 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
   // --- WESTERN GHATS ---
   {
     id: "kinnakorai",
+    canonicalName: "Kinnakorai",
     name: "Kinnakorai",
     slug: "kinnakorai",
     district: "The Nilgiris",
@@ -1047,12 +1165,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.7,
     reviewsCount: 880,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Remote Village", "Misty Ridges", "Nilgiri Pass"],
     highlights: ["Remote Mountain Pass Drives", "Misty Forest Ridge Trails", "Offbeat Western Ghats Tranquility"],
     aliases: ["Kinnakorai Village", "Kinakorai"],
   },
   {
     id: "mullayanagiri",
+    canonicalName: "Mullayanagiri",
     name: "Mullayanagiri",
     slug: "mullayanagiri",
     district: "Chikkamagaluru",
@@ -1068,12 +1188,14 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.9,
     reviewsCount: 11500,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Highest Peak Karnataka", "Chikkamagaluru", "Shola Grassland", "Trekking"],
     highlights: ["1,930m Highest Peak Summit View", "Shola Grassland Trekking Trail", "Coffee Estate Mountain Drives"],
     aliases: ["Mullayanagiri Peak", "Chikkamagaluru Peak"],
   },
   {
     id: "agumbe",
+    canonicalName: "Agumbe",
     name: "Agumbe",
     slug: "agumbe",
     district: "Shivamogga",
@@ -1089,45 +1211,111 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
     rating: 4.8,
     reviewsCount: 5200,
     verified: true,
+    source: "ExplorerTN Canonical Catalog",
     tags: ["Cherrapunji of South", "Rainforest", "Agumbe Sunset", "Waterfalls"],
     highlights: ["High-Altitude Rainforest Canopy", "Agumbe Sunset Viewpoint", "Onake Abbi & Barkana Waterfalls"],
     aliases: ["Agumbe Rainforest", "Agumbe Sunset Point"],
   },
 ];
 
+export function validatePlaceCoordinates(place: ExplorerPlace): boolean {
+  if (typeof place.latitude !== "number" || typeof place.longitude !== "number") {
+    throw new Error(`[Geographic Sanity Error] Place '${place.id}' missing valid numerical coordinates.`);
+  }
+  if (isNaN(place.latitude) || isNaN(place.longitude)) {
+    throw new Error(`[Geographic Sanity Error] Place '${place.id}' coordinates are NaN.`);
+  }
+  if (place.latitude < -90 || place.latitude > 90 || place.longitude < -180 || place.longitude > 180) {
+    throw new Error(`[Geographic Sanity Error] Place '${place.id}' coordinates (${place.latitude}, ${place.longitude}) out of WGS84 bounds.`);
+  }
+  if (place.latitude === 0 && place.longitude === 0) {
+    throw new Error(`[Geographic Sanity Error] Place '${place.id}' coordinates cannot be (0,0).`);
+  }
+  return true;
+}
+
+export function auditCanonicalCatalogDuplicates(): Array<{ place1: string; place2: string; distanceKm: number }> {
+  const duplicates: Array<{ place1: string; place2: string; distanceKm: number }> = [];
+  for (let i = 0; i < CANONICAL_PLACES.length; i++) {
+    for (let j = i + 1; j < CANONICAL_PLACES.length; j++) {
+      const p1 = CANONICAL_PLACES[i];
+      const p2 = CANONICAL_PLACES[j];
+      const dLat = (p2.latitude - p1.latitude) * (Math.PI / 180);
+      const dLng = (p2.longitude - p1.longitude) * (Math.PI / 180);
+      const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(p1.latitude * (Math.PI / 180)) *
+          Math.cos(p2.latitude * (Math.PI / 180)) *
+          Math.sin(dLng / 2) *
+          Math.sin(dLng / 2);
+      const distKm = Math.round(6371 * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a)) * 100) / 100;
+      if (distKm < 0.05 && p1.id !== p2.id) {
+        console.warn(`[Catalog Duplicate Warning] '${p1.id}' and '${p2.id}' have identical coordinates (${p1.latitude}, ${p1.longitude}).`);
+        duplicates.push({ place1: p1.id, place2: p2.id, distanceKm: distKm });
+      }
+    }
+  }
+  return duplicates;
+}
+
+export function resolvePlaceById(placeId: string): ExplorerPlace {
+  if (!placeId || !placeId.trim()) {
+    throw new DestinationResolutionError(placeId);
+  }
+  const rawId = placeId.toLowerCase().trim();
+  const place = CANONICAL_PLACES.find((p) => p.id.toLowerCase() === rawId || p.slug.toLowerCase() === rawId);
+  if (!place) {
+    throw new DestinationResolutionError(placeId);
+  }
+  validatePlaceCoordinates(place);
+  return place;
+}
+
 export function resolvePlace(query: string): ExplorerPlace | null {
   if (!query || !query.trim()) return null;
   const rawQ = query.toLowerCase().trim();
 
-  // 1. Direct ID or Slug Exact Match (Preserving hyphens!)
+  // 1. Direct ID or Slug Match (preserving hyphens!)
   for (const place of CANONICAL_PLACES) {
     if (place.id.toLowerCase() === rawQ || place.slug.toLowerCase() === rawQ) {
+      validatePlaceCoordinates(place);
       return place;
     }
   }
 
-  // 2. Exact Name Match
+  // 2. Canonical Name or Name Match
   for (const place of CANONICAL_PLACES) {
-    if (place.name.toLowerCase() === rawQ) {
+    if ((place.canonicalName && place.canonicalName.toLowerCase() === rawQ) || place.name.toLowerCase() === rawQ) {
+      validatePlaceCoordinates(place);
       return place;
     }
   }
 
-  // 3. Clean string substring match
+  // 3. Aliases Exact Match
+  for (const place of CANONICAL_PLACES) {
+    if (place.aliases?.some((alias) => alias.toLowerCase() === rawQ)) {
+      validatePlaceCoordinates(place);
+      return place;
+    }
+  }
+
+  // 4. Substring Match on Canonical Name / Slug / Aliases
   const cleanQ = rawQ.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
   for (const place of CANONICAL_PLACES) {
-    const cleanName = place.name.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+    const cleanName = (place.canonicalName || place.name).toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
     if (cleanName.includes(cleanQ) || (cleanQ.length > 3 && cleanName.startsWith(cleanQ))) {
+      validatePlaceCoordinates(place);
       return place;
     }
     if (place.slug.toLowerCase().includes(rawQ)) {
+      validatePlaceCoordinates(place);
       return place;
     }
     if (place.aliases?.some((alias) => alias.toLowerCase().includes(rawQ))) {
+      validatePlaceCoordinates(place);
       return place;
     }
   }
 
   return null;
 }
-

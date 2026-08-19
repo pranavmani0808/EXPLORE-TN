@@ -22,6 +22,7 @@ import {
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { PlannerApiRepository, PlannerChatResponseDTO } from "@/lib/api-client/planner";
+import { resolvePlace } from "@/lib/data/canonical-places";
 import {
   Map,
   MapMarker,
@@ -196,13 +197,21 @@ export function PlannerPage() {
   const originCityKey = originName.toLowerCase();
   const destCityKey = destName.toLowerCase();
 
-  // Dynamic start & end coordinates derived directly from OSRM geometry or geocoder dictionary
+  // Canonical Place Engine Resolution
+  const canonicalOrigin = resolvePlace(originName);
+  const canonicalDest = resolvePlace(destName);
+
+  // Dynamic start & end coordinates derived directly from OSRM geometry or Canonical Place Engine
   const originPos = mapRoutePoints.length > 0
-    ? { lat: mapRoutePoints[0][0], lng: mapRoutePoints[0][1], desc: `${originName} Departure` }
+    ? { lat: mapRoutePoints[0][0], lng: mapRoutePoints[0][1], desc: `${canonicalOrigin?.canonicalName || originName} Departure` }
+    : canonicalOrigin
+    ? { lat: canonicalOrigin.latitude, lng: canonicalOrigin.longitude, desc: `${canonicalOrigin.canonicalName} (${canonicalOrigin.district})` }
     : (CITY_COORDINATES[originCityKey] || { lat: 13.0827, lng: 80.2707, desc: `${originName} Departure` });
 
   const destPos = mapRoutePoints.length > 0
-    ? { lat: mapRoutePoints[mapRoutePoints.length - 1][0], lng: mapRoutePoints[mapRoutePoints.length - 1][1], desc: `${destName} Target Destination` }
+    ? { lat: mapRoutePoints[mapRoutePoints.length - 1][0], lng: mapRoutePoints[mapRoutePoints.length - 1][1], desc: `${canonicalDest?.canonicalName || destName} Target Destination` }
+    : canonicalDest
+    ? { lat: canonicalDest.latitude, lng: canonicalDest.longitude, desc: `${canonicalDest.canonicalName} (${canonicalDest.district})` }
     : (CITY_COORDINATES[destCityKey] || { lat: 9.9252, lng: 78.1198, desc: `${destName} Target Destination` });
 
   // Map viewport center & responsive auto-zoom calculation
