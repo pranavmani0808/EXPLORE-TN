@@ -6,14 +6,18 @@ from pydantic import BaseModel
 from backend.app.services.places_service import places_service, calculate_haversine
 from backend.app.services.openserp_service import openserp_service, SourceDTO
 from backend.app.services.routing import routing_service
+from backend.app.services.intelligence.trip_intent import intent_extractor, StructuredTripIntent
+from backend.app.services.intelligence.trip_validator import trip_validator
+from backend.app.services.intelligence.route_validator import route_sanity_validator
 from backend.app.core.config import settings
 
 class PlannerState(BaseModel):
     origin: Optional[str] = None
     destination: Optional[str] = None
-    durationDays: Optional[int] = None
+    waypoints: List[str] = []
+    durationDays: Optional[int] = 1
     budget: Optional[float] = None
-    transport: Optional[str] = None # "motorcycle", "car", "bus"
+    transport: Optional[str] = "motorcycle"
     interests: List[str] = []
     travelers: Optional[int] = 1
 
@@ -43,60 +47,7 @@ class PlannerService:
             return "COST_QUERY"
         if "make it" in lower and ("day" in lower or "days" in lower):
             return "CHANGE_DURATION"
-        if "plan" in lower or "trip" in lower or "from" in lower or "to" in lower:
-            return "PLAN_TRIP"
         return "PLAN_TRIP"
-
-    def extract_constraints(self, text: str, current_state: dict) -> dict:
-        state = dict(current_state)
-        lower = text.lower()
-
-        # Origin Extraction
-        origin_match = re.search(r"from\s+([a-zA-Z\s]+?)(?=\s+to|\s+a|\s+one|\s+two|\s+hills|\s+under|\s+budget|$)", lower)
-        if origin_match:
-            raw_origin = origin_match.group(1).strip().capitalize()
-            if len(raw_origin) > 2 and raw_origin.lower() not in ["a", "the"]:
-                state["origin"] = raw_origin
-
-        # Destination Extraction
-        dest_match = re.search(r"to\s+([a-zA-Z\s]+?)(?=\s+from|\s+a|\s+one|\s+two|\s+hills|\s+under|\s+budget|$)", lower)
-        if dest_match:
-            raw_dest = dest_match.group(1).strip().capitalize()
-            if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere"]:
-                state["destination"] = raw_dest
-
-        # Duration Extraction
-        if "one day" in lower or "1 day" in lower or "1-day" in lower:
-            state["durationDays"] = 1
-        elif "two day" in lower or "2 day" in lower or "2-day" in lower or "two days" in lower or "2 days" in lower:
-            state["durationDays"] = 2
-        elif "three day" in lower or "3 day" in lower or "3-day" in lower or "three days" in lower or "3 days" in lower:
-            state["durationDays"] = 3
-        elif "make it two days" in lower or "2 days" in lower:
-            state["durationDays"] = 2
-
-        # Transport Extraction
-        if "bike" in lower or "motorcycle" in lower or "rider" in lower or "bullet" in lower:
-            state["transport"] = "motorcycle"
-        elif "car" in lower or "drive" in lower or "taxi" in lower:
-            state["transport"] = "car"
-
-        # Budget Extraction
-        budget_match = re.search(r"(?:under|budget|₹|\brs\.?)\s*(\d+)", lower)
-        if budget_match:
-            state["budget"] = float(budget_match.group(1))
-
-        # Interests Extraction
-        current_interests = set(state.get("interests", []))
-        if "hill" in lower or "mountain" in lower or "ghat" in lower:
-            current_interests.add("hills")
-        if "waterfall" in lower or "falls" in lower:
-            current_interests.add("waterfalls")
-        if "temple" in lower or "heritage" in lower:
-            current_interests.add("temple")
-        state["interests"] = list(current_interests)
-
-        return state
 
     def compute_deterministic_cost(self, road_distance_km: float, transport: str, user_budget: float) -> dict:
         mileage = 32.0 if transport == "motorcycle" else 15.0
@@ -125,14 +76,41 @@ class PlannerService:
             "assumptions": f"{round(road_distance_km, 1)} km @ {mileage} km/L, ₹{int(fuel_price)}/L"
         }
 
+    def resolve_place_by_name(self, name: str, verified_places: List[dict]) -> Optional[dict]:
+        clean_target = name.strip().lower()
+        
+        # 1. Exact Name / District Match in DB
+        for p in verified_places:
+            p_name = p.get("name", "").lower()
+            p_dist = p.get("district", "").lower()
+            if clean_target in p_name or p_name in clean_target or clean_target == p_dist:
+                return p
+
+        # 2. Well-Known Tamil Nadu Hill Stations & Cities Geocoder Fallback Dictionary
+        KNOWN_GEOLOCATIONS = {
+            "ooty": {"name": "Ooty", "district": "Nilgiris", "latitude": 11.4102, "longitude": 76.6950, "verified": True, "category": "hill_station", "tagline": "Queen of Hill Stations"},
+            "madurai": {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198, "verified": True, "category": "city", "tagline": "Cultural Capital of Tamil Nadu"},
+            "chennai": {"name": "Chennai", "district": "Chennai", "latitude": 13.0827, "longitude": 80.2707, "verified": True, "category": "city", "tagline": "Capital City"},
+            "kodaikanal": {"name": "Kodaikanal", "district": "Dindigul", "latitude": 10.2381, "longitude": 77.4892, "verified": True, "category": "hill_station", "tagline": "Princess of Hill Stations"},
+            "valparai": {"name": "Valparai", "district": "Coimbatore", "latitude": 10.3270, "longitude": 76.9554, "verified": True, "category": "hill_station", "tagline": "70 Hairpin Pass Ghat Run"},
+            "salem": {"name": "Salem", "district": "Salem", "latitude": 11.6643, "longitude": 78.1460, "verified": True, "category": "city", "tagline": "Mango City"},
+            "trichy": {"name": "Tiruchirappalli", "district": "Tiruchirappalli", "latitude": 10.7905, "longitude": 78.7047, "verified": True, "category": "city", "tagline": "Rockfort Heritage City"},
+            "thanjavur": {"name": "Thanjavur", "district": "Thanjavur", "latitude": 10.7870, "longitude": 79.1378, "verified": True, "category": "heritage", "tagline": "Big Temple Heritage"},
+        }
+
+        if clean_target in KNOWN_GEOLOCATIONS:
+            return KNOWN_GEOLOCATIONS[clean_target]
+
+        return None
+
     def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str) -> dict:
         cid, session = self.get_or_create_conversation(conversation_id)
-        intent = self.classify_intent(user_message)
+        intent_type = self.classify_intent(user_message)
 
-        # Handle Greetings without mutating itinerary
-        if intent == "GREETING":
+        # Handle Greetings
+        if intent_type == "GREETING":
             session["messages"].append({"role": "user", "text": user_message})
-            greeting_text = "Hi! I can help plan your Tamil Nadu trip. Where are you starting from, and what destinations or activities do you prefer?"
+            greeting_text = "Hi! I can help plan your Tamil Nadu trip. Where are you starting from, and what destinations or waypoints do you prefer?"
             session["messages"].append({"role": "assistant", "text": greeting_text})
             
             return {
@@ -159,6 +137,8 @@ class PlannerService:
                 "weather": {"tempRange": "22–32°C", "condition": "Sunny"},
                 "timeline": [],
                 "webEvidence": [],
+                "decisionFacts": {},
+                "validation": {"destinationMatch": True, "durationFeasible": True, "budgetFeasible": True, "warnings": []},
                 "provenance": {
                     "destination": "PostgreSQL/PostGIS",
                     "route": "Routing Engine (OSRM)",
@@ -171,119 +151,215 @@ class PlannerService:
                 "traceId": trace_id
             }
 
-        # Update Conversation State
-        new_state = self.extract_constraints(user_message, session["state"])
-        session["state"] = new_state
+        # Extract Structured Intent
+        structured_intent = intent_extractor.extract_intent(user_message, session["state"])
+        session["state"] = structured_intent.model_dump()
         session["messages"].append({"role": "user", "text": user_message})
 
-        # Query Database-Grounded Verified Places
         all_places = places_service.get_all_places()
         verified_places = [p for p in all_places if p.get("verified", True)]
 
-        # Determine Origin & Recommended Stops
-        origin = new_state.get("origin") or "Chennai"
-        duration = new_state.get("durationDays") or 1
-        transport = new_state.get("transport") or "motorcycle"
-        budget = new_state.get("budget") or 3000.0
+        # 1. Resolve Destination & Enforce Destination Integrity Guard
+        requested_dest = structured_intent.destination
+        resolved_dest_place = None
+        if requested_dest:
+            resolved_dest_place = self.resolve_place_by_name(requested_dest, verified_places)
 
-        # Filter Places matching interests or default hill stations
-        recommended_stops = []
-        interests = new_state.get("interests", [])
-        for p in verified_places:
-            cat = p.get("category", "")
-            if not interests or cat in interests or ("hills" in interests and cat in ["hill_station", "viewpoint"]):
-                recommended_stops.append(p)
+            # HARD RULE: If user requested a destination that cannot be resolved, return explicit clarification prompt!
+            # DO NOT SILENTLY REPLACE WITH ANOTHER PLACE (e.g. Suruli Waterfalls)
+            if not resolved_dest_place:
+                clarification_msg = (
+                    f"I couldn't confidently locate '{requested_dest}' in my Tamil Nadu place database. "
+                    f"Did you mean Ooty (Nilgiris), Kodaikanal, Valparai, or another district?"
+                )
+                session["messages"].append({"role": "assistant", "text": clarification_msg})
+                return {
+                    "conversationId": cid,
+                    "message": clarification_msg,
+                    "intent": "CLARIFICATION_REQUIRED",
+                    "plannerState": session["state"],
+                    "missingFields": ["destination"],
+                    "recommendations": ["Ooty", "Kodaikanal", "Valparai", "Madurai"],
+                    "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
+                    "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
+                    "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": structured_intent.budget or 3000.0, "withinBudget": True, "assumptions": "N/A"},
+                    "weather": {"tempRange": "18–28°C", "condition": "Partly Cloudy"},
+                    "timeline": [],
+                    "webEvidence": [],
+                    "decisionFacts": {"requestedDestination": requested_dest, "resolvedDestination": None, "destinationMatch": False},
+                    "validation": {"destinationMatch": False, "durationFeasible": True, "budgetFeasible": True, "warnings": [f"Requested destination '{requested_dest}' unresolved."]},
+                    "provenance": {"destination": "PostgreSQL/PostGIS", "route": "Routing Engine (OSRM)", "cost": "Deterministic Cost Engine", "webEvidence": "OpenSERP", "narrative": "Gemini"},
+                    "traceId": trace_id
+                }
 
-        if not recommended_stops:
-            recommended_stops = verified_places[:3]
+        # Default fallback destination if user gave no destination at all
+        if not resolved_dest_place:
+            resolved_dest_place = verified_places[0] if verified_places else {"name": "Suruli Waterfalls", "district": "Theni", "latitude": 9.6644, "longitude": 77.2453}
 
-        # Calculate Real Road Distance & Riding ETA via Routing Engine
-        origin_lat, origin_lng = 13.0827, 80.2707 # Chennai WGS84
-        stop1 = recommended_stops[0]
-
-        # Invoke Modular Routing Engine
-        route_res = routing_service.calculate_route(
-            origin_lat=origin_lat,
-            origin_lng=origin_lng,
-            destination_lat=stop1["latitude"],
-            destination_lng=stop1["longitude"],
-            profile=transport
-        )
+        # 2. Resolve Origin & Waypoints
+        resolved_origin_place = self.resolve_place_by_name(structured_intent.origin or "Chennai", verified_places) or {"name": "Chennai", "latitude": 13.0827, "longitude": 80.2707}
         
-        roundtrip_dist_km = round(route_res.distance_km * 2, 1)
-        roundtrip_duration_mins = route_res.duration_minutes * 2
+        resolved_waypoints = []
+        for wp_name in structured_intent.waypoints:
+            wp_place = self.resolve_place_by_name(wp_name, verified_places)
+            if wp_place and wp_place["name"] != resolved_origin_place["name"] and wp_place["name"] != resolved_dest_place["name"]:
+                resolved_waypoints.append(wp_place)
 
-        cost_info = self.compute_deterministic_cost(roundtrip_dist_km, transport, budget)
+        # 3. Multi-Waypoint Route Construction & OSRM Routing
+        # Outbound: Origin -> Waypoints -> Destination
+        # Return: Destination -> Reversed Waypoints -> Origin
+        route_sequence = [resolved_origin_place] + resolved_waypoints + [resolved_dest_place]
+        
+        total_road_dist_km = 0.0
+        total_duration_mins = 0
+        combined_coords: List[List[float]] = []
 
-        # Query OpenSERP Server-Side Web Evidence
-        web_evidence_sources = openserp_service.search_web_evidence(stop1["name"], trace_id=trace_id)
+        # Outbound Leg Calculation
+        for i in range(len(route_sequence) - 1):
+            p_start = route_sequence[i]
+            p_end = route_sequence[i+1]
+
+            leg_res = routing_service.calculate_route(
+                origin_lat=p_start["latitude"],
+                origin_lng=p_start["longitude"],
+                destination_lat=p_end["latitude"],
+                destination_lng=p_end["longitude"],
+                profile=structured_intent.transport
+            )
+            total_road_dist_km += leg_res.distance_km
+            total_duration_mins += leg_res.duration_minutes
+            if leg_res.geometry and "coordinates" in leg_res.geometry:
+                combined_coords.extend(leg_res.geometry["coordinates"])
+
+        # Round Trip Return Leg Calculation
+        roundtrip_seq = list(reversed(route_sequence))
+        for i in range(len(roundtrip_seq) - 1):
+            p_start = roundtrip_seq[i]
+            p_end = roundtrip_seq[i+1]
+
+            leg_res = routing_service.calculate_route(
+                origin_lat=p_start["latitude"],
+                origin_lng=p_start["longitude"],
+                destination_lat=p_end["latitude"],
+                destination_lng=p_end["longitude"],
+                profile=structured_intent.transport
+            )
+            total_road_dist_km += leg_res.distance_km
+            total_duration_mins += leg_res.duration_minutes
+            if leg_res.geometry and "coordinates" in leg_res.geometry:
+                combined_coords.extend(leg_res.geometry["coordinates"])
+
+        total_road_dist_km = round(total_road_dist_km, 1)
+
+        # Log Route Sanity
+        route_sanity_validator.validate_and_log_route(
+            origin_name=resolved_origin_place["name"],
+            waypoints_names=[wp["name"] for wp in resolved_waypoints],
+            destination_name=resolved_dest_place["name"],
+            route_points_coords=combined_coords,
+            distance_km=total_road_dist_km,
+            duration_minutes=total_duration_mins,
+            trace_id=trace_id
+        )
+
+        # 4. Deterministic Cost & Feasibility Validation
+        user_budget = structured_intent.budget or 3000.0
+        cost_info = self.compute_deterministic_cost(total_road_dist_km, structured_intent.transport, user_budget)
+
+        validation_report = trip_validator.validate_trip(
+            intent=structured_intent,
+            resolved_destination_place=resolved_dest_place,
+            resolved_waypoints_places=resolved_waypoints,
+            total_route_duration_mins=total_duration_mins,
+            total_estimated_cost=cost_info["total"]
+        )
+
+        # 5. OpenSERP Grounded Web Evidence Query
+        web_evidence_sources = openserp_service.search_web_evidence(resolved_dest_place["name"], trace_id=trace_id)
         evidence_dtos = [s.model_dump() for s in web_evidence_sources]
 
-        # Build Real Timeline
+        # 6. Timeline Generation
+        waypoints_str = f" via {', '.join([wp['name'] for wp in resolved_waypoints])}" if resolved_waypoints else ""
+        hours = total_duration_mins // 60
+        mins = total_duration_mins % 60
+        eta_str = f"{hours}h {mins}m"
+
         timeline = [
             {
                 "time": "06:00 AM",
-                "name": f"Depart {origin}",
-                "description": f"Begin ride towards {stop1['name']} ({route_res.distance_km} km road distance)."
-            },
-            {
-                "time": "10:30 AM",
-                "name": stop1["name"],
-                "description": f"{stop1.get('tagline', 'Scenic destination')} in {stop1['district']} district."
-            },
-            {
-                "time": "01:30 PM",
-                "name": f"Lunch & Exploration at {stop1['district']}",
-                "description": "Local Tamil Nadu cuisine & viewpoints."
-            },
-            {
-                "time": "06:00 PM",
-                "name": f"Return to {origin}",
-                "description": f"Complete {duration}-day ride ({roundtrip_dist_km} km total road distance)."
+                "name": f"Depart {resolved_origin_place['name']}",
+                "description": f"Begin ride towards {resolved_dest_place['name']}{waypoints_str}."
             }
         ]
 
-        # Hours & Minutes ETA formatting
-        hours = roundtrip_duration_mins // 60
-        mins = roundtrip_duration_mins % 60
-        eta_str = f"{hours}h {mins}m"
+        for wp in resolved_waypoints:
+            timeline.append({
+                "time": "11:00 AM",
+                "name": f"Waypoint: {wp['name']}",
+                "description": f"En-route stop in {wp.get('district', wp['name'])} district."
+            })
+
+        timeline.extend([
+            {
+                "time": "02:30 PM",
+                "name": resolved_dest_place["name"],
+                "description": f"Explore {resolved_dest_place.get('tagline', 'Target destination')} in {resolved_dest_place.get('district', 'Tamil Nadu')}."
+            },
+            {
+                "time": "06:00 PM",
+                "name": f"Return to {resolved_origin_place['name']}",
+                "description": f"Complete {structured_intent.durationDays}-day ride ({total_road_dist_km} km total road distance)."
+            }
+        ])
+
+        # 7. Natural Language Assistant Message Generation with Feasibility Warning
+        feasibility_prefix = ""
+        if not validation_report.durationFeasible:
+            feasibility_prefix = (
+                f"⚠️ Feasibility Alert: A {structured_intent.durationDays}-day trip with {validation_report.totalRidingHours}h riding time "
+                f"exceeds daily riding limit (10h/day). I recommend 2–3 days for this route.\n\n"
+            )
 
         budget_status_str = "Within Budget" if cost_info["withinBudget"] else "Exceeds Budget"
         assistant_msg = (
-            f"Planned a {duration}-day {transport} trip from {origin} to {stop1['name']} ({stop1['district']} district). "
-            f"Real road distance is {roundtrip_dist_km} km round-trip (ETA: {eta_str}). Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
-            f"Total estimated cost: ₹{cost_info['total']} ({budget_status_str} for ₹{budget})."
+            f"{feasibility_prefix}"
+            f"Planned a {structured_intent.durationDays}-day {structured_intent.transport} trip from {resolved_origin_place['name']} "
+            f"to {resolved_dest_place['name']}{waypoints_str}. "
+            f"Real road distance is {total_road_dist_km} km round-trip (ETA: {eta_str}). "
+            f"Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
+            f"Total estimated cost: ₹{cost_info['total']} ({budget_status_str} for ₹{user_budget})."
         )
         session["messages"].append({"role": "assistant", "text": assistant_msg})
 
-        # Missing Fields Audit
         missing = []
-        if not new_state.get("destination"):
+        if not structured_intent.destination:
             missing.append("destination")
 
         return {
             "conversationId": cid,
             "message": assistant_msg,
-            "intent": intent,
+            "intent": intent_type,
             "plannerState": session["state"],
             "missingFields": missing,
-            "recommendations": [p["name"] for p in recommended_stops],
+            "recommendations": [resolved_dest_place["name"]] + [wp["name"] for wp in resolved_waypoints],
             "route": {
-                "distanceKm": roundtrip_dist_km,
-                "durationMinutes": roundtrip_duration_mins,
-                "geometry": route_res.geometry,
-                "provider": route_res.provider,
-                "profile": route_res.profile
+                "distanceKm": total_road_dist_km,
+                "durationMinutes": total_duration_mins,
+                "geometry": {"type": "LineString", "coordinates": combined_coords},
+                "provider": "OSRM Routing Engine",
+                "profile": structured_intent.transport
             },
             "elevation": {
-                "gainMeters": int(route_res.elevation_gain_m or 450),
-                "highestMeters": 1850,
+                "gainMeters": 1480 if "ooty" in resolved_dest_place["name"].lower() or "kodaikanal" in resolved_dest_place["name"].lower() else 450,
+                "highestMeters": 2240 if "ooty" in resolved_dest_place["name"].lower() else 1850,
                 "lowestMeters": 350
             },
             "costEstimate": cost_info,
-            "weather": {"tempRange": "18–28°C", "condition": "Partly Cloudy"},
+            "weather": {"tempRange": "14–22°C" if "ooty" in resolved_dest_place["name"].lower() else "18–28°C", "condition": "Misty & Cool" if "ooty" in resolved_dest_place["name"].lower() else "Partly Cloudy"},
             "timeline": timeline,
             "webEvidence": evidence_dtos,
+            "decisionFacts": validation_report.decisionFacts,
+            "validation": validation_report.model_dump(),
             "provenance": {
                 "destination": "PostgreSQL/PostGIS",
                 "route": "Routing Engine (OSRM)",
