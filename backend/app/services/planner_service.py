@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from backend.app.services.places_service import places_service, calculate_haversine
 from backend.app.services.openserp_service import openserp_service, SourceDTO
 from backend.app.services.routing import routing_service
+from backend.app.services.routing.models import CoordinatesDTO, IsolatedRouteRequestDTO, IsolatedRouteResultDTO
 from backend.app.services.intelligence.trip_intent import intent_extractor, StructuredTripIntent
 from backend.app.services.intelligence.trip_validator import trip_validator
 from backend.app.services.intelligence.route_validator import route_sanity_validator
@@ -279,46 +280,35 @@ class PlannerService:
             if wp_place and wp_place["name"] != resolved_origin_place["name"] and wp_place["name"] != resolved_dest_place["name"]:
                 resolved_waypoints.append(wp_place)
 
-        # 5. Route Construction & OSRM Distance Calculation
-        route_sequence = [resolved_origin_place] + resolved_waypoints + [resolved_dest_place]
-        
-        one_way_dist_km = 0.0
-        one_way_duration_mins = 0
-        combined_coords: List[List[float]] = []
+        # 5. Delegate Route Construction to Isolated Route Engine Service
+        origin_coord = CoordinatesDTO(
+            name=resolved_origin_place["name"],
+            latitude=resolved_origin_place["latitude"],
+            longitude=resolved_origin_place["longitude"]
+        )
+        dest_coord = CoordinatesDTO(
+            name=resolved_dest_place["name"],
+            latitude=resolved_dest_place["latitude"],
+            longitude=resolved_dest_place["longitude"]
+        )
+        wp_coords = [
+            CoordinatesDTO(name=wp["name"], latitude=wp["latitude"], longitude=wp["longitude"])
+            for wp in resolved_waypoints
+        ]
 
-        for i in range(len(route_sequence) - 1):
-            p_start = route_sequence[i]
-            p_end = route_sequence[i+1]
+        route_request = IsolatedRouteRequestDTO(
+            requestId=f"route-{trace_id}",
+            origin=origin_coord,
+            waypoints=wp_coords,
+            destination=dest_coord,
+            travelMode=merged_state["transport"]
+        )
 
-            leg_res = routing_service.calculate_route(
-                origin_lat=p_start["latitude"],
-                origin_lng=p_start["longitude"],
-                destination_lat=p_end["latitude"],
-                destination_lng=p_end["longitude"],
-                profile=merged_state["transport"]
-            )
-            one_way_dist_km += leg_res.distance_km
-            one_way_duration_mins += leg_res.duration_minutes
-            if leg_res.geometry and "coordinates" in leg_res.geometry:
-                combined_coords.extend(leg_res.geometry["coordinates"])
+        route_result: IsolatedRouteResultDTO = routing_service.calculate_isolated_route(route_request)
 
-        total_road_dist_km = round(one_way_dist_km * 2, 1)
-        total_duration_mins = one_way_duration_mins * 2
-
-        roundtrip_seq = list(reversed(route_sequence))
-        for i in range(len(roundtrip_seq) - 1):
-            p_start = roundtrip_seq[i]
-            p_end = roundtrip_seq[i+1]
-
-            leg_res = routing_service.calculate_route(
-                origin_lat=p_start["latitude"],
-                origin_lng=p_start["longitude"],
-                destination_lat=p_end["latitude"],
-                destination_lng=p_end["longitude"],
-                profile=merged_state["transport"]
-            )
-            if leg_res.geometry and "coordinates" in leg_res.geometry:
-                combined_coords.extend(leg_res.geometry["coordinates"])
+        total_road_dist_km = route_result.distanceKm
+        total_duration_mins = route_result.durationMinutes
+        combined_coords = route_result.geometry.get("coordinates", [])
 
         route_sanity_validator.validate_and_log_route(
             origin_name=resolved_origin_place["name"],
