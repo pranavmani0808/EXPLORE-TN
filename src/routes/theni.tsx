@@ -232,24 +232,12 @@ export function TheniTripPlannerPage() {
   const resolvedStops = useMemo(() => {
     return currentCircuit.stops.map((stop) => {
       const canonical = resolvePlace(stop.placeId);
+      if (!canonical) {
+        console.error(`[Canonical Resolution Warning] Place ID '${stop.placeId}' not found in canonical catalog.`);
+      }
       return {
         ...stop,
-        place: canonical || {
-          id: stop.placeId,
-          name: stop.placeId.replace(/-/g, " ").toUpperCase(),
-          district: "Theni",
-          state: "Tamil Nadu",
-          country: "India" as const,
-          latitude: 10.01,
-          longitude: 77.47,
-          categories: ["tourist-places"],
-          primaryCategory: "tourist-places",
-          tagline: "Theni Destination",
-          description: "Scenic stop along the Theni nature circuit.",
-          image: heroImg,
-          verified: true,
-          tags: ["Theni"],
-        },
+        place: canonical || CANONICAL_PLACES[0],
       };
     });
   }, [currentCircuit]);

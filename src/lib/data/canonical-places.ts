@@ -1097,18 +1097,37 @@ export const CANONICAL_PLACES: ExplorerPlace[] = [
 
 export function resolvePlace(query: string): ExplorerPlace | null {
   if (!query || !query.trim()) return null;
-  const q = query.toLowerCase().trim().replace(/[^a-z0-9\s]/g, "");
+  const rawQ = query.toLowerCase().trim();
 
+  // 1. Direct ID or Slug Exact Match (Preserving hyphens!)
   for (const place of CANONICAL_PLACES) {
-    if (place.name.toLowerCase().replace(/[^a-z0-9\s]/g, "").includes(q)) return place;
-    if (place.slug.toLowerCase().includes(q)) return place;
-    if (place.aliases?.some((alias) => alias.toLowerCase().replace(/[^a-z0-9\s]/g, "").includes(q))) return place;
+    if (place.id.toLowerCase() === rawQ || place.slug.toLowerCase() === rawQ) {
+      return place;
+    }
   }
 
-  // District or State match
+  // 2. Exact Name Match
   for (const place of CANONICAL_PLACES) {
-    if (place.district.toLowerCase().includes(q)) return place;
+    if (place.name.toLowerCase() === rawQ) {
+      return place;
+    }
+  }
+
+  // 3. Clean string substring match
+  const cleanQ = rawQ.replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+  for (const place of CANONICAL_PLACES) {
+    const cleanName = place.name.toLowerCase().replace(/[^a-z0-9\s]/g, " ").replace(/\s+/g, " ").trim();
+    if (cleanName.includes(cleanQ) || (cleanQ.length > 3 && cleanName.startsWith(cleanQ))) {
+      return place;
+    }
+    if (place.slug.toLowerCase().includes(rawQ)) {
+      return place;
+    }
+    if (place.aliases?.some((alias) => alias.toLowerCase().includes(rawQ))) {
+      return place;
+    }
   }
 
   return null;
 }
+
