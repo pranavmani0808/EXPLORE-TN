@@ -1049,6 +1049,66 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-19T10:00:00Z",
                 "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 50. Kinnakorai
+            "kinnakorai": {
+                "id": "p-kinnakorai",
+                "slug": "kinnakorai",
+                "name": "Kinnakorai",
+                "district": "The Nilgiris",
+                "category": "mountain",
+                "tagline": "Remote offbeat Western Ghats village tucked amidst misty mountain ridges",
+                "description": "Secluded mountain hamlet in the Nilgiris range known for quiet nature trails and scenic mountain roads.",
+                "latitude": 11.2333,
+                "longitude": 76.5833,
+                "elevation": "1750m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 51. Mullayanagiri
+            "mullayanagiri": {
+                "id": "p-mullayanagiri",
+                "slug": "mullayanagiri",
+                "name": "Mullayanagiri",
+                "district": "Chikkamagaluru",
+                "category": "mountain",
+                "tagline": "Highest peak in Karnataka (1,930m) — Shola grasslands & coffee plantation vistas",
+                "description": "Highest mountain peak in Karnataka offering summit views, trekking trails, and coffee estate drives.",
+                "latitude": 13.3908,
+                "longitude": 75.7214,
+                "elevation": "1930m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 52. Agumbe
+            "agumbe": {
+                "id": "p-agumbe",
+                "slug": "agumbe",
+                "name": "Agumbe",
+                "district": "Shivamogga",
+                "category": "nature",
+                "tagline": "Cherrapunji of the South — High-altitude rainforest reserve, sunset point & waterfalls",
+                "description": "Renowned Western Ghats rainforest biodiversity hotspot known for King Cobra conservation, waterfalls, and sunset views.",
+                "latitude": 13.5028,
+                "longitude": 75.0931,
+                "elevation": "643m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
             }
         }
         self._audit_logs: List[dict] = []
