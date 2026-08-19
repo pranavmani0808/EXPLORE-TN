@@ -1109,6 +1109,66 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-19T10:00:00Z",
                 "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 53. Kalrayan Hills
+            "kalrayan-hills": {
+                "id": "p-kalrayan-hills",
+                "slug": "kalrayan-hills",
+                "name": "Kalrayan Hills",
+                "district": "Kallakurichi",
+                "category": "mountain",
+                "tagline": "Eastern Ghats offbeat hill range with botanical gardens, Periyar falls & forest streams",
+                "description": "Lesser-known Eastern Ghats hill range known for forest landscapes, mountain streams, and quiet road trips.",
+                "latitude": 11.9674,
+                "longitude": 78.7562,
+                "elevation": "900m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 54. Gingee Fort
+            "gingee-fort": {
+                "id": "p-gingee-fort",
+                "slug": "gingee-fort",
+                "name": "Gingee Fort",
+                "district": "Villupuram",
+                "category": "heritage",
+                "tagline": "Troy of the East — Impregnable 3-hill fort citadel (Rajagiri, Krishnagiri, Chandrayandurg)",
+                "description": "Historic hill fortification built across three granite citadel hills, known for Rajagiri tower and steep rock staircases.",
+                "latitude": 12.2530,
+                "longitude": 79.4184,
+                "elevation": "250m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
+            },
+            # 55. Panchamalai — Salem
+            "panchamalai": {
+                "id": "p-panchamalai",
+                "slug": "panchamalai",
+                "name": "Panchamalai — Salem",
+                "district": "Salem",
+                "category": "mountain",
+                "tagline": "Hidden Eastern Ghats green hill range with tranquil rural countryside & viewpoints",
+                "description": "Offbeat hill range in Salem district offering quiet countryside drives, mountain air, and unexplored scenery.",
+                "latitude": 11.5167,
+                "longitude": 78.5000,
+                "elevation": "850m MSL",
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "verifiedBy": "Pranav",
+                "verifiedAt": "2026-08-19T10:00:00Z",
+                "createdAt": "2026-08-19T10:00:00Z"
             }
         }
         self._audit_logs: List[dict] = []

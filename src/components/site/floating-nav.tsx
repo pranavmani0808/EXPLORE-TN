@@ -11,6 +11,7 @@ const links = [
   { to: "/explore", label: "Explore", icon: Map },
   { to: "/routes", label: "Routes", icon: Route },
   { to: "/western-ghats", label: "Western Ghats", icon: Mountain },
+  { to: "/hills-of-tn", label: "TN Hills", icon: Mountain },
   { to: "/madurai", label: "Madurai", icon: Landmark },
   { to: "/hill-escapes", label: "Hills", icon: Mountain },
   { to: "/coastal-heritage", label: "Coastal", icon: Compass },
