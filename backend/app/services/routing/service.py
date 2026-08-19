@@ -7,12 +7,12 @@ from backend.app.services.routing.models import (
     IsolatedRouteRequestDTO,
     IsolatedRouteResultDTO,
 )
-from backend.app.services.routing.providers.osrm_provider import OSRMRoutingProvider
+from backend.app.services.routing.provider_factory import get_routing_provider
 from backend.app.core.logger import structured_logger
 
 class RoutingService:
     def __init__(self):
-        self.provider = OSRMRoutingProvider()
+        self.provider = get_routing_provider()
         self._cache: Dict[str, IsolatedRouteResultDTO] = {}
 
     def generate_fingerprint(self, coords: CoordinatesDTO) -> str:
