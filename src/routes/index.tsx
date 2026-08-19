@@ -8,10 +8,11 @@ import { GoogleMapHero } from "@/components/site/google-map-hero";
 import { DedicatedMapModal } from "@/components/site/dedicated-map-modal";
 import { PlaceCard } from "@/components/site/place-card";
 import { AdventureCard } from "@/components/site/adventure-card";
+import { AdventureDetailModal } from "@/components/site/adventure-detail-modal";
 import { SearchPanel } from "@/components/site/search-panel";
 import { Button } from "@/components/ui/button";
 import { categories, places, scenicRoute, arupadaiVeeduTemples } from "@/data/places";
-import { adventureActivities } from "@/data/adventures";
+import { adventureActivities, AdventureActivity } from "@/data/adventures";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -71,6 +72,7 @@ function Index() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDedicatedMapOpen, setIsDedicatedMapOpen] = useState(false);
   const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
+  const [activeModalActivity, setActiveModalActivity] = useState<AdventureActivity | null>(null);
   const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
   const handleAddToTrip = (slug: string) => {
@@ -80,6 +82,11 @@ function Index() {
   return (
     <AppShell>
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
+
+      <AdventureDetailModal
+        activity={activeModalActivity}
+        onClose={() => setActiveModalActivity(null)}
+      />
 
       {/* Dedicated 100% Fullscreen Map Viewport Modal */}
       <DedicatedMapModal
@@ -342,7 +349,11 @@ function Index() {
       >
         <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
           {adventureActivities.slice(0, 6).map((activity) => (
-            <AdventureCard key={activity.id} activity={activity} />
+            <AdventureCard
+              key={activity.id}
+              activity={activity}
+              onSelect={(act) => setActiveModalActivity(act)}
+            />
           ))}
         </div>
       </Section>

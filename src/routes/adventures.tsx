@@ -4,7 +4,8 @@ import { motion } from "motion/react";
 import { Search, Compass, Flame, Filter, SlidersHorizontal, Sparkles } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { AdventureCard } from "@/components/site/adventure-card";
-import { adventureActivities, adventureCategories, AdventureCategory, AdventureDifficulty } from "@/data/adventures";
+import { AdventureDetailModal } from "@/components/site/adventure-detail-modal";
+import { adventureActivities, adventureCategories, AdventureActivity, AdventureCategory, AdventureDifficulty } from "@/data/adventures";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
@@ -32,12 +33,13 @@ export function AdventuresPage() {
   const [selectedCategory, setSelectedCategory] = useState<AdventureCategory>("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
   const [sortBy, setSortBy] = useState<"popularity" | "name">("popularity");
+  const [activeModalActivity, setActiveModalActivity] = useState<AdventureActivity | null>(null);
 
   const filteredActivities = useMemo(() => {
     return adventureActivities
       .filter((activity) => {
         // 1. Search Query Filter
-        const query = searchQuery.toLowerCase().strip ? searchQuery.toLowerCase().trim() : "";
+        const query = searchQuery ? searchQuery.toLowerCase().trim() : "";
         const matchesQuery =
           !query ||
           activity.name.toLowerCase().includes(query) ||
@@ -66,6 +68,12 @@ export function AdventuresPage() {
 
   return (
     <AppShell>
+      {/* Detail Modal Overlay */}
+      <AdventureDetailModal
+        activity={activeModalActivity}
+        onClose={() => setActiveModalActivity(null)}
+      />
+
       {/* Hero Header Section */}
       <section className="relative overflow-hidden pt-28 pb-12 sm:pt-36 sm:pb-16 bg-slate-950 text-white border-b border-white/10">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/30 via-slate-950 to-slate-950" />
@@ -97,7 +105,7 @@ export function AdventuresPage() {
               transition={{ delay: 0.2 }}
               className="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed"
             >
-              From Himalayan paragliding in Bir Billing and Mysore skydiving to Ganges river rafting and Havelock coral scuba diving — discover and plan high-adrenaline experiences natively.
+              From Himalayan paragliding in Bir Billing and Mysore skydiving to Ganges river rafting and Havelock coral scuba diving — click any activity to view full location details, GPS coordinates, how to reach, and safety protocols.
             </motion.p>
           </div>
 
@@ -186,7 +194,11 @@ export function AdventuresPage() {
         {filteredActivities.length > 0 ? (
           <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {filteredActivities.map((activity) => (
-              <AdventureCard key={activity.id} activity={activity} />
+              <AdventureCard
+                key={activity.id}
+                activity={activity}
+                onSelect={(act) => setActiveModalActivity(act)}
+              />
             ))}
           </div>
         ) : (

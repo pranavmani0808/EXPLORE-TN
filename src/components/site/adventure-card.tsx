@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { MapPin, Clock, Tag, Sparkles, ArrowRight, ShieldAlert, Compass } from "lucide-react";
+import { MapPin, Clock, Tag, Sparkles, ArrowRight, Info, Eye } from "lucide-react";
 import { AdventureActivity } from "@/data/adventures";
 import { Button } from "@/components/ui/button";
 
@@ -20,7 +20,13 @@ const difficultyColors: Record<string, string> = {
   Extreme: "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/20",
 };
 
-export function AdventureCard({ activity }: { activity: AdventureActivity }) {
+export function AdventureCard({
+  activity,
+  onSelect,
+}: {
+  activity: AdventureActivity;
+  onSelect?: (activity: AdventureActivity) => void;
+}) {
   const [imgSrc, setImgSrc] = useState(activity.image);
   const [hasError, setHasError] = useState(false);
 
@@ -41,8 +47,11 @@ export function AdventureCard({ activity }: { activity: AdventureActivity }) {
       transition={{ duration: 0.4 }}
       className="group relative flex flex-col overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/80 backdrop-blur-[16px] shadow-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-2xl hover:border-emerald-500/40"
     >
-      {/* Cover Image Container */}
-      <div className="relative h-60 w-full overflow-hidden bg-slate-900">
+      {/* Cover Image Container (Clickable for Modal) */}
+      <div
+        onClick={() => onSelect && onSelect(activity)}
+        className="relative h-60 w-full overflow-hidden bg-slate-900 cursor-pointer"
+      >
         <img
           src={imgSrc}
           alt={`${activity.name} at ${activity.destination}, ${activity.state}`}
@@ -86,7 +95,10 @@ export function AdventureCard({ activity }: { activity: AdventureActivity }) {
 
       {/* Card Content Body */}
       <div className="flex flex-1 flex-col p-5">
-        <h3 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+        <h3
+          onClick={() => onSelect && onSelect(activity)}
+          className="text-xl font-bold tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors cursor-pointer"
+        >
           {activity.name}
         </h3>
 
@@ -118,20 +130,30 @@ export function AdventureCard({ activity }: { activity: AdventureActivity }) {
             </div>
           </div>
 
-          {/* Action CTA Button */}
-          <div className="mt-4">
+          {/* Action CTA Buttons */}
+          <div className="mt-4 grid grid-cols-12 gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onSelect && onSelect(activity)}
+              className="col-span-5 rounded-2xl border-slate-200 dark:border-white/15 text-xs font-bold py-5 hover:bg-slate-100 dark:hover:bg-white/10 flex items-center justify-center gap-1"
+            >
+              <Eye className="size-3.5" />
+              <span>Details</span>
+            </Button>
+
             <Link
               to="/planner"
               search={{ prompt: plannerPrompt }}
-              className="w-full"
+              className="col-span-7"
             >
               <Button
                 variant="default"
-                className="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-5 shadow-lg shadow-emerald-600/20 group-hover:shadow-emerald-500/40 transition-all flex items-center justify-center gap-2"
+                className="w-full rounded-2xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-5 text-xs shadow-md shadow-emerald-600/20 flex items-center justify-center gap-1.5"
               >
-                <Sparkles className="size-4" />
-                <span>Plan Adventure</span>
-                <ArrowRight className="size-4 transition-transform group-hover:translate-x-1" />
+                <Sparkles className="size-3.5" />
+                <span>Plan Trip</span>
+                <ArrowRight className="size-3.5" />
               </Button>
             </Link>
           </div>
