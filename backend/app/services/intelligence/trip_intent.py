@@ -192,6 +192,15 @@ class IntentExtractor:
                         if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "food", "spots"]:
                             explicit_dest = raw_dest
 
+        # Pattern D: Inside / Local Destination Extraction (e.g., "Plan a trip inside Madurai")
+        pattern_inside = re.search(r"(?:inside|\bin\b|around)\s+([a-zA-Z0-9\s,]+?)(?=\s+for|\s+at|\s+under|\s+budget|$)", lower)
+        if pattern_inside and not explicit_dest:
+            raw_dest = pattern_inside.group(1).strip().split(",")[0].strip().capitalize()
+            if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "food", "spots"]:
+                explicit_dest = raw_dest
+                if "from " not in lower:
+                    origin = raw_dest
+
         # DESTINATION OVERRIDE RULE:
         # If the latest turn has an explicit destination:
         # 1. OVERWRITE destination completely!
@@ -279,12 +288,27 @@ class IntentExtractor:
             if intent_category == "PLAN_TRIP": intent_category = "CHANGE_BUDGET"
 
         # 10. Interests Extraction
-        if any(w in lower for w in ["hill", "mountain", "ghat", "peak", "hills"]):
+        if any(w in lower for w in ["hill", "mountain", "ghat", "peak", "hills", "viewpoint", "viewpoints", "valleys"]):
+            interests.add("viewpoints")
             interests.add("hills")
         if any(w in lower for w in ["waterfall", "falls", "cascade", "waterfalls"]):
             interests.add("waterfalls")
-        if any(w in lower for w in ["temple", "heritage", "shrine", "spiritual", "murugan"]):
-            interests.add("temple")
+        if any(w in lower for w in ["temple", "temples", "heritage", "shrine", "spiritual", "murugan"]):
+            interests.add("temples")
+            interests.add("heritage")
+        if any(w in lower for w in ["food", "dining", "eating", "eateries", "cafes", "café", "bakeries", "dishes", "restaurant"]):
+            interests.add("food")
+        if any(w in lower for w in ["shopping", "handicrafts", "markets", "boutique"]):
+            interests.add("shopping")
+        if any(w in lower for w in ["forest", "wildlife", "nature", "gardens", "birds"]):
+            interests.add("nature")
+        if any(w in lower for w in ["beach", "beaches", "coastal", "sea"]):
+            interests.add("beaches")
+        if any(w in lower for w in ["rafting", "kayaking", "paragliding", "surfing", "adventure"]):
+            interests.add("adventure")
+            interests.add("rafting")
+        if "everything" in lower or "all" in lower:
+            interests.update(["temples", "food", "shopping", "heritage", "nature", "viewpoints"])
 
         return StructuredTripIntent(
             origin=origin or "Chennai",

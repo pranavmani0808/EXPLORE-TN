@@ -10,6 +10,7 @@ from backend.app.services.routing.models import CoordinatesDTO, IsolatedRouteReq
 from backend.app.services.intelligence.trip_intent import intent_extractor, StructuredTripIntent
 from backend.app.services.intelligence.trip_validator import trip_validator
 from backend.app.services.intelligence.route_validator import route_sanity_validator
+from backend.app.services.intelligence.destination_classifier import destination_classifier, DestinationProfile
 from backend.app.core.config import settings
 from backend.app.core.logger import structured_logger
 
@@ -26,6 +27,7 @@ class PlannerState(BaseModel):
     interests: List[str] = []
     foodPreferences: List[str] = []
     foodStops: List[dict] = []
+    discoveryPhase: Optional[str] = "INIT"  # "INIT" | "DISCOVER_INTERESTS" | "INTERESTS_COLLECTED"
 
 class PlannerService:
     def __init__(self):
@@ -90,7 +92,6 @@ class PlannerService:
             return None
         clean_target = name.strip().lower()
 
-        # 1. Well-Known Tamil Nadu Geocoder Dictionary (CHECKED FIRST BEFORE DISTRICT MATCHING - BUG 1 & 6 FIX)
         KNOWN_GEOLOCATIONS = {
             "madurai": {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198, "verified": True, "category": "city", "tagline": "Cultural & Culinary Capital of Tamil Nadu"},
             "chennai": {"name": "Chennai", "district": "Chennai", "latitude": 13.0827, "longitude": 80.2707, "verified": True, "category": "city", "tagline": "Capital City"},
@@ -98,32 +99,13 @@ class PlannerService:
             "aruppukottai": {"name": "Aruppukottai", "district": "Virudhunagar", "latitude": 9.5085, "longitude": 78.0991, "verified": True, "category": "city", "tagline": "Heritage Weaver Town near Madurai"},
             "kodaikanal": {"name": "Kodaikanal", "district": "Dindigul", "latitude": 10.2381, "longitude": 77.4892, "verified": True, "category": "hill_station", "tagline": "Princess of Hill Stations"},
             "valparai": {"name": "Valparai", "district": "Coimbatore", "latitude": 10.3270, "longitude": 76.9554, "verified": True, "category": "hill_station", "tagline": "70 Hairpin Pass Ghat Run"},
-            "thiruttani": {"name": "Thiruttani Murugan Temple", "district": "Tiruvallur", "latitude": 13.1788, "longitude": 79.6074, "verified": True, "category": "temple", "tagline": "1st Arupadai Veedu"},
-            "thiruttani murugan temple": {"name": "Thiruttani Murugan Temple", "district": "Tiruvallur", "latitude": 13.1788, "longitude": 79.6074, "verified": True, "category": "temple", "tagline": "1st Arupadai Veedu"},
-            "swamimalai": {"name": "Swamimalai Murugan Temple", "district": "Thanjavur", "latitude": 10.9567, "longitude": 79.3274, "verified": True, "category": "temple", "tagline": "2nd Arupadai Veedu"},
-            "swamimalai murugan temple": {"name": "Swamimalai Murugan Temple", "district": "Thanjavur", "latitude": 10.9567, "longitude": 79.3274, "verified": True, "category": "temple", "tagline": "2nd Arupadai Veedu"},
-            "palani": {"name": "Palani Murugan Temple", "district": "Dindigul", "latitude": 10.4497, "longitude": 77.5204, "verified": True, "category": "temple", "tagline": "3rd Arupadai Veedu"},
-            "palani murugan temple": {"name": "Palani Murugan Temple", "district": "Dindigul", "latitude": 10.4497, "longitude": 77.5204, "verified": True, "category": "temple", "tagline": "3rd Arupadai Veedu"},
-            "tiruchendur": {"name": "Tiruchendur Murugan Temple", "district": "Thoothukudi", "latitude": 8.4962, "longitude": 78.1288, "verified": True, "category": "temple", "tagline": "4th Arupadai Veedu"},
-            "tiruchendur murugan temple": {"name": "Tiruchendur Murugan Temple", "district": "Thoothukudi", "latitude": 8.4962, "longitude": 78.1288, "verified": True, "category": "temple", "tagline": "4th Arupadai Veedu"},
-            "pazhamudircholai": {"name": "Pazhamudircholai Murugan Temple", "district": "Madurai", "latitude": 10.0911, "longitude": 78.2173, "verified": True, "category": "temple", "tagline": "5th Arupadai Veedu"},
-            "pazhamudircholai murugan temple": {"name": "Pazhamudircholai Murugan Temple", "district": "Madurai", "latitude": 10.0911, "longitude": 78.2173, "verified": True, "category": "temple", "tagline": "5th Arupadai Veedu"},
-            "thirupparankundram": {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710, "verified": True, "category": "temple", "tagline": "6th Arupadai Veedu"},
-            "thirupparankundram murugan temple": {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710, "verified": True, "category": "temple", "tagline": "6th Arupadai Veedu"},
-            "goa": {"name": "Goa", "district": "Goa", "latitude": 15.6868, "longitude": 73.7042, "verified": True, "category": "adventure", "tagline": "Surfing & Coastal Adventure Beach"},
-            "bir billing": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital (2,400m)"},
-            "bir": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital (2,400m)"},
-            "billing": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital (2,400m)"},
-            "mysore": {"name": "Mysore", "district": "Mysore", "latitude": 12.2958, "longitude": 76.6394, "verified": True, "category": "adventure", "tagline": "10,000 ft Skydiving Dropzone"},
-            "jaipur": {"name": "Jaipur", "district": "Jaipur", "latitude": 26.9124, "longitude": 75.7873, "verified": True, "category": "adventure", "tagline": "Royal Hot Air Balloon Fortress View"},
-            "havelock": {"name": "Havelock Island", "district": "Andaman", "latitude": 12.0000, "longitude": 92.9800, "verified": True, "category": "adventure", "tagline": "Bay of Bengal Coral Scuba Reef"},
-            "havelock island": {"name": "Havelock Island", "district": "Andaman", "latitude": 12.0000, "longitude": 92.9800, "verified": True, "category": "adventure", "tagline": "Bay of Bengal Coral Scuba Reef"},
-            "zanskar": {"name": "Zanskar River", "district": "Kargil/Leh", "latitude": 33.4833, "longitude": 76.8833, "verified": True, "category": "adventure", "tagline": "High Altitude Grade IV Whitewater Canyon"},
-            "zanskar river": {"name": "Zanskar River", "district": "Kargil/Leh", "latitude": 33.4833, "longitude": 76.8833, "verified": True, "category": "adventure", "tagline": "High Altitude Grade IV Whitewater Canyon"},
+            "thanjavur": {"name": "Thanjavur", "district": "Thanjavur", "latitude": 10.7870, "longitude": 79.1378, "verified": True, "category": "heritage", "tagline": "Chola Architecture & Cultural City"},
+            "pondicherry": {"name": "Pondicherry", "district": "Puducherry", "latitude": 11.9416, "longitude": 79.8083, "verified": True, "category": "coastal", "tagline": "French Quarter Coastal Escape"},
+            "dhanushkodi": {"name": "Dhanushkodi", "district": "Ramanathapuram", "latitude": 9.1764, "longitude": 79.4182, "verified": True, "category": "coastal", "tagline": "Ghost Town & Ocean Confluence"},
             "rishikesh": {"name": "Rishikesh", "district": "Dehradun", "latitude": 30.0869, "longitude": 78.2676, "verified": True, "category": "adventure", "tagline": "Ganges White Water Rafting Capital"},
-            "kovalam": {"name": "Kovalam", "district": "Thiruvananthapuram", "latitude": 8.4004, "longitude": 76.9787, "verified": True, "category": "adventure", "tagline": "Lighthouse Point Break Surfing"},
-            "gulmarg": {"name": "Gulmarg", "district": "Baramulla", "latitude": 34.0484, "longitude": 74.3805, "verified": True, "category": "adventure", "tagline": "Asia's Highest Cable Car & Snow Slopes"},
-            "elephant beach": {"name": "Elephant Beach", "district": "Andaman", "latitude": 11.9961, "longitude": 92.9515, "verified": True, "category": "adventure", "tagline": "Underwater Sea Walk & Coral Reef"},
+            "goa": {"name": "Goa", "district": "Goa", "latitude": 15.6868, "longitude": 73.7042, "verified": True, "category": "adventure", "tagline": "Surfing & Coastal Beach"},
+            "bir billing": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital"},
+            "kovalam": {"name": "Kovalam", "district": "Thiruvananthapuram", "latitude": 8.4004, "longitude": 76.9787, "verified": True, "category": "adventure", "tagline": "Lighthouse Surf Break"},
         }
 
         if clean_target in KNOWN_GEOLOCATIONS:
@@ -133,12 +115,10 @@ class PlannerService:
             if key in clean_target or clean_target in key:
                 return info
 
-        # 2. Exact Name Match in DB
         for p in verified_places:
             if clean_target == p.get("name", "").lower() or clean_target == p.get("slug", "").lower():
                 return p
 
-        # 3. Substring Name Match (Only if exact match failed)
         for p in verified_places:
             p_name = p.get("name", "").lower()
             if clean_target in p_name:
@@ -155,19 +135,51 @@ class PlannerService:
                 {"name": "Simmakkal Konar Kadai", "location": "Simmakkal, Madurai", "specialty": "Original Mutton Kari Dosa & Brain Fry", "category": "non_veg_legend"},
                 {"name": "Amma Mess", "location": "K.K. Nagar, Madurai", "specialty": "Ayirai Meen Curry & Bone Marrow Omelette", "category": "non_veg_legend"}
             ]
-        elif "chennai" in dest_lower:
+        elif "kodaikanal" in dest_lower:
             return [
-                {"name": "Ratna Cafe", "location": "Triplicane, Chennai", "specialty": "Piping Hot Piping Sambar Idli", "category": "local_cuisine"},
-                {"name": "Buhari Hotel", "location": "Mount Road, Chennai", "specialty": "Original 1965 Heritage Chicken 65", "category": "non_veg_legend"}
+                {"name": "Cloud Street Bakery & Cafe", "location": "PT Road, Kodaikanal", "specialty": "Woodfired Pizza, Homemade Chocolates & Coffee", "category": "cafe"},
+                {"name": "Tava Vegetarian Restaurant", "location": "Seven Roads Junction, Kodaikanal", "specialty": "Piping Hot Parathas & Hill Station Stews", "category": "local_cuisine"}
             ]
         elif "ooty" in dest_lower:
             return [
                 {"name": "Kingstar Confectionery", "location": "Commercial Rd, Ooty", "specialty": "Handmade Ooty Fudge & Chocolates", "category": "bakery"},
                 {"name": "Nahars Sidewalk Cafe", "location": "Charing Cross, Ooty", "specialty": "Woodfired Pizza & Hot Chocolate", "category": "cafe"}
             ]
+        elif "pondicherry" in dest_lower:
+            return [
+                {"name": "Baker Street French Bakery", "location": "Bussy St, Pondicherry", "specialty": "Fresh Croissants, Baguettes & Eclairs", "category": "bakery"},
+                {"name": "Carte Blanche", "location": "White Town, Pondicherry", "specialty": "Franco-Tamil Fusion Seafood Feasts", "category": "local_cuisine"}
+            ]
         return [
             {"name": f"Traditional {destination_name} Mess", "location": destination_name, "specialty": "Banana Leaf Meal & Local Delicacies", "category": "local_cuisine"}
         ]
+
+    def select_local_destination_places(self, dest_name: str, interests: List[str], verified_places: List[dict]) -> List[dict]:
+        clean_dest = dest_name.lower()
+        matching_places = []
+        
+        for p in verified_places:
+            p_dist = p.get("district", "").lower()
+            p_name = p.get("name", "").lower()
+            if clean_dest in p_dist or clean_dest in p_name or p_name in clean_dest:
+                if p_name != clean_dest:
+                    matching_places.append(p)
+                    
+        if not matching_places:
+            return []
+            
+        if not interests or any(k in interests for k in ["everything", "all", "sights"]):
+            return matching_places[:4]
+            
+        filtered = []
+        for p in matching_places:
+            p_cat = p.get("category", "").lower()
+            p_desc = (p.get("tagline", "") + " " + p.get("name", "")).lower()
+            
+            if any(i.lower() in p_cat or i.lower() in p_desc for i in interests):
+                filtered.append(p)
+                
+        return filtered[:4] if filtered else matching_places[:3]
 
     def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str) -> dict:
         cid, session = self.get_or_create_conversation(conversation_id)
@@ -181,7 +193,7 @@ class PlannerService:
         if structured_intent.intentCategory == "GREETING":
             greeting_msg = (
                 "Hi! I am your ExplorerTN Trip Copilot. Tell me your starting city, budget, "
-                "or where you want to travel (e.g., 'Plan a River Rafting trip to Rishikesh', 'trip from Chennai to Madurai', or 'Plan a Paragliding trip to Bir Billing')."
+                "or where you want to travel (e.g., 'Plan a trip inside Madurai', 'Plan a trip to Kodaikanal', or 'Plan a River Rafting trip to Rishikesh')."
             )
             session["messages"].append({"role": "user", "text": user_message})
             session["messages"].append({"role": "assistant", "text": greeting_msg})
@@ -191,16 +203,10 @@ class PlannerService:
                 "intent": "GREETING",
                 "plannerState": session["state"],
                 "missingFields": ["destination"],
-                "recommendations": ["Rishikesh", "Goa", "Madurai", "Ooty"],
+                "recommendations": ["Madurai", "Kodaikanal", "Ooty", "Rishikesh"],
                 "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
                 "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
-                "costEstimate": {
-                    "fuelCost": "₹0",
-                    "total": 0.0,
-                    "budget": 3000.0,
-                    "withinBudget": True,
-                    "assumptions": "N/A"
-                },
+                "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": 3000.0, "withinBudget": True, "assumptions": "N/A"},
                 "weather": {"tempRange": "22–32°C", "condition": "Sunny"},
                 "timeline": [],
                 "webEvidence": [],
@@ -215,9 +221,6 @@ class PlannerService:
 
         target_dest_name = structured_intent.destination or prev_state.get("destination") or "Madurai"
         resolved_dest_place = self.resolve_place_by_name(target_dest_name, verified_places)
-
-        dest_name_log = resolved_dest_place.get('name') if resolved_dest_place else 'Unresolved'
-        structured_logger.info(f"[DestinationResolver] Resolved canonical destination: {dest_name_log}", trace_id=trace_id)
 
         if structured_intent.destination and structured_intent.intentCategory not in ["FOOD_DISCOVERY", "ADD_STOP"] and not resolved_dest_place:
             clarification_msg = (
@@ -247,47 +250,134 @@ class PlannerService:
             }
 
         if not resolved_dest_place:
-            resolved_dest_place = {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198}
+            resolved_dest_place = {"name": target_dest_name.title(), "district": target_dest_name.title(), "latitude": 9.9252, "longitude": 78.1198}
+
+        dest_name = resolved_dest_place["name"]
+        dest_profile = destination_classifier.classify_destination(dest_name)
+
+        # Session Reset check: If switching to a new destination, reset waypoints & interests
+        prev_dest = prev_state.get("destination")
+        is_dest_changed = prev_dest and prev_dest.lower() != dest_name.lower()
 
         merged_state = dict(prev_state)
-        merged_state["destination"] = resolved_dest_place["name"]
+        if is_dest_changed:
+            merged_state["waypoints"] = []
+            merged_state["interests"] = []
+            merged_state["discoveryPhase"] = "INIT"
+
+        merged_state["destination"] = dest_name
         merged_state["origin"] = structured_intent.origin or prev_state.get("origin") or "Chennai"
         merged_state["transport"] = structured_intent.transport or prev_state.get("transport") or "motorcycle"
         merged_state["durationDays"] = structured_intent.durationDays or prev_state.get("durationDays") or 1
         merged_state["departureTime"] = structured_intent.departureTime or prev_state.get("departureTime") or "06:00"
         merged_state["overnightTravel"] = structured_intent.overnightTravel or prev_state.get("overnightTravel", False)
-        merged_state["interests"] = structured_intent.interests
-        merged_state["trail"] = structured_intent.trail
+        
         merged_state["waypoints"] = structured_intent.waypoints
-
+        merged_state["trail"] = structured_intent.trail
         if structured_intent.budget is not None:
             merged_state["budget"] = structured_intent.budget
+        elif prev_state.get("budget") is not None:
+            merged_state["budget"] = prev_state.get("budget")
 
-        # Food Spot Population (BUG 7 FIX)
-        food_spots = self.get_local_food_spots(resolved_dest_place["name"])
+        if structured_intent.interests:
+            merged_state["interests"] = list(set(merged_state.get("interests", []) + structured_intent.interests))
+
+        # Check if we should trigger Destination Discovery Phase
+        # Trigger when user asks to plan/explore inside a destination (e.g. "Plan a trip inside Madurai", "Plan a trip inside Kodaikanal") without having chosen interests yet
+        lower_msg = user_message.lower()
+        has_route_specs = any(k in lower_msg for k in ["from ", "road trip", "bike", "car", "trail", "ride", "drive", "at 11", "under ", "budget"])
+        is_inside_or_local = any(k in lower_msg for k in ["inside", "explore", "what to see", "places to visit", "things to do"]) or ("trip inside" in lower_msg) or (re.search(r"\btrip\s+in\s+", lower_msg) is not None)
+
+        is_discovery_needed = (
+            structured_intent.destination is not None and
+            is_inside_or_local and
+            not has_route_specs and
+            len(merged_state.get("interests", [])) == 0 and
+            not structured_intent.trail and
+            merged_state.get("discoveryPhase") != "INTERESTS_COLLECTED"
+        )
+
+        if is_discovery_needed:
+            merged_state["discoveryPhase"] = "DISCOVER_INTERESTS"
+            session["state"] = merged_state
+            
+            suggested_chips = dest_profile.get("interests", [])
+            discovery_msg = f"Absolutely! What would you like to explore in {dest_name}?"
+
+            session["messages"].append({"role": "user", "text": user_message})
+            session["messages"].append({"role": "assistant", "text": discovery_msg})
+
+            return {
+                "conversationId": cid,
+                "message": discovery_msg,
+                "intent": "DISCOVER_INTERESTS",
+                "plannerState": session["state"],
+                "destinationProfile": dest_profile,
+                "suggestedCategories": suggested_chips,
+                "recommendations": [c["label"] for c in suggested_chips],
+                "route": {"distanceKm": 0.0, "durationMinutes": 0, "geometry": {"type": "LineString", "coordinates": []}, "provider": "OSRM Routing Engine"},
+                "elevation": {"gainMeters": 0, "highestMeters": 0, "lowestMeters": 0},
+                "costEstimate": {"fuelCost": "₹0", "total": 0.0, "budget": merged_state.get("budget") or 10000.0, "withinBudget": True, "assumptions": "N/A"},
+                "weather": {"tempRange": "22–32°C", "condition": "Sunny"},
+                "timeline": [],
+                "webEvidence": [],
+                "decisionFacts": {"destination": dest_name, "discoveryPhase": "DISCOVER_INTERESTS"},
+                "validation": {"destinationMatch": True, "durationFeasible": True, "budgetFeasible": True, "warnings": []},
+                "provenance": {"destination": "DestinationClassifier", "narrative": "ExplorerTN Trip Copilot"},
+                "traceId": trace_id
+            }
+
+        # Otherwise interests are present or user picked preferences -> Generate Itinerary!
+        merged_state["discoveryPhase"] = "INTERESTS_COLLECTED"
+        food_spots = self.get_local_food_spots(dest_name)
         merged_state["foodStops"] = food_spots
 
-        # Save clean mutated state to conversation session
         session["state"] = merged_state
         session["messages"].append({"role": "user", "text": user_message})
 
-        # 4. Resolve Origin & Waypoint Places for OSRM Route Engine
+        # Resolve Origin & Waypoint Places for OSRM Route Engine
         resolved_origin_place = self.resolve_place_by_name(merged_state["origin"], verified_places) or {"name": "Chennai", "latitude": 13.0827, "longitude": 80.2707}
         
         resolved_waypoints = []
         for wp_name in merged_state["waypoints"]:
             wp_place = self.resolve_place_by_name(wp_name, verified_places)
-            if wp_place and wp_place["name"] != resolved_origin_place["name"] and wp_place["name"] != resolved_dest_place["name"]:
+            if wp_place and wp_place["name"] != resolved_origin_place["name"] and wp_place["name"] != dest_name:
                 resolved_waypoints.append(wp_place)
 
-        # 5. Delegate Route Construction to Isolated Route Engine Service
+        # Auto-populate local destination places ONLY if it's a local city trip or discovery flow
+        is_local_trip = resolved_origin_place["name"].lower() == dest_name.lower() or merged_state.get("discoveryPhase") == "INTERESTS_COLLECTED"
+        if not resolved_waypoints and is_local_trip:
+            local_places = self.select_local_destination_places(dest_name, merged_state.get("interests", []), verified_places)
+            for lp in local_places:
+                if lp["name"] != resolved_origin_place["name"] and lp["name"] != dest_name:
+                    resolved_waypoints.append(lp)
+
+        # Synthetic landmarks for out-of-state destinations without DB places
+        if not resolved_waypoints and resolved_origin_place["name"].lower() == dest_name.lower():
+            if dest_name.lower() == "rishikesh":
+                resolved_waypoints = [
+                    {"name": "Ganges Rafting Takeoff Point", "latitude": 30.1260, "longitude": 78.3245, "tagline": "Grade III/IV Ganges Rafting Launch Point"},
+                    {"name": "Lakshman Jhula & Triveni Ghat", "latitude": 30.1235, "longitude": 78.3150, "tagline": "Evening Ganga Aarti & Suspension Bridge"}
+                ]
+            elif dest_name.lower() == "bir billing":
+                resolved_waypoints = [
+                    {"name": "Billing Launch Site (2,400m)", "latitude": 32.0550, "longitude": 76.7420, "tagline": "World Paragliding Takeoff Point"},
+                    {"name": "Bir Landing Ground & Cafés", "latitude": 32.0365, "longitude": 76.7196, "tagline": "Chokling Monastery & Landing Zone"}
+                ]
+            elif dest_name.lower() == "goa":
+                resolved_waypoints = [
+                    {"name": "Calangute & Baga Surf Break", "latitude": 15.5494, "longitude": 73.7535, "tagline": "Water Sports & Beach Shack"},
+                    {"name": "Fort Aguada Heritage View", "latitude": 15.4926, "longitude": 73.7737, "tagline": "17th Century Portuguese Lighthouse"}
+                ]
+
+        # Delegate Route Construction to Isolated Route Engine Service
         origin_coord = CoordinatesDTO(
             name=resolved_origin_place["name"],
             latitude=resolved_origin_place["latitude"],
             longitude=resolved_origin_place["longitude"]
         )
         dest_coord = CoordinatesDTO(
-            name=resolved_dest_place["name"],
+            name=dest_name,
             latitude=resolved_dest_place["latitude"],
             longitude=resolved_dest_place["longitude"]
         )
@@ -313,14 +403,13 @@ class PlannerService:
         route_sanity_validator.validate_and_log_route(
             origin_name=resolved_origin_place["name"],
             waypoints_names=[wp["name"] for wp in resolved_waypoints],
-            destination_name=resolved_dest_place["name"],
+            destination_name=dest_name,
             route_points_coords=combined_coords,
             distance_km=total_road_dist_km,
             duration_minutes=total_duration_mins,
             trace_id=trace_id
         )
 
-        # 6. Deterministic Cost & Feasibility Validation
         user_budget = merged_state.get("budget") or 10000.0
         cost_info = self.compute_deterministic_cost(total_road_dist_km, merged_state["transport"], user_budget)
 
@@ -332,11 +421,9 @@ class PlannerService:
             total_estimated_cost=cost_info["total"]
         )
 
-        # 7. OpenSERP Grounded Web Evidence Query
-        web_evidence_sources = openserp_service.search_web_evidence(resolved_dest_place["name"], trace_id=trace_id)
+        web_evidence_sources = openserp_service.search_web_evidence(dest_name, trace_id=trace_id)
         evidence_dtos = [s.model_dump() for s in web_evidence_sources]
 
-        # 8. Timeline Generation
         hours = total_duration_mins // 60
         mins = total_duration_mins % 60
         eta_str = f"{hours}h {mins}m"
@@ -357,10 +444,9 @@ class PlannerService:
             timeline.append({
                 "time": "06:00 AM",
                 "name": f"Depart {resolved_origin_place['name']}",
-                "description": f"Begin ride towards {resolved_dest_place['name']}."
+                "description": f"Begin ride towards {dest_name}."
             })
 
-            # Add Waypoint stops if any
             for wp in resolved_waypoints:
                 timeline.append({
                     "time": "11:30 AM",
@@ -368,12 +454,18 @@ class PlannerService:
                     "description": f"Explore {wp.get('tagline', 'En-route stop')}."
                 })
 
-            # Add Destination & Food Spots
+            interests_str = ", ".join(merged_state.get("interests", []))
             food_summary = ", ".join([f"{f['name']} ({f['specialty']})" for f in food_spots[:2]])
+            
+            detail_desc = f"Explore {resolved_dest_place.get('tagline', 'Target destination')}."
+            if interests_str:
+                detail_desc += f" Focused on: {interests_str}."
+            detail_desc += f" Food Highlights: {food_summary}."
+
             timeline.append({
                 "time": "02:30 PM",
-                "name": resolved_dest_place["name"],
-                "description": f"Explore {resolved_dest_place.get('tagline', 'Target destination')}. Local Food Highlights: {food_summary}."
+                "name": dest_name,
+                "description": detail_desc
             })
 
             timeline.append({
@@ -382,7 +474,6 @@ class PlannerService:
                 "description": f"Complete {merged_state['durationDays']}-day ride ({total_road_dist_km} km total road distance)."
             })
 
-        # 9. Natural Language Assistant Message Generation
         warning_prefix = ""
         if not validation_report.durationFeasible and not merged_state.get("overnightTravel"):
             warning_prefix = (
@@ -397,11 +488,13 @@ class PlannerService:
         food_narrative = ""
         if "food" in merged_state["interests"] or intent_type == "FOOD_DISCOVERY":
             top_foods = [f"{f['name']} ({f['specialty']})" for f in food_spots[:3]]
-            food_narrative = f" Food Highlights in {resolved_dest_place['name']}: {', '.join(top_foods)}."
+            food_narrative = f" Food Highlights in {dest_name}: {', '.join(top_foods)}."
+
+        interests_focus = f" focused on {', '.join(merged_state['interests'])}" if merged_state.get("interests") else ""
 
         assistant_msg = (
             f"{warning_prefix}"
-            f"Planned your {merged_state['durationDays']}-day {merged_state['transport']} trip to {resolved_dest_place['name']} from {resolved_origin_place['name']}."
+            f"Planned your {merged_state['durationDays']}-day {merged_state['transport']} trip to {dest_name} from {resolved_origin_place['name']}{interests_focus}."
             f"{food_narrative} "
             f"Real road distance across all stops is {total_road_dist_km} km round-trip (ETA: {eta_str}). "
             f"Estimated fuel cost is {cost_info['fuelCost']} ({cost_info['assumptions']}). "
@@ -414,8 +507,9 @@ class PlannerService:
             "message": assistant_msg,
             "intent": intent_type,
             "plannerState": session["state"],
+            "destinationProfile": dest_profile,
             "missingFields": [],
-            "recommendations": [resolved_dest_place["name"]] + [wp["name"] for wp in resolved_waypoints],
+            "recommendations": [dest_name] + [wp["name"] for wp in resolved_waypoints],
             "route": {
                 "distanceKm": total_road_dist_km,
                 "durationMinutes": total_duration_mins,

@@ -2,6 +2,21 @@ import { getApiBaseUrl } from "./config";
 
 const API_BASE_URL = getApiBaseUrl();
 
+export interface SuggestedCategoryItem {
+  id: string;
+  label: string;
+  icon: string;
+  categoryKey: string;
+}
+
+export interface DestinationProfileDTO {
+  destination: string;
+  region: string;
+  destinationTypes: string[];
+  primaryTagline: string;
+  interests?: SuggestedCategoryItem[];
+}
+
 export interface PlannerChatResponseDTO {
   conversationId: string;
   message: string;
@@ -13,7 +28,10 @@ export interface PlannerChatResponseDTO {
     budget?: number;
     transport?: string;
     interests?: string[];
+    discoveryPhase?: string;
   };
+  destinationProfile?: DestinationProfileDTO;
+  suggestedCategories?: SuggestedCategoryItem[];
   missingFields: string[];
   recommendations: string[];
   route: {

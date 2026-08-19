@@ -18,10 +18,12 @@ import {
   Navigation,
   ShieldAlert,
   Moon,
+  Check,
+  ArrowRight,
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
-import { PlannerApiRepository, PlannerChatResponseDTO } from "@/lib/api-client/planner";
+import { PlannerApiRepository, PlannerChatResponseDTO, SuggestedCategoryItem } from "@/lib/api-client/planner";
 import { resolvePlace } from "@/lib/data/canonical-places";
 import {
   Map,
@@ -82,7 +84,7 @@ export function PlannerPage() {
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
       role: "assistant",
-      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan a River Rafting trip to Rishikesh', 'Plan a Paragliding trip to Bir Billing', or 'trip from Chennai to Madurai').",
+      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan a trip inside Madurai', 'Plan a trip to Kodaikanal', or 'Plan a River Rafting trip to Rishikesh').",
     },
   ]);
   const [input, setInput] = useState("");
@@ -93,6 +95,7 @@ export function PlannerPage() {
 
   // Dynamic Route & Planner Response State
   const [plannerData, setPlannerData] = useState<PlannerChatResponseDTO | null>(null);
+  const [selectedChips, setSelectedChips] = useState<string[]>([]);
   const [timeline, setTimeline] = useState<Array<{ time: string; name: string; description: string }>>([
     {
       time: "06:00 AM",
@@ -123,10 +126,9 @@ export function PlannerPage() {
       ]);
       setLoading(true);
 
-      // Start fresh session for explicit URL prompt to prevent state contamination
       PlannerApiRepository.sendChatMessage(urlPrompt, undefined)
         .then((res: PlannerChatResponseDTO) => {
-          if (activeRequestIdRef.current !== requestId) return; // Prevent Stale Async Responses
+          if (activeRequestIdRef.current !== requestId) return;
 
           setConversationId(res.conversationId);
           setPlannerData(res);
@@ -145,13 +147,13 @@ export function PlannerPage() {
     }
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!input.trim() || loading) return;
+  const handleSendMessage = async (textToSend: string) => {
+    if (!textToSend.trim() || loading) return;
 
-    const userText = input.trim();
+    const userText = textToSend.trim();
     setInput("");
     setErrorMsg(null);
+    setSelectedChips([]);
 
     const requestId = crypto.randomUUID();
     activeRequestIdRef.current = requestId;
@@ -161,7 +163,7 @@ export function PlannerPage() {
 
     try {
       const res: PlannerChatResponseDTO = await PlannerApiRepository.sendChatMessage(userText, conversationId);
-      if (activeRequestIdRef.current !== requestId) return; // Prevent Stale Async Responses
+      if (activeRequestIdRef.current !== requestId) return;
 
       setConversationId(res.conversationId);
       setPlannerData(res);
@@ -186,6 +188,23 @@ export function PlannerPage() {
     }
   };
 
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    handleSendMessage(input);
+  };
+
+  const toggleChipSelection = (chipLabel: string) => {
+    setSelectedChips((prev) =>
+      prev.includes(chipLabel) ? prev.filter((c) => c !== chipLabel) : [...prev, chipLabel]
+    );
+  };
+
+  const handleSubmitSelectedChips = () => {
+    if (selectedChips.length === 0) return;
+    const text = selectedChips.join(", ");
+    handleSendMessage(text);
+  };
+
   // Extract Route Coordinates & Markers dynamically from API response
   const rawCoords = plannerData?.route?.geometry?.coordinates || [];
   const mapRoutePoints: Array<[number, number]> = rawCoords.map(([lng, lat]) => [lat, lng]);
@@ -201,7 +220,6 @@ export function PlannerPage() {
   const canonicalOrigin = resolvePlace(originName);
   const canonicalDest = resolvePlace(destName);
 
-  // Dynamic start & end coordinates derived directly from OSRM geometry or Canonical Place Engine
   const originPos = mapRoutePoints.length > 0
     ? { lat: mapRoutePoints[0][0], lng: mapRoutePoints[0][1], desc: `${canonicalOrigin?.canonicalName || originName} Departure` }
     : canonicalOrigin
@@ -214,7 +232,6 @@ export function PlannerPage() {
     ? { lat: canonicalDest.latitude, lng: canonicalDest.longitude, desc: `${canonicalDest.canonicalName} (${canonicalDest.district})` }
     : (CITY_COORDINATES[destCityKey] || { lat: 9.9252, lng: 78.1198, desc: `${destName} Target Destination` });
 
-  // Map viewport center & responsive auto-zoom calculation
   const centerLat = (originPos.lat + destPos.lat) / 2;
   const centerLng = (originPos.lng + destPos.lng) / 2;
   const latDiff = Math.abs(originPos.lat - destPos.lat);
@@ -228,6 +245,8 @@ export function PlannerPage() {
 
   const warnings = plannerData?.validation?.warnings || [];
   const costEstimate = plannerData?.costEstimate;
+
+  const isDiscoveryPhase = plannerData?.plannerState?.discoveryPhase === "DISCOVER_INTERESTS" || (plannerData?.suggestedCategories && plannerData.suggestedCategories.length > 0);
 
   return (
     <AppShell>
@@ -251,7 +270,7 @@ export function PlannerPage() {
               </span>
             </div>
 
-            <div className="flex-1 space-y-4 overflow-y-auto p-6 max-h-[500px]">
+            <div className="flex-1 space-y-4 overflow-y-auto p-6 max-h-[520px] custom-scrollbar">
               {messages.map((m, i) => (
                 <motion.div
                   key={i}
@@ -270,6 +289,56 @@ export function PlannerPage() {
                   </div>
                 </motion.div>
               ))}
+
+              {/* DESTINATION-AWARE DISCOVERY INTEREST CHIPS */}
+              {isDiscoveryPhase && plannerData?.suggestedCategories && plannerData.suggestedCategories.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl space-y-3 my-2"
+                >
+                  <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-emerald-400" /> Select What You Would Like to Explore in {plannerData.plannerState.destination}:
+                  </div>
+
+                  <div className="flex flex-wrap gap-2">
+                    {plannerData.suggestedCategories.map((item) => {
+                      const isSelected = selectedChips.includes(item.label);
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => toggleChipSelection(item.label)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                            isSelected
+                              ? "bg-emerald-500 text-black shadow-md border border-emerald-400"
+                              : "bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
+                          }`}
+                        >
+                          <span>{item.icon}</span>
+                          <span>{item.label}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-black" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {selectedChips.length > 0 && (
+                    <div className="pt-2 flex items-center justify-between border-t border-emerald-500/20">
+                      <span className="text-[11px] text-emerald-300 font-medium">
+                        Selected {selectedChips.length} interest{selectedChips.length > 1 ? "s" : ""}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleSubmitSelectedChips}
+                        className="px-3.5 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-xs rounded-xl transition flex items-center gap-1 cursor-pointer"
+                      >
+                        Build My Itinerary <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </motion.div>
+              )}
 
               {loading && (
                 <div className="flex justify-start">
@@ -292,7 +361,7 @@ export function PlannerPage() {
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  placeholder="Ask copilot... (e.g. 'add ooty', 'include food spots', 'make it 2 days')"
+                  placeholder="Ask copilot... (e.g. 'Plan a trip inside Madurai', 'viewpoints and waterfalls', 'make it 2 days')"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
                   className="w-full rounded-2xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 py-3.5 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none"
