@@ -55,8 +55,9 @@ export function FullscreenRouteMap({
   const [geoLocating, setGeoLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
 
-  // Map References & State
+  // Map & Search References
   const mapContainerRef = useRef<HTMLDivElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const leafletModuleRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
@@ -74,6 +75,19 @@ export function FullscreenRouteMap({
       if (p) setSelectedDestination(p);
     }
   }, [initialOriginPlaceId, initialDestinationPlaceId]);
+
+  // Click-Away Listener to Close Search Dropdown when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+        setSearchFocused(null);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   // Request Client Browser Geolocation for Origin
   const handleUseCurrentLocation = () => {
@@ -514,7 +528,7 @@ export function FullscreenRouteMap({
           </div>
 
           {/* Location Origin & Destination Search Inputs */}
-          <div className="py-3 space-y-2 border-b border-white/10 shrink-0">
+          <div ref={searchContainerRef} className="py-3 space-y-2 border-b border-white/10 shrink-0 relative">
             {/* Origin Input */}
             <div className="relative">
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
@@ -522,12 +536,17 @@ export function FullscreenRouteMap({
                 <input
                   type="text"
                   placeholder="Select Origin..."
-                  value={originQuery || (selectedOrigin ? selectedOrigin.canonicalName || selectedOrigin.name : "")}
+                  value={searchFocused === "origin" ? originQuery : (selectedOrigin ? selectedOrigin.canonicalName || selectedOrigin.name : originQuery)}
                   onChange={(e) => {
                     setOriginQuery(e.target.value);
                     setSearchFocused("origin");
                   }}
-                  onFocus={() => setSearchFocused("origin")}
+                  onFocus={() => {
+                    setSearchFocused("origin");
+                    if (selectedOrigin && !originQuery) {
+                      setOriginQuery(selectedOrigin.canonicalName || selectedOrigin.name);
+                    }
+                  }}
                   className="w-full bg-transparent text-white placeholder-slate-400 focus:outline-none"
                 />
                 <button
@@ -543,10 +562,13 @@ export function FullscreenRouteMap({
 
               {/* Origin Spotlight Dropdown */}
               {searchFocused === "origin" && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#1a2332] border border-white/20 rounded-xl max-h-48 overflow-y-auto shadow-2xl p-1">
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-52 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
                   <div
-                    onClick={handleUseCurrentLocation}
-                    className="p-2.5 rounded-lg hover:bg-emerald-500/20 text-xs font-bold text-emerald-400 flex items-center gap-2 cursor-pointer"
+                    onClick={() => {
+                      handleUseCurrentLocation();
+                      setSearchFocused(null);
+                    }}
+                    className="p-2.5 rounded-xl hover:bg-emerald-500/20 text-xs font-bold text-emerald-400 flex items-center gap-2 cursor-pointer mb-1 border border-emerald-500/30"
                   >
                     <LocateFixed className="w-4 h-4" /> Use My Current GPS Location
                   </div>
@@ -560,10 +582,10 @@ export function FullscreenRouteMap({
                         setOriginQuery("");
                         setSearchFocused(null);
                       }}
-                      className="p-2 rounded-lg hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer"
+                      className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
                     >
-                      <span>📍 {place.canonicalName || place.name}</span>
-                      <span className="text-[10px] text-slate-400">{place.district}</span>
+                      <span className="font-semibold">📍 {place.canonicalName || place.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{place.district}</span>
                     </div>
                   ))}
                 </div>
@@ -577,19 +599,24 @@ export function FullscreenRouteMap({
                 <input
                   type="text"
                   placeholder="Select Destination..."
-                  value={destinationQuery || (selectedDestination ? selectedDestination.canonicalName || selectedDestination.name : "")}
+                  value={searchFocused === "destination" ? destinationQuery : (selectedDestination ? selectedDestination.canonicalName || selectedDestination.name : destinationQuery)}
                   onChange={(e) => {
                     setDestinationQuery(e.target.value);
                     setSearchFocused("destination");
                   }}
-                  onFocus={() => setSearchFocused("destination")}
+                  onFocus={() => {
+                    setSearchFocused("destination");
+                    if (selectedDestination && !destinationQuery) {
+                      setDestinationQuery(selectedDestination.canonicalName || selectedDestination.name);
+                    }
+                  }}
                   className="w-full bg-transparent text-white placeholder-slate-400 focus:outline-none"
                 />
               </div>
 
               {/* Destination Spotlight Dropdown */}
               {searchFocused === "destination" && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#1a2332] border border-white/20 rounded-xl max-h-48 overflow-y-auto shadow-2xl p-1">
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-52 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
                   {CANONICAL_PLACES.filter((p) =>
                     (p.canonicalName || p.name).toLowerCase().includes(destinationQuery.toLowerCase())
                   ).slice(0, 8).map((place) => (
@@ -600,10 +627,10 @@ export function FullscreenRouteMap({
                         setDestinationQuery("");
                         setSearchFocused(null);
                       }}
-                      className="p-2 rounded-lg hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer"
+                      className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
                     >
-                      <span>⛰️ {place.canonicalName || place.name}</span>
-                      <span className="text-[10px] text-slate-400">{place.district}</span>
+                      <span className="font-semibold">⛰️ {place.canonicalName || place.name}</span>
+                      <span className="text-[10px] text-slate-400 font-mono">{place.district}</span>
                     </div>
                   ))}
                 </div>
