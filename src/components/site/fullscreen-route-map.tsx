@@ -181,21 +181,11 @@ export function FullscreenRouteMap({
 
           ROUTE_LEG_CACHE.set(cacheKey, segInfo);
           segments.push(segInfo);
-        } catch (err) {
+        } catch (err: any) {
           if (activeRequestIdRef.current !== requestId) return;
-          // Fallback straight line polyline if OSRM service is unreachable
-          const p1: [number, number] = [origin.latitude, origin.longitude];
-          const p2: [number, number] = [dest.latitude, dest.longitude];
-          const dLat = p2[0] - p1[0];
-          const dLng = p2[1] - p1[1];
-          const approxKm = Math.round(Math.sqrt(dLat * dLat + dLng * dLng) * 111 * 1.2 * 10) / 10;
-
-          const fallbackSeg = {
-            distanceKm: approxKm,
-            durationMins: Math.round(approxKm * 1.4),
-            polyline: [p1, p2] as [number, number][],
-          };
-          segments.push(fallbackSeg);
+          setRouteError(err?.message || "Road route unavailable. Could not calculate road network geometry.");
+          setRouteLoading(false);
+          return;
         }
       }
 
@@ -554,6 +544,24 @@ export function FullscreenRouteMap({
             </div>
 
             {geoError && <p className="text-[10px] text-rose-400 px-1">{geoError}</p>}
+            {routeError && (
+              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 space-y-2">
+                <div className="font-bold flex items-center gap-1.5 text-rose-400">
+                  ⚠️ Road Route Unavailable
+                </div>
+                <p className="text-[11px] leading-snug">{routeError}</p>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setRouteError(null);
+                    setRouteLoading(true);
+                  }}
+                  className="px-3 py-1 bg-rose-500 hover:bg-rose-600 text-black font-bold text-[10px] rounded-lg transition"
+                >
+                  Retry Route Calculation
+                </button>
+              </div>
+            )}
           </div>
 
           {/* NO ROUTE STATE */}

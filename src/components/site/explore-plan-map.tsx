@@ -173,21 +173,11 @@ export function ExplorePlanMap({
 
           ROUTE_LEG_CACHE.set(cacheKey, segInfo);
           segments.push(segInfo);
-        } catch (err) {
+        } catch (err: any) {
           if (activeRequestIdRef.current !== requestId) return;
-          // Fallback straight line polyline if OSRM service is unreachable
-          const p1: [number, number] = [origin.latitude, origin.longitude];
-          const p2: [number, number] = [dest.latitude, dest.longitude];
-          const dLat = p2[0] - p1[0];
-          const dLng = p2[1] - p1[1];
-          const approxKm = Math.round(Math.sqrt(dLat * dLat + dLng * dLng) * 111 * 10) / 10;
-
-          const fallbackSeg = {
-            distanceKm: approxKm,
-            durationMins: Math.round(approxKm * 1.5),
-            polyline: [p1, p2] as [number, number][],
-          };
-          segments.push(fallbackSeg);
+          setResolutionError(err?.message || "Road route unavailable. Could not fetch road network geometry.");
+          setRouteLoading(false);
+          return;
         }
       }
 
