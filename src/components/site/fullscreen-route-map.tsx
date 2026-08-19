@@ -1,24 +1,17 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   MapPin,
   Navigation,
   Compass,
   ArrowRight,
-  Maximize2,
-  X,
-  ChevronUp,
   ChevronDown,
-  Clock,
-  RotateCcw,
-  Sparkles,
-  Search,
-  Check,
+  ChevronUp,
   LocateFixed,
   Car,
   Bike,
   Footprints,
 } from "lucide-react";
-import { CANONICAL_PLACES, resolvePlace, resolvePlaceById, ExplorerPlace } from "@/lib/data/canonical-places";
+import { CANONICAL_PLACES, resolvePlaceById, ExplorerPlace } from "@/lib/data/canonical-places";
 import { RouteApiRepository, IsolatedRouteResultDTO } from "@/lib/api-client/routes";
 
 export interface FullscreenRouteMapProps {
@@ -38,7 +31,7 @@ export function FullscreenRouteMap({
   initialDestinationPlaceId,
   initialTravelMode = "driving",
 }: FullscreenRouteMapProps) {
-  // Client-Aware Origin & Destination Selection State
+  // Origin & Destination State
   const [originQuery, setOriginQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState<ExplorerPlace | null>(() => {
@@ -62,7 +55,7 @@ export function FullscreenRouteMap({
   const [geoLocating, setGeoLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
 
-  // Map References
+  // Map References & State
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const leafletModuleRef = useRef<any>(null);
@@ -129,7 +122,7 @@ export function FullscreenRouteMap({
   };
 
   // Route Stops Array: [Origin, ...Waypoints, Destination]
-  const stops: ExplorerPlace[] = React.useMemo(() => {
+  const stops: ExplorerPlace[] = useMemo(() => {
     const arr: ExplorerPlace[] = [];
     if (selectedOrigin) arr.push(selectedOrigin);
     arr.push(...waypoints);
@@ -198,13 +191,16 @@ export function FullscreenRouteMap({
     calculateAllSegments();
   }, [selectedOrigin, selectedDestination, waypoints, travelMode]);
 
-  // Leaflet Map Initialization & Rendering
+  // Leaflet Map Initialization & Lifecycle Management
   useEffect(() => {
-    if (typeof window === "undefined" || !mapContainerRef.current || stops.length === 0) return;
+    if (typeof window === "undefined" || !mapContainerRef.current) return;
 
     let isMounted = true;
 
-    import("leaflet").then((L) => {
+    async function initMap() {
+      const L = await import("leaflet");
+      await import("leaflet/dist/leaflet.css");
+
       if (!isMounted || !mapContainerRef.current) return;
       leafletModuleRef.current = L;
 
@@ -214,15 +210,18 @@ export function FullscreenRouteMap({
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
+      // Prevent multiple map instances on same container
       if (!leafletMapRef.current) {
+        const initialCenter: [number, number] = stops.length > 0 ? [stops[0].latitude, stops[0].longitude] : [10.8, 78.2];
+
         const map = L.map(mapContainerRef.current, {
-          center: [stops[0].latitude, stops[0].longitude],
-          zoom: 9,
+          center: initialCenter,
+          zoom: 8,
           zoomControl: false,
+          attributionControl: false,
         });
 
         L.tileLayer("https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png", {
-          attribution: '&copy; <a href="https://carto.com/">CARTO</a> & ExplorerTN Real Route Engine',
           maxZoom: 19,
           subdomains: "abcd",
         }).addTo(map);
@@ -234,110 +233,178 @@ export function FullscreenRouteMap({
 
         leafletMapRef.current = map;
         polylineGroupRef.current = L.layerGroup().addTo(map);
+
+        // Ensure Leaflet calculates tile grid after container layout stabilizes
+        requestAnimationFrame(() => {
+          map.invalidateSize();
+        });
       }
 
-      const map = leafletMapRef.current;
-      const polylineGroup = polylineGroupRef.current;
+      renderRouteOnMap();
+    }
 
-      markersRef.current.forEach((m) => map.removeLayer(m));
-      markersRef.current = [];
-      polylineGroup.clearLayers();
-
-      const bounds = L.latLngBounds([]);
-
-      // Render Numbered Stop Markers (①, ②, ③...) on true WGS84 GPS points
-      stops.forEach((place, idx) => {
-        bounds.extend([place.latitude, place.longitude]);
-
-        const numberLabel = idx === 0 ? "START" : idx === stops.length - 1 ? "END" : `${idx}`;
-        const isSelected = idx === selectedStopIndex;
-        const pinBg = isSelected ? "#10b981" : idx === 0 ? "#0284c7" : "#0f172a";
-
-        const customIcon = L.divIcon({
-          className: `custom-route-pin-${place.id}`,
-          html: `
-            <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-              ${isSelected ? '<span style="position: absolute; width: 42px; height: 42px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
-              <div style="
-                background: ${pinBg};
-                color: #ffffff;
-                border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
-                font-weight: 800;
-                font-size: 11px;
-                padding: 4px 10px;
-                border-radius: 9999px;
-                box-shadow: 0 4px 14px rgba(0,0,0,0.6);
-                white-space: nowrap;
-                display: flex;
-                align-items: center;
-                gap: 4px;
-                transition: all 0.2s ease;
-              ">
-                <span style="width: 7px; height: 7px; border-radius: 50%; background: ${isSelected ? '#000000' : '#10b981'};"></span>
-                ${numberLabel} · ${place.canonicalName || place.name}
-              </div>
-            </div>
-          `,
-          iconSize: [140, 28],
-          iconAnchor: [70, 14],
-        });
-
-        const marker = L.marker([place.latitude, place.longitude], {
-          icon: customIcon,
-          zIndexOffset: isSelected ? 2000 : 1000 - idx,
-        }).addTo(map);
-
-        marker.bindTooltip(`${idx + 1}. ${place.canonicalName || place.name}`, {
-          permanent: isSelected,
-          direction: "auto",
-          offset: [0, -14],
-          className: "custom-decluttered-map-tooltip",
-        });
-
-        marker.on("click", () => {
-          setSelectedStopIndex(idx);
-          map.flyTo([place.latitude, place.longitude], 11, { animate: true, duration: 1.2 });
-        });
-
-        markersRef.current.push(marker);
-      });
-
-      // Render Solid Road-Following Polylines
-      segmentData.forEach((seg, idx) => {
-        if (seg.polyline && seg.polyline.length > 0) {
-          const isSelectedLeg = idx === selectedStopIndex;
-          const polyline = L.polyline(seg.polyline, {
-            color: isSelectedLeg ? "#10b981" : "#0284c7",
-            weight: isSelectedLeg ? 6 : 4,
-            opacity: isSelectedLeg ? 0.95 : 0.8,
-            lineJoin: "round",
-          }).addTo(polylineGroup);
-
-          seg.polyline.forEach((pt) => bounds.extend(pt));
-        }
-      });
-
-      // Auto-fit map bounds to encompass all stop points and road geometry
-      if (bounds.isValid()) {
-        map.fitBounds(bounds, { padding: [60, 60] });
-      }
-    });
+    initMap();
 
     return () => {
       isMounted = false;
+      if (leafletMapRef.current) {
+        leafletMapRef.current.remove();
+        leafletMapRef.current = null;
+      }
     };
+  }, []);
+
+  // ResizeObserver for Container Sizing & Viewport Layout Safety
+  useEffect(() => {
+    if (typeof window === "undefined" || !mapContainerRef.current) return;
+
+    const invalidate = () => {
+      if (leafletMapRef.current) {
+        requestAnimationFrame(() => {
+          leafletMapRef.current?.invalidateSize();
+        });
+      }
+    };
+
+    const resizeObserver = new ResizeObserver(() => {
+      invalidate();
+    });
+
+    resizeObserver.observe(mapContainerRef.current);
+    window.addEventListener("resize", invalidate);
+    window.addEventListener("orientationchange", invalidate);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", invalidate);
+      window.removeEventListener("orientationchange", invalidate);
+    };
+  }, []);
+
+  // Invalidate Size when panelState changes
+  useEffect(() => {
+    if (leafletMapRef.current) {
+      setTimeout(() => {
+        leafletMapRef.current?.invalidateSize();
+      }, 300);
+    }
+  }, [panelState]);
+
+  // Render Numbered Markers & Real Road Network Polylines
+  const renderRouteOnMap = () => {
+    const map = leafletMapRef.current;
+    const L = leafletModuleRef.current;
+    const polylineGroup = polylineGroupRef.current;
+
+    if (!map || !L || !polylineGroup) return;
+
+    // Clear previous markers & polylines
+    markersRef.current.forEach((m) => map.removeLayer(m));
+    markersRef.current = [];
+    polylineGroup.clearLayers();
+
+    if (stops.length === 0) return;
+
+    const bounds = L.latLngBounds([]);
+
+    // 1. Render Numbered Stop Markers (①, ②, ③...) on true WGS84 GPS points
+    stops.forEach((place, idx) => {
+      bounds.extend([place.latitude, place.longitude]);
+
+      const numberLabel = idx === 0 ? "START" : idx === stops.length - 1 ? "END" : `${idx}`;
+      const isSelected = idx === selectedStopIndex;
+      const pinBg = isSelected ? "#10b981" : idx === 0 ? "#0284c7" : "#0f172a";
+
+      const customIcon = L.divIcon({
+        className: `custom-route-pin-${place.id}`,
+        html: `
+          <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+            ${isSelected ? '<span style="position: absolute; width: 42px; height: 42px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
+            <div style="
+              background: ${pinBg};
+              color: #ffffff;
+              border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
+              font-weight: 800;
+              font-size: 11px;
+              padding: 4px 10px;
+              border-radius: 9999px;
+              box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+              white-space: nowrap;
+              display: flex;
+              align-items: center;
+              gap: 4px;
+              transition: all 0.2s ease;
+            ">
+              <span style="width: 7px; height: 7px; border-radius: 50%; background: ${isSelected ? '#000000' : '#10b981'};"></span>
+              ${numberLabel} · ${place.canonicalName || place.name}
+            </div>
+          </div>
+        `,
+        iconSize: [140, 28],
+        iconAnchor: [70, 14],
+      });
+
+      const marker = L.marker([place.latitude, place.longitude], {
+        icon: customIcon,
+        zIndexOffset: isSelected ? 2000 : 1000 - idx,
+      }).addTo(map);
+
+      marker.bindTooltip(`${idx + 1}. ${place.canonicalName || place.name}`, {
+        permanent: isSelected,
+        direction: "auto",
+        offset: [0, -14],
+        className: "custom-decluttered-map-tooltip",
+      });
+
+      marker.on("click", () => {
+        setSelectedStopIndex(idx);
+        map.flyTo([place.latitude, place.longitude], 11, { animate: true, duration: 1.2 });
+      });
+
+      markersRef.current.push(marker);
+    });
+
+    // 2. Render Solid Real Road-Following Polylines
+    segmentData.forEach((seg, idx) => {
+      if (seg.polyline && seg.polyline.length > 0) {
+        const isSelectedLeg = idx === selectedStopIndex;
+        L.polyline(seg.polyline, {
+          color: isSelectedLeg ? "#10b981" : "#0284c7",
+          weight: isSelectedLeg ? 6 : 4,
+          opacity: isSelectedLeg ? 0.95 : 0.8,
+          lineJoin: "round",
+        }).addTo(polylineGroup);
+
+        seg.polyline.forEach((pt) => bounds.extend(pt));
+      }
+    });
+
+    // 3. Auto-fit Map Viewport to Encompass Full Road Geometry + Stop Markers
+    if (bounds.isValid()) {
+      map.invalidateSize();
+      map.fitBounds(bounds, {
+        paddingTopLeft: [420, 100],
+        paddingBottomRight: [80, 80],
+        maxZoom: 14,
+      });
+    }
+  };
+
+  // Re-render route on map whenever stops or segment data updates
+  useEffect(() => {
+    renderRouteOnMap();
   }, [stops, segmentData, selectedStopIndex]);
 
   // Aggregate Total Trip Metrics
-  const totalDistanceKm = React.useMemo(() => {
+  const totalDistanceKm = useMemo(() => {
     return Math.round(segmentData.reduce((acc, seg) => acc + seg.distanceKm, 0) * 10) / 10;
   }, [segmentData]);
 
-  const totalDurationMins = React.useMemo(() => {
+  const totalDurationMins = useMemo(() => {
     return segmentData.reduce((acc, seg) => acc + seg.durationMins, 0);
   }, [segmentData]);
 
-  const durationString = React.useMemo(() => {
+  const durationString = useMemo(() => {
     const hrs = Math.floor(totalDurationMins / 60);
     const mins = totalDurationMins % 60;
     if (hrs === 0) return `${mins} min`;
@@ -347,12 +414,12 @@ export function FullscreenRouteMap({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 w-screen h-screen bg-[#0B0F14] overflow-hidden font-sans text-white">
+    <div className="fixed inset-0 z-50 w-full h-full h-[100vh] h-[100dvh] min-h-[100vh] overflow-hidden bg-[#0B0F14] font-sans text-white relative">
       {/* 100% Fullscreen Leaflet Map Container */}
-      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
+      <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
 
-      {/* Compact Floating Top Navbar / Header Bar */}
-      <header className="absolute top-4 left-4 right-4 z-40 flex items-center justify-between pointer-events-none gap-3">
+      {/* Compact Top Navigation Bar (z-index: 30 / 100) */}
+      <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none gap-3">
         <div className="flex items-center gap-2 pointer-events-auto">
           <button
             type="button"
@@ -379,7 +446,7 @@ export function FullscreenRouteMap({
           )}
         </div>
 
-        {/* Travel Mode Pills */}
+        {/* Travel Mode Selector */}
         <div className="flex items-center gap-1 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto">
           {[
             { id: "driving", label: "Driving", icon: Car },
@@ -407,21 +474,21 @@ export function FullscreenRouteMap({
         </div>
       </header>
 
-      {/* Floating Draggable Left Directions Panel (Desktop & Mobile Bottom Sheet) */}
+      {/* Floating Directions Panel: Desktop TOP-LEFT (top-20 left-4), Mobile Bottom Sheet (z-index: 40 / 200) */}
       <aside
         className={`absolute z-40 transition-all duration-300 pointer-events-auto ${
           panelState === "hidden"
-            ? "-left-96 bottom-6"
+            ? "-left-96 top-20"
             : panelState === "compact"
-            ? "left-4 bottom-6 w-80 sm:w-96 max-h-48"
-            : "left-4 top-20 bottom-6 w-80 sm:w-96"
+            ? "left-4 top-20 w-80 sm:w-96 max-h-48"
+            : "left-4 top-20 w-80 sm:w-[380px] max-h-[calc(100dvh-110px)] max-sm:top-auto max-sm:bottom-4 max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:max-h-[70vh]"
         }`}
       >
         <div className="h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-5 shadow-2xl flex flex-col overflow-hidden text-white">
           {/* Drag Handle Bar */}
           <div
             onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
-            className="w-full flex flex-col items-center cursor-pointer py-1 group"
+            className="w-full flex flex-col items-center cursor-pointer py-1 group shrink-0"
           >
             <div className="w-12 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition" />
             <span className="text-[9px] text-slate-400 uppercase tracking-widest mt-1 font-mono">
@@ -430,7 +497,7 @@ export function FullscreenRouteMap({
           </div>
 
           {/* Panel Header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-2">
+          <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-2 shrink-0">
             <div className="flex items-center gap-2">
               <Compass className="w-4 h-4 text-emerald-400" />
               <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Directions & Itinerary</h2>
@@ -446,8 +513,8 @@ export function FullscreenRouteMap({
             </div>
           </div>
 
-          {/* Location Origin / Destination Search Controls */}
-          <div className="py-3 space-y-2 border-b border-white/10">
+          {/* Location Origin & Destination Search Inputs */}
+          <div className="py-3 space-y-2 border-b border-white/10 shrink-0">
             {/* Origin Input */}
             <div className="relative">
               <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
@@ -577,7 +644,7 @@ export function FullscreenRouteMap({
 
           {/* EXPANDED ROUTE ITINERARY & STOPS LIST */}
           {selectedOrigin && selectedDestination && panelState === "expanded" && (
-            <div className="flex-1 overflow-y-auto py-3 space-y-3 no-scrollbar">
+            <div className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
               <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs">
                 <div>
                   <div className="font-bold text-emerald-400">Total Journey Distance</div>
@@ -674,14 +741,14 @@ export function FullscreenRouteMap({
         <button
           type="button"
           onClick={() => setPanelState("expanded")}
-          className="absolute left-4 bottom-6 z-40 px-4 py-2.5 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 text-emerald-400 font-bold text-xs rounded-full shadow-2xl transition flex items-center gap-2 hover:bg-[#121821] cursor-pointer"
+          className="absolute left-4 top-20 z-40 px-4 py-2.5 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 text-emerald-400 font-bold text-xs rounded-full shadow-2xl transition flex items-center gap-2 hover:bg-[#121821] cursor-pointer"
         >
           <Compass className="w-4 h-4" /> Restore Directions ({totalDistanceKm} km)
         </button>
       )}
 
-      {/* Floating Map Zoom & Action Controls */}
-      <div className="absolute right-4 bottom-6 z-40 flex flex-col gap-2 pointer-events-auto">
+      {/* Floating Map Zoom & Action Controls (z-index: 50 / 300) */}
+      <div className="absolute right-4 bottom-6 z-50 flex flex-col gap-2 pointer-events-auto">
         <button
           type="button"
           onClick={handleUseCurrentLocation}
