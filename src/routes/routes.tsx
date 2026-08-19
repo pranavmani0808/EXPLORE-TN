@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { Fuel, Clock, Utensils, Camera, CloudSun, MapPin, Sparkles, Navigation, RefreshCw, ArrowRight, ShieldCheck, Compass } from "lucide-react";
+import { Fuel, Clock, Utensils, Camera, CloudSun, MapPin, Sparkles, Navigation, ArrowRight, Compass } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import heroImg from "@/assets/hero-ghats.jpg";
@@ -360,7 +360,6 @@ function generateDynamicRoute(origin: OriginCity, destination: DestinationCity):
   const key = `${origin}-${destination}`;
   if (ROUTE_PRESETS[key]) return ROUTE_PRESETS[key];
 
-  // Coordinates map for Tamil Nadu cities
   const CITY_COORDS: Record<string, [number, number]> = {
     Chennai: [13.0827, 80.2707],
     Coimbatore: [11.0168, 76.9558],
@@ -382,7 +381,6 @@ function generateDynamicRoute(origin: OriginCity, destination: DestinationCity):
   const startCoords = CITY_COORDS[origin] || [11.0, 78.0];
   const endCoords = CITY_COORDS[destination] || [10.2, 77.4];
 
-  // Rough distance calculation based on lat/lng Euclidean approx for TN
   const dLat = endCoords[0] - startCoords[0];
   const dLng = endCoords[1] - startCoords[1];
   const distKm = Math.round(Math.sqrt(dLat * dLat + dLng * dLng) * 110 * 1.3);
@@ -450,7 +448,6 @@ function RoutesPage() {
   const leafletMapRef = useRef<any>(null);
   const leafletModuleRef = useRef<any>(null);
 
-  // Recalculate route when origin or destination changes
   const handleGenerateRoute = () => {
     const route = generateDynamicRoute(selectedOrigin, selectedDestination);
     setCurrentRoute(route);
@@ -509,7 +506,6 @@ function RoutesPage() {
 
     const latLngs: [number, number][] = currentRoute.stops.map((s) => s.coords);
 
-    // Draw glowing emerald polyline path on real map tiles
     const polyline = L.polyline(latLngs, {
       color: "#10b981",
       weight: 4,
@@ -517,10 +513,8 @@ function RoutesPage() {
       dashArray: "8, 6",
     }).addTo(map);
 
-    // Fit map bounds to show full route
     map.fitBounds(polyline.getBounds(), { padding: [40, 40] });
 
-    // Draw Pin Markers for every stop along the route
     currentRoute.stops.forEach((stop, index) => {
       const isStart = index === 0;
       const isEnd = index === currentRoute.stops.length - 1;
@@ -546,126 +540,142 @@ function RoutesPage() {
 
   return (
     <AppShell>
+      {/* Aligned Page Header matching AI Planner style */}
       <PageHeader
-        eyebrow="Interactive Route Builder"
-        title={currentRoute.name}
-        description={currentRoute.summary}
+        eyebrow="ROUTE PLANNER"
+        title={`${selectedOrigin} → ${selectedDestination}`}
+        description="Plan your route, stops, distance and travel details across Tamil Nadu."
       />
 
-      <div className="mx-auto max-w-6xl px-4 pb-8 sm:px-6">
-        {/* Dynamic Route Origin & Destination Controls Box */}
-        <div className="bg-[#121821] border border-white/15 rounded-3xl p-5 sm:p-7 shadow-2xl mb-10 text-white">
-          <div className="flex items-center gap-2 text-emerald-400 font-mono text-xs mb-3 font-bold">
-            <Compass className="w-4 h-4 text-emerald-400" />
-            <span>SELECT YOUR ORIGIN & DESTINATION TRAIL</span>
+      <div className="mx-auto max-w-6xl px-4 pb-12 sm:px-6">
+        {/* Route Builder Control Panel - Aligned to ExplorerTN App Card UI */}
+        <div className="rounded-3xl border border-border bg-card p-5 sm:p-6 shadow-elevate mb-8">
+          <div className="flex items-center gap-2 text-primary font-mono text-xs mb-4 font-semibold uppercase tracking-wider">
+            <Compass className="size-4 text-primary" />
+            <span>Route Parameters</span>
           </div>
 
           <div className="grid gap-4 sm:grid-cols-3 items-end">
-            {/* Start / Origin Selector */}
+            {/* Origin Selector */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                 Starting Location (Origin)
               </label>
-              <select
-                value={selectedOrigin}
-                onChange={(e) => setSelectedOrigin(e.target.value as OriginCity)}
-                className="w-full bg-[#0B0F14] border border-white/20 rounded-2xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition cursor-pointer"
-              >
-                {ORIGINS.map((city) => (
-                  <option key={city} value={city} className="bg-[#0B0F14] text-white">
-                    📍 {city}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedOrigin}
+                  onChange={(e) => setSelectedOrigin(e.target.value as OriginCity)}
+                  className="w-full h-11 bg-secondary border border-border rounded-xl px-4 py-2 text-sm font-semibold text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition cursor-pointer appearance-none"
+                >
+                  {ORIGINS.map((city) => (
+                    <option key={city} value={city} className="bg-card text-card-foreground">
+                      📍 {city}
+                    </option>
+                  ))}
+                </select>
+                <Navigation className="absolute right-3.5 top-3.5 size-4 text-muted-foreground pointer-events-none" />
+              </div>
             </div>
 
             {/* Destination Selector */}
             <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-slate-300 mb-2">
+              <label className="block text-xs font-semibold uppercase tracking-wider text-muted-foreground mb-2">
                 Destination (End Point)
               </label>
-              <select
-                value={selectedDestination}
-                onChange={(e) => setSelectedDestination(e.target.value as DestinationCity)}
-                className="w-full bg-[#0B0F14] border border-white/20 rounded-2xl px-4 py-3 text-sm font-semibold text-white focus:outline-none focus:border-emerald-400 transition cursor-pointer"
-              >
-                {DESTINATIONS.map((city) => (
-                  <option key={city} value={city} className="bg-[#0B0F14] text-white">
-                    ⛰️ {city}
-                  </option>
-                ))}
-              </select>
+              <div className="relative">
+                <select
+                  value={selectedDestination}
+                  onChange={(e) => setSelectedDestination(e.target.value as DestinationCity)}
+                  className="w-full h-11 bg-secondary border border-border rounded-xl px-4 py-2 text-sm font-semibold text-foreground focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition cursor-pointer appearance-none"
+                >
+                  {DESTINATIONS.map((city) => (
+                    <option key={city} value={city} className="bg-card text-card-foreground">
+                      ⛰️ {city}
+                    </option>
+                  ))}
+                </select>
+                <MapPin className="absolute right-3.5 top-3.5 size-4 text-muted-foreground pointer-events-none" />
+              </div>
             </div>
 
-            {/* Generate Button */}
+            {/* Calculate CTA */}
             <div>
               <Button
                 onClick={handleGenerateRoute}
-                size="lg"
-                className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-6 shadow-xl shadow-emerald-500/20 transition flex items-center justify-center gap-2 text-sm"
+                className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground font-bold shadow-md transition flex items-center justify-center gap-2 text-sm"
               >
-                <Sparkles className="w-4 h-4" /> Calculate Route Map <ArrowRight className="w-4 h-4" />
+                <Sparkles className="size-4" /> Calculate Route <ArrowRight className="size-4" />
               </Button>
             </div>
           </div>
 
-          {/* Preset Chips */}
-          <div className="mt-5 flex flex-wrap items-center gap-2 pt-4 border-t border-white/10 text-xs">
-            <span className="text-slate-400 font-medium mr-1">Popular Trails:</span>
+          {/* Popular Presets */}
+          <div className="mt-5 flex flex-wrap items-center gap-2 pt-4 border-t border-border text-xs">
+            <span className="text-muted-foreground font-medium mr-1">Popular Routes:</span>
             {[
-              { origin: "Chennai", dest: "Kodaikanal", label: "Chennai → Kodai (520km)" },
-              { origin: "Coimbatore", dest: "Ooty", label: "Coimbatore → Ooty (88km)" },
-              { origin: "Coimbatore", dest: "Valparai", label: "Coimbatore → Valparai 40 Hairpins" },
-              { origin: "Madurai", dest: "Dhanushkodi", label: "Madurai → Dhanushkodi Ocean Road" },
-              { origin: "Salem", dest: "Kolli Hills", label: "Salem → Kolli Hills 70 Hairpins" },
-            ].map((p) => (
-              <button
-                key={p.label}
-                onClick={() => {
-                  setSelectedOrigin(p.origin as OriginCity);
-                  setSelectedDestination(p.dest as DestinationCity);
-                  const route = generateDynamicRoute(p.origin as OriginCity, p.dest as DestinationCity);
-                  setCurrentRoute(route);
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition ${
-                  selectedOrigin === p.origin && selectedDestination === p.dest
-                    ? "bg-emerald-500 text-black border-emerald-400 font-bold"
-                    : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {p.label}
-              </button>
-            ))}
+              { origin: "Chennai", dest: "Kodaikanal", label: "Chennai → Kodaikanal (520 km)" },
+              { origin: "Coimbatore", dest: "Ooty", label: "Coimbatore → Ooty (88 km)" },
+              { origin: "Coimbatore", dest: "Valparai", label: "Coimbatore → Valparai (40 Hairpins)" },
+              { origin: "Madurai", dest: "Dhanushkodi", label: "Madurai → Dhanushkodi (180 km)" },
+              { origin: "Salem", dest: "Kolli Hills", label: "Salem → Kolli Hills (70 Hairpins)" },
+            ].map((p) => {
+              const isActive = selectedOrigin === p.origin && selectedDestination === p.dest;
+              return (
+                <button
+                  key={p.label}
+                  type="button"
+                  onClick={() => {
+                    setSelectedOrigin(p.origin as OriginCity);
+                    setSelectedDestination(p.dest as DestinationCity);
+                    const route = generateDynamicRoute(p.origin as OriginCity, p.dest as DestinationCity);
+                    setCurrentRoute(route);
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium border transition cursor-pointer ${
+                    isActive
+                      ? "bg-primary/20 text-primary border-primary/40 font-bold"
+                      : "bg-secondary border-border text-muted-foreground hover:bg-secondary/80 hover:text-foreground"
+                  }`}
+                >
+                  {p.label}
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Route Details & Interactive Leaflet Map Grid */}
-        <div className="grid gap-10 lg:grid-cols-[1fr_0.8fr]">
-          {/* Left Column: Timeline Stop by Stop */}
-          <ol className="relative space-y-6 border-l border-border pl-6">
-            {currentRoute.stops.map((stop, i) => (
-              <motion.li
-                key={stop.name}
-                initial={{ opacity: 0, x: -24 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.5 }}
-                className="relative"
-              >
-                <span className="absolute -left-[31px] top-6 grid size-6 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground ring-4 ring-background">
-                  {i + 1}
-                </span>
-                <div className="overflow-hidden rounded-3xl border border-border bg-card shadow-elevate">
-                  <img src={stop.image} alt={stop.name} loading="lazy" className="h-48 w-full object-cover" />
-                  <div className="space-y-3 p-5">
-                    <div className="flex flex-wrap items-baseline justify-between gap-2">
-                      <h2 className="font-display text-xl font-semibold">{stop.name}</h2>
-                      <span className="flex items-center gap-1 text-xs text-muted-foreground font-mono">
-                        <MapPin className="size-3 text-emerald-400" aria-hidden /> {stop.distance}
+        {/* Content Layout: Timeline (Left) & Sticky Map (Right) */}
+        <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr]">
+          {/* Left Column: Compact Information Stop Cards */}
+          <div>
+            <h2 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground mb-4 font-mono flex items-center gap-2">
+              <Clock className="size-4 text-primary" /> Route Timeline & Stops
+            </h2>
+
+            <ol className="relative space-y-4 border-l border-border/60 pl-6">
+              {currentRoute.stops.map((stop, i) => (
+                <motion.li
+                  key={stop.name}
+                  initial={{ opacity: 0, x: -16 }}
+                  whileInView={{ opacity: 1, x: 0 }}
+                  viewport={{ once: true, margin: "-40px" }}
+                  transition={{ duration: 0.35, delay: i * 0.04 }}
+                  className="relative"
+                >
+                  <span className="absolute -left-[31px] top-4 grid size-6 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground ring-4 ring-background">
+                    {i + 1}
+                  </span>
+
+                  <div className="rounded-2xl border border-border bg-card p-4 sm:p-5 shadow-elevate transition hover:border-primary/30">
+                    <div className="flex flex-wrap items-baseline justify-between gap-2 mb-2">
+                      <h3 className="font-display text-base font-semibold text-foreground">{stop.name}</h3>
+                      <span className="flex items-center gap-1 text-xs text-primary font-mono font-medium">
+                        <MapPin className="size-3 text-primary" aria-hidden /> {stop.distance}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground">{stop.description}</p>
-                    <div className="grid gap-2 sm:grid-cols-2">
+
+                    <p className="text-xs text-muted-foreground mb-3 leading-relaxed">{stop.description}</p>
+
+                    <div className="grid gap-2 grid-cols-2 sm:grid-cols-4 mb-3">
                       {[
                         [Clock, "Time", stop.time],
                         [Fuel, "Fuel", stop.fuel],
@@ -674,53 +684,61 @@ function RoutesPage() {
                       ].map(([Icon, label, value]) => {
                         const I = Icon as typeof Clock;
                         return (
-                          <p key={label as string} className="flex items-center gap-2 rounded-xl bg-secondary px-3 py-2 text-xs">
-                            <I className="size-3.5 text-primary" aria-hidden />
-                            <span className="text-muted-foreground">{label as string}</span>
-                            <span className="ml-auto font-medium">{value as string}</span>
-                          </p>
+                          <div key={label as string} className="flex items-center gap-2 rounded-xl bg-secondary/70 px-2.5 py-1.5 text-[11px]">
+                            <I className="size-3 text-primary shrink-0" aria-hidden />
+                            <span className="text-muted-foreground truncate">{label as string}:</span>
+                            <span className="ml-auto font-medium text-foreground truncate">{value as string}</span>
+                          </div>
                         );
                       })}
                     </div>
-                    <p className="flex items-start gap-2 rounded-xl border border-border p-3 text-xs text-muted-foreground">
-                      <Camera className="mt-0.5 size-3.5 text-gold shrink-0" aria-hidden /> {stop.tip}
-                    </p>
+
+                    {stop.tip && (
+                      <div className="flex items-start gap-2 rounded-xl bg-secondary/40 border border-border/50 p-2.5 text-xs text-muted-foreground">
+                        <Camera className="mt-0.5 size-3.5 text-amber-400 shrink-0" aria-hidden />
+                        <span>{stop.tip}</span>
+                      </div>
+                    )}
                   </div>
-                </div>
-              </motion.li>
-            ))}
-          </ol>
-
-          {/* Right Column: Real Geographic Leaflet Map for Route & Metrics */}
-          <aside className="glass sticky top-28 h-fit rounded-4xl p-6 shadow-elevate">
-            <div className="flex items-center justify-between mb-4">
-              <p className="text-sm font-bold flex items-center gap-1.5">
-                <Navigation className="w-4 h-4 text-emerald-400" /> Geographic Route Map
-              </p>
-              <span className="text-[10px] font-mono text-emerald-400 px-2 py-0.5 bg-emerald-500/10 rounded-full border border-emerald-500/20">
-                CartoDB Engine
-              </span>
-            </div>
-
-            {/* Real Geographic Leaflet Map Viewport for Route */}
-            <div className="relative h-[320px] w-full rounded-3xl overflow-hidden border border-white/15 shadow-2xl mb-4">
-              <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
-            </div>
-
-            {/* Metrics Grid */}
-            <dl className="grid grid-cols-2 gap-3">
-              {[
-                ["Total Distance", currentRoute.totalDistance],
-                ["Riding Time", currentRoute.totalTime],
-                ["Fuel Estimate", currentRoute.fuelEstimate],
-                ["Best Season", currentRoute.bestSeason],
-              ].map(([k, v]) => (
-                <div key={k} className="rounded-2xl border border-border bg-card/60 p-3">
-                  <dt className="text-[11px] uppercase tracking-wide text-muted-foreground font-mono">{k}</dt>
-                  <dd className="mt-1 font-display text-sm font-bold text-emerald-400">{v}</dd>
-                </div>
+                </motion.li>
               ))}
-            </dl>
+            </ol>
+          </div>
+
+          {/* Right Column: Sticky App-Styled Map & Metrics */}
+          <aside className="sticky top-28 h-fit space-y-4">
+            <div className="rounded-3xl border border-border bg-card overflow-hidden shadow-elevate">
+              <div className="flex items-center justify-between p-4 border-b border-border bg-card/60">
+                <p className="text-xs font-bold flex items-center gap-1.5 text-foreground uppercase tracking-wider font-mono">
+                  <Navigation className="size-4 text-primary" /> Route Map
+                </p>
+                <span className="text-[10px] font-mono text-primary px-2.5 py-0.5 bg-primary/10 rounded-full border border-primary/20 font-semibold">
+                  CartoDB Engine
+                </span>
+              </div>
+
+              {/* Real Map Viewport */}
+              <div className="relative h-[340px] sm:h-[400px] w-full bg-background">
+                <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-10" />
+              </div>
+            </div>
+
+            {/* Metrics Dashboard Grid */}
+            <div className="rounded-3xl border border-border bg-card p-4 shadow-elevate">
+              <dl className="grid grid-cols-2 gap-3">
+                {[
+                  ["Total Distance", currentRoute.totalDistance],
+                  ["Riding Time", currentRoute.totalTime],
+                  ["Fuel Estimate", currentRoute.fuelEstimate],
+                  ["Best Season", currentRoute.bestSeason],
+                ].map(([k, v]) => (
+                  <div key={k} className="rounded-2xl border border-border/60 bg-secondary/50 p-3">
+                    <dt className="text-[10px] uppercase tracking-wider text-muted-foreground font-mono">{k}</dt>
+                    <dd className="mt-1 font-display text-sm font-bold text-primary">{v}</dd>
+                  </div>
+                ))}
+              </dl>
+            </div>
           </aside>
         </div>
       </div>
