@@ -233,7 +233,7 @@ function Index() {
             </Button>
           </div>
 
-          {/* Six Destination Cards */}
+          {/* Six Destination Cards in Responsive Grid */}
           <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
             {arupadaiVeeduTemples.map((temple, idx) => {
               const isAdded = addedTrips[temple.slug];
@@ -258,7 +258,7 @@ function Index() {
 
                   <div className="flex flex-1 flex-col p-4">
                     <p className="text-[11px] font-semibold text-amber-400">{temple.district} District</p>
-                    <h3 className="mt-1 font-display text-base font-bold">{temple.name}</h3>
+                    <h3 className="mt-1 font-display text-base font-bold line-clamp-1">{temple.name}</h3>
                     <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{temple.tagline}</p>
 
                     <div className="mt-4 grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
@@ -274,7 +274,7 @@ function Index() {
                         variant={isAdded ? "secondary" : "default"}
                         className={
                           isAdded
-                            ? "rounded-xl text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30"
+                            ? "rounded-xl text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
                             : "rounded-xl text-[11px] bg-amber-500 text-black hover:bg-amber-600 font-semibold"
                         }
                       >

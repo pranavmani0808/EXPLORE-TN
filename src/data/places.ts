@@ -110,13 +110,16 @@ export function getPlace(slug: string): Place | undefined {
   return places.find((p) => p.slug.toLowerCase() === q || p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === q);
 }
 
-export const arupadaiVeeduTemples: Place[] = places.filter((p) =>
-  [
-    "thiruttani-murugan-temple",
-    "swamimalai-murugan-temple",
-    "palani-murugan-temple",
-    "tiruchendur-murugan-temple",
-    "thirupparankundram-temple",
-    "pazhamudircholai-temple",
-  ].includes(p.slug)
-);
+export const ARUPADAI_VEEDU_SLUGS = [
+  "thirupparankundram-murugan-temple",
+  "tiruchendur-murugan-temple",
+  "palani-murugan-temple",
+  "swamimalai-murugan-temple",
+  "thiruttani-murugan-temple",
+  "pazhamudircholai-murugan-temple",
+];
+
+export const arupadaiVeeduTemples: Place[] = ARUPADAI_VEEDU_SLUGS
+  .map((slug) => places.find((p) => p.slug === slug || p.slug.includes(slug.split("-")[0])))
+  .filter((p): p is Place => p !== undefined);
+

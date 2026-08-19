@@ -13,12 +13,12 @@ class TrailsService:
                 "category": "spiritual",
                 "coverImage": "/src/assets/temples/palani.jpg",
                 "destinationSlugs": [
-                    "thiruttani-murugan-temple",
-                    "swamimalai-murugan-temple",
-                    "palani-murugan-temple",
+                    "thirupparankundram-murugan-temple",
                     "tiruchendur-murugan-temple",
-                    "pazhamudircholai-murugan-temple",
-                    "thirupparankundram-murugan-temple"
+                    "palani-murugan-temple",
+                    "swamimalai-murugan-temple",
+                    "thiruttani-murugan-temple",
+                    "pazhamudircholai-murugan-temple"
                 ],
                 "metadata": {
                     "totalTemples": 6,
