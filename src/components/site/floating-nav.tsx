@@ -10,8 +10,8 @@ import { checkBackendHealth } from "@/lib/api";
 const links = [
   { to: "/explore", label: "Explore", icon: Map },
   { to: "/routes", label: "Routes", icon: Route },
-  { to: "/theni", label: "Theni Circuit", icon: Compass },
-  { to: "/adventures", label: "Adventures", icon: Flame },
+  { to: "/coastal-heritage", label: "Coastal Trip", icon: Compass },
+  { to: "/theni", label: "Theni", icon: Flame },
   { to: "/planner", label: "AI Planner", icon: Sparkles },
   { to: "/community", label: "Community", icon: Users },
 ];
