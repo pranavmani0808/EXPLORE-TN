@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { motion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import {
   MapPin,
   Clock,
@@ -18,6 +18,9 @@ import {
   Building2,
   Waves,
   Trees,
+  X,
+  Info,
+  CheckCircle2,
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -31,7 +34,7 @@ import templesImg from "@/assets/cat-temples.jpg";
 export const Route = createFileRoute("/madurai")({
   head: () => ({
     meta: [
-      { title: "Explore Madurai — Heritage, Nature & Food Circuit | ExplorerTN" },
+      { title: "Explore Madurai — Heritage, Nature & Taste Madurai | ExplorerTN" },
       {
         name: "description",
         content:
@@ -60,6 +63,7 @@ export interface MaduraiDestination {
   category: string[];
   description: string;
   highlights: string[];
+  bestExperiences: string[];
   image: string;
   approxDistanceKm?: number;
   recommendedDuration: string;
@@ -89,6 +93,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Temple", "Heritage", "Architecture", "Culture", "Photography"],
     description: "Historic Dravidian temple complex featuring 14 soaring gopurams, Ashta Shakti Mandapam, and 33,000 stone sculptures.",
     highlights: ["1,000-Pillar Hall (Aayiram Kaal Mandapam)", "Golden Lotus Tank (Porthamarai Kulam)", "Soaring Southern Gopuram (170ft)"],
+    bestExperiences: ["Early morning deity procession", "Exploring 1,000-pillar hall art museum", "Evening lamp rituals & temple music"],
     image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 0,
     recommendedDuration: "2–3 Hours",
@@ -96,7 +101,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
   },
   {
     id: "thirupparankundram",
-    name: "Thirupparankundram",
+    name: "Thirupparankundram Murugan Temple",
     role: "Temple + Hill Heritage",
     district: "Madurai",
     state: "Tamil Nadu",
@@ -106,6 +111,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Temple", "Hill", "Heritage", "Culture", "Photography"],
     description: "6th-century rock-cut cave temple carved into a massive granite hill celebrating the celestial wedding of Lord Murugan.",
     highlights: ["Rock-Cut Cave Sanctuaries", "Hilltop Viewpoint of Madurai", "Historic Inscriptions"],
+    bestExperiences: ["Exploring ancient rock-carved sanctums", "Sunset view from Thirupparankundram hill ridge", "Attending evening pooja"],
     image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 8,
     recommendedDuration: "1.5 Hours",
@@ -123,6 +129,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Temple", "Heritage", "Nature", "Hill", "Culture"],
     description: "Nestled at the foot of Alagar Hills forest reserve. Ancient Vishnu shrine surrounded by lush green valley wilderness.",
     highlights: ["Kallazhagar Shrine Architecture", "Alagar Hills Forest Canopy", "Holy Spring Water Dip"],
+    bestExperiences: ["Valley drive through Alagar forest", "Visiting sacred mountain stream", "Tasting traditional temple prasadam"],
     image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 21,
     recommendedDuration: "2 Hours",
@@ -130,7 +137,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
   },
   {
     id: "pazhamudircholai",
-    name: "Pazhamudhircholai",
+    name: "Pazhamudircholai Murugan Temple",
     role: "Hill Temple + Forest Nature",
     district: "Madurai",
     state: "Tamil Nadu",
@@ -140,6 +147,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Temple", "Hill", "Nature", "Forest", "Culture"],
     description: "5th Arupadai Veedu shrine located deep inside evergreen Solaimalai hill forests above Alagar Kovil.",
     highlights: ["Dense Hill Forest Drive", "Solaimalai Mountain Shrine", "Avvaiyar Rose-Apple Tree Spot"],
+    bestExperiences: ["Scenic hill road trip through Solaimalai hills", "Forest walking trail", "Panoramic view of Madurai countryside"],
     image: "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 24,
     recommendedDuration: "1.5 Hours",
@@ -157,6 +165,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Heritage", "Hill", "Viewpoint", "History", "Photography"],
     description: "Hill ridge in Keelakuyilkudi village featuring ancient Jain rock-cut beds, stone carvings, and panoramic sunset views over paddy fields.",
     highlights: ["Settipodavu Jain Rock Sculptures", "Pechipallam Springs", "Panoramic Sunset Over Madurai Plains"],
+    bestExperiences: ["Climbing rock steps to Settipodavu caves", "Photography of 9th-century Jain bas-relief sculptures", "Sunset view over rural Madurai"],
     image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 10,
     recommendedDuration: "2 Hours",
@@ -174,6 +183,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Museum", "History", "Culture", "Day Trips"],
     description: "Housed in the historic Tamukkam Summer Palace of Nayak queens. One of five Gandhi Museums in India with freedom movement relics.",
     highlights: ["Historic Tamukkam Palace", "Freedom Struggle Photo Gallery", "Peace Garden"],
+    bestExperiences: ["Guided history walk through freedom movement gallery", "Exploring Nayak queen summer palace architecture", "Quiet walk in peace gardens"],
     image: "https://images.unsplash.com/photo-1589705298607-4e9640426b38?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 4,
     recommendedDuration: "1.5 Hours",
@@ -191,6 +201,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Palace", "Architecture", "Heritage", "History", "Photography"],
     description: "1636 Indo-Saracenic palace built by King Thirumalai Nayak featuring massive white columns, stuccowork, and courtyard arches.",
     highlights: ["Giant White Columns (82ft high)", "Swarga Vilasam Courtyard", "Sound & Light Evening Show"],
+    bestExperiences: ["Architectural photography of 82ft white columns", "Viewing celestial pavilion dome", "Evening light and sound show"],
     image: "https://images.unsplash.com/photo-1609946782701-7fa158869150?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 2,
     recommendedDuration: "1.5 Hours",
@@ -208,6 +219,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Dam", "Nature", "Viewpoint", "Family", "Photography", "Day Trips"],
     description: "Massive reservoir across Vaigai River with manicured gardens, children's park, and sunset reservoir viewpoints.",
     highlights: ["Vaigai Reservoir Water View", "Landscaped Flower Gardens", "Sunset Promenade"],
+    bestExperiences: ["Picnic along landscaped dam gardens", "Sunset view across Vaigai waters", "Scenic drive from Madurai"],
     image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 70,
     recommendedDuration: "Half Day",
@@ -225,6 +237,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Waterfall", "Nature", "Adventure", "Photography", "Day Trips"],
     description: "Cascading natural mountain stream flowing over granite rock formations at the foot of Kodaikanal hill slope.",
     highlights: ["Natural Rock Pool Stream", "Kodaikanal Foothill Canopy", "Cool Water Spray"],
+    bestExperiences: ["Dipper pools in mountain stream", "Forest canopy photography", "Combining with Vaigai Dam day trip"],
     image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 85,
     recommendedDuration: "Half Day",
@@ -259,6 +272,7 @@ const MADURAI_DESTINATIONS: MaduraiDestination[] = [
     category: ["Local", "Food", "Culture", "Countryside"],
     description: "Experience rural Madurai agricultural life, terracotta Ayyanar horse pottery, and traditional village messes.",
     highlights: ["Terracotta Ayyanar Horse Statues", "Paddy Field Scenery", "Authentic Village Mess Meal"],
+    bestExperiences: ["Exploring rural pottery workshops", "Village mess lunch on banana leaf", "Countryside photography drive"],
     image: "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1000&q=80",
     approxDistanceKm: 20,
     recommendedDuration: "3 Hours",
@@ -367,6 +381,7 @@ export function ExploreMaduraiPage() {
   const [selectedCircuit, setSelectedCircuit] = useState<string>("circuit-heritage");
   const [activeDestination, setActiveDestination] = useState<MaduraiDestination>(MADURAI_DESTINATIONS[0]);
   const [selectedSort, setSelectedSort] = useState<"Recommended" | "Closest" | "Heritage" | "Nature" | "Food">("Recommended");
+  const [detailModalDestination, setDetailModalDestination] = useState<MaduraiDestination | null>(null);
 
   const [routeMetrics, setRouteMetrics] = useState<{ distanceKm: number; durationMins: number } | null>(null);
   const [isCalculatingRoute, setIsCalculatingRoute] = useState(false);
@@ -646,7 +661,10 @@ export function ExploreMaduraiPage() {
                 }`}
               >
                 {/* Image Banner */}
-                <div className="relative h-48 w-full overflow-hidden bg-secondary">
+                <div
+                  onClick={() => setDetailModalDestination(dest)}
+                  className="relative h-48 w-full overflow-hidden bg-secondary cursor-pointer"
+                >
                   <img
                     src={dest.image}
                     alt={dest.name}
@@ -671,7 +689,10 @@ export function ExploreMaduraiPage() {
 
                 {/* Card Body */}
                 <div className="flex flex-1 flex-col p-5">
-                  <h3 className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors mb-0.5">
+                  <h3
+                    onClick={() => setDetailModalDestination(dest)}
+                    className="font-display text-lg font-bold text-foreground group-hover:text-primary transition-colors mb-0.5 cursor-pointer"
+                  >
                     {dest.name}
                   </h3>
                   <p className="text-[11px] text-primary font-mono font-semibold mb-2">
@@ -781,6 +802,123 @@ export function ExploreMaduraiPage() {
           </Button>
         </div>
       </div>
+
+      {/* Destination Detail Modal */}
+      <AnimatePresence>
+        {detailModalDestination && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-background/80 backdrop-blur-md">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl border border-border bg-card shadow-2xl p-6 text-foreground"
+            >
+              {/* Close Button */}
+              <button
+                type="button"
+                onClick={() => setDetailModalDestination(null)}
+                className="absolute top-4 right-4 p-2 rounded-full bg-secondary text-muted-foreground hover:text-foreground cursor-pointer z-10"
+              >
+                <X className="size-5" />
+              </button>
+
+              {/* Modal Banner */}
+              <div className="relative h-56 w-full rounded-2xl overflow-hidden mb-5 bg-secondary">
+                <img
+                  src={detailModalDestination.image}
+                  alt={detailModalDestination.name}
+                  className="h-full w-full object-cover"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/20 to-transparent" />
+                <div className="absolute bottom-4 left-4 right-4">
+                  <div className="flex flex-wrap gap-1.5 mb-2">
+                    {detailModalDestination.category.map((c) => (
+                      <span key={c} className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-primary text-primary-foreground">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                  <h2 className="font-display text-2xl font-bold text-foreground">{detailModalDestination.name}</h2>
+                  <p className="text-xs text-primary font-mono font-semibold">{detailModalDestination.role}</p>
+                </div>
+              </div>
+
+              {/* Modal Body */}
+              <div className="space-y-4">
+                <div>
+                  <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold mb-1">About Destination</h4>
+                  <p className="text-xs text-foreground leading-relaxed">{detailModalDestination.description}</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 bg-secondary/50 p-3.5 rounded-2xl border border-border/80">
+                  <div>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Distance from Madurai</span>
+                    <p className="text-xs font-bold text-primary">
+                      {detailModalDestination.approxDistanceKm === 0 ? "In City Center" : `~${detailModalDestination.approxDistanceKm} km`}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-mono text-muted-foreground uppercase">Recommended Duration</span>
+                    <p className="text-xs font-bold text-foreground">{detailModalDestination.recommendedDuration}</p>
+                  </div>
+                </div>
+
+                {/* Highlights & Best Experiences */}
+                <div>
+                  <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold mb-2">Key Highlights</h4>
+                  <div className="space-y-1.5">
+                    {detailModalDestination.highlights.map((h) => (
+                      <div key={h} className="text-xs text-foreground flex items-center gap-2">
+                        <CheckCircle2 className="size-3.5 text-primary shrink-0" />
+                        <span>{h}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {detailModalDestination.bestExperiences && detailModalDestination.bestExperiences.length > 0 && (
+                  <div>
+                    <h4 className="text-xs font-mono text-muted-foreground uppercase tracking-wider font-semibold mb-2">Best Experiences</h4>
+                    <div className="space-y-1.5">
+                      {detailModalDestination.bestExperiences.map((exp) => (
+                        <div key={exp} className="text-xs text-muted-foreground flex items-center gap-2">
+                          <span className="size-1.5 rounded-full bg-primary shrink-0" />
+                          <span>{exp}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="grid grid-cols-2 gap-3 pt-4 border-t border-border">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      setActiveDestination(detailModalDestination);
+                      setDetailModalDestination(null);
+                      window.scrollTo({ top: 350, behavior: "smooth" });
+                    }}
+                    className="rounded-xl text-xs font-semibold border-border hover:bg-secondary"
+                  >
+                    <RouteIcon className="size-3.5 mr-1" /> Calculate Route
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      const dest = detailModalDestination;
+                      setDetailModalDestination(null);
+                      handlePlanTrip(dest);
+                    }}
+                    className="rounded-xl text-xs font-bold bg-primary text-primary-foreground hover:bg-primary/90"
+                  >
+                    <Sparkles className="size-3.5 mr-1" /> Plan Trip with AI
+                  </Button>
+                </div>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </AppShell>
   );
 }
