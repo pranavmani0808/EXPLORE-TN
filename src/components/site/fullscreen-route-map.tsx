@@ -10,9 +10,18 @@ import {
   Car,
   Bike,
   Footprints,
+  Coffee,
+  Fuel,
+  Utensils,
+  Hotel,
+  Clock,
+  Sparkles,
+  Check,
+  Plus,
 } from "lucide-react";
 import { CANONICAL_PLACES, resolvePlaceById, ExplorerPlace } from "@/lib/data/canonical-places";
 import { RouteApiRepository, IsolatedRouteResultDTO } from "@/lib/api-client/routes";
+import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
 
 export interface FullscreenRouteMapProps {
   isOpen?: boolean;
@@ -43,8 +52,10 @@ export function FullscreenRouteMap({
   const [waypoints, setWaypoints] = useState<ExplorerPlace[]>([]);
   const [travelMode, setTravelMode] = useState<"driving" | "motorcycle" | "walking" | "cycling">(initialTravelMode);
 
-  // Panel State: "expanded" | "compact" | "hidden"
+  // Panel State & Phase 2 Recommendations Tab
   const [panelState, setPanelState] = useState<"expanded" | "compact" | "hidden">("expanded");
+  const [activePanelTab, setActivePanelTab] = useState<"timeline" | "suggestions">("timeline");
+  const [departureTime, setDepartureTime] = useState<string>("06:00 AM");
   const [searchFocused, setSearchFocused] = useState<"origin" | "destination" | null>(null);
 
   // Route Engine Calculation State
@@ -144,6 +155,65 @@ export function FullscreenRouteMap({
     return arr;
   }, [selectedOrigin, waypoints, selectedDestination]);
 
+  // Aggregate Total Trip Metrics
+  const totalDistanceKm = useMemo(() => {
+    return Math.round(segmentData.reduce((acc, seg) => acc + seg.distanceKm, 0) * 10) / 10;
+  }, [segmentData]);
+
+  const totalDurationMins = useMemo(() => {
+    return segmentData.reduce((acc, seg) => acc + seg.durationMins, 0);
+  }, [segmentData]);
+
+  const durationString = useMemo(() => {
+    const hrs = Math.floor(totalDurationMins / 60);
+    const mins = totalDurationMins % 60;
+    if (hrs === 0) return `${mins} min`;
+    return `${hrs} hr ${mins} min`;
+  }, [totalDurationMins]);
+
+  // Phase 2: Calculate Intelligent Rest, Meal & Overnight Recommendations
+  const recommendationResult = useMemo(() => {
+    if (!selectedOrigin || !selectedDestination || segmentData.length === 0) return null;
+    const combinedPolyline = segmentData.flatMap((seg) => seg.polyline || []);
+    if (combinedPolyline.length < 2) return null;
+
+    return RouteStopRecommendationEngine.generateRecommendations({
+      routePolyline: combinedPolyline,
+      totalDistanceKm,
+      totalDurationMinutes: totalDurationMins,
+      departureTime,
+      maxDetourKm: 5.0,
+    });
+  }, [selectedOrigin, selectedDestination, segmentData, totalDistanceKm, totalDurationMins, departureTime]);
+
+  // Add Recommended Stop to Route Waypoints & Trigger Real Road Network Recalculation
+  const handleAddRecommendedStop = (candidate: RouteStopCandidate) => {
+    const placeObj: ExplorerPlace = candidate.placeObject || {
+      id: candidate.placeId,
+      canonicalName: candidate.name,
+      name: candidate.name,
+      slug: candidate.placeId,
+      district: candidate.district,
+      state: "Tamil Nadu",
+      country: "India",
+      latitude: candidate.lat,
+      longitude: candidate.lng,
+      categories: ["food"],
+      primaryCategory: "food",
+      tagline: candidate.tagline,
+      description: candidate.reason,
+      image: "https://images.unsplash.com/photo-1555396273-367ea4eb4db5?auto=format&fit=crop&w=800&q=80",
+      rating: candidate.rating,
+      verified: true,
+      source: "Route Stop Engine",
+      tags: ["rest-stop", candidate.category],
+    };
+
+    if (waypoints.some((w) => w.id === placeObj.id)) return;
+
+    setWaypoints((prev) => [...prev, placeObj]);
+  };
+
   // Calculate Route via Provider-Agnostic Backend Route Engine
   useEffect(() => {
     if (!selectedOrigin || !selectedDestination) {
@@ -224,7 +294,6 @@ export function FullscreenRouteMap({
         shadowUrl: "https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png",
       });
 
-      // Prevent multiple map instances on same container
       if (!leafletMapRef.current) {
         const initialCenter: [number, number] = stops.length > 0 ? [stops[0].latitude, stops[0].longitude] : [10.8, 78.2];
 
@@ -243,7 +312,6 @@ export function FullscreenRouteMap({
         leafletMapRef.current = map;
         polylineGroupRef.current = L.layerGroup().addTo(map);
 
-        // Ensure Leaflet calculates tile grid after container layout stabilizes
         requestAnimationFrame(() => {
           map.invalidateSize();
         });
@@ -307,7 +375,6 @@ export function FullscreenRouteMap({
 
     if (!map || !L || !polylineGroup) return;
 
-    // Clear previous markers & polylines
     markersRef.current.forEach((m) => map.removeLayer(m));
     markersRef.current = [];
     polylineGroup.clearLayers();
@@ -403,22 +470,6 @@ export function FullscreenRouteMap({
   useEffect(() => {
     renderRouteOnMap();
   }, [stops, segmentData, selectedStopIndex]);
-
-  // Aggregate Total Trip Metrics
-  const totalDistanceKm = useMemo(() => {
-    return Math.round(segmentData.reduce((acc, seg) => acc + seg.distanceKm, 0) * 10) / 10;
-  }, [segmentData]);
-
-  const totalDurationMins = useMemo(() => {
-    return segmentData.reduce((acc, seg) => acc + seg.durationMins, 0);
-  }, [segmentData]);
-
-  const durationString = useMemo(() => {
-    const hrs = Math.floor(totalDurationMins / 60);
-    const mins = totalDurationMins % 60;
-    if (hrs === 0) return `${mins} min`;
-    return `${hrs} hr ${mins} min`;
-  }, [totalDurationMins]);
 
   if (!isOpen) return null;
 
@@ -659,14 +710,38 @@ export function FullscreenRouteMap({
               <Navigation className="w-8 h-8 text-emerald-400 mb-2 animate-bounce" />
               <h3 className="text-sm font-bold text-white">Select Origin & Destination</h3>
               <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                Choose your starting location and destination above to calculate real road distance and ETAs.
+                Choose your starting location and destination above to calculate real road distance, ETAs, and rest recommendations.
               </p>
             </div>
           )}
 
-          {/* EXPANDED ROUTE ITINERARY & STOPS LIST */}
+          {/* PHASE 2: TAB SELECTOR (Timeline vs Rest & Meals Engine) */}
           {selectedOrigin && selectedDestination && panelState === "expanded" && (
-            <div className="flex-1 overflow-y-auto py-3 space-y-3 pr-1">
+            <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl my-2 shrink-0">
+              <button
+                type="button"
+                onClick={() => setActivePanelTab("timeline")}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activePanelTab === "timeline" ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <Compass className="w-3.5 h-3.5" /> Timeline ({stops.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setActivePanelTab("suggestions")}
+                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
+                  activePanelTab === "suggestions" ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <Coffee className="w-3.5 h-3.5" /> Rest & Meals {recommendationResult?.recommendations.length ? `(${recommendationResult.recommendations.length})` : ""}
+              </button>
+            </div>
+          )}
+
+          {/* EXPANDED ROUTE ITINERARY & STOPS LIST */}
+          {selectedOrigin && selectedDestination && panelState === "expanded" && activePanelTab === "timeline" && (
+            <div className="flex-1 overflow-y-auto py-2 space-y-3 pr-1">
               <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs">
                 <div>
                   <div className="font-bold text-emerald-400">Total Journey Distance</div>
@@ -732,6 +807,117 @@ export function FullscreenRouteMap({
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* PHASE 2: INTELLIGENT REST, MEAL & OVERNIGHT RECOMMENDATION ENGINE VIEW */}
+          {selectedOrigin && selectedDestination && panelState === "expanded" && activePanelTab === "suggestions" && (
+            <div className="flex-1 overflow-y-auto py-2 space-y-3 pr-1">
+              {/* Departure Time Controls */}
+              <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs">
+                <span className="text-slate-300 font-medium flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 text-emerald-400" /> Departure Time:
+                </span>
+                <select
+                  value={departureTime}
+                  onChange={(e) => setDepartureTime(e.target.value)}
+                  className="bg-[#121821] border border-white/20 rounded-lg px-2.5 py-1 text-emerald-400 font-bold focus:outline-none cursor-pointer text-xs"
+                >
+                  {["05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM"].map((t) => (
+                    <option key={t} value={t}>{t}</option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Long Journey Mode Active Banner */}
+              {recommendationResult?.isLongJourney && (
+                <div className="p-3 bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-purple-500/20 border border-emerald-500/40 rounded-xl text-xs space-y-1">
+                  <div className="font-extrabold text-emerald-300 flex items-center gap-1.5">
+                    <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
+                    LONG JOURNEY MODE ACTIVATED
+                  </div>
+                  <div className="text-[11px] text-slate-300">
+                    Route Distance: <span className="font-mono text-emerald-400 font-bold">{totalDistanceKm} km</span> · Expected Arrival: <span className="font-mono text-sky-300 font-bold">{recommendationResult.expectedArrivalTime}</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Recommendations List */}
+              {(!recommendationResult || recommendationResult.recommendations.length === 0) ? (
+                <div className="p-6 text-center text-xs text-slate-400 bg-white/5 border border-white/10 rounded-xl">
+                  {totalDistanceKm < 150 ? (
+                    <p>Short route ({totalDistanceKm} km) — Rest & meal stops are not required for trips under 150 km.</p>
+                  ) : (
+                    <p>No rest stops found within 5 km corridor detour of this route.</p>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-2.5">
+                  <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
+                    Suggested Stops Along Route Corridor ({recommendationResult.recommendations.length})
+                  </div>
+
+                  {recommendationResult.recommendations.map((rec) => {
+                    const isAlreadyAdded = waypoints.some((w) => w.id === rec.placeId);
+                    const CategoryIcon = rec.category === "tea" ? Coffee : rec.category === "fuel" ? Fuel : rec.category === "hotel" ? Hotel : Utensils;
+                    const catBg = rec.category === "tea" ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : rec.category === "fuel" ? "bg-sky-500/20 text-sky-300 border-sky-500/40" : rec.category === "hotel" ? "bg-purple-500/20 text-purple-300 border-purple-500/40" : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
+
+                    return (
+                      <div
+                        key={rec.placeId}
+                        className="p-3 bg-white/5 border border-white/10 hover:border-white/20 rounded-xl space-y-2 text-xs transition"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <div>
+                            <div className="flex items-center gap-2">
+                              <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold flex items-center gap-1 ${catBg}`}>
+                                <CategoryIcon className="w-3 h-3" />
+                                {rec.category.toUpperCase()}
+                              </span>
+                              <span className="text-[10px] text-emerald-400 font-mono font-bold">
+                                ETA ~ {rec.estimatedArrivalTime}
+                              </span>
+                            </div>
+                            <h4 className="font-bold text-white text-xs mt-1">{rec.name}</h4>
+                            <p className="text-[11px] text-slate-300 mt-0.5">{rec.tagline}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-white/10">
+                          <span>{rec.routeDistanceFromOriginKm} km from start</span>
+                          <span>{rec.detourDistanceKm} km detour</span>
+                          {rec.rating && <span className="text-amber-400 font-bold">★ {rec.rating}</span>}
+                        </div>
+
+                        <p className="text-[10px] text-emerald-300 italic">{rec.reason}</p>
+
+                        <div className="pt-1 flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleAddRecommendedStop(rec)}
+                            disabled={isAlreadyAdded}
+                            className={`px-3 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                              isAlreadyAdded
+                                ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 cursor-default"
+                                : "bg-emerald-500 text-black hover:bg-emerald-400"
+                            }`}
+                          >
+                            {isAlreadyAdded ? (
+                              <>
+                                <Check className="w-3.5 h-3.5" /> Added as Stop
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="w-3.5 h-3.5" /> Add Stop to Route
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
