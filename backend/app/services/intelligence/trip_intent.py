@@ -47,6 +47,23 @@ class IntentExtractor:
         "tasting", "cuisine", "food spots", "eateries"
     ]
 
+    ADVENTURE_DESTINATIONS = {
+        "goa": "Goa",
+        "bir billing": "Bir Billing",
+        "bir": "Bir Billing",
+        "billing": "Bir Billing",
+        "mysore": "Mysore",
+        "jaipur": "Jaipur",
+        "havelock": "Havelock Island",
+        "havelock island": "Havelock Island",
+        "zanskar": "Zanskar River",
+        "zanskar river": "Zanskar River",
+        "rishikesh": "Rishikesh",
+        "kovalam": "Kovalam",
+        "gulmarg": "Gulmarg",
+        "elephant beach": "Elephant Beach"
+    }
+
     @classmethod
     def normalize_query(cls, text: str) -> str:
         s = text.lower().strip()
@@ -93,7 +110,7 @@ class IntentExtractor:
             if "idli" in lower:
                 food_prefs.append("Murugan Soft Idlis")
 
-        # 2. Strict Curated Trail Recognition (EXPLICIT THEMATIC KEYWORDS ONLY)
+        # 2. Strict Curated Trail Recognition
         EXPLICIT_TRAIL_KEYWORDS = [
             "arupadai", "arupadai veedu", "six murugan", "6 murugan",
             "six abodes", "murugan circuit", "sacred murugan circuit", "all six abodes"
@@ -129,21 +146,35 @@ class IntentExtractor:
             departure_time = "23:00"
             overnight_travel = True
 
-        # 4. Origin & Destination Extraction Patterns (RUN FIRST SO WAYPOINTS CAN EXCLUDE DESTINATION)
+        # 4. Adventure Activity & Destination Direct Matching
+        for adv_key, adv_name in cls.ADVENTURE_DESTINATIONS.items():
+            if adv_key in lower and not trail:
+                destination = adv_name
+                interests.add("adventure")
+                break
+
+        # 5. Pattern-based Origin & Destination Extraction
         if not is_food_query and intent_category in ["PLAN_TRIP", "ADD_STOP"]:
-            pattern_a = re.search(r"(?:from|starting at|departing)\s+([a-zA-Z0-9\s]+?)\s+to\s+([a-zA-Z0-9\s]+?)(?=\s+through|\s+via|\s+for|\s+at|\s+with|\s+a|\s+one|\s+under|\s+budget|$)", lower)
+            # Clean prompt string by removing adventure action prefixes (e.g. "plan a surfing trip to goa, goa" -> "plan trip to goa")
+            cleaned_lower = re.sub(
+                r"plan\s+a?\s*(?:surfing|paragliding|skydiving|scuba|scuba\s+diving|kayaking|river\s+rafting|rafting|hot-air\s+balloon|gondola|gondola\s+ride|sea\s+walking)?\s*(?:trip|ride|tour|experience)?\s*to\s+",
+                "to ",
+                lower
+            )
+
+            pattern_a = re.search(r"(?:from|starting at|departing)\s+([a-zA-Z0-9\s]+?)\s+to\s+([a-zA-Z0-9\s,]+?)(?=\s+through|\s+via|\s+for|\s+at|\s+with|\s+a|\s+one|\s+under|\s+budget|$)", cleaned_lower)
             if pattern_a:
                 raw_orig = pattern_a.group(1).strip().capitalize()
-                raw_dest = pattern_a.group(2).strip().capitalize()
+                raw_dest = pattern_a.group(2).strip().split(",")[0].strip().capitalize()
                 raw_dest = re.sub(r"\s+at\s+\d+.*$", "", raw_dest, flags=re.IGNORECASE)
                 if len(raw_orig) > 2 and raw_orig.lower() not in ["a", "the"]:
                     origin = raw_orig
                 if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "hills", "waterfalls"] and not trail:
                     destination = raw_dest
             else:
-                pattern_b = re.search(r"to\s+([a-zA-Z0-9\s]+?)\s+from\s+([a-zA-Z0-9\s]+?)(?=\s+through|\s+via|\s+for|\s+at|\s+a|\s+one|\s+under|\s+budget|$)", lower)
+                pattern_b = re.search(r"to\s+([a-zA-Z0-9\s,]+?)\s+from\s+([a-zA-Z0-9\s]+?)(?=\s+through|\s+via|\s+for|\s+at|\s+a|\s+one|\s+under|\s+budget|$)", cleaned_lower)
                 if pattern_b:
-                    raw_dest = pattern_b.group(1).strip().capitalize()
+                    raw_dest = pattern_b.group(1).strip().split(",")[0].strip().capitalize()
                     raw_orig = pattern_b.group(2).strip().capitalize()
                     raw_dest = re.sub(r"\s+at\s+\d+.*$", "", raw_dest, flags=re.IGNORECASE)
                     if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "hills", "waterfalls"] and not trail:
@@ -151,22 +182,43 @@ class IntentExtractor:
                     if len(raw_orig) > 2 and raw_orig.lower() not in ["a", "the"]:
                         origin = raw_orig
                 else:
-                    pattern_c = re.search(r"(?:plan\s+a?\s*(?:bike|car|ride|trip)?\s*to|to)\s+([a-zA-Z0-9\s]+?)(?=\s+from|\s+through|\s+via|\s+for|\s+at|\s+under|\s+budget|$)", lower)
+                    pattern_c = re.search(r"to\s+([a-zA-Z0-9\s,]+?)(?=\s+from|\s+through|\s+via|\s+for|\s+at|\s+under|\s+budget|$)", cleaned_lower)
                     if pattern_c:
-                        raw_dest = pattern_c.group(1).strip().capitalize()
+                        raw_dest = pattern_c.group(1).strip().split(",")[0].strip().capitalize()
                         raw_dest = re.sub(r"\s+at\s+\d+.*$", "", raw_dest, flags=re.IGNORECASE)
                         if len(raw_dest) > 2 and raw_dest.lower() not in ["a", "the", "somewhere", "food", "spots"] and not trail:
                             destination = raw_dest
 
-        # Clean city name if user asked for "Madurai" or "Ooty"
-        if destination and "madurai" in destination.lower() and not trail:
-            destination = "Madurai"
-        if destination and "ooty" in destination.lower() and not trail:
-            destination = "Ooty"
+        # Clean city names
+        if destination:
+            dest_lower = destination.lower()
+            if "madurai" in dest_lower and not trail:
+                destination = "Madurai"
+            elif "ooty" in dest_lower and not trail:
+                destination = "Ooty"
+            elif "goa" in dest_lower:
+                destination = "Goa"
+            elif "bir" in dest_lower or "billing" in dest_lower:
+                destination = "Bir Billing"
+            elif "mysore" in dest_lower:
+                destination = "Mysore"
+            elif "jaipur" in dest_lower:
+                destination = "Jaipur"
+            elif "havelock" in dest_lower:
+                destination = "Havelock Island"
+            elif "zanskar" in dest_lower:
+                destination = "Zanskar River"
+            elif "rishikesh" in dest_lower:
+                destination = "Rishikesh"
+            elif "kovalam" in dest_lower:
+                destination = "Kovalam"
+            elif "gulmarg" in dest_lower:
+                destination = "Gulmarg"
+
         if origin and "chennai" in origin.lower():
             origin = "Chennai"
 
-        # 5. Waypoint / Stop Extraction (e.g. "through madurai", "via salem", "add ooty")
+        # 6. Waypoint / Stop Extraction
         waypoint_matches = re.findall(
             r"(?:through|via|by way of|stopping at|passing|include|add)\s+([a-zA-Z0-9\s]+?)(?=\s+to|\s+from|\s+for|\s+at|\s+under|\s+budget|\s+and|\s+food|\s+spots|$)",
             lower
@@ -184,7 +236,7 @@ class IntentExtractor:
         if waypoints and destination in waypoints:
             waypoints.remove(destination)
 
-        # 6. Duration Days Extraction
+        # 7. Duration Days Extraction
         if "one day" in lower or "1 day" in lower or "1-day" in lower:
             duration = 1
             if intent_category == "PLAN_TRIP": intent_category = "CHANGE_DURATION"
@@ -201,22 +253,22 @@ class IntentExtractor:
             duration = 5
             if intent_category == "PLAN_TRIP": intent_category = "CHANGE_DURATION"
 
-        # 7. Transport Mode Extraction
+        # 8. Transport Mode Extraction
         if any(w in lower for w in ["bike", "motorcycle", "rider", "bullet", "riding"]):
             transport_mode = "motorcycle"
         elif any(w in lower for w in ["car", "drive", "taxi", "cab"]):
             transport_mode = "car"
 
-        # 8. Budget Extraction
+        # 9. Budget Extraction
         budget_match = re.search(r"(?:under|budget|₹|\brs\.?)\s*(\d+)", lower)
         if budget_match:
             budget = float(budget_match.group(1))
             if intent_category == "PLAN_TRIP": intent_category = "CHANGE_BUDGET"
 
-        # 9. Interests Extraction
-        if any(w in lower for w in ["hill", "mountain", "ghat", "peak"]):
+        # 10. Interests Extraction
+        if any(w in lower for w in ["hill", "mountain", "ghat", "peak", "hills"]):
             interests.add("hills")
-        if any(w in lower for w in ["waterfall", "falls", "cascade"]):
+        if any(w in lower for w in ["waterfall", "falls", "cascade", "waterfalls"]):
             interests.add("waterfalls")
         if any(w in lower for w in ["temple", "heritage", "shrine", "spiritual", "murugan"]):
             interests.add("temple")

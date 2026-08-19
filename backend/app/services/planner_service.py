@@ -108,10 +108,28 @@ class PlannerService:
             "pazhamudircholai murugan temple": {"name": "Pazhamudircholai Murugan Temple", "district": "Madurai", "latitude": 10.0911, "longitude": 78.2173, "verified": True, "category": "temple", "tagline": "5th Arupadai Veedu"},
             "thirupparankundram": {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710, "verified": True, "category": "temple", "tagline": "6th Arupadai Veedu"},
             "thirupparankundram murugan temple": {"name": "Thirupparankundram Murugan Temple", "district": "Madurai", "latitude": 9.8797, "longitude": 78.0710, "verified": True, "category": "temple", "tagline": "6th Arupadai Veedu"},
+            "goa": {"name": "Goa", "district": "Goa", "latitude": 15.6868, "longitude": 73.7042, "verified": True, "category": "adventure", "tagline": "Surfing & Coastal Adventure Beach"},
+            "bir billing": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital (2,400m)"},
+            "bir": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital (2,400m)"},
+            "billing": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital (2,400m)"},
+            "mysore": {"name": "Mysore", "district": "Mysore", "latitude": 12.2958, "longitude": 76.6394, "verified": True, "category": "adventure", "tagline": "10,000 ft Skydiving Dropzone"},
+            "jaipur": {"name": "Jaipur", "district": "Jaipur", "latitude": 26.9124, "longitude": 75.7873, "verified": True, "category": "adventure", "tagline": "Royal Hot Air Balloon Fortress View"},
+            "havelock": {"name": "Havelock Island", "district": "Andaman", "latitude": 12.0000, "longitude": 92.9800, "verified": True, "category": "adventure", "tagline": "Bay of Bengal Coral Scuba Reef"},
+            "havelock island": {"name": "Havelock Island", "district": "Andaman", "latitude": 12.0000, "longitude": 92.9800, "verified": True, "category": "adventure", "tagline": "Bay of Bengal Coral Scuba Reef"},
+            "zanskar": {"name": "Zanskar River", "district": "Kargil/Leh", "latitude": 33.4833, "longitude": 76.8833, "verified": True, "category": "adventure", "tagline": "High Altitude Grade IV Whitewater Canyon"},
+            "zanskar river": {"name": "Zanskar River", "district": "Kargil/Leh", "latitude": 33.4833, "longitude": 76.8833, "verified": True, "category": "adventure", "tagline": "High Altitude Grade IV Whitewater Canyon"},
+            "rishikesh": {"name": "Rishikesh", "district": "Dehradun", "latitude": 30.0869, "longitude": 78.2676, "verified": True, "category": "adventure", "tagline": "Ganges White Water Rafting Capital"},
+            "kovalam": {"name": "Kovalam", "district": "Thiruvananthapuram", "latitude": 8.4004, "longitude": 76.9787, "verified": True, "category": "adventure", "tagline": "Lighthouse Point Break Surfing"},
+            "gulmarg": {"name": "Gulmarg", "district": "Baramulla", "latitude": 34.0484, "longitude": 74.3805, "verified": True, "category": "adventure", "tagline": "Asia's Highest Cable Car & Snow Slopes"},
+            "elephant beach": {"name": "Elephant Beach", "district": "Andaman", "latitude": 11.9961, "longitude": 92.9515, "verified": True, "category": "adventure", "tagline": "Underwater Sea Walk & Coral Reef"},
         }
 
         if clean_target in KNOWN_GEOLOCATIONS:
             return KNOWN_GEOLOCATIONS[clean_target]
+
+        for key, info in KNOWN_GEOLOCATIONS.items():
+            if key in clean_target or clean_target in key:
+                return info
 
         # 2. Exact Name Match in DB
         for p in verified_places:
@@ -248,6 +266,7 @@ class PlannerService:
         merged_state["durationDays"] = structured_intent.durationDays or prev_state.get("durationDays") or 1
         merged_state["departureTime"] = structured_intent.departureTime or prev_state.get("departureTime") or "06:00"
         merged_state["overnightTravel"] = structured_intent.overnightTravel or prev_state.get("overnightTravel", False)
+        merged_state["interests"] = structured_intent.interests
         
         if structured_intent.budget is not None:
             merged_state["budget"] = structured_intent.budget
