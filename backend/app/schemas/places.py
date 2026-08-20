@@ -39,13 +39,22 @@ class PlaceResponse(BaseModel):
     name: str
     district: str
     category: str
+    subcategory: Optional[str] = None
+    city: Optional[str] = None
     tagline: Optional[str] = None
     description: Optional[str] = None
     latitude: float
     longitude: float
+    coordinateSource: Optional[str] = None
+    coordinateAccuracy: Optional[str] = "EXACT"
+    state: Optional[str] = "Tamil Nadu"
+    country: Optional[str] = "India"
+    tags: List[str] = Field(default_factory=list)
+    activities: List[str] = Field(default_factory=list)
+    aliases: List[str] = Field(default_factory=list)
     elevation: Optional[str] = None
     verified: bool = False
-    createdBy: str
+    createdBy: Optional[str] = "System"
     verifiedBy: Optional[str] = None
     verifiedAt: Optional[str] = None
-    createdAt: str
+    createdAt: Optional[str] = "2026-08-20T10:00:00Z"

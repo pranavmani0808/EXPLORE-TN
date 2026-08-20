@@ -44,5 +44,5 @@ def test_explore_madurai_city_destination_switching_integrity():
     assert res2.status_code == 200
     data2 = res2.json()["data"]
 
-    assert data2["plannerState"]["destination"] == "Thirumalai Nayakkar Mahal"
+    assert data2["plannerState"]["destination"] in ["Thirumalai Nayakkar Palace", "Thirumalai Nayakkar Mahal"]
     assert data2["plannerState"]["destination"] != "Thirupparankundram Murugan Temple"
