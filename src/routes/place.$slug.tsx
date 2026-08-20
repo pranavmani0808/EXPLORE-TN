@@ -28,6 +28,7 @@ import { PlaceCard } from "@/components/site/place-card";
 import { Button } from "@/components/ui/button";
 import { getPlace, places, type Place } from "@/data/places";
 import { recordPlaceVisit, getUserVisits, submitCommunityContribution } from "@/lib/explorer-activity";
+import { useAuthGuard } from "@/lib/auth-guard-context";
 
 export const Route = createFileRoute("/place/$slug")({
   loader: ({ params }) => {
@@ -64,6 +65,7 @@ function Fact({ icon: Icon, label, value }: { icon: typeof Gauge; label: string;
 }
 
 function PlacePage() {
+  const { requireAuth } = useAuthGuard();
   const { place } = Route.useLoaderData() as { place: Place };
   const related = places.filter((p) => p.slug !== place.slug).slice(0, 3);
 
@@ -82,21 +84,25 @@ function PlacePage() {
   }, [place.slug]);
 
   const handleRecordVisit = () => {
-    const res = recordPlaceVisit(place.slug, place.name, place.district, "Manual Explorer Log");
-    setVisitFeedback(res.message);
-    if (res.success) {
-      setHasVisited(true);
-    }
+    requireAuth(() => {
+      const res = recordPlaceVisit(place.slug, place.name, place.district, "Manual Explorer Log");
+      setVisitFeedback(res.message);
+      if (res.success) {
+        setHasVisited(true);
+      }
+    }, `Sign in to log your visit to ${place.name}.`);
   };
 
   const handleReviewSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!reviewContent) return;
-    submitCommunityContribution("review", place.slug, place.name, reviewTitle || "Explorer Review", reviewContent);
-    setReviewStatus("Your review has been submitted to the Operations Moderation Queue for verification.");
-    setReviewTitle("");
-    setReviewContent("");
-    setShowReviewForm(false);
+    requireAuth(() => {
+      submitCommunityContribution("review", place.slug, place.name, reviewTitle || "Explorer Review", reviewContent);
+      setReviewStatus("Your review has been submitted to the Operations Moderation Queue for verification.");
+      setReviewTitle("");
+      setReviewContent("");
+      setShowReviewForm(false);
+    }, `Sign in to submit a review for ${place.name}.`);
   };
 
   return (

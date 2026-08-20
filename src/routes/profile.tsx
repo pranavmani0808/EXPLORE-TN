@@ -26,6 +26,7 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { getCurrentAuthUser, subscribeToAuthChanges, UserProfile } from "@/lib/auth-rbac";
 import { getUserVisits, getCommunityContributions, PlaceVisit } from "@/lib/explorer-activity";
+import { useAuthGuard } from "@/lib/auth-guard-context";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -53,6 +54,7 @@ const TN_38_DISTRICTS = [
 ];
 
 function ProfilePage() {
+  const { openAuthModal } = useAuthGuard();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [visits, setVisits] = useState<PlaceVisit[]>([]);
   const [contributionsCount, setContributionsCount] = useState({ photos: 0, reviews: 0 });
@@ -78,14 +80,33 @@ function ProfilePage() {
     return () => unsubscribe();
   }, []);
 
-  const user = currentUser || {
-    name: "Explorer",
-    email: "Unauthenticated Visitor",
-    avatar: "EX",
-    role: "explorer" as const,
-    rank: "Level 0 Explorer",
-  };
+  if (!currentUser) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-2xl px-4 py-36 text-center font-sans">
+          <div className="bg-[#121821] border border-white/15 rounded-3xl p-8 shadow-2xl text-white">
+            <div className="inline-flex size-16 place-items-center rounded-2xl bg-emerald-500 text-black font-black mb-4">
+              <Compass className="size-8 text-black" />
+            </div>
+            <h2 className="text-2xl font-black">Sign in to view your Explorer Passport</h2>
+            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+              Track places visited across 38 districts, save custom routes, build itineraries, and sync your contributions.
+            </p>
+            <div className="mt-6 flex items-center justify-center gap-3">
+              <Button
+                onClick={() => openAuthModal("Sign in to view your Explorer Passport.")}
+                className="bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs rounded-2xl px-6 py-2.5 shadow-lg shadow-emerald-500/20 cursor-pointer"
+              >
+                Sign In to ExplorerTN
+              </Button>
+            </div>
+          </div>
+        </div>
+      </AppShell>
+    );
+  }
 
+  const user = currentUser;
   const initials = user.avatar || (user.name ? user.name.slice(0, 2).toUpperCase() : "EX");
 
   // Dynamic user stats derived ONLY from real user activity

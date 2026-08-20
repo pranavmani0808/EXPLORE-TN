@@ -18,10 +18,13 @@ import {
   Sparkles,
   Check,
   Plus,
+  Bookmark,
 } from "lucide-react";
 import { CANONICAL_PLACES, resolvePlaceById, ExplorerPlace } from "@/lib/data/canonical-places";
 import { RouteApiRepository, IsolatedRouteResultDTO, RouteOption } from "@/lib/api-client/routes";
 import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
+import { useAuthGuard } from "@/lib/auth-guard-context";
+import { toast } from "sonner";
 
 export interface FullscreenRouteMapProps {
   isOpen?: boolean;
@@ -40,6 +43,7 @@ export function FullscreenRouteMap({
   initialDestinationPlaceId,
   initialTravelMode = "driving",
 }: FullscreenRouteMapProps) {
+  const { requireAuth } = useAuthGuard();
   // Origin & Destination State
   const [originQuery, setOriginQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
@@ -1046,7 +1050,11 @@ export function FullscreenRouteMap({
                                 ) : (
                                   <button
                                     type="button"
-                                    onClick={() => handleAddRecommendedStop(rec)}
+                                    onClick={() => {
+                                      requireAuth(() => {
+                                        handleAddRecommendedStop(rec);
+                                      }, `Sign in to add ${rec.name} to your route itinerary.`);
+                                    }}
                                     className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[11px] font-extrabold transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-md"
                                   >
                                     <Plus className="w-3.5 h-3.5" /> Add Stop

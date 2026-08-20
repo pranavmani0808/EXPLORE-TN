@@ -20,9 +20,12 @@ import {
   Moon,
   Check,
   ArrowRight,
+  Bookmark,
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
+import { useAuthGuard } from "@/lib/auth-guard-context";
+import { toast } from "sonner";
 import { PlannerApiRepository, PlannerChatResponseDTO, SuggestedCategoryItem } from "@/lib/api-client/planner";
 import { resolvePlace } from "@/lib/data/canonical-places";
 import {
@@ -80,6 +83,7 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string 
 };
 
 export function PlannerPage() {
+  const { requireAuth } = useAuthGuard();
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
@@ -482,6 +486,23 @@ export function PlannerPage() {
                   </div>
                 ))}
               </div>
+
+              {timeline.length > 0 && (
+                <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex justify-end">
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      requireAuth(() => {
+                        toast.success("Trip itinerary saved to your account ✓");
+                      }, "Sign in to save this trip itinerary to your account.");
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md shadow-emerald-500/20 cursor-pointer flex items-center gap-2"
+                  >
+                    <Bookmark className="size-4" />
+                    <span>Save Trip to My Account</span>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
 

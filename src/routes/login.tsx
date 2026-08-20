@@ -5,6 +5,7 @@ import { Compass, Lock, UserCheck, UserPlus, Mail, Key, User } from "lucide-reac
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { UserRole, getAuthorizedRedirectRoute, setAuthSession, UserProfile } from "@/lib/auth-rbac";
+import { supabase } from "@/lib/supabase-client";
 
 export const Route = createFileRoute("/login")({
   head: () => ({
@@ -52,9 +53,11 @@ function LoginPage() {
     password: "",
   });
 
-  const handleAuthSubmit = () => {
-    setAuthStep("authenticating");
+  const handleAuthSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!form.email || !form.password) return;
 
+    setAuthStep("authenticating");
     const emailLower = form.email.trim().toLowerCase();
     const isAdminCreds =
       emailLower === "admin@exploretn.com" ||
@@ -62,14 +65,40 @@ function LoginPage() {
       emailLower.endsWith("@explorertn.com");
 
     const assignedRole: UserRole = isAdminCreds ? "super_admin" : "explorer";
+    let userId = `usr-${Date.now()}`;
+    let userName = isAdminCreds
+      ? "Platform Super Admin"
+      : form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer");
+
+    try {
+      if (authMode === "signup") {
+        const { data } = await supabase.auth.signUp({
+          email: form.email,
+          password: form.password,
+          options: { data: { full_name: userName } },
+        });
+        if (data?.user) userId = data.user.id;
+      } else {
+        const { data } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password,
+        });
+        if (data?.user) {
+          userId = data.user.id;
+          if (data.user.user_metadata?.full_name) {
+            userName = data.user.user_metadata.full_name;
+          }
+        }
+      }
+    } catch (err) {
+      console.warn("[LoginPage] Supabase auth fallback to local session:", err);
+    }
 
     const createdUser: UserProfile = {
-      id: `usr-${Date.now()}`,
-      name: isAdminCreds
-        ? "Platform Super Admin"
-        : form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer"),
-      email: form.email.trim() || "user@explorertn.com",
-      avatar: isAdminCreds ? "AD" : (form.fullName || form.email || "EX").slice(0, 2).toUpperCase(),
+      id: userId,
+      name: userName,
+      email: form.email.trim(),
+      avatar: isAdminCreds ? "AD" : userName.slice(0, 2).toUpperCase(),
       role: assignedRole,
       status: "active",
       rank: isAdminCreds ? "Super Admin" : "Verified Explorer",
@@ -80,12 +109,12 @@ function LoginPage() {
 
     setTimeout(() => {
       setAuthStep("authorized");
-    }, 1000);
+    }, 600);
 
     setTimeout(() => {
       const redirectUrl = getAuthorizedRedirectRoute(createdUser.role);
       window.location.href = redirectUrl;
-    }, 1800);
+    }, 1200);
   };
 
   return (

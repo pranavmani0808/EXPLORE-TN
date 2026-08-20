@@ -126,13 +126,18 @@ function RootShell({ children }: { children: ReactNode }) {
 }
 
 
+import { AuthGuardProvider } from "../lib/auth-guard-context";
+import { Toaster } from "sonner";
+
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <AuthGuardProvider>
+        <Toaster position="top-right" theme="dark" richColors />
+        <Outlet />
+      </AuthGuardProvider>
     </QueryClientProvider>
   );
 }

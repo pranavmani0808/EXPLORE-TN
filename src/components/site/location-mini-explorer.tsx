@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
+import { useAuthGuard } from "@/lib/auth-guard-context";
 
 export interface LocationMiniExplorerProps {
   location: ExplorerPlace;
@@ -39,6 +40,7 @@ export function LocationMiniExplorer({
   onTogglePlaceSelection,
 }: LocationMiniExplorerProps) {
   const navigate = useNavigate();
+  const { requireAuth } = useAuthGuard();
   const [panelState, setPanelState] = useState<"compact" | "expanded" | "closed">("expanded");
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [internalSelectedIds, setInternalSelectedIds] = useState<string[]>([location.id]);
@@ -297,7 +299,9 @@ export function LocationMiniExplorer({
                     type="button"
                     onClick={(e) => {
                       e.stopPropagation();
-                      toggleSelection(place.id);
+                      requireAuth(() => {
+                        toggleSelection(place.id);
+                      }, `Sign in to add ${place.canonicalName || place.name} to your trip.`);
                     }}
                     className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition flex items-center gap-1 cursor-pointer ${
                       isAdded

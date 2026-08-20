@@ -5,6 +5,7 @@ import { Heart, MessageCircle, Bookmark, Plus, Compass, Sparkles, Image, Message
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { places } from "@/data/places";
+import { useAuthGuard } from "@/lib/auth-guard-context";
 
 export const Route = createFileRoute("/community")({
   head: () => ({
@@ -34,6 +35,7 @@ export interface CommunityPost {
 }
 
 function CommunityPage() {
+  const { requireAuth, user } = useAuthGuard();
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [newPost, setNewPost] = useState({
@@ -49,7 +51,7 @@ function CommunityPage() {
 
     const created: CommunityPost = {
       id: `post-${Date.now()}`,
-      authorName: newPost.authorName || "Explorer",
+      authorName: user?.name || newPost.authorName || "Explorer",
       authorLocation: "Tamil Nadu",
       placeName: newPost.placeName || "Ghat Trail",
       image: newPost.image,
@@ -80,7 +82,11 @@ function CommunityPage() {
             <p className="text-xs text-slate-400 font-mono">Real-time user journals & verified trail photo logs</p>
           </div>
           <Button
-            onClick={() => setShowShareModal(true)}
+            onClick={() => {
+              requireAuth(() => {
+                setShowShareModal(true);
+              }, "Sign in to share your story or photo dump with the community.");
+            }}
             size="sm"
             className="bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-500/20 cursor-pointer"
           >
