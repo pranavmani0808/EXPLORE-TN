@@ -1,5 +1,5 @@
 import math
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from backend.app.schemas.places import PlaceCreate, PlaceResponse, PlaceFeedbackCreate
 from backend.app.core.exceptions import ValidationException, ResourceNotFoundException, APIException, ConflictException
 from backend.app.core.security import UserContext
@@ -1318,5 +1318,71 @@ class PlacesService:
 
     def get_all_places(self) -> List[dict]:
         return list(self._places_db.values())
+
+    def search_places(
+        self,
+        q: Optional[str] = None,
+        category: Optional[str] = None,
+        district: Optional[str] = None,
+    ) -> List[dict]:
+        results = list(self._places_db.values())
+
+        if category and category.lower() not in {"all", "all categories", ""}:
+            needle = category.lower().replace("_", "-").replace(" ", "-")
+            stem = needle.rstrip("s")
+            filtered = []
+            for p in results:
+                cat = str(p.get("category", "")).lower().replace("_", "-")
+                if needle in cat or stem in cat or cat in needle:
+                    filtered.append(p)
+            results = filtered
+
+        if district and district.lower() not in {"all", "all districts", ""}:
+            dneedle = district.lower().strip()
+            results = [p for p in results if dneedle in str(p.get("district", "")).lower()]
+
+        if q and q.strip():
+            ql = q.lower().strip()
+            scored: List[Tuple[int, dict]] = []
+            for p in results:
+                hay = " ".join(
+                    [
+                        str(p.get("name", "")),
+                        str(p.get("slug", "")),
+                        str(p.get("district", "")),
+                        str(p.get("category", "")),
+                        str(p.get("tagline", "")),
+                        str(p.get("description", "")),
+                    ]
+                ).lower()
+                if ql not in hay:
+                    continue
+                score = 0
+                if p.get("name", "").lower().startswith(ql):
+                    score += 3
+                if ql in p.get("name", "").lower() or ql in p.get("slug", "").lower():
+                    score += 2
+                scored.append((score, p))
+            scored.sort(key=lambda item: item[0], reverse=True)
+            results = [p for _, p in scored]
+
+        return results
+
+    def autocomplete(self, q: str, limit: int = 8) -> List[dict]:
+        if not q or not q.strip():
+            return []
+        matches = self.search_places(q=q)
+        suggestions = []
+        for p in matches[:limit]:
+            suggestions.append(
+                {
+                    "id": p.get("id"),
+                    "slug": p.get("slug"),
+                    "name": p.get("name"),
+                    "district": p.get("district"),
+                    "category": p.get("category"),
+                }
+            )
+        return suggestions
 
 places_service = PlacesService()

@@ -18,16 +18,21 @@ export function PageHeader({
   eyebrow,
   title,
   description,
+  subtitle,
 }: {
-  eyebrow: string;
+  eyebrow?: string;
   title: string;
-  description: string;
+  description?: string;
+  subtitle?: string;
 }) {
+  const copy = description || subtitle;
   return (
     <header className="mx-auto max-w-6xl px-4 pb-8 pt-28 sm:px-6 sm:pt-36">
-      <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
+      {eyebrow && (
+        <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
+      )}
       <h1 className="mt-3 text-4xl font-bold sm:text-6xl">{title}</h1>
-      <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">{description}</p>
+      {copy && <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">{copy}</p>}
     </header>
   );
 }

@@ -44,8 +44,19 @@ class PlaceResponse(BaseModel):
     latitude: float
     longitude: float
     elevation: Optional[str] = None
+    image: Optional[str] = None
+    status: Optional[str] = None
     verified: bool = False
     createdBy: str
     verifiedBy: Optional[str] = None
     verifiedAt: Optional[str] = None
     createdAt: str
+
+    model_config = {"extra": "ignore"}
+
+class PlaceSearchSuggestion(BaseModel):
+    id: str
+    slug: str
+    name: str
+    district: str
+    category: str

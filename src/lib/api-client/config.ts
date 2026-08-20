@@ -31,18 +31,19 @@ export function getApiBaseUrl(): string {
     return apiUrl.replace(/\/+$/, "");
   }
 
-  // 3. Runtime Browser Environment Guard for Production Deployment
-  // When running in a production browser environment (e.g. Vercel deployment),
-  // window.location.hostname is NOT localhost/127.0.0.1.
-  // Use window.location.origin instead of falling back to localhost:8000!
-  if (typeof window !== "undefined" && window.location) {
-    const hostname = window.location.hostname;
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return window.location.origin;
-    }
+  // 3. Browser: always use same-origin relative URLs.
+  // The Vite / Vercel layer proxies /api, /healthz, /readyz to FastAPI.
+  // Never point the user's browser at localhost — that is the sandbox, not their machine.
+  if (typeof window !== "undefined") {
+    return "";
   }
 
-  // 4. Default Base URL for local development only
-  return "http://localhost:8000";
+  // 4. SSR / Node local fallback
+  return "http://127.0.0.1:8000";
 }
 
+export function apiUrl(path: string): string {
+  const base = getApiBaseUrl();
+  const normalized = path.startsWith("/") ? path : `/${path}`;
+  return `${base}${normalized}`;
+}

@@ -496,11 +496,20 @@ Continue developing this project in the [Lovable editor](https://lovable.dev/pro
 
 ## Development
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+Frontend is Vite + TanStack Start. Backend is FastAPI. The Vite dev server proxies `/api`, `/healthz` and `/readyz` to `http://127.0.0.1:8000`.
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
+# Frontend
 npm i
 npm run dev
+
+# Backend (separate terminal)
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+uvicorn backend.app.main:app --host 0.0.0.0 --port 8000
 ```
+
+Copy `.env.example` to `.env` for local secrets. Never commit live API keys.
+
+Honest remaining work lives in [`docs/PUNCHLIST.md`](docs/PUNCHLIST.md).

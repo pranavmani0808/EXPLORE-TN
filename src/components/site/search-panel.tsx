@@ -1,8 +1,7 @@
-import { useMemo, useState, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { useState, useEffect } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Search, Clock, Flame, Sparkles, MapPin, Server, Mic, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
-import { places, categories } from "@/data/places";
 import { fetchAutocompleteSuggestions, BackendSearchSuggestion } from "@/lib/api";
 
 const trendingSpots = [
@@ -21,8 +20,19 @@ const aiSuggestions = [
 ];
 
 export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [backendSuggestions, setBackendSuggestions] = useState<BackendSearchSuggestion[]>([]);
+
+  const goToPlace = (slug?: string, fallbackQuery?: string) => {
+    onOpenChange(false);
+    setQuery("");
+    if (slug) {
+      navigate({ to: "/place/$slug", params: { slug } });
+      return;
+    }
+    navigate({ to: "/explore", search: { q: fallbackQuery || query } });
+  };
 
   useEffect(() => {
     if (!query.trim()) {
@@ -85,17 +95,18 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                 </p>
                 <div className="space-y-1.5">
                   {backendSuggestions.map((s) => (
-                    <div
+                    <button
                       key={s.id}
-                      onClick={() => onOpenChange(false)}
-                      className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-emerald-500/15 hover:border-emerald-500/30 transition cursor-pointer"
+                      type="button"
+                      onClick={() => goToPlace(s.slug, s.name)}
+                      className="flex w-full items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-emerald-500/15 hover:border-emerald-500/30 transition cursor-pointer text-left"
                     >
                       <div className="flex items-center gap-2.5">
                         <MapPin className="size-4 text-emerald-400" />
                         <span className="font-semibold text-sm text-white">{s.name}</span>
                       </div>
                       <span className="text-xs font-mono text-slate-400">{s.district} • {s.category}</span>
-                    </div>
+                    </button>
                   ))}
                   {!backendSuggestions.length && (
                     <p className="text-sm text-slate-400 py-3 text-center">Searching places matching "{query}"...</p>
@@ -114,7 +125,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                   {trendingSpots.map((spot) => (
                     <div
                       key={spot.label}
-                      onClick={() => onOpenChange(false)}
+                      onClick={() => goToPlace(undefined, spot.label)}
                       className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/40 transition cursor-pointer group"
                     >
                       <span className="text-lg">{spot.icon}</span>
@@ -135,7 +146,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                   {recentSearches.map((rec) => (
                     <button
                       key={rec}
-                      onClick={() => onOpenChange(false)}
+                      onClick={() => goToPlace(undefined, rec)}
                       className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 hover:border-emerald-500/40 transition flex items-center gap-1.5"
                     >
                       <Clock className="size-3 text-slate-400" /> {rec}
@@ -155,7 +166,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                   {aiSuggestions.map((sug) => (
                     <div
                       key={sug.label}
-                      onClick={() => onOpenChange(false)}
+                      onClick={() => goToPlace(undefined, sug.label)}
                       className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition cursor-pointer"
                     >
                       <div className="flex items-center gap-2.5">

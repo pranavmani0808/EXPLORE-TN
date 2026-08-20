@@ -11,18 +11,18 @@ class Settings(BaseSettings):
     DATABASE_URL: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/explorer_tn"
     REDIS_URL: str = "redis://localhost:6379/0"
     
-    # Security & JWT
-    SUPABASE_JWT_SECRET: str = "super-secret-jwt-key-explorer-tn-production"
+    # Security & JWT — must come from environment in any shared/deployed environment
+    SUPABASE_JWT_SECRET: str = ""
     ALGORITHM: str = "HS256"
     
-    # AI API Configuration
-    AI_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
-    OPENROUTER_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
-    GEMINI_API_KEY: str = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
-    VITE_AI_API_KEY: Optional[str] = "osk_live_5mHigJn-I2mcPuZQd1LbiN82EwFGZpVxzG7vdnNrGiY"
+    # AI API Configuration (never commit live keys)
+    AI_API_KEY: str = ""
+    OPENROUTER_API_KEY: str = ""
+    GEMINI_API_KEY: str = ""
+    VITE_AI_API_KEY: Optional[str] = None
 
     # OpenSERP Server-Side Web-Grounding Configuration
-    OPENSERP_API_KEY: str = "openserp_live_secret_key_explorer_tn_prod"
+    OPENSERP_API_KEY: str = ""
     OPENSERP_BASE_URL: str = "https://api.openserp.com/v1/search"
 
     # Routing Engine Configuration
@@ -38,9 +38,8 @@ class Settings(BaseSettings):
         "http://127.0.0.1:5173",
         "http://127.0.0.1:8000",
         "https://explore-tn-trails-main.vercel.app",
-        "https://explore-tn-trails-main-dnrgi59oo-chatterbox1.vercel.app",
-        "https://explore-tn-trails-main-phctvk9o7-chatterbox1.vercel.app",
     ]
+    CORS_ORIGIN_REGEX: str = r"https://.*\.(e2b\.app|vercel\.app)"
     
     # Rate Limiting & Timeouts
     DEFAULT_RATE_LIMIT_PER_MIN: int = 120

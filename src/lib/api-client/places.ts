@@ -2,17 +2,43 @@ import { PlaceDTO, PlaceExploreCompositeDTO, HomeExperienceDTO, TripExperienceDT
 import { getApiBaseUrl } from "./config";
 
 export class PlaceApiRepository {
-  static async fetchPlaces(category?: string): Promise<PlaceDTO[]> {
+  static async fetchPlaces(category?: string, extras?: { district?: string; query?: string }): Promise<PlaceDTO[]> {
     try {
       const baseUrl = getApiBaseUrl();
-      const url = new URL(`${baseUrl}/api/v1/discover`);
-      if (category && category !== "All") {
+      const url = new URL(`${baseUrl}/api/v1/places`, baseUrl || (typeof window !== "undefined" ? window.location.origin : "http://127.0.0.1:8000"));
+      if (category && category !== "All" && category !== "all") {
         url.searchParams.append("category", category);
       }
-      const res = await fetch(url.toString());
+      if (extras?.district && extras.district !== "all") {
+        url.searchParams.append("district", extras.district);
+      }
+      if (extras?.query) {
+        url.searchParams.append("q", extras.query);
+      }
+      const res = await fetch(`${url.pathname}${url.search}`);
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      return data.places || [];
+      const payload = await res.json();
+      const rows = payload.data || payload.places || [];
+      return rows.map((row: Record<string, unknown>) => ({
+        id: String(row.id ?? row.slug ?? ""),
+        name: String(row.name ?? ""),
+        slug: String(row.slug ?? ""),
+        district: String(row.district ?? ""),
+        city: String(row.district ?? ""),
+        category: String(row.category ?? ""),
+        coordinates: {
+          latitude: Number(row.latitude ?? 0),
+          longitude: Number(row.longitude ?? 0),
+        },
+        elevationMeters: Number(String(row.elevation ?? "0").replace(/[^\d.]/g, "")) || 0,
+        heroImage: String(row.image ?? ""),
+        rating: Number(row.rating ?? 4.6),
+        reviewCount: Number(row.reviewsCount ?? row.reviews ?? 0),
+        flowStatus: String(row.status ?? "PUBLISHED"),
+        difficulty: String(row.difficulty ?? "Moderate"),
+        tagline: row.tagline ? String(row.tagline) : undefined,
+        description: row.description ? String(row.description) : undefined,
+      }));
     } catch (err) {
       console.warn("[PlaceApiRepository] Backend offline, returning repository cache:", err);
       return [];

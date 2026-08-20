@@ -24,6 +24,16 @@ export interface PlaceDTO {
   reviewCount: number;
   flowStatus?: string;
   difficulty: string;
+  tagline?: string;
+  description?: string;
+}
+
+export interface BackendSearchSuggestion {
+  id: string;
+  slug: string;
+  name: string;
+  district: string;
+  category: string;
 }
 
 // Experience-Oriented BFF Response DTOs (Single API Call Per Screen)

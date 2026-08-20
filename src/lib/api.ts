@@ -1,9 +1,10 @@
 import { PlaceApiRepository, AIApiRepository, MediaApiRepository, WeatherApiRepository, PlaceDTO, MediaAssetDTO } from "./api-client";
 import { getApiBaseUrl } from "./api-client/config";
+import type { BackendSearchSuggestion } from "./api-client/types";
+import { CANONICAL_PLACES } from "./data/canonical-places";
 
 export * from "./api-client";
-
-const API_BASE_URL = getApiBaseUrl();
+export type { BackendSearchSuggestion };
 
 export async function checkBackendHealth(): Promise<boolean> {
   try {
@@ -22,45 +23,43 @@ export async function fetchRealtimeBackendTelemetry() {
     const baseUrl = getApiBaseUrl();
     const response = await fetch(`${baseUrl}/api/v1/admin/telemetry`);
     if (!response.ok) {
-      return {
-        timestamp: new Date().toISOString(),
-        requestRate: 48,
-        p95LatencyMs: 24,
-        errorRatePct: 0.0,
-        activeWorkers: 8,
-        dbPoolActive: 12,
-        redisStatus: "Healthy",
-        errorCategories: {}
-      };
+      return null;
     }
     const data = await response.json();
     return data.data;
   } catch {
-    return {
-      timestamp: new Date().toISOString(),
-      requestRate: 48,
-      p95LatencyMs: 24,
-      errorRatePct: 0.0,
-      activeWorkers: 8,
-      dbPoolActive: 12,
-      redisStatus: "Healthy",
-      errorCategories: {}
-    };
+    return null;
   }
 }
 
-export async function fetchAutocompleteSuggestions(query: string) {
+export async function fetchAutocompleteSuggestions(query: string): Promise<BackendSearchSuggestion[]> {
+  if (!query.trim()) return [];
+
   try {
     const baseUrl = getApiBaseUrl();
     const res = await fetch(`${baseUrl}/api/v1/places/search/autocomplete?q=${encodeURIComponent(query)}`);
     if (res.ok) {
       const data = await res.json();
-      return data.data || [];
+      const rows = data.data || [];
+      if (rows.length > 0) return rows;
     }
   } catch (err) {
     console.warn("Autocomplete API offline:", err);
   }
-  return [];
+
+  const q = query.toLowerCase().trim();
+  return CANONICAL_PLACES.filter((p) => {
+    const hay = `${p.name} ${p.district} ${p.tagline} ${p.slug} ${p.tags.join(" ")}`.toLowerCase();
+    return hay.includes(q);
+  })
+    .slice(0, 8)
+    .map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      name: p.name,
+      district: p.district,
+      category: p.primaryCategory,
+    }));
 }
 
 export async function createPlaceNodeBackend(payload: any) {
