@@ -116,6 +116,34 @@ async def get_places_by_district(district: str, request: Request):
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
+@router.get("/viewport", response_model=ResponseEnvelope[List[dict]])
+async def get_places_in_viewport(
+    request: Request,
+    min_lat: float,
+    max_lat: float,
+    min_lng: float,
+    max_lng: float,
+    category: Optional[str] = None
+):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    places = places_service.get_places_in_viewport(min_lat, max_lat, min_lng, max_lng, category)
+    return ResponseEnvelope(
+        data=places,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.post("/corridor", response_model=ResponseEnvelope[List[dict]])
+async def get_places_along_corridor(request: Request, payload: dict):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    polyline = payload.get("polyline") or payload.get("coordinates") or []
+    max_detour = float(payload.get("maxDetourKm") or 5.0)
+    category = payload.get("category")
+    places = places_service.get_places_along_corridor(polyline, max_detour_km=max_detour, category=category)
+    return ResponseEnvelope(
+        data=places,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
 @router.get("/categories", response_model=ResponseEnvelope[dict])
 async def list_place_categories(request: Request):
     trace_id = getattr(request.state, "trace_id", "tr-default")

@@ -2137,6 +2137,60 @@ class PlacesService:
         self._places_db[slug] = new_place
         return (new_place, True)
 
+    def get_places_in_viewport(self, min_lat: float, max_lat: float, min_lng: float, max_lng: float, category: Optional[str] = None) -> List[dict]:
+        """
+        Spatial bounding-box viewport query backing Leaflet map viewports.
+        """
+        matched = []
+        for p in self._places_db.values():
+            lat = p.get("latitude")
+            lng = p.get("longitude")
+            if lat is None or lng is None:
+                continue
+            if min_lat <= lat <= max_lat and min_lng <= lng <= max_lng:
+                if category and category.lower() != "all":
+                    p_cat = p.get("category", "").lower()
+                    p_tags = [t.lower() for t in p.get("tags", [])]
+                    if category.lower() != p_cat and category.lower() not in p_tags:
+                        continue
+                matched.append(p)
+        return matched
+
+    def get_places_along_corridor(self, polyline_coords: List[List[float]], max_detour_km: float = 5.0, category: Optional[str] = None) -> List[dict]:
+        """
+        Spatial road corridor query to discover POIs within corridor detour of road geometry.
+        """
+        if not polyline_coords:
+            return []
+
+        matched = []
+        for p in self._places_db.values():
+            lat = p.get("latitude")
+            lng = p.get("longitude")
+            if lat is None or lng is None:
+                continue
+
+            if category and category.lower() != "all":
+                p_cat = p.get("category", "").lower()
+                p_tags = [t.lower() for t in p.get("tags", [])]
+                if category.lower() != p_cat and category.lower() not in p_tags:
+                    continue
+
+            # Minimum distance to any point along the polyline corridor
+            min_dist = float("inf")
+            for pt in polyline_coords:
+                d = calculate_haversine(lat, lng, pt[0], pt[1])
+                if d < min_dist:
+                    min_dist = d
+
+            if min_dist <= max_detour_km:
+                p_copy = dict(p)
+                p_copy["detourDistanceKm"] = round(min_dist, 2)
+                matched.append(p_copy)
+
+        matched.sort(key=lambda x: x.get("detourDistanceKm", 0.0))
+        return matched
+
     def search_places_by_category_and_location(self, query: str, category: Optional[str] = None, radius_km: float = 50.0) -> Dict[str, Any]:
         resolved = self.resolve_destination(query)
         if resolved["confidence"] in ["HIGH", "MEDIUM"] and resolved["latitude"] and resolved["longitude"]:

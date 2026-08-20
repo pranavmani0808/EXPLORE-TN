@@ -11,6 +11,8 @@ from backend.app.services.intelligence.trip_intent import intent_extractor, Stru
 from backend.app.services.intelligence.trip_validator import trip_validator
 from backend.app.services.intelligence.route_validator import route_sanity_validator
 from backend.app.services.intelligence.destination_classifier import destination_classifier, DestinationProfile
+from backend.app.services.intelligence.destination_resolver import destination_resolver
+from backend.app.services.intelligence.itinerary_optimizer import itinerary_optimizer
 from backend.app.core.config import settings
 from backend.app.core.logger import structured_logger
 
@@ -267,8 +269,13 @@ class PlannerService:
         merged_state["departureTime"] = structured_intent.departureTime or prev_state.get("departureTime") or "06:00"
         merged_state["overnightTravel"] = structured_intent.overnightTravel or prev_state.get("overnightTravel", False)
         
+        if any(k in user_message.lower() for k in ["arupadai", "six murugan", "6 murugan", "six abodes", "murugan circuit"]):
+            intent_type = "ARUPADAI_VEEDU_TRAIL"
+            structured_intent.intentCategory = "ARUPADAI_VEEDU_TRAIL"
+            structured_intent.trail = "arupadai-veedu"
+
         merged_state["waypoints"] = structured_intent.waypoints
-        merged_state["trail"] = structured_intent.trail
+        merged_state["trail"] = structured_intent.trail or ("arupadai-veedu" if intent_type == "ARUPADAI_VEEDU_TRAIL" else prev_state.get("trail"))
         if structured_intent.budget is not None:
             merged_state["budget"] = structured_intent.budget
         elif prev_state.get("budget") is not None:
@@ -423,9 +430,22 @@ class PlannerService:
         mins = total_duration_mins % 60
         eta_str = f"{hours}h {mins}m"
 
-        timeline = []
+        # Use Itinerary Optimizer for Time-Aware Timeline Generation & Feasibility Warnings
+        opt_places, opt_timeline, opt_warnings = itinerary_optimizer.optimize_itinerary(
+            origin_lat=resolved_origin_place["latitude"],
+            origin_lng=resolved_origin_place["longitude"],
+            places=resolved_waypoints,
+            departure_time_str=f"{merged_state['departureTime']} AM" if len(merged_state['departureTime']) <= 5 else merged_state['departureTime'],
+            speed_kmh=45.0 if merged_state["transport"] == "motorcycle" else 55.0
+        )
+
+        if opt_warnings:
+            for w in opt_warnings:
+                if w not in validation_report.warnings:
+                    validation_report.warnings.append(w)
+
         if merged_state.get("trail") == "arupadai-veedu":
-            timeline.extend([
+            timeline = [
                 {"time": "Day 1 — 06:00 AM", "name": f"Depart {resolved_origin_place['name']}", "description": f"Begin Arupadai Veedu sacred trail from {resolved_origin_place['name']}."},
                 {"time": "Day 1 — 08:30 AM", "name": "1. Thiruttani Murugan Temple", "description": "1st Arupadai Veedu atop Tanigai hill (365 steps)."},
                 {"time": "Day 1 — 02:00 PM", "name": "2. Swamimalai Murugan Temple", "description": "2nd Arupadai Veedu near Kumbakonam (Pranava Mantra shrine)."},
@@ -434,40 +454,12 @@ class PlannerService:
                 {"time": "Day 3 — 08:30 AM", "name": "5. Pazhamudircholai Murugan Temple", "description": "5th Arupadai Veedu in dense Solaimalai hill forest."},
                 {"time": "Day 3 — 11:30 AM", "name": "6. Thirupparankundram Murugan Temple", "description": "6th Arupadai Veedu rock-cut cave shrine."},
                 {"time": f"Day {merged_state.get('durationDays', 3)} — 07:00 PM", "name": f"Return to {resolved_origin_place['name']}", "description": f"Complete sacred 6-temple trail ({total_road_dist_km} km total road distance)."}
-            ])
+            ]
         else:
-            timeline.append({
-                "time": "06:00 AM",
-                "name": f"Depart {resolved_origin_place['name']}",
-                "description": f"Begin ride towards {dest_name}."
-            })
-
-            for wp in resolved_waypoints:
-                timeline.append({
-                    "time": "11:30 AM",
-                    "name": f"Stop at {wp['name']}",
-                    "description": f"Explore {wp.get('tagline', 'En-route stop')}."
-                })
-
-            interests_str = ", ".join(merged_state.get("interests", []))
-            food_summary = ", ".join([f"{f['name']} ({f['specialty']})" for f in food_spots[:2]])
-            
-            detail_desc = f"Explore {resolved_dest_place.get('tagline', 'Target destination')}."
-            if interests_str:
-                detail_desc += f" Focused on: {interests_str}."
-            detail_desc += f" Food Highlights: {food_summary}."
-
-            timeline.append({
-                "time": "02:30 PM",
-                "name": dest_name,
-                "description": detail_desc
-            })
-
-            timeline.append({
-                "time": "06:00 PM",
-                "name": f"Return to {resolved_origin_place['name']}",
-                "description": f"Complete {merged_state['durationDays']}-day ride ({total_road_dist_km} km total road distance)."
-            })
+            timeline = opt_timeline if opt_timeline else [
+                {"time": "06:00 AM", "name": f"Depart {resolved_origin_place['name']}", "description": f"Begin trip to {dest_name}."},
+                {"time": "01:00 PM", "name": f"Arrive at {dest_name}", "description": f"Explore {resolved_dest_place.get('tagline', 'Target Destination')}."}
+            ]
 
         warning_prefix = ""
         if not validation_report.durationFeasible and not merged_state.get("overnightTravel"):
