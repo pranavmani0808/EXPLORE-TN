@@ -65,7 +65,7 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-15T10:00:00Z",
                 "createdAt": "2026-08-15T10:00:00Z",
-                "image": "/src/assets/temples/thirupparankundram.jpg",
+                "image": "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
                 "trailSlug": "arupadai-veedu",
                 "trailOrder": 1,
                 "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
@@ -89,7 +89,7 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-15T10:00:00Z",
                 "createdAt": "2026-08-15T10:00:00Z",
-                "image": "/src/assets/temples/tiruchendur.jpg",
+                "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
                 "trailSlug": "arupadai-veedu",
                 "trailOrder": 2,
                 "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
@@ -113,7 +113,7 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-15T10:00:00Z",
                 "createdAt": "2026-08-15T10:00:00Z",
-                "image": "/src/assets/temples/palani.jpg",
+                "image": "https://images.unsplash.com/photo-1609946782701-791789c67676?auto=format&fit=crop&w=1000&q=80",
                 "trailSlug": "arupadai-veedu",
                 "trailOrder": 3,
                 "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
@@ -137,7 +137,7 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-15T10:00:00Z",
                 "createdAt": "2026-08-15T10:00:00Z",
-                "image": "/src/assets/temples/swamimalai.jpg",
+                "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
                 "trailSlug": "arupadai-veedu",
                 "trailOrder": 4,
                 "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
@@ -161,7 +161,7 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-15T10:00:00Z",
                 "createdAt": "2026-08-15T10:00:00Z",
-                "image": "/src/assets/temples/thiruttani.jpg",
+                "image": "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
                 "trailSlug": "arupadai-veedu",
                 "trailOrder": 5,
                 "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"
@@ -185,7 +185,7 @@ class PlacesService:
                 "verifiedBy": "Pranav",
                 "verifiedAt": "2026-08-15T10:00:00Z",
                 "createdAt": "2026-08-15T10:00:00Z",
-                "image": "/src/assets/temples/pazhamudircholai.jpg",
+                "image": "https://images.unsplash.com/photo-1470071459604-3b5ec3a7fe05?auto=format&fit=crop&w=1000&q=80",
                 "trailSlug": "arupadai-veedu",
                 "trailOrder": 6,
                 "imageAttribution": "Public Heritage Archive / ExplorerTN Verified Media"

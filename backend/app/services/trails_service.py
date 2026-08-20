@@ -11,7 +11,7 @@ class TrailsService:
                 "name": "Arupadai Veedu Trail",
                 "subtitle": "Journey through the six sacred abodes of Lord Murugan across Tamil Nadu.",
                 "category": "spiritual",
-                "coverImage": "/src/assets/temples/palani.jpg",
+                "coverImage": "https://images.unsplash.com/photo-1609946782701-791789c67676?auto=format&fit=crop&w=1000&q=80",
                 "destinationSlugs": [
                     "thirupparankundram-murugan-temple",
                     "tiruchendur-murugan-temple",

@@ -14,6 +14,7 @@ import {
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { arupadaiVeeduTemples, type Place } from "@/data/places";
+import { PlannerApiRepository } from "@/lib/api-client/planner";
 import {
   Map,
   MapMarker,
@@ -64,20 +65,14 @@ export function ArupadaiVeeduTrailPage() {
     .map((t) => t.coords)
     .filter((c): c is [number, number] => c !== undefined);
 
-  // Fetch real multi-waypoint OSRM road geometry from backend
+  // Fetch real multi-waypoint OSRM road geometry from backend via PlannerApiRepository
   useEffect(() => {
     let active = true;
 
     async function fetchTrailRoute() {
       try {
-        const res = await fetch("/api/v1/planner/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: "Plan an Arupadai Veedu trip" }),
-        });
-        if (!res.ok) return;
-        const json = await res.json();
-        const coords = json?.data?.route?.geometry?.coordinates;
+        const data = await PlannerApiRepository.sendChatMessage("Plan an Arupadai Veedu trip");
+        const coords = data?.route?.geometry?.coordinates;
         if (active && coords && Array.isArray(coords) && coords.length > 0) {
           // OSRM coordinates are [lng, lat], convert to [lat, lng] for Leaflet
           const pts: Array<[number, number]> = coords.map(([lng, lat]: [number, number]) => [lat, lng]);
