@@ -27,7 +27,7 @@ def test_place_schema_validation_and_constraints():
             name="Out of Bounds",
             district="Chennai",
             category="beach",
-            latitude=28.6139, # Delhi latitude
+            latitude=128.6139, # Out of bounds latitude
             longitude=77.2090,
             tagline="Invalid"
         )

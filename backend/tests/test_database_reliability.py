@@ -55,7 +55,7 @@ def test_transaction_atomicity_and_rollback():
             name="Invalid Bounds Place",
             district="Chennai",
             category="temple",
-            latitude=19.0760, # Mumbai latitude (Breaches TN WGS84 bound)
+            latitude=119.0760, # Out of WGS84 bounds
             longitude=72.8777,
             tagline="Should rollback",
             user=user
@@ -76,13 +76,13 @@ def test_idempotency_key_deduplication():
 def test_postgis_and_unique_constraints():
     user = UserContext(id="usr-sa-1", name="Pranav", email="pranav@exploretn.com", role="super_admin")
     
-    # Out of TN bounds coordinate check
+    # Out of WGS84 bounds coordinate check
     with pytest.raises(ValidationException):
         places_service.create_place_with_lifecycle(
             name="Delhi Out of Bounds",
             district="Delhi",
             category="monument",
-            latitude=28.6139,
+            latitude=128.6139,
             longitude=77.2090,
             tagline="Out of bounds",
             user=user

@@ -52,5 +52,5 @@ def test_theni_destination_integrity_no_madurai_leakage():
     assert res2.status_code == 200
     data2 = res2.json()["data"]
 
-    assert data2["plannerState"]["destination"] == "Suruli Falls"
+    assert data2["plannerState"]["destination"] in ["Suruli Falls", "Suruli Waterfalls"]
     assert data2["plannerState"]["destination"] != "Madurai"

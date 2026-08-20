@@ -69,3 +69,52 @@ async def verify_place(
         data={"status": "VERIFIED", "verifiedBy": current_user.name, "placeId": place_id},
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
+
+@router.post("/resolve", response_model=ResponseEnvelope[dict])
+async def resolve_place_query(request: Request, payload: dict):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    q = payload.get("query") or payload.get("q") or ""
+    resolved = places_service.resolve_destination(q)
+    return ResponseEnvelope(
+        data=resolved,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/nearby", response_model=ResponseEnvelope[List[dict]])
+async def get_nearby_places(request: Request, lat: float, lng: float, radius: float = 50.0, category: Optional[str] = None):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    nearby = places_service.find_nearby_places(lat, lng, radius_km=radius, category=category)
+    return ResponseEnvelope(
+        data=nearby,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/search", response_model=ResponseEnvelope[dict])
+async def search_places(request: Request, q: str, category: Optional[str] = None, radius: float = 50.0):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    results = places_service.search_places_by_category_and_location(q, category=category, radius_km=radius)
+    return ResponseEnvelope(
+        data=results,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/categories", response_model=ResponseEnvelope[dict])
+async def list_place_categories(request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    categories = [
+        {"key": "all", "label": "All Places", "icon": "🗺️"},
+        {"key": "temple", "label": "Temples & Heritage", "icon": "🛕"},
+        {"key": "waterfall", "label": "Waterfalls", "icon": "💦"},
+        {"key": "mountain", "label": "Hills & Mountains", "icon": "🏔️"},
+        {"key": "coastal", "label": "Beaches & Coastal", "icon": "🏖️"},
+        {"key": "heritage", "label": "Forts & Palaces", "icon": "🏛️"},
+        {"key": "adventure", "label": "Adventure & Treks", "icon": "🪂"},
+        {"key": "food", "label": "Food & Dining", "icon": "🍛"},
+        {"key": "lake", "label": "Lakes & Rivers", "icon": "🌊"},
+    ]
+    place_types = ["CITY", "TOWN", "DISTRICT", "STATE", "REGION", "TEMPLE", "CHURCH", "MOSQUE", "WATERFALL", "RIVER", "LAKE", "DAM", "BEACH", "HILL", "MOUNTAIN", "VALLEY", "VIEWPOINT", "FOREST", "NATIONAL_PARK", "WILDLIFE", "FORT", "PALACE", "HERITAGE_SITE", "FOOD_SPOT", "RESTAURANT", "CAFE", "TEA_SHOP", "HOTEL", "RESORT", "ADVENTURE", "TREKKING", "KAYAKING", "RAFTING", "CAMPING"]
+    return ResponseEnvelope(
+        data={"categories": categories, "types": place_types},
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+

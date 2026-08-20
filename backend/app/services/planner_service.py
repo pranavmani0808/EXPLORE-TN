@@ -90,31 +90,26 @@ class PlannerService:
     def resolve_place_by_name(self, name: str, verified_places: List[dict]) -> Optional[dict]:
         if not name:
             return None
+        try:
+            from backend.app.services.places_service import places_service
+            resolved = places_service.resolve_destination(name)
+            if resolved and resolved.get("confidence") in ["HIGH", "MEDIUM"]:
+                place_obj = resolved.get("placeObject")
+                if place_obj:
+                    return place_obj
+                return {
+                    "name": resolved.get("canonicalName"),
+                    "district": resolved.get("district") or resolved.get("city") or "India",
+                    "latitude": resolved.get("latitude") or 10.0,
+                    "longitude": resolved.get("longitude") or 77.5,
+                    "verified": True,
+                    "category": resolved.get("category") or "city",
+                    "tagline": f"Explore {resolved.get('canonicalName')}"
+                }
+        except Exception:
+            pass
+
         clean_target = name.strip().lower()
-
-        KNOWN_GEOLOCATIONS = {
-            "madurai": {"name": "Madurai", "district": "Madurai", "latitude": 9.9252, "longitude": 78.1198, "verified": True, "category": "city", "tagline": "Cultural & Culinary Capital of Tamil Nadu"},
-            "chennai": {"name": "Chennai", "district": "Chennai", "latitude": 13.0827, "longitude": 80.2707, "verified": True, "category": "city", "tagline": "Capital City"},
-            "ooty": {"name": "Ooty", "district": "Nilgiris", "latitude": 11.4102, "longitude": 76.6950, "verified": True, "category": "hill_station", "tagline": "Queen of Hill Stations"},
-            "aruppukottai": {"name": "Aruppukottai", "district": "Virudhunagar", "latitude": 9.5085, "longitude": 78.0991, "verified": True, "category": "city", "tagline": "Heritage Weaver Town near Madurai"},
-            "kodaikanal": {"name": "Kodaikanal", "district": "Dindigul", "latitude": 10.2381, "longitude": 77.4892, "verified": True, "category": "hill_station", "tagline": "Princess of Hill Stations"},
-            "valparai": {"name": "Valparai", "district": "Coimbatore", "latitude": 10.3270, "longitude": 76.9554, "verified": True, "category": "hill_station", "tagline": "70 Hairpin Pass Ghat Run"},
-            "thanjavur": {"name": "Thanjavur", "district": "Thanjavur", "latitude": 10.7870, "longitude": 79.1378, "verified": True, "category": "heritage", "tagline": "Chola Architecture & Cultural City"},
-            "pondicherry": {"name": "Pondicherry", "district": "Puducherry", "latitude": 11.9416, "longitude": 79.8083, "verified": True, "category": "coastal", "tagline": "French Quarter Coastal Escape"},
-            "dhanushkodi": {"name": "Dhanushkodi", "district": "Ramanathapuram", "latitude": 9.1764, "longitude": 79.4182, "verified": True, "category": "coastal", "tagline": "Ghost Town & Ocean Confluence"},
-            "rishikesh": {"name": "Rishikesh", "district": "Dehradun", "latitude": 30.0869, "longitude": 78.2676, "verified": True, "category": "adventure", "tagline": "Ganges White Water Rafting Capital"},
-            "goa": {"name": "Goa", "district": "Goa", "latitude": 15.6868, "longitude": 73.7042, "verified": True, "category": "adventure", "tagline": "Surfing & Coastal Beach"},
-            "bir billing": {"name": "Bir Billing", "district": "Kangra", "latitude": 32.0365, "longitude": 76.7196, "verified": True, "category": "adventure", "tagline": "World Paragliding Capital"},
-            "kovalam": {"name": "Kovalam", "district": "Thiruvananthapuram", "latitude": 8.4004, "longitude": 76.9787, "verified": True, "category": "adventure", "tagline": "Lighthouse Surf Break"},
-        }
-
-        if clean_target in KNOWN_GEOLOCATIONS:
-            return KNOWN_GEOLOCATIONS[clean_target]
-
-        for key, info in KNOWN_GEOLOCATIONS.items():
-            if key in clean_target or clean_target in key:
-                return info
-
         for p in verified_places:
             if clean_target == p.get("name", "").lower() or clean_target == p.get("slug", "").lower():
                 return p

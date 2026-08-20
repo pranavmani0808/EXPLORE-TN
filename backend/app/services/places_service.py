@@ -1,4 +1,5 @@
 import math
+import re
 from typing import List, Dict, Any, Tuple
 from backend.app.schemas.places import PlaceCreate, PlaceResponse, PlaceFeedbackCreate
 from backend.app.core.exceptions import ValidationException, ResourceNotFoundException, APIException, ConflictException
@@ -27,17 +28,472 @@ class PlacesService:
     def __init__(self):
         # In-memory transactional store backing PostgreSQL PostGIS database queries
         self._places_db: Dict[str, dict] = {
+            # National & Interstate Destinations
+            "kovalam": {
+                "id": "p-kovalam",
+                "slug": "kovalam",
+                "name": "Kovalam",
+                "display_name": "Kovalam Beach Break & Surfing",
+                "type": "TOWN",
+                "category": "coastal",
+                "subcategory": "surfing",
+                "tagline": "Lighthouse Beach & Surfing Point",
+                "description": "Famous crescent-shaped beach near Thiruvananthapuram, renowned for surfing breaks, lighthouse view, and seaside seafood cafes.",
+                "latitude": 8.4004,
+                "longitude": 76.9787,
+                "city": "Kovalam",
+                "district": "Thiruvananthapuram",
+                "state": "Kerala",
+                "country": "India",
+                "region": "Malabar Coast",
+                "aliases": ["kovalam", "kovalam beach", "lighthouse beach kovalam"],
+                "search_terms": ["surfing", "beach", "lighthouse", "water sports"],
+                "activities": ["surfing", "beaches", "swimming", "seafood"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.7,
+                "popularity": 90
+            },
+            "zanskar-river": {
+                "id": "p-zanskar-river",
+                "slug": "zanskar-river",
+                "name": "Zanskar River",
+                "display_name": "Zanskar River & Gorge, Ladakh",
+                "type": "RIVER",
+                "category": "adventure",
+                "subcategory": "kayaking",
+                "tagline": "High-altitude Himalayan river for world-class whitewater kayaking & Chadar trek",
+                "description": "A sacred Himalayan river in Ladakh renowned for extreme whitewater kayaking, rafting through 1,000m granite gorges, and winter frozen river ice treks.",
+                "latitude": 33.8689,
+                "longitude": 76.9200,
+                "city": "Padum",
+                "district": "Kargil / Zanskar",
+                "state": "Ladakh",
+                "country": "India",
+                "region": "Ladakh, Trans-Himalayas",
+                "aliases": ["zanskar", "zanskar river", "zanskar river ladakh", "zanskar valley river", "zanskar rafting", "zanskar kayaking", "zanskar gorge"],
+                "search_terms": ["kayaking", "rafting", "white water rafting", "chadar trek", "ladakh", "zanskar"],
+                "activities": ["kayaking", "rafting", "camping", "trekking"],
+                "best_for": ["Adventure Enthusiasts", "Whitewater Kayakers", "Landscape Photographers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.9,
+                "popularity": 96
+            },
+            "rishikesh": {
+                "id": "p-rishikesh",
+                "slug": "rishikesh",
+                "name": "Rishikesh",
+                "display_name": "Rishikesh, Uttarakhand",
+                "type": "TOWN",
+                "category": "adventure",
+                "subcategory": "rafting",
+                "tagline": "Yoga & Ganges White Water Rafting Capital of the World",
+                "description": "Situated at the Himalayan foothills where the holy Ganges river emerges, world-famous for white water river rafting, cliff jumping, yoga ashrams, and Ganga Aarti.",
+                "latitude": 30.0869,
+                "longitude": 78.2676,
+                "city": "Rishikesh",
+                "district": "Dehradun / Tehri Garhwal",
+                "state": "Uttarakhand",
+                "country": "India",
+                "region": "Garhwal Himalayas, Uttarakhand",
+                "aliases": ["rishikesh", "rishikesh rafting", "ganges rafting", "rishikesh yoga", "laxman jhula"],
+                "search_terms": ["rafting", "yoga", "ganges", "kayaking", "camping", "cliff jumping"],
+                "activities": ["rafting", "kayaking", "camping", "yoga", "trekking"],
+                "best_for": ["River Rafters", "Yogis", "Adventure Seekers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1596178065887-1198b6148b2b?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.8,
+                "popularity": 94
+            },
+            "goa": {
+                "id": "p-goa",
+                "slug": "goa",
+                "name": "Goa",
+                "display_name": "Goa Coastal Beaches",
+                "type": "STATE",
+                "category": "coastal",
+                "subcategory": "beach",
+                "tagline": "Pristine Arabian Sea coastline, Portuguese heritage & water sports",
+                "description": "India's premier coastal state famous for golden sand beaches, water sports, Portuguese colonial architecture, and fresh seafood.",
+                "latitude": 15.2993,
+                "longitude": 74.1240,
+                "city": "Panaji",
+                "district": "North & South Goa",
+                "state": "Goa",
+                "country": "India",
+                "region": "Konkan Coast",
+                "aliases": ["goa", "goa beaches", "north goa", "south goa", "calangute", "baga"],
+                "search_terms": ["beach", "beaches", "water sports", "seafood", "sunset", "coastal"],
+                "activities": ["beaches", "water_sports", "seafood", "heritage", "scuba"],
+                "best_for": ["Beach Lovers", "Water Sports Enthusiasts", "Holidaymakers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.8,
+                "popularity": 98
+            },
+            "munnar": {
+                "id": "p-munnar",
+                "slug": "munnar",
+                "name": "Munnar",
+                "display_name": "Munnar Tea Hills, Kerala",
+                "type": "HILL",
+                "category": "mountain",
+                "subcategory": "tea_plantation",
+                "tagline": "Lush emerald tea plantations & high mountain misty peaks",
+                "description": "A picturesque hill station in the Western Ghats of Kerala, famous for sprawling tea estates, Anamudi Peak, waterfalls, and cool mountain climate.",
+                "latitude": 10.0889,
+                "longitude": 77.0595,
+                "city": "Munnar",
+                "district": "Idukki",
+                "state": "Kerala",
+                "country": "India",
+                "region": "Western Ghats, Kerala",
+                "aliases": ["munnar", "munnar tea plantations", "munnar hills", "munnar kerala"],
+                "search_terms": ["tea plantations", "tea gardens", "hills", "waterfalls", "viewpoints", "trekking"],
+                "activities": ["tea_gardens", "scenery", "trekking", "viewpoints"],
+                "best_for": ["Nature Enthusiasts", "Photographers", "Trekkers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1589705298607-4e9640426b38?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.8,
+                "popularity": 93
+            },
+            "manali": {
+                "id": "p-manali",
+                "slug": "manali",
+                "name": "Manali",
+                "display_name": "Manali Valley, Himachal Pradesh",
+                "type": "TOWN",
+                "category": "mountain",
+                "subcategory": "adventure",
+                "tagline": "Himalayan snow resort, Solang paragliding & alpine adventure",
+                "description": "High-altitude Himalayan resort town in Kullu valley, renowned for paragliding in Solang Valley, snow sports at Rohtang Pass, and scenic pine forests.",
+                "latitude": 32.2432,
+                "longitude": 77.1892,
+                "city": "Manali",
+                "district": "Kullu",
+                "state": "Himachal Pradesh",
+                "country": "India",
+                "region": "Beas River Valley, Himalayas",
+                "aliases": ["manali", "solang valley", "rohtang pass", "manali adventure"],
+                "search_terms": ["snow", "paragliding", "trekking", "skiing", "mountains"],
+                "activities": ["paragliding", "snow_sports", "trekking", "camping"],
+                "best_for": ["Snow Seekers", "Adventure Trekkers", "Mountain Lovers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1609946782701-7fa158869150?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.7,
+                "popularity": 92
+            },
+            "leh": {
+                "id": "p-leh",
+                "slug": "leh",
+                "name": "Leh",
+                "display_name": "Leh High-Altitude Capital, Ladakh",
+                "type": "TOWN",
+                "category": "mountain",
+                "subcategory": "heritage",
+                "tagline": "High-altitude Trans-Himalayan desert capital, Buddhist monasteries & high passes",
+                "description": "The capital of Ladakh situated at 3,500m MSL, surrounded by cold desert mountains, ancient Buddhist monasteries, Leh Palace, and Khardung La Pass.",
+                "latitude": 34.1526,
+                "longitude": 77.5771,
+                "city": "Leh",
+                "district": "Leh",
+                "state": "Ladakh",
+                "country": "India",
+                "region": "Trans-Himalayas, Ladakh",
+                "aliases": ["leh", "leh ladakh", "leh palace", "pangong tso", "khardung la"],
+                "search_terms": ["monasteries", "high pass", "biking", "pangong", "khardung la"],
+                "activities": ["biking", "monasteries", "trekking", "high_pass"],
+                "best_for": ["High Altitude Explorers", "Motorcycle Riders", "Culture Seekers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.9,
+                "popularity": 95
+            },
+            "coorg": {
+                "id": "p-coorg",
+                "slug": "coorg",
+                "name": "Coorg",
+                "display_name": "Coorg (Kodagu), Karnataka",
+                "type": "DISTRICT",
+                "category": "mountain",
+                "subcategory": "coffee_plantation",
+                "tagline": "Scotland of India — Coffee estates, misty hills & Abbey Falls",
+                "description": "A serene coffee-producing hill station in the Western Ghats of Karnataka, renowned for Abbey Falls, Raja's Seat, coffee plantations, and Kodava culture.",
+                "latitude": 12.4244,
+                "longitude": 75.7382,
+                "city": "Madikeri",
+                "district": "Kodagu",
+                "state": "Karnataka",
+                "country": "India",
+                "region": "Western Ghats, Karnataka",
+                "aliases": ["coorg", "kodagu", "madikeri", "coorg hills", "coorg coffee"],
+                "search_terms": ["coffee plantations", "coffee", "hills", "waterfalls", "abbey falls"],
+                "activities": ["coffee_plantations", "trekking", "waterfalls", "viewpoints"],
+                "best_for": ["Coffee Lovers", "Trekkers", "Nature Seekers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.7,
+                "popularity": 90
+            },
+            "srinagar": {
+                "id": "p-srinagar",
+                "slug": "srinagar",
+                "name": "Srinagar",
+                "display_name": "Srinagar & Dal Lake, Kashmir",
+                "type": "CITY",
+                "category": "lake",
+                "subcategory": "houseboat",
+                "tagline": "Jewel of Kashmir — Dal Lake Shikaras, houseboats & Mughal Gardens",
+                "description": "The summer capital of Jammu & Kashmir, famous for Dal Lake shikara rides, historic wooden houseboats, Nishat Bagh, Shalimar Bagh, and saffron gardens.",
+                "latitude": 34.0837,
+                "longitude": 74.7973,
+                "city": "Srinagar",
+                "district": "Srinagar",
+                "state": "Jammu & Kashmir",
+                "country": "India",
+                "region": "Kashmir Valley",
+                "aliases": ["srinagar", "dal lake", "srinagar kashmir", "shalimar bagh", "shikara"],
+                "search_terms": ["dal lake", "houseboats", "shikara", "mughal gardens", "kashmir"],
+                "activities": ["houseboats", "shikara_rides", "gardens", "heritage"],
+                "best_for": ["Couples", "Family Vacationers", "Heritage Enthusiasts"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.8,
+                "popularity": 91
+            },
+            "mysuru": {
+                "id": "p-mysuru",
+                "slug": "mysuru",
+                "name": "Mysuru",
+                "display_name": "Mysuru (Mysore), Karnataka",
+                "type": "CITY",
+                "category": "heritage",
+                "subcategory": "palace",
+                "tagline": "Heritage Palace Capital — Royal Amba Vilas Palace & Chamundi Hill",
+                "description": "The cultural capital of Karnataka, famous for the magnificent Mysuru Palace, Chamundeshwari Temple atop Chamundi Hill, Mysore silk, and Dasara festivities.",
+                "latitude": 12.2958,
+                "longitude": 76.6394,
+                "city": "Mysuru",
+                "district": "Mysuru",
+                "state": "Karnataka",
+                "country": "India",
+                "region": "Southern Karnataka",
+                "aliases": ["mysore", "mysuru", "mysore palace", "chamundi hill"],
+                "search_terms": ["palace", "heritage", "mysore palace", "silk", "temple"],
+                "activities": ["palaces", "culture", "silk_shopping", "heritage"],
+                "best_for": ["Heritage Buffs", "Royal History Enthusiasts", "Shoppers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.7,
+                "popularity": 89
+            },
+            "bir-billing": {
+                "id": "p-bir-billing",
+                "slug": "bir-billing",
+                "name": "Bir Billing",
+                "display_name": "Bir Billing Paragliding Capital, Himachal Pradesh",
+                "type": "TOWN",
+                "category": "adventure",
+                "subcategory": "paragliding",
+                "tagline": "World Paragliding Capital & Tibetan Monastery Hub",
+                "description": "A world-renowned paragliding destination in Kangra valley, Himachal Pradesh, offering tandem paragliding flights, scenic landing sites, and Buddhist monasteries.",
+                "latitude": 32.0436,
+                "longitude": 76.7180,
+                "city": "Bir",
+                "district": "Kangra",
+                "state": "Himachal Pradesh",
+                "country": "India",
+                "region": "Kangra Valley, Dhauladhar Range",
+                "aliases": ["bir billing", "bir", "billing", "bir paragliding"],
+                "search_terms": ["paragliding", "monastery", "sunset", "adventure", "flying"],
+                "activities": ["paragliding", "monasteries", "trekking", "cafes"],
+                "best_for": ["Paragliders", "Adventure Seekers", "Peace Seekers"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.9,
+                "popularity": 91
+            },
+            "madurai": {
+                "id": "p-madurai",
+                "slug": "madurai",
+                "name": "Madurai",
+                "display_name": "Madurai City, Tamil Nadu",
+                "type": "CITY",
+                "category": "heritage",
+                "subcategory": "temple",
+                "tagline": "Cultural & Culinary Capital of Tamil Nadu",
+                "description": "An ancient lotus-shaped city on the banks of the Vaigai river, world-renowned for Meenakshi Amman Temple, Thirumalai Nayakkar Palace, and iconic street food.",
+                "latitude": 9.9252,
+                "longitude": 78.1198,
+                "city": "Madurai",
+                "district": "Madurai",
+                "state": "Tamil Nadu",
+                "country": "India",
+                "region": "Southern Tamil Nadu",
+                "aliases": ["madurai", "madurai city", "thoonga nagaram", "temple city"],
+                "search_terms": ["madurai", "temple", "food", "heritage", "jigarthanda", "kari dosa"],
+                "activities": ["temples", "food", "heritage", "shopping", "culture"],
+                "best_for": ["Cultural Explorers", "Foodies", "Pilgrims"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.9,
+                "popularity": 99
+            },
+            "chennai": {
+                "id": "p-chennai",
+                "slug": "chennai",
+                "name": "Chennai",
+                "display_name": "Chennai Capital City, Tamil Nadu",
+                "type": "CITY",
+                "category": "coastal",
+                "subcategory": "city",
+                "tagline": "Gateway to South India — Marina Beach, heritage & filter coffee",
+                "description": "The capital city of Tamil Nadu, famous for Marina Beach, Kapaleeshwarar Temple, Carnatic music season, filter coffee, and silk heritage.",
+                "latitude": 13.0827,
+                "longitude": 80.2707,
+                "city": "Chennai",
+                "district": "Chennai",
+                "state": "Tamil Nadu",
+                "country": "India",
+                "region": "Coromandel Coast",
+                "aliases": ["chennai", "madras", "chennai city"],
+                "search_terms": ["chennai", "marina beach", "filter coffee", "mylapore"],
+                "activities": ["beaches", "food", "heritage", "shopping", "temples"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.8,
+                "popularity": 98
+            },
+            "kodaikanal": {
+                "id": "p-kodaikanal",
+                "slug": "kodaikanal",
+                "name": "Kodaikanal",
+                "display_name": "Kodaikanal Hill Station, Dindigul",
+                "type": "HILL",
+                "category": "mountain",
+                "subcategory": "viewpoint",
+                "tagline": "Princess of Hill Stations — Kodai Lake, Coaker's Walk & misty waterfalls",
+                "description": "A tranquil hill station perched at 2,133m MSL in the Palani Hills, renowned for Kodai Lake, Pillar Rocks, Silver Cascade, and pine forests.",
+                "latitude": 10.2381,
+                "longitude": 77.4892,
+                "city": "Kodaikanal",
+                "district": "Dindigul",
+                "state": "Tamil Nadu",
+                "country": "India",
+                "region": "Palani Hills, Western Ghats",
+                "aliases": ["kodaikanal", "kodai", "kodaikanal hills", "kodai hills"],
+                "search_terms": ["kodaikanal", "viewpoints", "waterfalls", "lake", "trekking"],
+                "activities": ["viewpoints", "waterfalls", "boating", "trekking"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.9,
+                "popularity": 97
+            },
+            "ooty": {
+                "id": "p-ooty",
+                "slug": "ooty",
+                "name": "Ooty",
+                "display_name": "Ooty (Udhagamandalam), Nilgiris",
+                "type": "HILL",
+                "category": "mountain",
+                "subcategory": "tea_plantation",
+                "tagline": "Queen of Hill Stations — Nilgiri Mountain Toy Train & Doddabetta Peak",
+                "description": "The capital of the Nilgiris district, famous for Doddabetta Peak, Botanical Gardens, UNESCO heritage toy train, tea estates, and homemade chocolates.",
+                "latitude": 11.4102,
+                "longitude": 76.6950,
+                "city": "Udhagamandalam",
+                "district": "The Nilgiris",
+                "state": "Tamil Nadu",
+                "country": "India",
+                "region": "Nilgiri Hills, Western Ghats",
+                "aliases": ["ooty", "udhagamandalam", "ooti", "oothy", "ooty hills"],
+                "search_terms": ["ooty", "nilgiris", "toy train", "tea estates", "doddabetta"],
+                "activities": ["tea_estates", "toy_train", "viewpoints", "boating"],
+                "status": "PUBLISHED",
+                "verified": True,
+                "version": 1,
+                "createdBy": "Pranav",
+                "createdAt": "2026-08-20T10:00:00Z",
+                "image": "https://images.unsplash.com/photo-1589705298607-4e9640426b38?auto=format&fit=crop&w=1000&q=80",
+                "rating": 4.9,
+                "popularity": 97
+            },
             "suruli-waterfalls": {
                 "id": "p-1",
                 "slug": "suruli-waterfalls",
                 "name": "Suruli Waterfalls",
-                "district": "Theni",
+                "display_name": "Suruli Waterfalls, Theni",
+                "type": "WATERFALL",
                 "category": "waterfall",
                 "tagline": "Scenic 150ft 2-tier cascading falls",
-                "description": "Located in Theni district, Tamil Nadu.",
+                "description": "Located in Theni district, Tamil Nadu. Renowned for its 2-stage drop and medicinal herbal stream.",
                 "latitude": 9.6644,
                 "longitude": 77.2653,
-                "elevation": "450m MSL",
+                "city": "Cumbum / Uthamapalayam",
+                "district": "Theni",
+                "state": "Tamil Nadu",
+                "country": "India",
+                "region": "Theni, Western Ghats",
+                "aliases": ["suruli", "suruli falls", "suruli waterfall", "suruli aruvi", "suruli waterfalls"],
+                "search_terms": ["suruli", "waterfall", "theni waterfalls", "falls near theni"],
+                "activities": ["waterfalls", "bathing", "nature", "photography"],
                 "status": "PUBLISHED",
                 "verified": True,
                 "version": 1,
@@ -1253,8 +1709,8 @@ class PlacesService:
         return place_record
 
     def create_place_with_lifecycle(self, name: str, district: str, category: str, latitude: float, longitude: float, tagline: str, user: UserContext) -> dict:
-        if latitude < 8.0 or latitude > 13.6 or longitude < 76.0 or longitude > 80.5:
-            raise ValidationException(f"Latitude/Longitude ({latitude}°N, {longitude}°E) falls outside Tamil Nadu WGS84 bounds (8.0°N-13.6°N, 76.0°E-80.5°E).")
+        if latitude < -90.0 or latitude > 90.0 or longitude < -180.0 or longitude > 180.0:
+            raise ValidationException(f"Latitude/Longitude ({latitude}°N, {longitude}°E) falls outside valid WGS84 bounds.")
 
         slug = name.lower().replace(" ", "-").replace("'", "")
         place_record = {
@@ -1312,11 +1768,190 @@ class PlacesService:
         if identifier in self._places_db:
             return self._places_db[identifier]
         for p in self._places_db.values():
-            if p["id"] == identifier or p["slug"] == identifier:
+            if p.get("id") == identifier or p.get("slug") == identifier or (p.get("name") and p["name"].lower() == identifier.lower()):
                 return p
         raise ResourceNotFoundException("Place", identifier)
 
     def get_all_places(self) -> List[dict]:
         return list(self._places_db.values())
 
+    def _build_resolved_dict(self, place: dict, confidence: str, matched_alias: str = None, extracted_activity: str = None) -> dict:
+        return {
+            "canonicalPlaceId": place.get("id"),
+            "canonicalName": place.get("name"),
+            "slug": place.get("slug"),
+            "displayName": place.get("display_name") or f"{place.get('name')}, {place.get('district') or place.get('city') or place.get('state')}",
+            "confidence": confidence,
+            "matchedAlias": matched_alias or place.get("name"),
+            "placeType": (place.get("type") or "LOCATION").upper(),
+            "category": place.get("category", "nature"),
+            "subcategory": place.get("subcategory"),
+            "city": place.get("city") or place.get("district"),
+            "district": place.get("district"),
+            "state": place.get("state", "Tamil Nadu"),
+            "region": place.get("region") or f"{place.get('district') or place.get('state')}, India",
+            "latitude": place.get("latitude"),
+            "longitude": place.get("longitude"),
+            "activities": place.get("activities", []),
+            "extractedActivity": extracted_activity,
+            "placeObject": place
+        }
+
+    def resolve_destination(self, query: str) -> dict:
+        """
+        Intelligent Multi-Pass Destination & Place Resolver
+        """
+        if not query or not str(query).strip():
+            return {
+                "canonicalPlaceId": None,
+                "canonicalName": None,
+                "slug": None,
+                "displayName": None,
+                "confidence": "UNRESOLVED",
+                "matchedAlias": None,
+                "placeType": "UNKNOWN",
+                "city": None,
+                "district": None,
+                "state": None,
+                "region": "India",
+                "latitude": None,
+                "longitude": None,
+                "activities": [],
+                "extractedActivity": None,
+                "placeObject": None
+            }
+
+        raw_query = str(query).strip()
+        clean_q = raw_query.lower()
+
+        # Activity Extraction
+        activity_keywords = ["kayaking", "rafting", "trekking", "camping", "surfing", "paragliding", "temple", "temples", "waterfall", "waterfalls", "beach", "beaches", "food", "cafes", "viewpoint", "viewpoints"]
+        extracted_activity = None
+        target_place_query = clean_q
+
+        for act in activity_keywords:
+            if re.search(r"\b" + act + r"\b", clean_q):
+                extracted_activity = act
+                target_place_query = re.sub(r"\b" + act + r"\b", "", target_place_query).strip()
+                break
+
+        # Cleanup query prefix/suffix
+        target_place_query = re.sub(r"^(?:plan\s+a?\s*(?:surfing|paragliding|skydiving|scuba|scuba\s+diving|kayaking|river\s+rafting|rafting)?\s*(?:trip|ride|tour|experience)?\s*(?:to|in|inside|around)?|trip\s+to|trip\s+in|waterfalls?\s+near|temples?\s+in|food\s+in|viewpoints?\s+in)\s*", "", target_place_query, flags=re.IGNORECASE).strip()
+        if not target_place_query:
+            target_place_query = clean_q
+
+        # Pass 1: Direct Slug / ID Match
+        for slug, place in self._places_db.items():
+            if clean_q == slug or target_place_query == slug or clean_q == place.get("id", "").lower():
+                return self._build_resolved_dict(place, confidence="HIGH", matched_alias=slug, extracted_activity=extracted_activity)
+
+        # Pass 2: Exact Name / Display Name / Alias Match
+        for slug, place in self._places_db.items():
+            name_clean = (place.get("name") or "").lower()
+            disp_clean = (place.get("display_name") or "").lower()
+            aliases = [a.lower() for a in place.get("aliases", [])]
+
+            if clean_q in [name_clean, disp_clean] or clean_q in aliases:
+                return self._build_resolved_dict(place, confidence="HIGH", matched_alias=clean_q, extracted_activity=extracted_activity)
+            if target_place_query in [name_clean, disp_clean] or target_place_query in aliases:
+                return self._build_resolved_dict(place, confidence="HIGH", matched_alias=target_place_query, extracted_activity=extracted_activity)
+
+        # Pass 3: Token Substring / Fuzzy Search
+        best_place = None
+        best_score = 0.0
+        matched_alias_found = None
+
+        for slug, place in self._places_db.items():
+            name_clean = (place.get("name") or "").lower()
+            aliases = [a.lower() for a in place.get("aliases", [])]
+            search_terms = [s.lower() for s in place.get("search_terms", [])]
+            city = (place.get("city") or place.get("district") or "").lower()
+            district = (place.get("district") or "").lower()
+
+            score = 0.0
+            matched_term = None
+
+            q_test = target_place_query if target_place_query else clean_q
+            if len(q_test) >= 3:
+                if q_test in name_clean or name_clean in q_test:
+                    score = 0.95
+                    matched_term = name_clean
+                elif any(q_test in a or a in q_test for a in aliases):
+                    score = 0.90
+                    matched_term = q_test
+                elif any(q_test in s for s in search_terms):
+                    score = 0.85
+                    matched_term = q_test
+                elif q_test in city or q_test in district:
+                    score = 0.88
+                    matched_term = city
+
+            if score > best_score:
+                best_score = score
+                best_place = place
+                matched_alias_found = matched_term
+
+        if best_place and best_score >= 0.70:
+            conf = "HIGH" if best_score >= 0.85 else "MEDIUM"
+            return self._build_resolved_dict(best_place, confidence=conf, matched_alias=matched_alias_found, extracted_activity=extracted_activity)
+
+        # Pass 4: Unresolved Fallback
+        return {
+            "canonicalPlaceId": None,
+            "canonicalName": raw_query.title(),
+            "slug": None,
+            "displayName": raw_query.title(),
+            "confidence": "UNRESOLVED",
+            "matchedAlias": None,
+            "placeType": "UNKNOWN",
+            "city": None,
+            "district": None,
+            "state": None,
+            "region": "India",
+            "latitude": None,
+            "longitude": None,
+            "activities": [],
+            "extractedActivity": extracted_activity,
+            "placeObject": None
+        }
+
+    def find_nearby_places(self, lat: float, lng: float, radius_km: float = 50.0, category: Optional[str] = None, place_type: Optional[str] = None, min_rating: float = 0.0) -> List[dict]:
+        results = []
+        for slug, place in self._places_db.items():
+            p_lat = place.get("latitude")
+            p_lng = place.get("longitude")
+            if p_lat is None or p_lng is None:
+                continue
+            dist_km = calculate_haversine(lat, lng, p_lat, p_lng)
+            if dist_km <= radius_km:
+                if category and category.lower() != "all":
+                    p_cat = (place.get("category") or "").lower()
+                    if category.lower() not in p_cat:
+                        continue
+                if place_type and place_type.lower() != "all":
+                    p_type = (place.get("type") or "").lower()
+                    if place_type.lower() not in p_type:
+                        continue
+                place_copy = dict(place)
+                place_copy["distanceKm"] = dist_km
+                results.append(place_copy)
+        results.sort(key=lambda x: x["distanceKm"])
+        return results
+
+    def search_places_by_category_and_location(self, query: str, category: Optional[str] = None, radius_km: float = 50.0) -> Dict[str, Any]:
+        resolved = self.resolve_destination(query)
+        if resolved["confidence"] in ["HIGH", "MEDIUM"] and resolved["latitude"] and resolved["longitude"]:
+            nearby = self.find_nearby_places(resolved["latitude"], resolved["longitude"], radius_km=radius_km, category=category)
+            return {
+                "resolvedDestination": resolved,
+                "category": category,
+                "nearbyPlaces": nearby
+            }
+        return {
+            "resolvedDestination": resolved,
+            "category": category,
+            "nearbyPlaces": []
+        }
+
 places_service = PlacesService()
+

@@ -30,18 +30,18 @@ def test_wgs84_geofence_validation():
     assert res_valid.status_code == 200
     assert res_valid.json()["data"]["name"] == "Kodaikanal Lake View"
 
-    # Invalid Non-TN Coordinates (Mumbai: 19.076°N, 72.8777°E)
+    # Invalid WGS84 Coordinates (Latitude 190.076°N)
     invalid_payload = {
-        "name": "Gateway of India",
-        "district": "Mumbai",
+        "name": "Invalid Global Location",
+        "district": "Orbit",
         "category": "heritage",
-        "latitude": 19.076,
+        "latitude": 190.076,
         "longitude": 72.8777,
-        "tagline": "Non TN location"
+        "tagline": "Invalid WGS84 location"
     }
     res_invalid = client.post("/api/v1/places", json=invalid_payload)
     assert res_invalid.status_code == 400
-    assert "Latitude 19.076" in res_invalid.json()["error"]["message"]
+    assert "Latitude 190.076" in res_invalid.json()["error"]["message"]
 
 # 3. Test Spatial Duplicate Detection Engine
 def test_spatial_duplicate_detection():

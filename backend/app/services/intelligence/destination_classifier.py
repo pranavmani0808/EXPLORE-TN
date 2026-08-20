@@ -154,6 +154,18 @@ DESTINATION_CATALOG: Dict[str, Dict[str, Any]] = {
             {"id": "cafes", "label": "Mountain Cafés", "icon": "☕", "categoryKey": "food"},
         ]
     },
+    "zanskar river": {
+        "destination": "Zanskar River",
+        "region": "Ladakh",
+        "destinationTypes": ["RIVER", "ADVENTURE", "MOUNTAIN"],
+        "primaryTagline": "High-altitude Himalayan river for world-class whitewater kayaking & Chadar trek",
+        "interests": [
+            {"id": "kayaking", "label": "Kayaking & Whitewater Rafting", "icon": "🛶", "categoryKey": "adventure"},
+            {"id": "camping", "label": "Riverside Camping & Stays", "icon": "🏕️", "categoryKey": "camping"},
+            {"id": "gorge", "label": "Zanskar Canyon & Gorge Views", "icon": "🏔️", "categoryKey": "viewpoints"},
+            {"id": "food", "label": "Local Dhaba Food & Rest Stops", "icon": "☕", "categoryKey": "food"},
+        ]
+    },
 }
 
 class DestinationClassifier:
@@ -161,16 +173,59 @@ class DestinationClassifier:
     def classify_destination(cls, destination_name: str) -> Dict[str, Any]:
         key = destination_name.strip().lower()
         
-        # Check exact catalog match
+        # 1. Check exact catalog match
         if key in DESTINATION_CATALOG:
             return DESTINATION_CATALOG[key]
             
-        # Partial match
+        # 2. Check canonical places_service resolver
+        try:
+            from backend.app.services.places_service import places_service
+            resolved = places_service.resolve_destination(destination_name)
+            if resolved and resolved.get("confidence") in ["HIGH", "MEDIUM"]:
+                place_obj = resolved.get("placeObject") or {}
+                name = resolved.get("canonicalName") or destination_name.title()
+                p_type = resolved.get("placeType") or "LOCATION"
+                region = resolved.get("region") or resolved.get("state") or "India"
+                activities = resolved.get("activities") or []
+                category = resolved.get("category") or "nature"
+
+                interests = []
+                if "kayaking" in activities or "rafting" in activities or "adventure" in category:
+                    interests.append({"id": "kayaking", "label": "Kayaking & Whitewater Rafting", "icon": "🛶", "categoryKey": "adventure"})
+                    interests.append({"id": "camping", "label": "Riverside Camping & Stays", "icon": "🏕️", "categoryKey": "camping"})
+                    interests.append({"id": "viewpoints", "label": "Gorge & Mountain Views", "icon": "🏔️", "categoryKey": "viewpoints"})
+                    interests.append({"id": "food", "label": "Local Food & Rest Stops", "icon": "☕", "categoryKey": "food"})
+                elif "waterfall" in category or "waterfalls" in activities:
+                    interests.append({"id": "waterfalls", "label": "Waterfalls & Streams", "icon": "💦", "categoryKey": "waterfalls"})
+                    interests.append({"id": "nature", "label": "Nature Walks", "icon": "🌿", "categoryKey": "nature"})
+                    interests.append({"id": "viewpoints", "label": "Scenic Spots", "icon": "🌄", "categoryKey": "viewpoints"})
+                    interests.append({"id": "food", "label": "Local Food", "icon": "🍛", "categoryKey": "food"})
+                elif "temple" in category or "spiritual" in activities:
+                    interests.append({"id": "temples", "label": "Temples & Heritage", "icon": "🛕", "categoryKey": "temple"})
+                    interests.append({"id": "heritage", "label": "Historical Architecture", "icon": "🏛️", "categoryKey": "heritage"})
+                    interests.append({"id": "food", "label": "Local Food", "icon": "🍛", "categoryKey": "food"})
+                else:
+                    interests.append({"id": "sights", "label": "Top Sights & Attractions", "icon": "🛕", "categoryKey": "sights"})
+                    interests.append({"id": "food", "label": "Local Food & Dining", "icon": "🍛", "categoryKey": "food"})
+                    interests.append({"id": "nature", "label": "Nature & Viewpoints", "icon": "🌿", "categoryKey": "nature"})
+                    interests.append({"id": "heritage", "label": "Culture & Heritage", "icon": "🏛️", "categoryKey": "heritage"})
+
+                return {
+                    "destination": name,
+                    "region": region,
+                    "destinationTypes": [p_type, category.upper()],
+                    "primaryTagline": place_obj.get("tagline") or f"Explore {name}",
+                    "interests": interests
+                }
+        except Exception:
+            pass
+
+        # 3. Partial catalog match
         for cat_key, profile in DESTINATION_CATALOG.items():
             if cat_key in key or key in cat_key:
                 return profile
 
-        # Dynamic Fallback for any unknown destination
+        # 4. Dynamic Fallback for any unknown destination
         clean_title = destination_name.strip().title()
         return {
             "destination": clean_title,
@@ -188,3 +243,4 @@ class DestinationClassifier:
         }
 
 destination_classifier = DestinationClassifier()
+
