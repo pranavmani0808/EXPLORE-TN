@@ -22,7 +22,8 @@ const sessionsMemory = new Map<string, any>();
 
 async function handleApiRequest(request: Request): Promise<Response | null> {
   const url = new URL(request.url);
-  const path = url.pathname;
+  const path = url.pathname.replace(/\/+$/, "");
+  const method = request.method.toUpperCase();
 
   // 1. Health Endpoint: /healthz & /readyz
   if (path === "/healthz" || path === "/readyz") {
@@ -37,7 +38,7 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
   }
 
   // 2. AI Trip Copilot Endpoint: POST /api/v1/planner/chat
-  if (path === "/api/v1/planner/chat" && request.method === "POST") {
+  if (path === "/api/v1/planner/chat" && method === "POST") {
     try {
       const body = await request.clone().json().catch(() => ({}));
       const userMsg: string = body.message || body.user_message || "Plan a trip to Madurai";
