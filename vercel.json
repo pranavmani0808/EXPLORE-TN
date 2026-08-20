@@ -1,21 +1,27 @@
 {
   "version": 2,
-  "rewrites": [
+  "builds": [
     {
-      "source": "/healthz",
-      "destination": "/api/index"
+      "src": "api/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/healthz",
+      "dest": "api/index.py"
     },
     {
-      "source": "/readyz",
-      "destination": "/api/index"
+      "src": "/readyz",
+      "dest": "api/index.py"
     },
     {
-      "source": "/api/v1/:path*",
-      "destination": "/api/index"
+      "src": "/api/v1/(.*)",
+      "dest": "api/index.py"
     },
     {
-      "source": "/api/:path*",
-      "destination": "/api/index"
+      "src": "/api/(.*)",
+      "dest": "api/index.py"
     }
   ]
 }

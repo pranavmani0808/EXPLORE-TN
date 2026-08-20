@@ -4,6 +4,8 @@ import { MapPin, Star, ArrowUpRight } from "lucide-react";
 import type { Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 
+import { SafeImage } from "@/components/ui/safe-image";
+
 export function PlaceCard({ place, size = "md" }: { place: Place; size?: "md" | "lg" }) {
   return (
     <motion.article
@@ -15,8 +17,9 @@ export function PlaceCard({ place, size = "md" }: { place: Place; size?: "md" | 
     >
       <Link to="/place/$slug" params={{ slug: place.slug }} className="block">
         <div className={cn("relative overflow-hidden", size === "lg" ? "h-80" : "h-56")}>
-          <img
+          <SafeImage
             src={place.image}
+            category={place.category}
             alt={place.name}
             loading="lazy"
             className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
