@@ -1,9 +1,12 @@
 import pytest
+import jwt, time
 from fastapi.testclient import TestClient
 from backend.app.main import app
+from backend.app.core.config import settings
 from backend.app.core.security import decode_supabase_jwt, UserContext
 
 client = TestClient(app)
+ADMIN_TOKEN = jwt.encode({"sub": "usr-sa-1", "email": "admin@exploretn.com", "app_metadata": {"role": "super_admin"}, "exp": int(time.time()) + 3600}, settings.SUPABASE_JWT_SECRET, algorithm=settings.ALGORITHM)
 
 # 1. Test Infrastructure Health & Readiness
 def test_health_and_readiness():
@@ -26,20 +29,19 @@ def test_wgs84_geofence_validation():
         "longitude": 77.5000,
         "tagline": "Scenic high altitude star shaped lake"
     }
-    res_valid = client.post("/api/v1/places", json=valid_payload)
+    res_valid = client.post("/api/v1/places", json=valid_payload, headers={"Authorization": f"Bearer {ADMIN_TOKEN}"})
     assert res_valid.status_code == 200
     assert res_valid.json()["data"]["name"] == "Kodaikanal Lake View"
 
-    # Invalid WGS84 Coordinates (Latitude 190.076°N)
     invalid_payload = {
-        "name": "Invalid Global Location",
-        "district": "Orbit",
-        "category": "heritage",
+        "name": "Mumbai Beach",
+        "district": "Mumbai",
+        "category": "coastal",
         "latitude": 190.076,
         "longitude": 72.8777,
         "tagline": "Invalid WGS84 location"
     }
-    res_invalid = client.post("/api/v1/places", json=invalid_payload)
+    res_invalid = client.post("/api/v1/places", json=invalid_payload, headers={"Authorization": f"Bearer {ADMIN_TOKEN}"})
     assert res_invalid.status_code == 400
     assert "Latitude 190.076" in res_invalid.json()["error"]["message"]
 
@@ -54,7 +56,7 @@ def test_spatial_duplicate_detection():
         "longitude": 77.2655,
         "tagline": "Duplicate entry"
     }
-    res = client.post("/api/v1/places", json=dup_payload)
+    res = client.post("/api/v1/places", json=dup_payload, headers={"Authorization": f"Bearer {ADMIN_TOKEN}"})
     assert res.status_code == 400
     assert "Potential spatial duplicate detected" in res.json()["error"]["message"]
 

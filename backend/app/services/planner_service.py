@@ -33,18 +33,21 @@ class PlannerState(BaseModel):
 
 class PlannerService:
     def __init__(self):
-        self._conversations: Dict[str, dict] = {}
+        # Keyed by (user_id, conversation_id) for strict multi-tenant isolation
+        self._conversations: Dict[Tuple[str, str], dict] = {}
 
-    def get_or_create_conversation(self, conversation_id: Optional[str] = None) -> Tuple[str, dict]:
+    def get_or_create_conversation(self, user_id: str, conversation_id: Optional[str] = None) -> Tuple[str, dict]:
         cid = conversation_id or f"conv-{uuid.uuid4().hex[:8]}"
-        if cid not in self._conversations:
-            self._conversations[cid] = {
+        key = (user_id, cid)
+        if key not in self._conversations:
+            self._conversations[key] = {
                 "conversationId": cid,
+                "userId": user_id,
                 "messages": [],
                 "state": PlannerState().model_dump(),
                 "updatedAt": time.strftime("%Y-%m-%dT%H:%M:%SZ")
             }
-        return cid, self._conversations[cid]
+        return cid, self._conversations[key]
 
     def classify_intent(self, text: str) -> str:
         lower = text.lower().strip()
@@ -178,8 +181,8 @@ class PlannerService:
                 
         return filtered[:4] if filtered else matching_places[:3]
 
-    def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str) -> dict:
-        cid, session = self.get_or_create_conversation(conversation_id)
+    def process_chat_message(self, conversation_id: Optional[str], user_message: str, trace_id: str, user_id: str = "anonymous") -> dict:
+        cid, session = self.get_or_create_conversation(user_id, conversation_id)
         
         prev_state = session["state"]
         structured_intent = intent_extractor.extract_intent(user_message, prev_state)

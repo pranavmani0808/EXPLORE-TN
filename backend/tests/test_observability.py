@@ -43,8 +43,12 @@ def test_error_taxonomy_category_mapping():
     assert perm_exc.error_category == "AUTH_ERROR"
 
 # 3. Test Real-Time Telemetry API Endpoint (GET /api/v1/admin/telemetry)
+import jwt, time
+from backend.app.core.config import settings
+
 def test_realtime_telemetry_endpoint():
-    res = client.get("/api/v1/admin/telemetry")
+    token = jwt.encode({"sub": "usr-sa-1", "email": "admin@exploretn.com", "app_metadata": {"role": "super_admin"}, "exp": int(time.time()) + 3600}, settings.SUPABASE_JWT_SECRET, algorithm=settings.ALGORITHM)
+    res = client.get("/api/v1/admin/telemetry", headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
     body = res.json()
     assert "data" in body

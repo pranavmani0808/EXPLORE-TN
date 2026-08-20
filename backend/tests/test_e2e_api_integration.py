@@ -104,8 +104,12 @@ def test_e2e_telemetry_health_flow():
     assert body["database"] == "healthy"
 
 # 10. 📜 Audit Trail Logging Flow E2E Chain
+import jwt, time
+from backend.app.core.config import settings
+
 def test_e2e_audit_trail_flow():
-    res = client.get("/api/v1/admin/telemetry")
+    token = jwt.encode({"sub": "usr-sa-1", "email": "admin@exploretn.com", "app_metadata": {"role": "super_admin"}, "exp": int(time.time()) + 3600}, settings.SUPABASE_JWT_SECRET, algorithm=settings.ALGORITHM)
+    res = client.get("/api/v1/admin/telemetry", headers={"Authorization": f"Bearer {token}"})
     assert res.status_code == 200
     body = res.json()
     assert "errorTaxonomy" in body["data"]

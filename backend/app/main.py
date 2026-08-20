@@ -20,6 +20,7 @@ from backend.app.api.v1.jobs import router as jobs_router
 from backend.app.api.v1.planner import router as planner_router
 from backend.app.api.v1.trails import router as trails_router
 from backend.app.api.v1.routes_engine import router as routes_engine_router
+from backend.app.api.v1.user_resources import router as user_resources_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -96,6 +97,7 @@ app.include_router(jobs_router, prefix=settings.API_V1_STR)
 app.include_router(planner_router, prefix=settings.API_V1_STR)
 app.include_router(trails_router, prefix=settings.API_V1_STR)
 app.include_router(routes_engine_router, prefix=settings.API_V1_STR)
+app.include_router(user_resources_router, prefix=settings.API_V1_STR)
 app.include_router(routes_engine_router, prefix="/api")
 
 if __name__ == "__main__":
