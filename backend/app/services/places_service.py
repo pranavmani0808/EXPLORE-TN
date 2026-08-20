@@ -1840,20 +1840,25 @@ class PlacesService:
         if not target_place_query:
             target_place_query = clean_q
 
+        norm_q = " ".join(re.sub(r"[^\w\s]", " ", clean_q).split())
+        norm_target = " ".join(re.sub(r"[^\w\s]", " ", target_place_query).split())
+
         # Pass 1: Direct Slug / ID Match
         for slug, place in self._places_db.items():
-            if clean_q == slug or target_place_query == slug or clean_q == place.get("id", "").lower():
+            if clean_q == slug or target_place_query == slug or norm_target == slug or clean_q == place.get("id", "").lower():
                 return self._build_resolved_dict(place, confidence="HIGH", matched_alias=slug, extracted_activity=extracted_activity)
 
-        # Pass 2: Exact Name / Display Name / Alias Match
+        # Pass 2: Exact Name / Display Name / Alias Match (Punctuation-Insensitive)
         for slug, place in self._places_db.items():
             name_clean = (place.get("name") or "").lower()
             disp_clean = (place.get("display_name") or "").lower()
             aliases = [a.lower() for a in place.get("aliases", [])]
+            norm_aliases = [" ".join(re.sub(r"[^\w\s]", " ", a).split()) for a in aliases]
+            norm_name = " ".join(re.sub(r"[^\w\s]", " ", name_clean).split())
 
-            if clean_q in [name_clean, disp_clean] or clean_q in aliases:
+            if clean_q in [name_clean, disp_clean] or clean_q in aliases or norm_q in norm_aliases or norm_q == norm_name:
                 return self._build_resolved_dict(place, confidence="HIGH", matched_alias=clean_q, extracted_activity=extracted_activity)
-            if target_place_query in [name_clean, disp_clean] or target_place_query in aliases:
+            if target_place_query in [name_clean, disp_clean] or target_place_query in aliases or norm_target in norm_aliases or norm_target == norm_name:
                 return self._build_resolved_dict(place, confidence="HIGH", matched_alias=target_place_query, extracted_activity=extracted_activity)
 
         # Pass 3: Token Substring / Fuzzy Search
@@ -1871,7 +1876,7 @@ class PlacesService:
             score = 0.0
             matched_term = None
 
-            q_test = target_place_query if target_place_query else clean_q
+            q_test = norm_target if norm_target else norm_q
             if len(q_test) >= 3:
                 if q_test in name_clean or name_clean in q_test:
                     score = 0.95
