@@ -2,21 +2,97 @@ import { PlaceDTO, PlaceExploreCompositeDTO, HomeExperienceDTO, TripExperienceDT
 import { getApiBaseUrl } from "./config";
 
 export class PlaceApiRepository {
-  static async fetchPlaces(category?: string): Promise<PlaceDTO[]> {
+  static async fetchPlaces(category?: string, district?: string, query?: string): Promise<any[]> {
     try {
       const baseUrl = getApiBaseUrl();
-      const url = new URL(`${baseUrl}/api/v1/discover`);
-      if (category && category !== "All") {
+      const url = new URL(`${baseUrl}/api/v1/places`);
+      if (category && category !== "all" && category !== "All" && category !== "All Categories") {
         url.searchParams.append("category", category);
+      }
+      if (district && district !== "all" && district !== "All" && district !== "All Districts") {
+        url.searchParams.append("district", district);
+      }
+      if (query) {
+        url.searchParams.append("query", query);
       }
       const res = await fetch(url.toString());
       if (!res.ok) throw new Error(`HTTP error ${res.status}`);
-      const data = await res.json();
-      return data.places || [];
+      const payload = await res.json();
+      return payload.data || payload.places || [];
     } catch (err) {
-      console.warn("[PlaceApiRepository] Backend offline, returning repository cache:", err);
+      console.warn("[PlaceApiRepository] Server API places query failed:", err);
       return [];
     }
+  }
+
+  static async fetchPlaceByIdOrSlug(idOrSlug: string): Promise<any | null> {
+    try {
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/v1/places/${encodeURIComponent(idOrSlug)}`);
+      if (res.ok) {
+        const payload = await res.json();
+        return payload.data || null;
+      }
+    } catch (err) {
+      console.warn(`[PlaceApiRepository] Server API place fetch failed for ${idOrSlug}:`, err);
+    }
+    return null;
+  }
+
+  static async resolvePlace(query: string): Promise<any | null> {
+    try {
+      const baseUrl = getApiBaseUrl();
+      const res = await fetch(`${baseUrl}/api/v1/places/resolve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query })
+      });
+      if (res.ok) {
+        const payload = await res.json();
+        return payload.data || null;
+      }
+    } catch (err) {
+      console.warn(`[PlaceApiRepository] Server API place resolve failed for query "${query}":`, err);
+    }
+    return null;
+  }
+
+  static async fetchNearbyPlaces(lat: number, lng: number, radius: number = 50, category?: string): Promise<any[]> {
+    try {
+      const baseUrl = getApiBaseUrl();
+      const url = new URL(`${baseUrl}/api/v1/places/nearby`);
+      url.searchParams.append("lat", lat.toString());
+      url.searchParams.append("lng", lng.toString());
+      url.searchParams.append("radius", radius.toString());
+      if (category) url.searchParams.append("category", category);
+
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const payload = await res.json();
+        return payload.data || [];
+      }
+    } catch (err) {
+      console.warn("[PlaceApiRepository] Server API nearby query failed:", err);
+    }
+    return [];
+  }
+
+  static async searchPlaces(q: string, category?: string): Promise<any[]> {
+    try {
+      const baseUrl = getApiBaseUrl();
+      const url = new URL(`${baseUrl}/api/v1/places/search`);
+      url.searchParams.append("q", q);
+      if (category) url.searchParams.append("category", category);
+
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const payload = await res.json();
+        return payload.data || [];
+      }
+    } catch (err) {
+      console.warn(`[PlaceApiRepository] Server API search failed for query "${q}":`, err);
+    }
+    return [];
   }
 
   // Experience-Oriented BFF Endpoint 1: Screen-Level Home Bundle
@@ -31,7 +107,7 @@ export class PlaceApiRepository {
         }
       }
     } catch (err) {
-      console.warn("[PlaceApiRepository] BFF Home Experience offline, falling back:", err);
+      console.warn("[PlaceApiRepository] BFF Home Experience offline:", err);
     }
     return {
       hero: {
@@ -43,9 +119,9 @@ export class PlaceApiRepository {
         imageAsset: "/assets/hero-ghats.jpg",
       },
       stats: [
-        { label: "Verified Places", value: "128+" },
+        { label: "Verified Places", value: "105+" },
         { label: "Ghat Routes", value: "42" },
-        { label: "District Guides", value: "14" },
+        { label: "District Guides", value: "38" },
         { label: "Community Scouts", value: "1,240" },
       ],
       curatedCollections: [
@@ -66,40 +142,6 @@ export class PlaceApiRepository {
           tagline: "Post-monsoon cascades in Nilgiris & Theni",
         },
       ],
-    };
-  }
-
-  // Experience-Oriented BFF Endpoint 2: Screen-Level Explore Unified Bundle
-  static async fetchExploreExperience(filters?: { district?: string; category?: string; query?: string }): Promise<PlaceExploreCompositeDTO> {
-    try {
-      const baseUrl = getApiBaseUrl();
-      const url = new URL(`${baseUrl}/api/v1/places/experience/explore`);
-      if (filters?.district) url.searchParams.append("district", filters.district);
-      if (filters?.category) url.searchParams.append("category", filters.category);
-      if (filters?.query) url.searchParams.append("query", filters.query);
-
-      const res = await fetch(url.toString());
-      if (res.ok) {
-        const payload = await res.json();
-        if (payload.data && payload.data.nodes) {
-          return payload.data;
-        }
-      }
-    } catch (err) {
-      console.warn("[PlaceApiRepository] BFF Explore Experience offline:", err);
-    }
-
-    return {
-      nodes: [],
-      activeFilters: {
-        district: filters?.district || "All Districts",
-        category: filters?.category || "All Categories",
-        query: filters?.query || "",
-      },
-      spatialExtent: {
-        center: [10.2381, 77.4892],
-        zoom: 7,
-      },
     };
   }
 

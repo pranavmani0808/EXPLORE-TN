@@ -98,6 +98,24 @@ async def search_places(request: Request, q: str, category: Optional[str] = None
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
+@router.get("/category/{category}", response_model=ResponseEnvelope[List[PlaceResponse]])
+async def get_places_by_category(category: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    data = places_service.get_places_by_category(category)
+    return ResponseEnvelope(
+        data=data,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/district/{district}", response_model=ResponseEnvelope[List[PlaceResponse]])
+async def get_places_by_district(district: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    data = places_service.get_places_by_district(district)
+    return ResponseEnvelope(
+        data=data,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
 @router.get("/categories", response_model=ResponseEnvelope[dict])
 async def list_place_categories(request: Request):
     trace_id = getattr(request.state, "trace_id", "tr-default")
