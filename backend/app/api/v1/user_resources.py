@@ -106,3 +106,26 @@ async def remove_favorite(place_id: str, request: Request, current_user: UserCon
         data=favorites,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
+
+# --- SAVED ROUTES ---
+@router.get("/routes", response_model=ResponseEnvelope[List[dict]])
+async def get_saved_routes(request: Request, current_user: UserContext = Depends(decode_supabase_jwt)):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    routes = user_service.get_saved_routes(current_user.id)
+    return ResponseEnvelope(
+        data=routes,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.post("/routes", response_model=ResponseEnvelope[dict])
+async def save_route(request: Request, payload: dict, current_user: UserContext = Depends(decode_supabase_jwt)):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    title = payload.get("title") or "Saved Route"
+    origin = payload.get("origin") or "Chennai"
+    destination = payload.get("destination") or "Madurai"
+    distance_km = float(payload.get("distanceKm") or 0.0)
+    route = user_service.save_route(current_user.id, title, origin, destination, distance_km)
+    return ResponseEnvelope(
+        data=route,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )

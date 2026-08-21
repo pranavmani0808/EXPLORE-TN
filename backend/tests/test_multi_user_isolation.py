@@ -112,3 +112,22 @@ def test_concurrent_user_ai_planner_isolation():
 
     # Verify complete isolation: User A state does not contain Kodaikanal, User B state does not contain Madurai
     assert data_a["plannerState"]["destination"] != data_b["plannerState"]["destination"]
+
+# 4. Test IDOR Protection on Saved Routes
+def test_idor_saved_routes_protection():
+    token_a = generate_test_jwt("user-a-123", "user_a@exploretn.com")
+    token_b = generate_test_jwt("user-b-456", "user_b@exploretn.com")
+
+    # User A saves a route
+    res_a = client.post(
+        "/api/v1/user/routes",
+        json={"title": "ECR Scenic Highway", "origin": "Chennai", "destination": "Pondicherry", "distanceKm": 155.0},
+        headers={"Authorization": f"Bearer {token_a}"}
+    )
+    assert res_a.status_code == 200
+    route_id = res_a.json()["data"]["id"]
+
+    # User B checks saved routes -> Must be empty
+    res_b_list = client.get("/api/v1/user/routes", headers={"Authorization": f"Bearer {token_b}"})
+    assert res_b_list.status_code == 200
+    assert len(res_b_list.json()["data"]) == 0
