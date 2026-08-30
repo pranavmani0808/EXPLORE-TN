@@ -67,7 +67,7 @@ class TNGeoService:
                 "lgdCode": d["code"]
             }
 
-        # 2. 25 Official Municipal Corporations
+        # 2. 25 Official Municipal Corporations (Cities)
         corporations = [
             {"id": "corp-chennai", "nameEn": "Greater Chennai Corporation", "nameTa": "பெருநகர சென்னை மாநகராட்சி", "dist": "dist-chennai", "lat": 13.0827, "lng": 80.2707, "code": "ULB-CORP-01"},
             {"id": "corp-madurai", "nameEn": "Madurai City Municipal Corporation", "nameTa": "மதுரை மாநகராட்சி", "dist": "dist-madurai", "lat": 9.9252, "lng": 78.1198, "code": "ULB-CORP-02"},
@@ -112,17 +112,29 @@ class TNGeoService:
                 "lgdCode": c["code"]
             }
 
-        # 3. Key Municipalities & Town Panchayats
+        # 3. Comprehensive Municipalities, Towns & Special Localities
         urban_localities = [
             {"id": "mun-ooty", "nameEn": "Udhagamandalam (Ooty) Municipality", "nameTa": "உதகமண்டலம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-nilgiris", "lat": 11.4102, "lng": 76.6950, "code": "ULB-MUN-01"},
-            {"id": "mun-kodaikanal", "nameEn": "Kodaikanal Municipality", "nameTa": "கொடைக்கானல் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-dindigul", "lat": 10.2381, "lng": 77.4892, "code": "ULB-MUN-02"},
-            {"id": "mun-theni", "nameEn": "Theni Allinagaram Municipality", "nameTa": "தேனி அல்லிநகரம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-theni", "lat": 10.0104, "lng": 77.4768, "code": "ULB-MUN-03"},
-            {"id": "mun-mettupalayam", "nameEn": "Mettupalayam Municipality", "nameTa": "மேட்டுப்பாளையம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-coimbatore", "lat": 11.2994, "lng": 76.9458, "code": "ULB-MUN-04"},
-            {"id": "tp-batlagundu", "nameEn": "Batlagundu Town Panchayat", "nameTa": "வத்தலகுண்டு பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-dindigul", "lat": 10.1583, "lng": 77.7611, "code": "ULB-TP-01"},
-            {"id": "tp-courtallam", "nameEn": "Courtallam Special Town Panchayat", "nameTa": "குற்றாலம் பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-tenkasi", "lat": 8.9304, "lng": 77.2694, "code": "ULB-TP-02"},
-            {"id": "tp-valparai", "nameEn": "Valparai Town Panchayat", "nameTa": "வால்பாறை பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-coimbatore", "lat": 10.3270, "lng": 76.9554, "code": "ULB-TP-03"},
-            {"id": "tp-gingee", "nameEn": "Gingee Town Panchayat", "nameTa": "செஞ்சி பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-villupuram", "lat": 12.2505, "lng": 79.4184, "code": "ULB-TP-04"},
-            {"id": "tp-yercaud", "nameEn": "Yercaud Town Panchayat", "nameTa": "ஏற்காடு பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-salem", "lat": 11.7753, "lng": 78.2093, "code": "ULB-TP-05"}
+            {"id": "mun-coonoor", "nameEn": "Coonoor Municipality", "nameTa": "குன்னூர் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-nilgiris", "lat": 11.3530, "lng": 76.7959, "code": "ULB-MUN-02"},
+            {"id": "tp-kotagiri", "nameEn": "Kotagiri Town Panchayat", "nameTa": "கோத்தகிரி பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-nilgiris", "lat": 11.4200, "lng": 76.8800, "code": "ULB-TP-01"},
+            {"id": "mun-kodaikanal", "nameEn": "Kodaikanal Municipality", "nameTa": "கொடைக்கானல் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-dindigul", "lat": 10.2381, "lng": 77.4892, "code": "ULB-MUN-03"},
+            {"id": "mun-palani", "nameEn": "Palani Municipality", "nameTa": "பழனி நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-dindigul", "lat": 10.4500, "lng": 77.5200, "code": "ULB-MUN-04"},
+            {"id": "tp-batlagundu", "nameEn": "Batlagundu Town Panchayat", "nameTa": "வத்தலகுண்டு பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-dindigul", "lat": 10.1583, "lng": 77.7611, "code": "ULB-TP-02"},
+            {"id": "mun-theni", "nameEn": "Theni Allinagaram Municipality", "nameTa": "தேனி அல்லிநகரம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-theni", "lat": 10.0104, "lng": 77.4768, "code": "ULB-MUN-05"},
+            {"id": "mun-periyakulam", "nameEn": "Periyakulam Municipality", "nameTa": "பெரியகுளம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-theni", "lat": 10.1200, "lng": 77.5500, "code": "ULB-MUN-06"},
+            {"id": "mun-bodi", "nameEn": "Bodinayakanur Municipality", "nameTa": "போடிநாயக்கனூர் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-theni", "lat": 10.0100, "lng": 77.3500, "code": "ULB-MUN-07"},
+            {"id": "mun-cumbum", "nameEn": "Cumbum Municipality", "nameTa": "கம்பம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-theni", "lat": 9.7340, "lng": 77.2810, "code": "ULB-MUN-08"},
+            {"id": "mun-mettupalayam", "nameEn": "Mettupalayam Municipality", "nameTa": "மேட்டுப்பாளையம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-coimbatore", "lat": 11.2994, "lng": 76.9458, "code": "ULB-MUN-09"},
+            {"id": "mun-pollachi", "nameEn": "Pollachi Municipality", "nameTa": "பொள்ளாச்சி நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-coimbatore", "lat": 10.6600, "lng": 77.0100, "code": "ULB-MUN-10"},
+            {"id": "tp-valparai", "nameEn": "Valparai Hill Township", "nameTa": "வால்பாறை நகரியம்", "level": "TOWN_PANCHAYAT", "dist": "dist-coimbatore", "lat": 10.3270, "lng": 76.9554, "code": "ULB-TP-03"},
+            {"id": "mun-rameswaram", "nameEn": "Rameswaram Special Municipality", "nameTa": "இராமேஸ்வரம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-ramanathapuram", "lat": 9.2876, "lng": 79.3129, "code": "ULB-MUN-11"},
+            {"id": "tp-thiruchendur", "nameEn": "Thiruchendur Town Panchayat", "nameTa": "திருச்செந்தூர் பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-thoothukudi", "lat": 8.4833, "lng": 78.1167, "code": "ULB-TP-04"},
+            {"id": "tp-courtallam", "nameEn": "Courtallam Special Town Panchayat", "nameTa": "குற்றாலம் பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-tenkasi", "lat": 8.9304, "lng": 77.2694, "code": "ULB-TP-05"},
+            {"id": "tp-mahabalipuram", "nameEn": "Mamallapuram (Mahabalipuram) Town Panchayat", "nameTa": "மாமல்லபுரம் பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-chengalpattu", "lat": 12.6269, "lng": 80.1927, "code": "ULB-TP-06"},
+            {"id": "mun-chidambaram", "nameEn": "Chidambaram Municipality", "nameTa": "சிதம்பரம் நகராட்சி", "level": "MUNICIPALITY", "dist": "dist-cuddalore", "lat": 11.3992, "lng": 79.6934, "code": "ULB-MUN-12"},
+            {"id": "tp-gingee", "nameEn": "Gingee Town Panchayat", "nameTa": "செஞ்சி பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-villupuram", "lat": 12.2505, "lng": 79.4184, "code": "ULB-TP-07"},
+            {"id": "tp-yercaud", "nameEn": "Yercaud Hill Town Panchayat", "nameTa": "ஏற்காடு பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-salem", "lat": 11.7753, "lng": 78.2093, "code": "ULB-TP-08"},
+            {"id": "tp-velankanni", "nameEn": "Velankanni Special Town Panchayat", "nameTa": "வேளாங்கண்ணி பேரூராட்சி", "level": "TOWN_PANCHAYAT", "dist": "dist-nagapattinam", "lat": 10.6800, "lng": 79.8300, "code": "ULB-TP-09"}
         ]
 
         for u in urban_localities:
@@ -141,12 +153,19 @@ class TNGeoService:
                 "lgdCode": u["code"]
             }
 
-        # 4. Rural Blocks & Village Panchayats / Habitations
+        # 4. Rural Blocks, Village Panchayats & Villages
         rural_nodes = [
             {"id": "blk-thirupparankundram", "nameEn": "Thirupparankundram Block & Suburb", "nameTa": "திருப்பரங்குன்றம் ஒன்றியம்", "level": "BLOCK", "dist": "dist-madurai", "lat": 9.8804, "lng": 78.0711, "code": "RLB-BLK-01"},
             {"id": "blk-vadipatti", "nameEn": "Vadipatti Panchayat Union Block", "nameTa": "வாடிப்பட்டி ஒன்றியம்", "level": "BLOCK", "dist": "dist-madurai", "lat": 10.0520, "lng": 77.9620, "code": "RLB-BLK-02"},
+            {"id": "blk-usilampatti", "nameEn": "Usilampatti Panchayat Union", "nameTa": "உசிலம்பட்டி ஒன்றியம்", "level": "BLOCK", "dist": "dist-madurai", "lat": 9.9700, "lng": 77.7900, "code": "RLB-BLK-03"},
+            {"id": "blk-melur", "nameEn": "Melur Panchayat Union Block", "nameTa": "மேலூர் ஒன்றியம்", "level": "BLOCK", "dist": "dist-madurai", "lat": 10.0300, "lng": 78.3300, "code": "RLB-BLK-04"},
             {"id": "vp-alagar-kovil", "nameEn": "Alagar Kovil Village Panchayat", "nameTa": "அழகர்கோவில் ஊராட்சி", "level": "VILLAGE_PANCHAYAT", "dist": "dist-madurai", "lat": 10.0740, "lng": 78.2130, "code": "RLB-VP-01"},
-            {"id": "vp-kumbakkarai", "nameEn": "Kumbakkarai Foothill Habitation", "nameTa": "கும்பக்கரை சிற்றூர்", "level": "HABITATION", "dist": "dist-theni", "lat": 10.1810, "lng": 77.5310, "code": "RLB-HAB-01"}
+            {"id": "vp-kumbakkarai", "nameEn": "Kumbakkarai Foothill Village", "nameTa": "கும்பக்கரை சிற்றூர்", "level": "HABITATION", "dist": "dist-theni", "lat": 10.1810, "lng": 77.5310, "code": "RLB-HAB-01"},
+            {"id": "vp-megamalai-village", "nameEn": "Highwavys Megamalai Village", "nameTa": "ஹைவேவிஸ் மேகமலை கிராமம்", "level": "VILLAGE_PANCHAYAT", "dist": "dist-theni", "lat": 9.7100, "lng": 77.3800, "code": "RLB-VP-02"},
+            {"id": "vp-masinagudi", "nameEn": "Masinagudi Forest Village Panchayat", "nameTa": "மசினகுடி வன கிராமம்", "level": "VILLAGE_PANCHAYAT", "dist": "dist-nilgiris", "lat": 11.5700, "lng": 76.6400, "code": "RLB-VP-03"},
+            {"id": "vp-dhanushkodi", "nameEn": "Dhanushkodi Coastal Village", "nameTa": "தனுஷ்கோடி கடலோரக் கிராமம்", "level": "HABITATION", "dist": "dist-ramanathapuram", "lat": 9.1764, "lng": 79.4140, "code": "RLB-HAB-02"},
+            {"id": "vp-kanadukathan", "nameEn": "Kanadukathan Chettinad Village", "nameTa": "கானாடு காத்தான் செட்டிநாடு கிராமம்", "level": "VILLAGE_PANCHAYAT", "dist": "dist-sivaganga", "lat": 10.1400, "lng": 78.7800, "code": "RLB-VP-04"},
+            {"id": "vp-poompuhar", "nameEn": "Poompuhar Coastal Heritage Village", "nameTa": "பூம்புகார் கடற்கரைக் கிராமம்", "level": "VILLAGE_PANCHAYAT", "dist": "dist-mayiladuthurai", "lat": 11.1400, "lng": 79.8500, "code": "RLB-VP-05"}
         ]
 
         for r_node in rural_nodes:
