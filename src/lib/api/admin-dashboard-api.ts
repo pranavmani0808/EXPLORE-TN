@@ -200,6 +200,29 @@ export interface AdminSettings {
   districts: string[];
 }
 
+export interface EntityPerformance {
+  entityId: string;
+  entityName: string;
+  category: string;
+  district: string;
+  latitude: number;
+  longitude: number;
+  totalViews: number;
+  uniqueVisitors: number;
+  savesCount: number;
+  reviewsCount: number;
+  rating: number;
+  hasBookingIntegration: boolean;
+  bookingNotice: string;
+  bookingRequests?: number;
+  confirmedBookings?: number;
+  cancelledBookings?: number;
+  completedBookings?: number;
+  conversionRatePct?: number;
+  status: string;
+  lastUpdated: string;
+}
+
 export class AdminDashboardApiRepository {
   private static baseUrl = '/api/v1/admin';
 
@@ -218,6 +241,13 @@ export class AdminDashboardApiRepository {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer fake-jwt-token-for-popzdesigngroup@gmail.com'
     };
+  }
+
+  static async getEntityPerformance(entityId: string): Promise<EntityPerformance> {
+    const res = await fetch(`${this.baseUrl}/entity/${encodeURIComponent(entityId)}/performance`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch entity performance');
+    const env = await res.json();
+    return env.data;
   }
 
   static async getOverview(): Promise<AdminDashboardMetrics> {

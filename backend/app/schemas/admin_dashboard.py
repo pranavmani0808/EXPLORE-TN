@@ -150,6 +150,29 @@ class UserRoleUpdateDTO(BaseModel):
     userId: str
     newRole: str
 
+class EntityPerformanceDTO(BaseModel):
+    entityId: str
+    entityName: str
+    category: str
+    district: str
+    latitude: float
+    longitude: float
+    totalViews: int
+    uniqueVisitors: int
+    savesCount: int
+    reviewsCount: int
+    rating: float
+    hasBookingIntegration: bool
+    bookingNotice: str
+    bookingRequests: Optional[int] = None
+    confirmedBookings: Optional[int] = None
+    cancelledBookings: Optional[int] = None
+    completedBookings: Optional[int] = None
+    conversionRatePct: Optional[float] = None
+    status: str
+    lastUpdated: str
+
+
 class AuditLogEntryDTO(BaseModel):
     id: str
     userEmail: str

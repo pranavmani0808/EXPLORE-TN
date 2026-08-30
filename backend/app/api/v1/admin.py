@@ -21,10 +21,24 @@ from backend.app.schemas.admin_dashboard import (
     ContentCmsSectionDTO,
     AdminSettingsDTO,
     AuditLogEntryDTO,
-    UserRoleUpdateDTO
+    UserRoleUpdateDTO,
+    EntityPerformanceDTO
 )
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations"])
+
+@router.get("/entity/{entity_id}/performance", response_model=ResponseEnvelope[EntityPerformanceDTO])
+async def get_entity_performance(
+    entity_id: str,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("destinations.view"))
+):
+    trace_id = getattr(request.state, "trace_id", "tr-perf") if request else "tr-perf"
+    perf = admin_dashboard_service.get_entity_performance(entity_id)
+    return ResponseEnvelope(
+        data=perf,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
 
 @router.get("/telemetry", response_model=ResponseEnvelope[dict])
 async def get_telemetry(
