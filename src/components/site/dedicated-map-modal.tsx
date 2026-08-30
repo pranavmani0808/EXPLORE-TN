@@ -23,11 +23,19 @@ import {
   Droplets,
   ChevronDown,
   Check,
+  Building2,
+  Building,
+  TreePine,
+  MapMarker,
+  Layers,
+  ArrowRight,
+  Info,
+  CheckCircle2
 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { LocationMiniExplorer } from "@/components/site/location-mini-explorer";
+import { TNGeoApiRepository, TNGeoNode, TNGeoAreaDetail } from "@/lib/api/tn-geo-api";
 
-// Category Definitions & Lucide Icon Mapping
 export interface CategoryConfig {
   id: string;
   shortLabel: string;
@@ -66,11 +74,71 @@ export function DedicatedMapModal({
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [isMoreOpen, setIsMoreOpen] = useState<boolean>(false);
 
+  // Administrative Geographic Directory State (Phase 1)
+  const [districts, setDistricts] = useState<TNGeoNode[]>([]);
+  const [selectedGeoNode, setSelectedGeoNode] = useState<TNGeoNode | null>(null);
+  const [areaDetail, setAreaDetail] = useState<TNGeoAreaDetail | null>(null);
+  const [geoSearchResults, setGeoSearchResults] = useState<TNGeoNode[]>([]);
+  const [isSearchingGeo, setIsSearchingGeo] = useState<boolean>(false);
+  const [currentZoomLevel, setCurrentZoomLevel] = useState<number>(7);
+
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const moreMenuRef = useRef<HTMLDivElement>(null);
   const leafletMapRef = useRef<any>(null);
   const markersRef = useRef<{ [key: string]: any }>({});
+  const geoMarkersRef = useRef<{ [key: string]: any }>({});
   const leafletModuleRef = useRef<any>(null);
+
+  // Load Administrative Districts on Init
+  useEffect(() => {
+    async function loadGeoDirectory() {
+      try {
+        const d = await TNGeoApiRepository.getDistricts();
+        setDistricts(d);
+      } catch (err) {
+        console.error("Failed to load TN Geo Directory", err);
+      }
+    }
+    loadGeoDirectory();
+  }, []);
+
+  // Search Engine Listener
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setGeoSearchResults([]);
+      setIsSearchingGeo(false);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearchingGeo(true);
+      try {
+        const res = await TNGeoApiRepository.searchGeo(searchQuery.trim());
+        setGeoSearchResults(res.nodes);
+      } catch (err) {
+        setGeoSearchResults([]);
+      } finally {
+        setIsSearchingGeo(false);
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  // Load Area Detail when Selected Area Changes
+  useEffect(() => {
+    if (!selectedGeoNode) {
+      setAreaDetail(null);
+      return;
+    }
+    async function loadDetail() {
+      try {
+        const det = await TNGeoApiRepository.getAreaDetail(selectedGeoNode.id);
+        setAreaDetail(det);
+      } catch (err) {
+        setAreaDetail(null);
+      }
+    }
+    loadDetail();
+  }, [selectedGeoNode]);
 
   // Close "More" dropdown when clicking outside
   useEffect(() => {
@@ -126,7 +194,7 @@ export function DedicatedMapModal({
 
       const map = L.map(mapContainerRef.current, {
         center: [11.5, 78.5],
-        zoom: 7,
+        zoom: 7.5,
         zoomControl: false,
         attributionControl: false,
       });
@@ -138,8 +206,13 @@ export function DedicatedMapModal({
 
       L.control.zoom({ position: "bottomright" }).addTo(map);
 
+      map.on("zoomend", () => {
+        setCurrentZoomLevel(map.getZoom());
+      });
+
       leafletMapRef.current = map;
       renderMarkers();
+      renderGeoMarkers();
     }
 
     initLeaflet();
@@ -153,7 +226,55 @@ export function DedicatedMapModal({
     };
   }, [isOpen]);
 
-  // Render Real WGS84 Decluttered Markers on Map
+  // Render Administrative Directory Markers
+  const renderGeoMarkers = () => {
+    const map = leafletMapRef.current;
+    const L = leafletModuleRef.current;
+    if (!map || !L) return;
+
+    Object.values(geoMarkersRef.current).forEach((m: any) => m.remove());
+    geoMarkersRef.current = {};
+
+    districts.forEach((dist) => {
+      const isSelected = selectedGeoNode?.id === dist.id;
+      const icon = L.divIcon({
+        className: `custom-geo-pin-${dist.id}`,
+        html: `
+          <div style="
+            background: ${isSelected ? '#3b82f6' : '#1e293b'};
+            color: #ffffff;
+            border: 2px solid ${isSelected ? '#93c5fd' : '#64748b'};
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 800;
+            font-family: monospace;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+          ">
+            <span style="width: 6px; height: 6px; border-radius: 50%; background: #60a5fa;"></span>
+            <span>${dist.nameEn}</span>
+          </div>
+        `,
+        iconSize: [110, 24],
+        iconAnchor: [55, 12]
+      });
+
+      const marker = L.marker([dist.latitude, dist.longitude], { icon, zIndexOffset: 200 }).addTo(map);
+      marker.on("click", async () => {
+        setSelectedGeoNode(dist);
+        map.flyTo([dist.latitude, dist.longitude], 9.5, { animate: true, duration: 1.2 });
+      });
+
+      geoMarkersRef.current[dist.id] = marker;
+    });
+  };
+
+  // Render Tourism Markers
   const renderMarkers = () => {
     const map = leafletMapRef.current;
     const L = leafletModuleRef.current;
@@ -174,8 +295,8 @@ export function DedicatedMapModal({
               background: ${isSelected ? '#10b981' : '#0f172a'};
               color: ${isSelected ? '#000000' : '#ffffff'};
               border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
-              width: ${isSelected ? '26px' : '18px'};
-              height: ${isSelected ? '26px' : '18px'};
+              width: ${isSelected ? '24px' : '16px'};
+              height: ${isSelected ? '24px' : '16px'};
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -183,12 +304,12 @@ export function DedicatedMapModal({
               box-shadow: 0 4px 14px rgba(0,0,0,0.5);
               transition: all 0.2s ease;
             ">
-              <span style="width: 6px; height: 6px; border-radius: 50%; background: ${isSelected ? '#000000' : '#38bdf8'};"></span>
+              <span style="width: 5px; height: 5px; border-radius: 50%; background: ${isSelected ? '#000000' : '#38bdf8'};"></span>
             </div>
           </div>
         `,
-        iconSize: [26, 26],
-        iconAnchor: [13, 13],
+        iconSize: [24, 24],
+        iconAnchor: [12, 12],
       });
 
       const marker = L.marker([place.latitude, place.longitude], {
@@ -196,7 +317,6 @@ export function DedicatedMapModal({
         zIndexOffset: isSelected ? 1000 : 100,
       }).addTo(map);
 
-      // Smart auto-directional decluttered tooltip positioning
       marker.bindTooltip(place.canonicalName || place.name, {
         permanent: isSelected,
         direction: "auto",
@@ -206,23 +326,28 @@ export function DedicatedMapModal({
 
       marker.on("click", () => {
         setSelectedPlace(place);
+        setSelectedGeoNode(null);
         map.flyTo([place.latitude, place.longitude], 11, { animate: true, duration: 1.2 });
       });
 
       markersRef.current[place.id] = marker;
     });
-
-    if (filteredPlaces.length > 0 && selectedPlace) {
-      const isSelectedInFilter = filteredPlaces.some((p) => p.id === selectedPlace.id);
-      if (!isSelectedInFilter) {
-        setSelectedPlace(filteredPlaces[0]);
-      }
-    }
   };
 
   useEffect(() => {
     renderMarkers();
-  }, [filteredPlaces, selectedPlace]);
+    renderGeoMarkers();
+  }, [filteredPlaces, selectedPlace, districts, selectedGeoNode]);
+
+  const selectSearchGeoNode = (node: TNGeoNode) => {
+    setSelectedGeoNode(node);
+    setSelectedPlace(null);
+    setSearchQuery("");
+    setGeoSearchResults([]);
+    if (leafletMapRef.current) {
+      leafletMapRef.current.flyTo([node.latitude, node.longitude], node.level === "DISTRICT" ? 9.5 : 12, { animate: true, duration: 1.2 });
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -243,9 +368,9 @@ export function DedicatedMapModal({
               TN
             </span>
             <div>
-              <h1 className="text-xs font-black text-white leading-none">ExplorerTN Unified Spatial Catalog</h1>
+              <h1 className="text-xs font-black text-white leading-none">Tamil Nadu Geographic Directory</h1>
               <p className="text-[9px] text-emerald-400 font-mono mt-0.5">
-                CartoDB Dark Engine • {filteredPlaces.length} places
+                38 Districts • 25 Corporations • Local Bodies • Phase 1
               </p>
             </div>
           </div>
@@ -261,12 +386,12 @@ export function DedicatedMapModal({
         </div>
 
         {/* Spotlight Search Bar */}
-        <div className="relative w-full sm:w-80 pointer-events-auto">
+        <div className="relative w-full sm:w-96 pointer-events-auto">
           <div className="bg-[#0a1419]/90 backdrop-blur-xl border border-white/15 hover:border-emerald-500/40 rounded-full px-3.5 py-2 shadow-2xl flex items-center gap-2 transition">
             <Search className="w-4 h-4 text-emerald-400 shrink-0" />
             <input
               type="text"
-              placeholder="Search places, districts, states..."
+              placeholder="Search Tamil Nadu areas (District, City, Town, Village)..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none"
@@ -277,16 +402,42 @@ export function DedicatedMapModal({
               </button>
             )}
           </div>
+
+          {/* Search Results Dropdown */}
+          {geoSearchResults.length > 0 && (
+            <div className="absolute top-full left-0 right-0 mt-2 bg-[#0a1419]/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl p-2 z-50 max-h-72 overflow-y-auto space-y-1">
+              <div className="px-3 py-1 text-[10px] font-mono text-emerald-400 font-bold uppercase border-b border-white/10">
+                Official Geographic Results ({geoSearchResults.length})
+              </div>
+              {geoSearchResults.map((node) => (
+                <button
+                  key={node.id}
+                  onClick={() => selectSearchGeoNode(node)}
+                  className="w-full text-left px-3 py-2 rounded-xl text-xs hover:bg-white/10 transition flex items-center justify-between text-white"
+                >
+                  <div>
+                    <div className="font-bold flex items-center gap-1.5">
+                      <span>{node.nameEn}</span>
+                      <span className="text-slate-400 text-[10px]">({node.nameTa})</span>
+                    </div>
+                    <div className="text-[10px] text-slate-400">
+                      {node.level} · {node.districtName} District · LGD {node.lgdCode}
+                    </div>
+                  </div>
+                  <ArrowRight className="w-3.5 h-3.5 text-emerald-400" />
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </header>
 
-      {/* Lightweight Floating Category Control Bar (Top-Left overlay, compact & minimal) */}
+      {/* Floating Category Control Bar */}
       <nav
         aria-label="Map Category Filters"
         className="absolute top-16 left-4 z-40 pointer-events-auto flex items-center gap-1.5 max-sm:right-4 max-sm:overflow-x-auto no-scrollbar"
       >
         <div className="bg-[#0a1419]/90 backdrop-blur-xl border border-white/15 rounded-2xl p-1.5 shadow-2xl flex items-center gap-1">
-          {/* Primary Categories */}
           {primaryCategories.map((cat) => {
             const Icon = cat.icon;
             const isActive = activeCategory === cat.id;
@@ -297,7 +448,6 @@ export function DedicatedMapModal({
                 type="button"
                 onClick={() => setActiveCategory(cat.id)}
                 title={cat.fullLabel}
-                aria-label={`Filter by ${cat.fullLabel}`}
                 className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
                   isActive
                     ? "bg-emerald-500 text-black shadow-md"
@@ -306,76 +456,91 @@ export function DedicatedMapModal({
               >
                 <Icon className={`w-3.5 h-3.5 ${isActive ? "text-black" : "text-slate-400"}`} />
                 <span>{cat.shortLabel}</span>
-                {cat.id === "all" && (
-                  <span className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full ${isActive ? "bg-black/20 text-black" : "bg-white/10 text-slate-400"}`}>
-                    {CANONICAL_PLACES.length}
-                  </span>
-                )}
               </button>
             );
           })}
-
-          {/* Secondary Categories "More ▾" Popover Menu */}
-          <div ref={moreMenuRef} className="relative">
-            <button
-              type="button"
-              onClick={() => setIsMoreOpen((prev) => !prev)}
-              title="More Categories"
-              aria-label="More category filters"
-              aria-expanded={isMoreOpen}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all duration-200 flex items-center gap-1.5 whitespace-nowrap cursor-pointer ${
-                activeSecondaryCategory
-                  ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                  : "text-slate-300 hover:text-white hover:bg-white/10"
-              }`}
-            >
-              <span>{activeSecondaryCategory ? activeSecondaryCategory.shortLabel : "More"}</span>
-              <ChevronDown className={`w-3.5 h-3.5 transition-transform duration-200 ${isMoreOpen ? "rotate-180 text-emerald-400" : "text-slate-400"}`} />
-            </button>
-
-            {/* "More ▾" Dropdown Popover */}
-            {isMoreOpen && (
-              <div
-                role="menu"
-                className="absolute top-full left-0 mt-2 w-48 bg-[#0a1419]/95 backdrop-blur-2xl border border-white/20 rounded-2xl shadow-2xl p-1.5 z-50 flex flex-col gap-0.5 animate-in fade-in zoom-in-95 duration-150"
-              >
-                {secondaryCategories.map((cat) => {
-                  const Icon = cat.icon;
-                  const isActive = activeCategory === cat.id;
-
-                  return (
-                    <button
-                      key={cat.id}
-                      type="button"
-                      role="menuitem"
-                      onClick={() => {
-                        setActiveCategory(cat.id);
-                        setIsMoreOpen(false);
-                      }}
-                      title={cat.fullLabel}
-                      aria-label={`Filter by ${cat.fullLabel}`}
-                      className={`w-full px-3 py-2 rounded-xl text-xs font-semibold transition flex items-center justify-between cursor-pointer ${
-                        isActive
-                          ? "bg-emerald-500 text-black font-bold"
-                          : "text-slate-300 hover:text-white hover:bg-white/10"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Icon className={`w-3.5 h-3.5 ${isActive ? "text-black" : "text-slate-400"}`} />
-                        <span>{cat.shortLabel}</span>
-                      </div>
-                      {isActive && <Check className="w-3.5 h-3.5 text-black" />}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-          </div>
         </div>
       </nav>
 
-      {/* Contextual Location Mini-Explorer (Bottom-Right Sliding Panel) */}
-      {selectedPlace && (
+      {/* Area Information Panel (Side Card overlay) */}
+      {selectedGeoNode && (
+        <div className="absolute bottom-6 left-6 z-40 w-full max-w-md bg-[#0a1419]/95 backdrop-blur-2xl border border-white/20 rounded-3xl p-6 shadow-2xl text-white space-y-4 font-sans animate-in slide-in-from-bottom-5 duration-200">
+          <div className="flex items-start justify-between border-b border-white/10 pb-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  {selectedGeoNode.level}
+                </span>
+                <span className="font-mono text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  {selectedGeoNode.adminType}
+                </span>
+              </div>
+              <h2 className="text-xl font-extrabold text-white mt-1">
+                {selectedGeoNode.nameEn}
+              </h2>
+              <p className="text-xs text-slate-400 font-mono">
+                {selectedGeoNode.nameTa} · {selectedGeoNode.districtName} District
+              </p>
+            </div>
+            <button onClick={() => setSelectedGeoNode(null)} className="text-slate-400 hover:text-white p-1">
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 gap-2 text-xs font-mono">
+            <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
+              <span className="text-[9px] text-slate-400 block uppercase">LGD CODE</span>
+              <span className="font-bold text-emerald-400">{selectedGeoNode.lgdCode}</span>
+            </div>
+            <div className="p-2.5 bg-white/5 rounded-xl border border-white/5">
+              <span className="text-[9px] text-slate-400 block uppercase">COORDINATES</span>
+              <span className="font-bold text-white">({selectedGeoNode.latitude.toFixed(2)}, {selectedGeoNode.longitude.toFixed(2)})</span>
+            </div>
+          </div>
+
+          {/* REAL TOURISM DATA LINKED TO AREA */}
+          <div className="rounded-2xl border border-white/10 bg-white/5 p-4 space-y-2">
+            <div className="flex items-center justify-between text-xs border-b border-white/10 pb-2">
+              <span className="font-bold text-white font-mono flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" /> Linked Explore TN Data
+              </span>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {areaDetail?.tourismStats.dataAvailability || "LIVE DATABASE"}
+              </span>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono pt-1">
+              <div className="p-2 bg-black/40 rounded-xl">
+                <div className="text-[10px] text-slate-400">DESTINATIONS</div>
+                <div className="text-base font-bold text-emerald-400">{selectedGeoNode.placesCount}</div>
+              </div>
+              <div className="p-2 bg-black/40 rounded-xl">
+                <div className="text-[10px] text-slate-400">ATTRACTIONS</div>
+                <div className="text-base font-bold text-emerald-400">{selectedGeoNode.attractionsCount}</div>
+              </div>
+              <div className="p-2 bg-black/40 rounded-xl">
+                <div className="text-[10px] text-slate-400">HOTELS</div>
+                <div className="text-base font-bold text-emerald-400">{selectedGeoNode.hotelsCount}</div>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex justify-end pt-1">
+            <button
+              onClick={() => {
+                const searchQ = selectedGeoNode.nameEn.split(" ")[0];
+                setSearchQuery(searchQ);
+              }}
+              className="w-full py-2.5 bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg transition"
+            >
+              Explore Places in {selectedGeoNode.nameEn} <ArrowRight className="w-4 h-4" />
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Contextual Location Mini-Explorer */}
+      {selectedPlace && !selectedGeoNode && (
         <LocationMiniExplorer
           location={selectedPlace}
           isOpen={true}
