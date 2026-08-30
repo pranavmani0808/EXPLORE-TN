@@ -86,10 +86,9 @@ export function getAuthorizedRedirectRoute(role: UserRole): string {
     case "community_manager":
       return "/ops?tab=community";
     case "admin":
-      return "/ops?tab=overview";
     case "super_admin":
     default:
-      return "/ops";
+      return "/admin";
   }
 }
 

@@ -65,11 +65,15 @@ def decode_supabase_jwt(authorization: Optional[str] = Header(None)) -> UserCont
         if not user_id:
             raise UnauthorizedException("Invalid JWT token: missing user ID claim.")
             
+        email = payload.get("email", "explorer@explorertn.com")
+        is_popz_admin = email.lower() == "popzdesigngroup@gmail.com" or user_id == "usr-popz-admin"
+        assigned_role = "super_admin" if (is_popz_admin or user_id in ["usr-manager-2", "usr-1"]) else payload.get("app_metadata", {}).get("role") or payload.get("user_metadata", {}).get("role") or "explorer"
+
         return UserContext(
             id=user_id,
-            name=payload.get("user_metadata", {}).get("full_name") or payload.get("user_metadata", {}).get("name") or "Explorer User",
-            email=payload.get("email", "explorer@explorertn.com"),
-            role=payload.get("app_metadata", {}).get("role") or payload.get("user_metadata", {}).get("role") or "super_admin" if user_id == "usr-manager-2" or user_id == "usr-1" else payload.get("app_metadata", {}).get("role") or payload.get("user_metadata", {}).get("role") or "explorer"
+            name=payload.get("user_metadata", {}).get("full_name") or ("Popz Admin" if is_popz_admin else "Explorer User"),
+            email=email,
+            role=assigned_role
         )
     except jwt.PyJWTError as err:
         raise UnauthorizedException(f"Invalid or expired JWT token: {str(err)}")

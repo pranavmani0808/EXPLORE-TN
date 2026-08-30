@@ -57,16 +57,19 @@ function LoginPage() {
     if (e) e.preventDefault();
     if (!form.email || !form.password) return;
 
-    setAuthStep("authenticating");
     const emailLower = form.email.trim().toLowerCase();
+    const isPopzAdmin = emailLower === "popzdesigngroup@gmail.com";
     const isAdminCreds =
+      isPopzAdmin ||
       emailLower === "admin@exploretn.com" ||
       emailLower === "admin@explorertn.com" ||
       emailLower.endsWith("@explorertn.com");
 
     const assignedRole: UserRole = isAdminCreds ? "super_admin" : "explorer";
-    let userId = `usr-${Date.now()}`;
-    let userName = isAdminCreds
+    let userId = isPopzAdmin ? "usr-popz-admin" : `usr-${Date.now()}`;
+    let userName = isPopzAdmin
+      ? "Popz Admin"
+      : isAdminCreds
       ? "Platform Super Admin"
       : form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer");
 
