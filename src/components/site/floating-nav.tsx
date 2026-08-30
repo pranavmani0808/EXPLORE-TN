@@ -23,12 +23,14 @@ import {
   Trees,
   CloudRain,
   X,
+  Shield,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ProfileMenu } from "@/components/site/profile-menu";
 import { cn } from "@/lib/utils";
 import { checkBackendHealth } from "@/lib/api";
+import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
 
 function useTheme() {
   const [dark, setDark] = useState(true);
@@ -313,6 +315,16 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
           {/* Utility Controls & Profile Menu */}
           <div className="hidden items-center gap-2 sm:flex">
+            {isAdminUser(getCurrentAuthUser()) && (
+              <Link
+                to="/admin"
+                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs rounded-full font-mono font-bold hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-black transition"
+              >
+                <Shield className="size-3.5" />
+                <span>Admin</span>
+              </Link>
+            )}
+
             <Button
               variant="ghost"
               size="icon"

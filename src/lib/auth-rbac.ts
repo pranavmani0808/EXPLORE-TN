@@ -96,6 +96,11 @@ export function hasPermission(role: UserRole, permission: Permission): boolean {
   return PERMISSION_MATRIX[role]?.includes(permission) ?? false;
 }
 
+export function isAdminUser(user: UserProfile | null): boolean {
+  if (!user) return false;
+  return user.role === "super_admin" || user.role === "admin";
+}
+
 // REAL AUTH SESSION MANAGER with Reactive Event Broadcast
 export function getCurrentAuthUser(): UserProfile | null {
   if (typeof window === "undefined") return null;

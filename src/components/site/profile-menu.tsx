@@ -17,7 +17,8 @@ import {
   LogIn,
   UserPlus,
 } from "lucide-react";
-import { getCurrentAuthUser, clearAuthSession, UserProfile } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, clearAuthSession, UserProfile, isAdminUser } from "@/lib/auth-rbac";
+import { LayoutDashboard, Shield } from "lucide-react";
 
 interface ProfileMenuProps {
   dark: boolean;
@@ -155,6 +156,25 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
                 </div>
               </div>
             </div>
+
+            {/* Role-Based Admin Access Link */}
+            {isAdminUser(currentUser) && (
+              <div className="mt-2">
+                <Link
+                  to="/admin"
+                  onClick={() => setIsOpen(false)}
+                  className="group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-extrabold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 transition-all hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-black shadow-sm"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <LayoutDashboard className="size-4 shrink-0" />
+                    <span>Admin Dashboard</span>
+                  </div>
+                  <span className="text-[10px] font-mono uppercase bg-emerald-600 dark:bg-emerald-400 text-white dark:text-black px-1.5 py-0.5 rounded font-black">
+                    CONTROL
+                  </span>
+                </Link>
+              </div>
+            )}
 
             {/* Quick Actions List */}
             <div className="mt-3 space-y-0.5">

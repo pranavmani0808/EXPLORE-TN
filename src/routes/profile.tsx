@@ -24,9 +24,10 @@ import { PlaceCard } from "@/components/site/place-card";
 import { places } from "@/data/places";
 import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
-import { getCurrentAuthUser, subscribeToAuthChanges, UserProfile } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, subscribeToAuthChanges, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { getUserVisits, getCommunityContributions, PlaceVisit } from "@/lib/explorer-activity";
 import { useAuthGuard } from "@/lib/auth-guard-context";
+import { LayoutDashboard } from "lucide-react";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -178,6 +179,27 @@ function ProfilePage() {
               </div>
               <Progress value={xpEarned % 100} className="h-2 bg-slate-100 dark:bg-white/10" />
             </div>
+
+            {/* Role-Based Admin Operations Banner */}
+            {isAdminUser(user) && (
+              <div className="mt-5 border-t border-slate-200 dark:border-white/10 pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 rounded-2xl p-4">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Shield className="size-4 text-emerald-600 dark:text-emerald-400" />
+                    <span className="font-extrabold text-sm text-slate-900 dark:text-white">Admin Privileges Active</span>
+                  </div>
+                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                    You have full operational authorization to the Explore TN Control Center & Crawler Ingestion Pipeline.
+                  </p>
+                </div>
+                <Link
+                  to="/admin"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs shadow-md shadow-emerald-500/20 shrink-0 transition"
+                >
+                  <LayoutDashboard className="size-4" /> Open Admin Dashboard →
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-2 shrink-0">

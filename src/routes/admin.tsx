@@ -55,6 +55,7 @@ import {
   ContentCmsSection,
   AdminSettings
 } from "@/lib/api/admin-dashboard-api";
+import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/admin")({
@@ -168,6 +169,12 @@ function AdminOperationsCenter() {
   };
 
   useEffect(() => {
+    const user = getCurrentAuthUser();
+    if (!user || !isAdminUser(user)) {
+      toast.error("Unauthorized Access: Admin privileges required.");
+      window.location.href = "/login";
+      return;
+    }
     loadAdminData();
   }, []);
 
