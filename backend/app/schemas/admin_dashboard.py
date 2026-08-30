@@ -10,57 +10,158 @@ class AdminDashboardMetricsDTO(BaseModel):
     totalPackages: int
     newCrawledItems: int
     pendingApprovals: int
+    publishedContent: int
     systemApiHealth: str
     lastCrawlTimestamp: str
+    recentActivities: List[Dict[str, str]]
+    crawlerStatus: Dict[str, Any]
 
-class CrawledDataRecordDTO(BaseModel):
-    id: str
-    sourceUrl: str
-    domain: str
-    title: str
-    extractedType: str  # destination, attraction, hotel, restaurant, event
-    district: str
-    rawPayload: Dict[str, Any]
-    status: str  # PENDING_REVIEW, APPROVED, REJECTED, FAILED
-    crawlTime: str
-    errorMessage: Optional[str] = None
-
-class AdminEventDTO(BaseModel):
-    id: str
-    title: str
-    category: str
-    district: str
-    startDate: str
-    endDate: str
-    location: str
-    organizer: str
-    isPublished: bool
-    imageUrl: Optional[str] = None
-
-class AdminHotelListingDTO(BaseModel):
+class DestinationDetailDTO(BaseModel):
     id: str
     name: str
     district: str
     category: str
-    contactPhone: str
+    description: str
+    latitude: float
+    longitude: float
+    bestTimeToVisit: str
+    openingInfo: str
+    imageUrl: str
+    highlights: List[str]
+    activities: List[str]
+    nearbyAttractions: List[str]
+    metaTitle: str
+    metaDescription: str
+    slug: str
+    status: str  # Draft, Published, Archived
+
+class AttractionDetailDTO(BaseModel):
+    id: str
+    name: str
+    destinationId: str
+    destinationName: str
+    category: str  # Temples, Beaches, Waterfalls, Forts, Museums, Wildlife, Hill Stations, Adventure, Heritage
+    description: str
+    latitude: float
+    longitude: float
+    openingHours: str
+    entryFee: str
+    contact: str
     website: str
+    facilities: List[str]  # Parking, Restrooms, Food, Guide, Wheelchair Access
+    imageUrl: str
+    status: str  # Draft, Published
+
+class HotelDetailDTO(BaseModel):
+    id: str
+    name: str
+    destinationName: str
+    address: str
+    latitude: float
+    longitude: float
+    phone: str
+    email: str
+    website: str
+    priceRange: str
+    amenities: List[str]
+    roomTypes: List[str]
+    imageUrl: str
     rating: float
     verificationStatus: str  # VERIFIED, PENDING, UNVERIFIED
+    isFeatured: bool
+    isPublished: bool
+
+class RestaurantDetailDTO(BaseModel):
+    id: str
+    name: str
+    destinationName: str
+    cuisine: str
+    isVegetarian: bool
+    priceRange: str
+    address: str
+    latitude: float
+    longitude: float
+    openingHours: str
+    phone: str
+    website: str
+    menuUrl: str
+    imageUrl: str
+    amenities: List[str]
+    isFeatured: bool
+    verificationStatus: str
+    isPublished: bool
+
+class EventDetailDTO(BaseModel):
+    id: str
+    title: str
+    description: str
+    startDate: str
+    endDate: str
+    startTime: str
+    endTime: str
+    venue: str
+    district: str
+    location: str
+    organizer: str
+    contact: str
+    ticketPrice: str
+    bookingUrl: str
+    imageUrl: str
+    category: str  # Festival, Cultural, Adventure, Food, Music, Exhibition, Government
+    isRecurring: bool
+    status: str  # Upcoming, Ongoing, Completed, Draft
+    isPublished: bool
+
+class CrawlerSourceDTO(BaseModel):
+    id: str
+    name: str
+    url: str
+    category: str
+    isActive: bool
+    lastCrawl: str
+
+class CrawlerJobDTO(BaseModel):
+    id: str
+    sourceName: str
+    urlsScanned: int
+    newItems: int
+    updatedItems: int
+    duplicates: int
+    failed: int
+    status: str  # Completed, Running, Failed
+    timestamp: str
+
+class CrawledDataDiffDTO(BaseModel):
+    id: str
+    crawledItem: Dict[str, Any]
+    existingItem: Optional[Dict[str, Any]] = None
+    diffStatus: str  # NEW, UPDATED, DUPLICATE, FAILED
 
 class AdminUserRoleDTO(BaseModel):
     id: str
     email: str
     name: str
-    role: str  # Super Admin, Editor, Crawler Manager
+    role: str  # Super Admin, Admin, Content Editor, Crawler Manager, Moderator, Analytics Viewer
     permissions: List[str]
+    status: str  # Active, Suspended, Pending
     lastActive: str
 
 class AdminAnalyticsDTO(BaseModel):
     mostViewedDestinations: List[Dict[str, Any]]
+    popularDistractions: List[Dict[str, Any]]
     popularDistricts: List[Dict[str, Any]]
     topSearchQueries: List[Dict[str, Any]]
     dailyApiRequests: int
     totalDataVolumeMb: float
+    crawlerStats: Dict[str, int]
+
+class ContentCmsSectionDTO(BaseModel):
+    id: str
+    sectionName: str
+    title: str
+    subtitle: str
+    isPublished: bool
+    items: List[Dict[str, Any]]
 
 class AdminSettingsDTO(BaseModel):
     siteTitle: str
@@ -69,3 +170,5 @@ class AdminSettingsDTO(BaseModel):
     enableRealtimeAlerts: bool
     defaultDistrict: str
     maintenanceMode: bool
+    categories: List[str]
+    districts: List[str]
