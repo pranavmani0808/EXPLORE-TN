@@ -25,6 +25,9 @@ class Settings(BaseSettings):
     OPENSERP_API_KEY: str = "openserp_live_secret_key_explorer_tn_prod"
     OPENSERP_BASE_URL: str = "https://api.openserp.com/v1/search"
 
+    # WEB_CRAWL-main Service Integration
+    WEB_CRAWL_API_BASE_URL: str = "http://localhost:8000/api"
+
     # Routing Engine Configuration
     ROUTING_PROVIDER: str = "osrm"
     ROUTING_BASE_URL: str = "http://router.project-osrm.org"

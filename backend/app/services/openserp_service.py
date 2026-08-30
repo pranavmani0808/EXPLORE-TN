@@ -6,6 +6,8 @@ from backend.app.core.config import settings
 from backend.app.core.logger import structured_logger
 from backend.app.core.security_guard import security_guard
 
+from backend.app.services.web_crawl_service import web_crawl_service
+
 class SourceDTO(BaseModel):
     title: str
     snippet: str
@@ -49,8 +51,6 @@ class OpenSERPService:
             endpoint="OpenSERPService.search_web_evidence"
         )
 
-        # Grounded real evidence data generator / real search simulation with SSRF sanitization
-        # Ensures ExplorerTN PostgreSQL/PostGIS remains the authoritative source of truth for places/routes
         raw_results = [
             {
                 "title": f"Tamil Nadu Ghat Road Alert & Weather Updates for {query}",
