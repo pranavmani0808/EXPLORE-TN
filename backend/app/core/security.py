@@ -11,16 +11,52 @@ class UserContext(BaseModel):
     email: str
     role: str # 'super_admin' | 'place_manager' | 'route_manager' | 'community_manager' | 'explorer'
 
-# PERMISSION MATRIX DEFINITION
+# GRANULAR ROLE PERMISSION MATRIX DEFINITION
+ALL_PERMISSIONS = {
+    "destinations.view", "destinations.create", "destinations.update", "destinations.delete",
+    "attractions.view", "attractions.create", "attractions.update", "attractions.delete",
+    "hotels.view", "hotels.create", "hotels.update", "hotels.delete",
+    "restaurants.view", "restaurants.create", "restaurants.update", "restaurants.delete",
+    "events.view", "events.create", "events.update", "events.delete",
+    "guides.view", "guides.create", "guides.update", "guides.delete",
+    "crawler.view", "crawler.run", "crawler.review", "crawler.approve",
+    "users.view", "users.create", "users.update", "users.delete", "users.change_role",
+    "analytics.view",
+    "cms.view", "cms.update",
+    "settings.view", "settings.update",
+    "audit.view",
+    "telemetry.view", "users.role_change", "places.create", "places.update", "places.verify", "places.delete", "routes.create"
+}
+
 ROLE_PERMISSIONS: dict[str, Set[str]] = {
-    "super_admin": {
-        "users.create", "users.update", "users.delete", "users.role_change",
-        "places.create", "places.update", "places.verify", "places.delete",
-        "routes.create", "routes.update", "routes.verify", "routes.delete",
-        "media.upload", "media.delete", "reviews.moderate", "system.backup", "telemetry.view"
+    "super_admin": ALL_PERMISSIONS,
+    "admin": {
+        "destinations.view", "destinations.create", "destinations.update", "destinations.delete",
+        "attractions.view", "attractions.create", "attractions.update", "attractions.delete",
+        "hotels.view", "hotels.create", "hotels.update", "hotels.delete",
+        "restaurants.view", "restaurants.create", "restaurants.update", "restaurants.delete",
+        "events.view", "events.create", "events.update", "events.delete",
+        "guides.view", "guides.create", "guides.update", "guides.delete",
+        "crawler.view", "crawler.run", "crawler.review", "crawler.approve",
+        "analytics.view", "cms.view", "cms.update", "audit.view", "telemetry.view",
+        "places.create", "places.update", "places.verify"
+    },
+    "editor": {
+        "destinations.view", "destinations.create", "destinations.update",
+        "attractions.view", "attractions.create", "attractions.update",
+        "hotels.view", "hotels.create", "hotels.update",
+        "restaurants.view", "restaurants.create", "restaurants.update",
+        "events.view", "events.create", "events.update",
+        "guides.view", "guides.create", "guides.update",
+        "cms.view", "cms.update", "places.create", "places.update"
+    },
+    "moderator": {
+        "destinations.view", "attractions.view", "events.view",
+        "crawler.view", "crawler.review", "cms.view", "reviews.moderate"
     },
     "place_manager": {
-        "places.create", "places.update", "places.submit", "places.verify", "media.upload", "telemetry.view"
+        "places.create", "places.update", "places.submit", "places.verify", "media.upload", "telemetry.view",
+        "destinations.view", "destinations.create", "destinations.update"
     },
     "route_manager": {
         "routes.create", "routes.update", "routes.submit", "routes.verify", "media.upload", "telemetry.view"
@@ -29,7 +65,7 @@ ROLE_PERMISSIONS: dict[str, Set[str]] = {
         "reviews.moderate", "reports.manage", "media.upload", "telemetry.view"
     },
     "explorer": {
-        "visits.log", "reviews.create", "photos.upload", "reports.create"
+        "visits.log", "reviews.create", "photos.upload", "reports.create", "destinations.view"
     }
 }
 

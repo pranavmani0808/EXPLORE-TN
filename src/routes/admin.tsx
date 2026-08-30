@@ -53,7 +53,8 @@ import {
   AdminUserRole,
   AdminAnalytics,
   ContentCmsSection,
-  AdminSettings
+  AdminSettings,
+  AuditLogEntry
 } from "@/lib/api/admin-dashboard-api";
 import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
 import { toast } from "sonner";
@@ -64,7 +65,7 @@ export const Route = createFileRoute("/admin")({
       { title: "Explore TN — Production Management System & Control Center" },
       {
         name: "description",
-        content: "Explore TN Management System: CMS, Web Crawler Control Center Pipeline, RBAC Matrix, Attractions, Hotels, Restaurants & Analytics.",
+        content: "Explore TN Management System: Single Source of Truth CMS, Web Crawler Pipeline, RBAC Matrix & Audit Logs.",
       },
     ],
   }),
@@ -83,7 +84,8 @@ type AdminSection =
   | "users"
   | "analytics"
   | "content"
-  | "settings";
+  | "settings"
+  | "audit";
 
 function AdminOperationsCenter() {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
@@ -104,6 +106,7 @@ function AdminOperationsCenter() {
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [cmsSections, setCmsSections] = useState<ContentCmsSection[]>([]);
   const [settings, setSettings] = useState<AdminSettings | null>(null);
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,7 +136,7 @@ function AdminOperationsCenter() {
   const loadAdminData = async () => {
     setLoading(true);
     try {
-      const [m, d, a, h, r, e, cs, cj, cd, u, an, cm, s] = await Promise.all([
+      const [m, d, a, h, r, e, cs, cj, cd, u, an, cm, s, aud] = await Promise.all([
         AdminDashboardApiRepository.getOverview().catch(() => null),
         AdminDashboardApiRepository.getDestinations().catch(() => []),
         AdminDashboardApiRepository.getAttractions().catch(() => []),
@@ -146,7 +149,8 @@ function AdminOperationsCenter() {
         AdminDashboardApiRepository.getUsers().catch(() => []),
         AdminDashboardApiRepository.getAnalytics().catch(() => null),
         AdminDashboardApiRepository.getCmsSections().catch(() => []),
-        AdminDashboardApiRepository.getSettings().catch(() => null)
+        AdminDashboardApiRepository.getSettings().catch(() => null),
+        AdminDashboardApiRepository.getAuditLogs().catch(() => [])
       ]);
       setMetrics(m);
       setDestinations(d);
@@ -161,6 +165,7 @@ function AdminOperationsCenter() {
       setAnalytics(an);
       setCmsSections(cm);
       setSettings(s);
+      setAuditLogs(aud);
     } catch (err) {
       toast.error("Failed to load management system telemetry.");
     } finally {
@@ -293,6 +298,7 @@ function AdminOperationsCenter() {
                   { id: "travel_guides", label: "Travel Guides", icon: Map, count: 12 },
                   { id: "crawler", label: "Crawler Pipeline", icon: Bot, badge: crawlerDiffs.length },
                   { id: "users", label: "Users & Roles", icon: Users, count: users.length },
+                  { id: "audit", label: "Audit Logs", icon: ShieldCheck, count: auditLogs.length },
                   { id: "analytics", label: "Analytics", icon: BarChart3 },
                   { id: "content", label: "Content CMS", icon: FileText },
                   { id: "settings", label: "Settings", icon: SettingsIcon }
@@ -801,6 +807,37 @@ function AdminOperationsCenter() {
                       </tbody>
                     </table>
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Audit Logs Module */}
+            {activeSection === "audit" && (
+              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4 font-sans">
+                <div className="flex items-center justify-between pb-4 border-b border-border">
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground font-serif">Security & Operations Audit Trail</h3>
+                    <p className="text-xs text-muted-foreground">Immutable audit logs for administrative actions, role updates, and crawler approvals.</p>
+                  </div>
+                  <span className="text-xs font-bold px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                    {auditLogs.length} Log Entries
+                  </span>
+                </div>
+
+                <div className="divide-y divide-border">
+                  {auditLogs.map((log) => (
+                    <div key={log.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono text-xs font-bold px-2 py-0.5 rounded bg-primary/10 text-primary">{log.action}</span>
+                          <span className="font-bold text-foreground text-sm">{log.resource}</span>
+                          <span className="text-xs text-muted-foreground">by {log.userEmail}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground mt-1">{log.details}</div>
+                      </div>
+                      <div className="text-xs font-mono text-muted-foreground shrink-0">{log.timestamp}</div>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}

@@ -146,6 +146,19 @@ class AdminUserRoleDTO(BaseModel):
     status: str  # Active, Suspended, Pending
     lastActive: str
 
+class UserRoleUpdateDTO(BaseModel):
+    userId: str
+    newRole: str
+
+class AuditLogEntryDTO(BaseModel):
+    id: str
+    userEmail: str
+    action: str  # e.g., "DESTINATION_CREATED", "CRAWLER_APPROVED", "USER_ROLE_CHANGED"
+    resource: str  # e.g., "Madurai Destination", "Diff #diff-001"
+    details: str
+    timestamp: str
+    ipAddress: Optional[str] = "127.0.0.1"
+
 class AdminAnalyticsDTO(BaseModel):
     mostViewedDestinations: List[Dict[str, Any]]
     popularDistractions: List[Dict[str, Any]]

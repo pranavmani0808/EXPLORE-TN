@@ -1,14 +1,26 @@
+import time
+import jwt
 import pytest
 from fastapi.testclient import TestClient
 from backend.app.main import app
+from backend.app.core.config import settings
 from backend.app.services.admin_dashboard_service import admin_dashboard_service
 
 client = TestClient(app)
 
+def get_auth_token(email="popzdesigngroup@gmail.com", role="super_admin"):
+    payload = {
+        "sub": "usr-popz-admin",
+        "email": email,
+        "app_metadata": {"role": role},
+        "exp": int(time.time()) + 3600
+    }
+    return jwt.encode(payload, settings.SUPABASE_JWT_SECRET, algorithm=settings.ALGORITHM)
+
 # 1. Test Overview Metrics
 def test_admin_dashboard_overview():
     overview = admin_dashboard_service.get_dashboard_overview()
-    assert overview.totalDestinations >= 2
+    assert overview.totalDestinations >= 10
     assert overview.pendingApprovals >= 1
     assert "100%" in overview.systemApiHealth
 
@@ -38,19 +50,22 @@ def test_admin_events_hotels_users_analytics():
     analytics = admin_dashboard_service.get_analytics()
     assert analytics.dailyApiRequests > 0
 
-    settings = admin_dashboard_service.get_settings()
-    assert settings.crawlerMaxPagesPerRun == 50
+    settings_data = admin_dashboard_service.get_settings()
+    assert settings_data.crawlerMaxPagesPerRun == 50
 
 # 4. Test REST Endpoints via FastAPI TestClient
 def test_admin_endpoints():
-    res_ov = client.get("/api/v1/admin/dashboard/overview")
+    token = get_auth_token()
+    headers = {"Authorization": f"Bearer {token}"}
+
+    res_ov = client.get("/api/v1/admin/dashboard/overview", headers=headers)
     assert res_ov.status_code == 200
     assert "totalDestinations" in res_ov.json()["data"]
 
-    res_dest = client.get("/api/v1/admin/destinations")
+    res_dest = client.get("/api/v1/admin/destinations", headers=headers)
     assert res_dest.status_code == 200
     assert isinstance(res_dest.json()["data"], list)
 
-    res_sy = client.post("/api/v1/admin/settings/categories?category_name=Cultural")
+    res_sy = client.post("/api/v1/admin/settings/categories?category_name=Cultural", headers=headers)
     assert res_sy.status_code == 200
     assert "Cultural" in res_sy.json()["data"]["categories"]

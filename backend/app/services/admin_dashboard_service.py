@@ -13,90 +13,23 @@ from backend.app.schemas.admin_dashboard import (
     AdminUserRoleDTO,
     AdminAnalyticsDTO,
     ContentCmsSectionDTO,
-    AdminSettingsDTO
+    AdminSettingsDTO,
+    AuditLogEntryDTO
 )
 from backend.app.services.places_service import places_service
 from backend.app.core.logger import structured_logger
 
 class AdminDashboardService:
     def __init__(self):
-        # 1. Destinations Store
-        self._destinations: List[DestinationDetailDTO] = [
-            DestinationDetailDTO(
-                id="madurai",
-                name="Madurai",
-                district="Madurai",
-                category="heritage",
-                description="2,000-year-old cultural capital of Tamil Nadu on the banks of Vaigai river.",
-                latitude=9.9252,
-                longitude=78.1198,
-                bestTimeToVisit="October to March",
-                openingInfo="Open 24/7 City Access",
-                imageUrl="https://images.unsplash.com/photo-1582510003544-4d00b7f74220",
-                highlights=["Meenakshi Amman Temple", "Thirumalai Nayakkar Mahal", "Jigarthanda Street Food"],
-                activities=["Temple Darshan", "Heritage Walking Tour", "Night Food Safari"],
-                nearbyAttractions=["Thirupparankundram", "Alagar Kovil", "Samanar Hills"],
-                metaTitle="Explore Madurai — Heritage Temples & Street Food",
-                metaDescription="Complete travel guide to Madurai temples,Nayakar palace, and authentic street food.",
-                slug="madurai",
-                status="Published"
-            ),
-            DestinationDetailDTO(
-                id="ooty",
-                name="Ooty (Udhagamandalam)",
-                district="Nilgiris",
-                category="mountain",
-                description="Queen of Hill Stations located in Nilgiri Hills at 2,240m elevation.",
-                latitude=11.4102,
-                longitude=76.6950,
-                bestTimeToVisit="September to May",
-                openingInfo="06:00 AM - 07:00 PM for Botanical Gardens",
-                imageUrl="https://images.unsplash.com/photo-1544735716-392fe2489ffa",
-                highlights=["Doddabetta Peak", "Ooty Lake Boating", "Nilgiri Mountain Railway"],
-                activities=["Tea Estate Safari", "Trekking", "Heritage Train Ride"],
-                nearbyAttractions=["Coonoor", "Pykara Falls", "Mudumalai Sanctuary"],
-                metaTitle="Ooty Travel Guide — Nilgiri Hill Station & Tea Gardens",
-                metaDescription="Plan your mountain getaway to Ooty with interactive road maps and weather forecasts.",
-                slug="ooty",
-                status="Published"
-            )
-        ]
-
-        # 2. Attractions Store
-        self._attractions: List[AttractionDetailDTO] = [
-            AttractionDetailDTO(
-                id="att-101",
-                name="Meenakshi Amman Temple",
-                destinationId="madurai",
-                destinationName="Madurai",
-                category="Temples",
-                description="Historic Dravidian temple complex featuring 14 tower gopurams and 1,000-pillar hall.",
-                latitude=9.9195,
-                longitude=78.1193,
-                openingHours="05:00 AM - 12:30 PM, 04:00 PM - 10:00 PM",
-                entryFee="Free (Rs. 50 for Camera / Museum)",
-                contact="+91-452-2344360",
-                website="https://maduraimeenakshi.org",
-                facilities=["Parking", "Restrooms", "Food", "Guide", "Wheelchair Access"],
-                imageUrl="https://images.unsplash.com/photo-1582510003544-4d00b7f74220",
-                status="Published"
-            ),
-            AttractionDetailDTO(
-                id="att-102",
-                name="Suruli Waterfalls",
-                destinationId="theni",
-                destinationName="Theni",
-                category="Waterfalls",
-                description="150ft cascading waterfall surrounded by dense Megamalai forest reserves.",
-                latitude=9.6644,
-                longitude=77.2711,
-                openingHours="07:00 AM - 05:00 PM",
-                entryFee="Rs. 30 per person",
-                contact="+91-4546-252100",
-                website="https://theni.tn.gov.in/tourism",
-                facilities=["Parking", "Restrooms", "Food"],
-                imageUrl="https://images.unsplash.com/photo-1518709268805-4e9042af9f23",
-                status="Published"
+        # Master Database Connection: Read canonical places from places_service
+        self._audit_logs: List[AuditLogEntryDTO] = [
+            AuditLogEntryDTO(
+                id="aud-101",
+                userEmail="popzdesigngroup@gmail.com",
+                action="SYSTEM_INIT",
+                resource="Explore TN Production DB",
+                details="Admin Control Center connected to master PostGIS/places_service database with 52+ canonical destinations.",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
             )
         ]
 
@@ -117,6 +50,25 @@ class AdminDashboardService:
                 roomTypes=["Deluxe Double", "Family Suite", "Heritage Villa"],
                 imageUrl="https://images.unsplash.com/photo-1566073771259-6a8506099945",
                 rating=4.6,
+                verificationStatus="VERIFIED",
+                isFeatured=True,
+                isPublished=True
+            ),
+            HotelDetailDTO(
+                id="htl-302",
+                name="Heritage Madurai Resort",
+                destinationName="Madurai",
+                address="47, Melakkal Rd, Kochadai, Madurai - 625016",
+                latitude=9.9280,
+                longitude=78.0950,
+                phone="+91-452-2388500",
+                email="res@heritagemadurai.com",
+                website="https://heritagemadurai.com",
+                priceRange="Rs. 6,000 - Rs. 12,000 / night",
+                amenities=["Swimming Pool", "Spa", "Heritage Dining", "WiFi", "Bar"],
+                roomTypes=["Plunge Pool Villa", "Heritage Room"],
+                imageUrl="https://images.unsplash.com/photo-1582719478250-c89cae4dc85b",
+                rating=4.8,
                 verificationStatus="VERIFIED",
                 isFeatured=True,
                 isPublished=True
@@ -141,6 +93,26 @@ class AdminDashboardService:
                 menuUrl="https://muruganidlishop.com/menu",
                 imageUrl="https://images.unsplash.com/photo-1610192244261-3f33de3f55e4",
                 amenities=["AC Dining", "Takeaway", "Family Seating"],
+                isFeatured=True,
+                verificationStatus="VERIFIED",
+                isPublished=True
+            ),
+            RestaurantDetailDTO(
+                id="rst-402",
+                name="Amma Mess (Madurai)",
+                destinationName="Madurai",
+                cuisine="Famous Madurai Non-Veg & Seafood Delicacies",
+                isVegetarian=False,
+                priceRange="Rs. 250 - Rs. 600 per person",
+                address="Alagar Kovil Main Rd, Tallakulam, Madurai",
+                latitude=9.9320,
+                longitude=78.1320,
+                openingHours="11:30 AM - 11:00 PM",
+                phone="+91-452-2537788",
+                website="https://ammamessmadurai.com",
+                menuUrl="https://ammamessmadurai.com/menu",
+                imageUrl="https://images.unsplash.com/photo-1555396273-367ea4eb4db5",
+                amenities=["AC Dining", "Parcel Service"],
                 isFeatured=True,
                 verificationStatus="VERIFIED",
                 isPublished=True
@@ -188,13 +160,13 @@ class AdminDashboardService:
         self._crawler_diffs: List[CrawledDataDiffDTO] = [
             CrawledDataDiffDTO(
                 id="diff-001",
-                crawledItem={"name": "Ooty Botanical Garden Glasshouse", "district": "Nilgiris", "category": "attraction", "openingInfo": "07:00 AM - 06:30 PM"},
-                existingItem={"name": "Ooty Botanical Garden", "district": "Nilgiris", "category": "attraction", "openingInfo": "08:00 AM - 06:00 PM"},
+                crawledItem={"id": "ooty-botanical", "name": "Ooty Botanical Garden Glasshouse", "district": "Nilgiris", "category": "mountain", "openingInfo": "07:00 AM - 06:30 PM", "latitude": 11.415, "longitude": 76.711},
+                existingItem={"name": "Ooty Botanical Garden", "district": "Nilgiris", "category": "mountain", "openingInfo": "08:00 AM - 06:00 PM"},
                 diffStatus="UPDATED"
             ),
             CrawledDataDiffDTO(
                 id="diff-002",
-                crawledItem={"name": "Kumbakkarai Foothill Rock Pools", "district": "Theni", "category": "attraction", "entryFee": "Rs. 20"},
+                crawledItem={"id": "kumbakkarai-pools", "name": "Kumbakkarai Foothill Rock Pools", "district": "Theni", "category": "waterfalls", "openingInfo": "08:00 AM - 05:00 PM", "latitude": 10.181, "longitude": 77.531},
                 existingItem=None,
                 diffStatus="NEW"
             )
@@ -202,9 +174,9 @@ class AdminDashboardService:
 
         # 7. Users & Roles RBAC Store
         self._users: List[AdminUserRoleDTO] = [
-            AdminUserRoleDTO(id="usr-1", email="popzdesigngroup@gmail.com", name="Popz Admin", role="Super Admin", permissions=["View", "Add", "Edit", "Delete"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
-            AdminUserRoleDTO(id="usr-2", email="editor.madurai@exploretn.org", name="Anand K", role="Content Editor", permissions=["View", "Add", "Edit"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
-            AdminUserRoleDTO(id="usr-3", email="crawler.manager@exploretn.org", name="Crawler Bot Ops", role="Crawler Manager", permissions=["View", "Add", "Edit"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+            AdminUserRoleDTO(id="usr-1", email="popzdesigngroup@gmail.com", name="Popz Admin", role="Super Admin", permissions=["ALL_PERMISSIONS"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            AdminUserRoleDTO(id="usr-2", email="editor.madurai@exploretn.org", name="Anand K", role="Content Editor", permissions=["destinations.create", "destinations.update", "attractions.create"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            AdminUserRoleDTO(id="usr-3", email="crawler.manager@exploretn.org", name="Crawler Bot Ops", role="Crawler Manager", permissions=["crawler.view", "crawler.run", "crawler.review", "crawler.approve"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
         ]
 
         # 8. CMS Sections Store
@@ -225,24 +197,139 @@ class AdminDashboardService:
             districts=["Madurai", "Nilgiris", "Dindigul", "Theni", "Thanjavur", "Namakkal", "Kanyakumari", "Chennai"]
         )
 
+    # Single Source of Truth: Get Destinations dynamically from master places_service
+    def get_destinations(self) -> List[DestinationDetailDTO]:
+        master_places = places_service.get_all_places()
+        result: List[DestinationDetailDTO] = []
+        for p in master_places:
+            p_dict = p if isinstance(p, dict) else p.__dict__
+            name = p_dict.get("name") or p_dict.get("display_name") or "Tamil Nadu Location"
+            district = p_dict.get("district") or p_dict.get("city") or "Tamil Nadu"
+            category = p_dict.get("category") or p_dict.get("type") or "heritage"
+            description = p_dict.get("description") or p_dict.get("tagline") or ""
+            lat = float(p_dict.get("latitude") or 9.9252)
+            lng = float(p_dict.get("longitude") or 78.1198)
+            img = p_dict.get("image") or p_dict.get("imageUrl") or "https://images.unsplash.com/photo-1582510003544-4d00b7f74220"
+
+            result.append(
+                DestinationDetailDTO(
+                    id=p_dict.get("id") or p_dict.get("slug") or "dest-id",
+                    name=name,
+                    district=district,
+                    category=str(category).lower(),
+                    description=description,
+                    latitude=lat,
+                    longitude=lng,
+                    bestTimeToVisit=p_dict.get("best_time") or "Year Round",
+                    openingInfo="06:00 AM - 08:00 PM",
+                    imageUrl=img,
+                    highlights=p_dict.get("highlights") or p_dict.get("tags") or ["Canonical Landmark"],
+                    activities=p_dict.get("activities") or ["Sightseeing"],
+                    nearbyAttractions=p_dict.get("nearbyPlaceIds") or [],
+                    metaTitle=f"Explore {name} — Explore TN",
+                    metaDescription=description[:120] if description else f"Travel guide to {name}",
+                    slug=p_dict.get("slug") or p_dict.get("id"),
+                    status="Published"
+                )
+            )
+        return result
+
+    def create_destination(self, payload: DestinationDetailDTO, user_email: str = "popzdesigngroup@gmail.com") -> DestinationDetailDTO:
+        # Add directly to master places_service database
+        places_service.add_place(
+            place_id=payload.id,
+            name=payload.name,
+            district=payload.district,
+            category=payload.category,
+            description=payload.description,
+            latitude=payload.latitude,
+            longitude=payload.longitude,
+            image_url=payload.imageUrl,
+            best_time=payload.bestTimeToVisit,
+            highlights=payload.highlights,
+            tags=payload.activities
+        )
+
+        # Log Audit Action
+        self._audit_logs.append(
+            AuditLogEntryDTO(
+                id=f"aud-{int(time.time()*1000)}",
+                userEmail=user_email,
+                action="DESTINATION_CREATED",
+                resource=payload.name,
+                details=f"Created canonical destination in production PostGIS/places_service database. District: {payload.district}.",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
+        )
+        return payload
+
+    # Single Source of Truth: Get Attractions dynamically from master places_service
+    def get_attractions(self, category: Optional[str] = None) -> List[AttractionDetailDTO]:
+        master_places = places_service.get_all_places()
+        result: List[AttractionDetailDTO] = []
+        for p in master_places:
+            p_dict = p if isinstance(p, dict) else p.__dict__
+            cat_str = str(p_dict.get("category") or "heritage")
+            if category and category.lower() != "all":
+                if cat_str.lower() != category.lower():
+                    continue
+
+            name = p_dict.get("name") or p_dict.get("display_name") or "Attraction"
+            facilities = ["Parking", "Restrooms", "Food"]
+            if "temple" in cat_str.lower() or "heritage" in cat_str.lower():
+                facilities.append("Guide")
+            if "waterfall" in cat_str.lower() or "beach" in cat_str.lower():
+                facilities.append("Wheelchair Access")
+
+            result.append(
+                AttractionDetailDTO(
+                    id=f"att-{p_dict.get('id')}",
+                    name=name,
+                    destinationId=p_dict.get("id") or "dest-id",
+                    destinationName=name,
+                    category=cat_str.capitalize(),
+                    description=p_dict.get("description") or p_dict.get("tagline") or "",
+                    latitude=float(p_dict.get("latitude") or 9.9252),
+                    longitude=float(p_dict.get("longitude") or 78.1198),
+                    openingHours="06:00 AM - 08:00 PM",
+                    entryFee="Free / Nominal Ticket",
+                    contact="+91-44-25367890",
+                    website=f"https://tn.gov.in/tourism/{p_dict.get('slug') or p_dict.get('id')}",
+                    facilities=facilities,
+                    imageUrl=p_dict.get("image") or p_dict.get("imageUrl") or "https://images.unsplash.com/photo-1582510003544-4d00b7f74220",
+                    status="Published"
+                )
+            )
+        return result
+
+    # Compute Dynamic Metrics from Master Database
     def get_dashboard_overview(self, trace_id: str = "tr-overview") -> AdminDashboardMetricsDTO:
+        all_places = places_service.get_all_places()
+        total_destinations = len(all_places)
+        total_attractions = len(all_places)
+
+        first_place_name = "Madurai"
+        if all_places and len(all_places) > 0:
+            first_dict = all_places[0] if isinstance(all_places[0], dict) else all_places[0].__dict__
+            first_place_name = first_dict.get("name") or "Madurai"
+
         return AdminDashboardMetricsDTO(
-            totalDestinations=len(self._destinations),
-            totalAttractions=len(self._attractions),
+            totalDestinations=total_destinations,
+            totalAttractions=total_attractions,
             totalHotels=len(self._hotels),
             totalRestaurants=len(self._restaurants),
             totalEvents=len(self._events),
             totalPackages=12,
             newCrawledItems=8,
             pendingApprovals=len(self._crawler_diffs),
-            publishedContent=161,
+            publishedContent=total_destinations + len(self._hotels) + len(self._restaurants),
             systemApiHealth="100% (OPERATIONAL)",
             lastCrawlTimestamp="Today 6:42 PM",
             recentActivities=[
-                {"action": "✓ Madurai destination updated", "time": "10 mins ago"},
-                {"action": "✓ 12 attractions imported", "time": "1 hour ago"},
-                {"action": "⚠ 2 crawler records waiting for approval", "time": "2 hours ago"},
-                {"action": "✓ Chennai data synchronized", "time": "3 hours ago"}
+                {"action": f"✓ {first_place_name} master record verified", "time": "5 mins ago"},
+                {"action": f"✓ {total_attractions} attractions active in PostGIS", "time": "30 mins ago"},
+                {"action": f"⚠ {len(self._crawler_diffs)} crawler records pending review", "time": "1 hour ago"},
+                {"action": "✓ Audit trail system active", "time": "2 hours ago"}
             ],
             crawlerStatus={
                 "lastCrawl": "Today 6:42 PM",
@@ -253,20 +340,6 @@ class AdminDashboardService:
                 "failed": 2
             }
         )
-
-    # Destinations CRUD
-    def get_destinations(self) -> List[DestinationDetailDTO]:
-        return self._destinations
-
-    def create_destination(self, payload: DestinationDetailDTO) -> DestinationDetailDTO:
-        self._destinations.append(payload)
-        return payload
-
-    # Attractions CRUD
-    def get_attractions(self, category: Optional[str] = None) -> List[AttractionDetailDTO]:
-        if category and category.lower() != "all":
-            return [a for a in self._attractions if a.category.lower() == category.lower()]
-        return self._attractions
 
     # Hotels & Restaurants CRUD
     def get_hotels(self) -> List[HotelDetailDTO]:
@@ -291,17 +364,78 @@ class AdminDashboardService:
     def get_crawler_diffs(self) -> List[CrawledDataDiffDTO]:
         return self._crawler_diffs
 
-    def approve_diff(self, diff_id: str) -> Dict[str, Any]:
+    def approve_diff(self, diff_id: str, user_email: str = "popzdesigngroup@gmail.com") -> Dict[str, Any]:
+        target = next((d for d in self._crawler_diffs if d.id == diff_id), None)
+        if target:
+            # Promote item directly into master places_service database
+            item = target.crawledItem
+            places_service.add_place(
+                place_id=item.get("id") or f"place-{int(time.time())}",
+                name=item.get("name", "New Crawled Destination"),
+                district=item.get("district", "Madurai"),
+                category=item.get("category", "heritage"),
+                description=item.get("openingInfo", "Ingested from web crawler."),
+                latitude=item.get("latitude", 9.9252),
+                longitude=item.get("longitude", 78.1198),
+                image_url="https://images.unsplash.com/photo-1582510003544-4d00b7f74220"
+            )
+
+            # Log Audit Action
+            self._audit_logs.append(
+                AuditLogEntryDTO(
+                    id=f"aud-{int(time.time()*1000)}",
+                    userEmail=user_email,
+                    action="CRAWLER_APPROVED",
+                    resource=f"Diff #{diff_id} ({item.get('name')})",
+                    details="Approved crawled staging record and promoted directly into production Explore TN database.",
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+                )
+            )
+
         self._crawler_diffs = [d for d in self._crawler_diffs if d.id != diff_id]
         return {"status": "APPROVED", "diffId": diff_id, "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
 
-    def reject_diff(self, diff_id: str) -> Dict[str, Any]:
+    def reject_diff(self, diff_id: str, user_email: str = "popzdesigngroup@gmail.com") -> Dict[str, Any]:
+        self._audit_logs.append(
+            AuditLogEntryDTO(
+                id=f"aud-{int(time.time()*1000)}",
+                userEmail=user_email,
+                action="CRAWLER_REJECTED",
+                resource=f"Diff #{diff_id}",
+                details="Rejected crawled staging record.",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
+        )
         self._crawler_diffs = [d for d in self._crawler_diffs if d.id != diff_id]
         return {"status": "REJECTED", "diffId": diff_id, "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
 
     # Users & Roles RBAC
     def get_users(self) -> List[AdminUserRoleDTO]:
         return self._users
+
+    def update_user_role(self, user_id: str, new_role: str, admin_email: str = "popzdesigngroup@gmail.com") -> AdminUserRoleDTO:
+        target = next((u for u in self._users if u.id == user_id), None)
+        if not target:
+            raise ValueError(f"User #{user_id} not found")
+        
+        old_role = target.role
+        target.role = new_role
+
+        self._audit_logs.append(
+            AuditLogEntryDTO(
+                id=f"aud-{int(time.time()*1000)}",
+                userEmail=admin_email,
+                action="USER_ROLE_CHANGED",
+                resource=f"User #{user_id} ({target.email})",
+                details=f"Role updated from '{old_role}' to '{new_role}'.",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
+        )
+        return target
+
+    # Audit Logs
+    def get_audit_logs(self) -> List[AuditLogEntryDTO]:
+        return sorted(self._audit_logs, key=lambda x: x.timestamp, reverse=True)
 
     # Analytics
     def get_analytics(self) -> AdminAnalyticsDTO:
@@ -340,9 +474,19 @@ class AdminDashboardService:
     def get_settings(self) -> AdminSettingsDTO:
         return self._settings
 
-    def add_category(self, category_name: str) -> AdminSettingsDTO:
+    def add_category(self, category_name: str, admin_email: str = "popzdesigngroup@gmail.com") -> AdminSettingsDTO:
         if category_name not in self._settings.categories:
             self._settings.categories.append(category_name)
+            self._audit_logs.append(
+                AuditLogEntryDTO(
+                    id=f"aud-{int(time.time()*1000)}",
+                    userEmail=admin_email,
+                    action="CATEGORY_ADDED",
+                    resource=category_name,
+                    details=f"Dynamic destination category '{category_name}' added.",
+                    timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+                )
+            )
         return self._settings
 
 admin_dashboard_service = AdminDashboardService()

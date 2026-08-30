@@ -160,6 +160,16 @@ export interface AdminUserRole {
   lastActive: string;
 }
 
+export interface AuditLogEntry {
+  id: string;
+  userEmail: string;
+  action: string;
+  resource: string;
+  details: string;
+  timestamp: string;
+  ipAddress?: string;
+}
+
 export interface AdminAnalytics {
   mostViewedDestinations: Array<{ name: string; views: number; district: string }>;
   popularDistractions: Array<{ name: string; views: number; category: string }>;
@@ -193,15 +203,32 @@ export interface AdminSettings {
 export class AdminDashboardApiRepository {
   private static baseUrl = '/api/v1/admin';
 
+  private static getHeaders(): HeadersInit {
+    try {
+      const userRaw = localStorage.getItem('etn_auth_user');
+      if (userRaw) {
+        const user = JSON.parse(userRaw);
+        return {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer fake-jwt-token-for-${user.email || 'usr-popz-admin'}`
+        };
+      }
+    } catch {}
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer fake-jwt-token-for-popzdesigngroup@gmail.com'
+    };
+  }
+
   static async getOverview(): Promise<AdminDashboardMetrics> {
-    const res = await fetch(`${this.baseUrl}/dashboard/overview`);
+    const res = await fetch(`${this.baseUrl}/dashboard/overview`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch admin overview');
     const env = await res.json();
     return env.data;
   }
 
   static async getDestinations(): Promise<DestinationDetail[]> {
-    const res = await fetch(`${this.baseUrl}/destinations`);
+    const res = await fetch(`${this.baseUrl}/destinations`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch destinations');
     const env = await res.json();
     return env.data;
@@ -210,7 +237,7 @@ export class AdminDashboardApiRepository {
   static async createDestination(payload: DestinationDetail): Promise<DestinationDetail> {
     const res = await fetch(`${this.baseUrl}/destinations`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: this.getHeaders(),
       body: JSON.stringify(payload)
     });
     if (!res.ok) throw new Error('Failed to create destination');
@@ -220,21 +247,21 @@ export class AdminDashboardApiRepository {
 
   static async getAttractions(category?: string): Promise<AttractionDetail[]> {
     const url = category ? `${this.baseUrl}/attractions?category=${encodeURIComponent(category)}` : `${this.baseUrl}/attractions`;
-    const res = await fetch(url);
+    const res = await fetch(url, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch attractions');
     const env = await res.json();
     return env.data;
   }
 
   static async getHotels(): Promise<HotelDetail[]> {
-    const res = await fetch(`${this.baseUrl}/hotels`);
+    const res = await fetch(`${this.baseUrl}/hotels`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch hotels');
     const env = await res.json();
     return env.data;
   }
 
   static async getRestaurants(): Promise<RestaurantDetail[]> {
-    const res = await fetch(`${this.baseUrl}/restaurants`);
+    const res = await fetch(`${this.baseUrl}/restaurants`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch restaurants');
     const env = await res.json();
     return env.data;
@@ -242,77 +269,104 @@ export class AdminDashboardApiRepository {
 
   static async getEvents(status?: string): Promise<EventDetail[]> {
     const url = status ? `${this.baseUrl}/events?status=${encodeURIComponent(status)}` : `${this.baseUrl}/events`;
-    const res = await fetch(url);
+    const res = await fetch(url, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch events');
     const env = await res.json();
     return env.data;
   }
 
   static async getCrawlerSources(): Promise<CrawlerSource[]> {
-    const res = await fetch(`${this.baseUrl}/crawler/sources`);
+    const res = await fetch(`${this.baseUrl}/crawler/sources`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch crawler sources');
     const env = await res.json();
     return env.data;
   }
 
   static async getCrawlerJobs(): Promise<CrawlerJob[]> {
-    const res = await fetch(`${this.baseUrl}/crawler/jobs`);
+    const res = await fetch(`${this.baseUrl}/crawler/jobs`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch crawler jobs');
     const env = await res.json();
     return env.data;
   }
 
   static async getCrawlerDiffs(): Promise<CrawledDataDiff[]> {
-    const res = await fetch(`${this.baseUrl}/crawler/diffs`);
+    const res = await fetch(`${this.baseUrl}/crawler/diffs`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch crawler diffs');
     const env = await res.json();
     return env.data;
   }
 
   static async approveDiff(diffId: string): Promise<any> {
-    const res = await fetch(`${this.baseUrl}/crawler/diffs/${diffId}/approve`, { method: 'POST' });
+    const res = await fetch(`${this.baseUrl}/crawler/diffs/${diffId}/approve`, {
+      method: 'POST',
+      headers: this.getHeaders()
+    });
     if (!res.ok) throw new Error('Failed to approve diff');
     const env = await res.json();
     return env.data;
   }
 
   static async rejectDiff(diffId: string): Promise<any> {
-    const res = await fetch(`${this.baseUrl}/crawler/diffs/${diffId}/reject`, { method: 'POST' });
+    const res = await fetch(`${this.baseUrl}/crawler/diffs/${diffId}/reject`, {
+      method: 'POST',
+      headers: this.getHeaders()
+    });
     if (!res.ok) throw new Error('Failed to reject diff');
     const env = await res.json();
     return env.data;
   }
 
   static async getUsers(): Promise<AdminUserRole[]> {
-    const res = await fetch(`${this.baseUrl}/users`);
+    const res = await fetch(`${this.baseUrl}/users`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch users');
     const env = await res.json();
     return env.data;
   }
 
+  static async updateUserRole(userId: string, newRole: string): Promise<AdminUserRole> {
+    const res = await fetch(`${this.baseUrl}/users/role`, {
+      method: 'POST',
+      headers: this.getHeaders(),
+      body: JSON.stringify({ userId, newRole })
+    });
+    if (!res.ok) throw new Error('Failed to update user role');
+    const env = await res.json();
+    return env.data;
+  }
+
+  static async getAuditLogs(): Promise<AuditLogEntry[]> {
+    const res = await fetch(`${this.baseUrl}/audit-logs`, { headers: this.getHeaders() });
+    if (!res.ok) throw new Error('Failed to fetch audit logs');
+    const env = await res.json();
+    return env.data;
+  }
+
   static async getAnalytics(): Promise<AdminAnalytics> {
-    const res = await fetch(`${this.baseUrl}/analytics`);
+    const res = await fetch(`${this.baseUrl}/analytics`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch analytics');
     const env = await res.json();
     return env.data;
   }
 
   static async getCmsSections(): Promise<ContentCmsSection[]> {
-    const res = await fetch(`${this.baseUrl}/cms/sections`);
+    const res = await fetch(`${this.baseUrl}/cms/sections`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch CMS sections');
     const env = await res.json();
     return env.data;
   }
 
   static async getSettings(): Promise<AdminSettings> {
-    const res = await fetch(`${this.baseUrl}/settings`);
+    const res = await fetch(`${this.baseUrl}/settings`, { headers: this.getHeaders() });
     if (!res.ok) throw new Error('Failed to fetch settings');
     const env = await res.json();
     return env.data;
   }
 
   static async addCategory(categoryName: string): Promise<AdminSettings> {
-    const res = await fetch(`${this.baseUrl}/settings/categories?category_name=${encodeURIComponent(categoryName)}`, { method: 'POST' });
+    const res = await fetch(`${this.baseUrl}/settings/categories?category_name=${encodeURIComponent(categoryName)}`, {
+      method: 'POST',
+      headers: this.getHeaders()
+    });
     if (!res.ok) throw new Error('Failed to add category');
     const env = await res.json();
     return env.data;

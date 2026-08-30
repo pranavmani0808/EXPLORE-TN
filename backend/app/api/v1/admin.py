@@ -19,7 +19,9 @@ from backend.app.schemas.admin_dashboard import (
     AdminUserRoleDTO,
     AdminAnalyticsDTO,
     ContentCmsSectionDTO,
-    AdminSettingsDTO
+    AdminSettingsDTO,
+    AuditLogEntryDTO,
+    UserRoleUpdateDTO
 )
 
 router = APIRouter(prefix="/admin", tags=["Admin Operations"])
@@ -29,20 +31,19 @@ async def get_telemetry(
     request: Request,
     current_user: UserContext = Depends(check_permission("telemetry.view"))
 ):
-    trace_id = getattr(request.state, "trace_id", "tr-default")
-    places_count = len(places_service.get_all_places())
-    
-    realtime_telemetry = telemetry_service.get_realtime_telemetry()
-    realtime_telemetry["totalPlaces"] = places_count
-    
+    trace_id = getattr(request.state, "trace_id", "tr-telemetry")
+    data = telemetry_service.get_realtime_telemetry()
     return ResponseEnvelope(
-        data=realtime_telemetry,
+        data=data,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
 # 1. Admin Dashboard Overview
 @router.get("/dashboard/overview", response_model=ResponseEnvelope[AdminDashboardMetricsDTO])
-async def get_dashboard_overview(request: Request):
+async def get_dashboard_overview(
+    request: Request,
+    current_user: UserContext = Depends(check_permission("destinations.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-admin-overview")
     overview = admin_dashboard_service.get_dashboard_overview(trace_id=trace_id)
     return ResponseEnvelope(
@@ -50,9 +51,12 @@ async def get_dashboard_overview(request: Request):
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-# 2. Destinations Management
+# 2. Destinations Management (Single Source of Truth)
 @router.get("/destinations", response_model=ResponseEnvelope[List[DestinationDetailDTO]])
-async def get_admin_destinations(request: Request = None):
+async def get_admin_destinations(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("destinations.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-dest") if request else "tr-dest"
     destinations = admin_dashboard_service.get_destinations()
     return ResponseEnvelope(
@@ -61,17 +65,25 @@ async def get_admin_destinations(request: Request = None):
     )
 
 @router.post("/destinations", response_model=ResponseEnvelope[DestinationDetailDTO])
-async def create_admin_destination(payload: DestinationDetailDTO, request: Request = None):
+async def create_admin_destination(
+    payload: DestinationDetailDTO,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("destinations.create"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-dest-create") if request else "tr-dest-create"
-    created = admin_dashboard_service.create_destination(payload)
+    created = admin_dashboard_service.create_destination(payload, user_email=current_user.email)
     return ResponseEnvelope(
         data=created,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-# 3. Attractions Management
+# 3. Attractions Management (Single Source of Truth)
 @router.get("/attractions", response_model=ResponseEnvelope[List[AttractionDetailDTO]])
-async def get_admin_attractions(category: Optional[str] = None, request: Request = None):
+async def get_admin_attractions(
+    category: Optional[str] = None,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("attractions.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-attractions") if request else "tr-attractions"
     attractions = admin_dashboard_service.get_attractions(category=category)
     return ResponseEnvelope(
@@ -81,7 +93,10 @@ async def get_admin_attractions(category: Optional[str] = None, request: Request
 
 # 4. Hotels & Restaurants Management
 @router.get("/hotels", response_model=ResponseEnvelope[List[HotelDetailDTO]])
-async def get_admin_hotels(request: Request = None):
+async def get_admin_hotels(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("hotels.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-hotels") if request else "tr-hotels"
     hotels = admin_dashboard_service.get_hotels()
     return ResponseEnvelope(
@@ -90,7 +105,10 @@ async def get_admin_hotels(request: Request = None):
     )
 
 @router.get("/restaurants", response_model=ResponseEnvelope[List[RestaurantDetailDTO]])
-async def get_admin_restaurants(request: Request = None):
+async def get_admin_restaurants(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("restaurants.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-restaurants") if request else "tr-restaurants"
     restaurants = admin_dashboard_service.get_restaurants()
     return ResponseEnvelope(
@@ -100,7 +118,11 @@ async def get_admin_restaurants(request: Request = None):
 
 # 5. Events Management
 @router.get("/events", response_model=ResponseEnvelope[List[EventDetailDTO]])
-async def get_admin_events(status: Optional[str] = None, request: Request = None):
+async def get_admin_events(
+    status: Optional[str] = None,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("events.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-events") if request else "tr-events"
     events = admin_dashboard_service.get_events(status=status)
     return ResponseEnvelope(
@@ -108,9 +130,12 @@ async def get_admin_events(status: Optional[str] = None, request: Request = None
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-# 6. Crawler Pipeline Control Center
+# 6. Crawler Pipeline Control Center (Staging → Master DB Promotion)
 @router.get("/crawler/sources", response_model=ResponseEnvelope[List[CrawlerSourceDTO]])
-async def get_crawler_sources(request: Request = None):
+async def get_crawler_sources(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("crawler.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-crawler-src") if request else "tr-crawler-src"
     sources = admin_dashboard_service.get_crawler_sources()
     return ResponseEnvelope(
@@ -119,7 +144,10 @@ async def get_crawler_sources(request: Request = None):
     )
 
 @router.get("/crawler/jobs", response_model=ResponseEnvelope[List[CrawlerJobDTO]])
-async def get_crawler_jobs(request: Request = None):
+async def get_crawler_jobs(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("crawler.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-crawler-jobs") if request else "tr-crawler-jobs"
     jobs = admin_dashboard_service.get_crawler_jobs()
     return ResponseEnvelope(
@@ -128,7 +156,10 @@ async def get_crawler_jobs(request: Request = None):
     )
 
 @router.get("/crawler/diffs", response_model=ResponseEnvelope[List[CrawledDataDiffDTO]])
-async def get_crawler_diffs(request: Request = None):
+async def get_crawler_diffs(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("crawler.review"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-crawler-diffs") if request else "tr-crawler-diffs"
     diffs = admin_dashboard_service.get_crawler_diffs()
     return ResponseEnvelope(
@@ -137,18 +168,26 @@ async def get_crawler_diffs(request: Request = None):
     )
 
 @router.post("/crawler/diffs/{diff_id}/approve", response_model=ResponseEnvelope[dict])
-async def approve_crawler_diff(diff_id: str, request: Request = None):
+async def approve_crawler_diff(
+    diff_id: str,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("crawler.approve"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-diff-approve") if request else "tr-diff-approve"
-    res = admin_dashboard_service.approve_diff(diff_id)
+    res = admin_dashboard_service.approve_diff(diff_id, user_email=current_user.email)
     return ResponseEnvelope(
         data=res,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
 @router.post("/crawler/diffs/{diff_id}/reject", response_model=ResponseEnvelope[dict])
-async def reject_crawler_diff(diff_id: str, request: Request = None):
+async def reject_crawler_diff(
+    diff_id: str,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("crawler.review"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-diff-reject") if request else "tr-diff-reject"
-    res = admin_dashboard_service.reject_diff(diff_id)
+    res = admin_dashboard_service.reject_diff(diff_id, user_email=current_user.email)
     return ResponseEnvelope(
         data=res,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
@@ -156,7 +195,10 @@ async def reject_crawler_diff(diff_id: str, request: Request = None):
 
 # 7. Users & Roles (RBAC)
 @router.get("/users", response_model=ResponseEnvelope[List[AdminUserRoleDTO]])
-async def get_admin_users(request: Request = None):
+async def get_admin_users(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("users.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-users") if request else "tr-users"
     users = admin_dashboard_service.get_users()
     return ResponseEnvelope(
@@ -164,9 +206,38 @@ async def get_admin_users(request: Request = None):
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-# 8. Analytics
+@router.post("/users/role", response_model=ResponseEnvelope[AdminUserRoleDTO])
+async def update_user_role(
+    payload: UserRoleUpdateDTO,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("users.role_change"))
+):
+    trace_id = getattr(request.state, "trace_id", "tr-role-change") if request else "tr-role-change"
+    updated = admin_dashboard_service.update_user_role(payload.userId, payload.newRole, admin_email=current_user.email)
+    return ResponseEnvelope(
+        data=updated,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+# 8. Audit Logs
+@router.get("/audit-logs", response_model=ResponseEnvelope[List[AuditLogEntryDTO]])
+async def get_audit_logs(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("audit.view"))
+):
+    trace_id = getattr(request.state, "trace_id", "tr-audit") if request else "tr-audit"
+    logs = admin_dashboard_service.get_audit_logs()
+    return ResponseEnvelope(
+        data=logs,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+# 9. Analytics
 @router.get("/analytics", response_model=ResponseEnvelope[AdminAnalyticsDTO])
-async def get_admin_analytics(request: Request = None):
+async def get_admin_analytics(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("analytics.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-analytics") if request else "tr-analytics"
     analytics = admin_dashboard_service.get_analytics()
     return ResponseEnvelope(
@@ -174,9 +245,12 @@ async def get_admin_analytics(request: Request = None):
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-# 9. Content CMS
+# 10. Content CMS
 @router.get("/cms/sections", response_model=ResponseEnvelope[List[ContentCmsSectionDTO]])
-async def get_cms_sections(request: Request = None):
+async def get_cms_sections(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("cms.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-cms") if request else "tr-cms"
     sections = admin_dashboard_service.get_cms_sections()
     return ResponseEnvelope(
@@ -184,9 +258,12 @@ async def get_cms_sections(request: Request = None):
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-# 10. Settings & Categories
+# 11. Settings & Categories
 @router.get("/settings", response_model=ResponseEnvelope[AdminSettingsDTO])
-async def get_admin_settings(request: Request = None):
+async def get_admin_settings(
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("settings.view"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-settings") if request else "tr-settings"
     settings_data = admin_dashboard_service.get_settings()
     return ResponseEnvelope(
@@ -195,9 +272,13 @@ async def get_admin_settings(request: Request = None):
     )
 
 @router.post("/settings/categories", response_model=ResponseEnvelope[AdminSettingsDTO])
-async def add_admin_category(category_name: str = Query(...), request: Request = None):
+async def add_admin_category(
+    category_name: str = Query(...),
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("settings.update"))
+):
     trace_id = getattr(request.state, "trace_id", "tr-cat-add") if request else "tr-cat-add"
-    updated = admin_dashboard_service.add_category(category_name)
+    updated = admin_dashboard_service.add_category(category_name, admin_email=current_user.email)
     return ResponseEnvelope(
         data=updated,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))

@@ -2206,6 +2206,33 @@ class PlacesService:
             "nearbyPlaces": []
         }
 
+    def add_place(self, place_id: str, name: str, district: str, category: str, description: str, latitude: float, longitude: float, image_url: str = None, best_time: str = "Year Round", highlights: List[str] = None, tags: List[str] = None) -> dict:
+        slug = re.sub(r'[^a-z0-9]+', '-', name.lower()).strip('-')
+        record = {
+            "id": place_id,
+            "slug": slug,
+            "name": name,
+            "display_name": f"{name}, {district}",
+            "type": category.upper(),
+            "category": category.lower(),
+            "description": description,
+            "latitude": float(latitude),
+            "longitude": float(longitude),
+            "district": district,
+            "state": "Tamil Nadu",
+            "country": "India",
+            "best_time": best_time,
+            "highlights": highlights or [name],
+            "tags": tags or [category],
+            "image": image_url or "https://images.unsplash.com/photo-1582510003544-4d00b7f74220",
+            "rating": 4.8,
+            "popularity": 95,
+            "status": "PUBLISHED",
+            "verified": True
+        }
+        self._places_db[slug] = record
+        return record
+
 places_service = PlacesService()
 
 
