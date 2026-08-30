@@ -36,8 +36,12 @@ export interface TNGeoAreaDetail {
   };
 }
 
+import { getApiBaseUrl } from "@/lib/api-client/config";
+
 export class TNGeoApiRepository {
-  private static baseUrl = '/api/v1/geo';
+  private static get baseUrl(): string {
+    return `${getApiBaseUrl()}/api/v1/geo`;
+  }
 
   static async getDistricts(): Promise<TNGeoNode[]> {
     const res = await fetch(`${this.baseUrl}/districts`);

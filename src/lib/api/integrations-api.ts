@@ -37,8 +37,12 @@ export interface ExternalApiResponse<T = any> {
   retrievedAt: string;
 }
 
+import { getApiBaseUrl } from "@/lib/api-client/config";
+
 export class IntegrationsApiRepository {
-  private static baseUrl = '/api/v1/integrations';
+  private static get baseUrl(): string {
+    return `${getApiBaseUrl()}/api/v1/integrations`;
+  }
 
   static async getWeatherForecast(destination: string): Promise<WeatherForecast> {
     const res = await fetch(`${this.baseUrl}/weather?destination=${encodeURIComponent(destination)}`);

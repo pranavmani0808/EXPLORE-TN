@@ -15,8 +15,12 @@ export interface CrawledUrl {
   crawledAt: string;
 }
 
+import { getApiBaseUrl } from "@/lib/api-client/config";
+
 export class CrawlApiRepository {
-  private static baseUrl = '/api/v1/crawl';
+  private static get baseUrl(): string {
+    return `${getApiBaseUrl()}/api/v1/crawl`;
+  }
 
   static async getHealth(): Promise<{ status: string; provider: string; apiBaseUrl: string; connected: boolean }> {
     try {

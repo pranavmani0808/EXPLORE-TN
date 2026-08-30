@@ -223,8 +223,12 @@ export interface EntityPerformance {
   lastUpdated: string;
 }
 
+import { getApiBaseUrl } from "@/lib/api-client/config";
+
 export class AdminDashboardApiRepository {
-  private static baseUrl = '/api/v1/admin';
+  private static get baseUrl(): string {
+    return `${getApiBaseUrl()}/api/v1/admin`;
+  }
 
   private static getHeaders(): HeadersInit {
     try {
