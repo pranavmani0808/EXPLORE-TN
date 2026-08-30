@@ -148,7 +148,7 @@ function AdminOperationsCenter() {
 
   return (
     <AppShell>
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-7xl px-4 pt-28 sm:pt-32 lg:pt-36 pb-16 sm:px-6 font-sans">
         {/* Top Operational Header */}
         <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between border-b border-border pb-6">
           <div>
@@ -164,12 +164,12 @@ function AdminOperationsCenter() {
             </h1>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 shrink-0">
             <Button variant="outline" size="sm" onClick={loadAdminData} className="gap-2">
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               Refresh Telemetry
             </Button>
-            <Button size="sm" onClick={handleSyncProduction} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white">
+            <Button size="sm" onClick={handleSyncProduction} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
               <Database className="h-4 w-4" />
               Sync to Production DB
             </Button>
@@ -179,7 +179,7 @@ function AdminOperationsCenter() {
         {/* Sidebar + Main Module Grid */}
         <div className="mt-8 grid grid-cols-1 gap-8 lg:grid-cols-12">
           {/* Sidebar Navigation */}
-          <div className="lg:col-span-3">
+          <div className="lg:col-span-3 lg:sticky lg:top-32 lg:self-start">
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm">
               <div className="mb-4 px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground">
                 EXPLORE TN CONTROL
