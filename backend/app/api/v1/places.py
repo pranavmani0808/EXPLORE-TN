@@ -19,15 +19,6 @@ async def list_places(request: Request, category: Optional[str] = None):
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
-@router.get("/{place_id}", response_model=ResponseEnvelope[PlaceResponse])
-async def get_place_by_id(place_id: str, request: Request):
-    trace_id = getattr(request.state, "trace_id", "tr-default")
-    place_record = places_service.get_place_by_id_or_slug(place_id)
-    return ResponseEnvelope(
-        data=place_record,
-        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
-    )
-
 @router.post("", response_model=ResponseEnvelope[PlaceResponse])
 async def create_place(
     place_in: PlaceCreate,
@@ -161,6 +152,43 @@ async def list_place_categories(request: Request):
     place_types = ["CITY", "TOWN", "DISTRICT", "STATE", "REGION", "TEMPLE", "CHURCH", "MOSQUE", "WATERFALL", "RIVER", "LAKE", "DAM", "BEACH", "HILL", "MOUNTAIN", "VALLEY", "VIEWPOINT", "FOREST", "NATIONAL_PARK", "WILDLIFE", "FORT", "PALACE", "HERITAGE_SITE", "FOOD_SPOT", "RESTAURANT", "CAFE", "TEA_SHOP", "HOTEL", "RESORT", "ADVENTURE", "TREKKING", "KAYAKING", "RAFTING", "CAMPING"]
     return ResponseEnvelope(
         data={"categories": categories, "types": place_types},
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/search/autocomplete", response_model=ResponseEnvelope[List[dict]])
+async def autocomplete_places(q: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    results = places_service.search_places_by_category_and_location(q)
+    return ResponseEnvelope(
+        data=results.get("places", []),
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/experience/home", response_model=ResponseEnvelope[dict])
+async def get_experience_home(request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    all_places = places_service.get_all_places()
+    featured = [p for p in all_places if p.get("featured", False)] or all_places[:6]
+    return ResponseEnvelope(
+        data={"featured": featured, "trending": all_places[:4], "categories": ["temple", "waterfall", "hill_station"]},
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/experience/trip/{slug}", response_model=ResponseEnvelope[dict])
+async def get_experience_trip(slug: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    place = places_service.get_place_by_id_or_slug(slug)
+    return ResponseEnvelope(
+        data={"tripSlug": slug, "place": place, "recommendedDuration": "2 Days"},
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.get("/{place_id}", response_model=ResponseEnvelope[PlaceResponse])
+async def get_place_by_id(place_id: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    place_record = places_service.get_place_by_id_or_slug(place_id)
+    return ResponseEnvelope(
+        data=place_record,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 

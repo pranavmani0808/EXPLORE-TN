@@ -104,6 +104,7 @@ app.include_router(routes_engine_router, prefix=settings.API_V1_STR)
 app.include_router(user_resources_router, prefix=settings.API_V1_STR)
 app.include_router(crawl_router, prefix=settings.API_V1_STR)
 app.include_router(integrations_router, prefix=settings.API_V1_STR)
+app.include_router(integrations_router, prefix="/api/v1/weather_legacy")
 app.include_router(routes_engine_router, prefix="/api")
 
 if __name__ == "__main__":

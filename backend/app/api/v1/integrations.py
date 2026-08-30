@@ -24,6 +24,18 @@ async def get_weather(
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
+@router.get("/weather/{district}", response_model=ResponseEnvelope[WeatherForecastDTO])
+async def get_weather_by_district(
+    district: str,
+    request: Request = None
+):
+    trace_id = getattr(request.state, "trace_id", "tr-weather") if request else "tr-weather"
+    forecast = weather_service.get_weather_forecast(destination=district, trace_id=trace_id)
+    return ResponseEnvelope(
+        data=forecast,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
 # 2. TTDC Official Tourism Advisories API Endpoint
 @router.get("/ttdc/advisories", response_model=ResponseEnvelope[List[TTDCAdvisoryDTO]])
 async def get_ttdc_advisories(
