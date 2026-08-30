@@ -26,7 +26,19 @@ class Settings(BaseSettings):
     OPENSERP_BASE_URL: str = "https://api.openserp.com/v1/search"
 
     # WEB_CRAWL-main Service Integration
-    WEB_CRAWL_API_BASE_URL: str = "http://localhost:8000/api"
+    WEB_CRAWL_API_BASE_URL: str = "http://localhost:8080/api"
+
+    # OpenWeather / Live Weather Advisory Configuration
+    WEATHER_API_KEY: str = "ow_live_secret_key_explorer_tn_prod"
+    WEATHER_BASE_URL: str = "https://api.openweathermap.org/data/2.5"
+
+    # TTDC Official Tourism & E-Governance API Configuration
+    TTDC_API_KEY: str = "ttdc_gov_live_key_tn_tourism_2026"
+    TTDC_BASE_URL: str = "https://api.ttdc.tn.gov.in/v1"
+
+    # Mapbox / Geocoding & Places Autocomplete API Configuration
+    MAPBOX_API_KEY: str = "pk.eyJ1IjoicHJhbmF2dG4iLCJhIjoiY2x5eG56eDdtMDJxeTJrcjB4Nm1leWp2OSJ9"
+    GEOCODING_BASE_URL: str = "https://api.mapbox.com/geocoding/v5/mapbox.places"
 
     # Routing Engine Configuration
     ROUTING_PROVIDER: str = "osrm"

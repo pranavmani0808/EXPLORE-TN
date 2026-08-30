@@ -25,12 +25,11 @@ class WebCrawlService:
 
     def check_health(self) -> Dict[str, Any]:
         """
-        Health probe for the external WEB_CRAWL-main service connection.
+        Fast health probe for external WEB_CRAWL-main service connection.
         """
         try:
-            # Check backend health URL (e.g. http://localhost:8000/health)
             health_url = self.base_url.rsplit("/api", 1)[0] + "/health"
-            with httpx.Client(timeout=2.0) as client:
+            with httpx.Client(timeout=0.3) as client:
                 res = client.get(health_url)
                 is_healthy = res.status_code == 200
         except Exception:
@@ -65,7 +64,7 @@ class WebCrawlService:
         payload = {"url": target_url, "max_pages": max_pages}
 
         try:
-            with httpx.Client(timeout=5.0) as client:
+            with httpx.Client(timeout=0.5) as client:
                 res = client.post(endpoint, json=payload)
                 if res.status_code in [200, 201, 202]:
                     data = res.json()
@@ -99,7 +98,7 @@ class WebCrawlService:
         """
         endpoint = f"{self.base_url}/crawl/jobs/{job_id}"
         try:
-            with httpx.Client(timeout=3.0) as client:
+            with httpx.Client(timeout=0.3) as client:
                 res = client.get(endpoint)
                 if res.status_code == 200:
                     return res.json()
@@ -124,7 +123,7 @@ class WebCrawlService:
         """
         endpoint = f"{self.base_url}/crawl/jobs/{job_id}/urls"
         try:
-            with httpx.Client(timeout=3.0) as client:
+            with httpx.Client(timeout=0.3) as client:
                 res = client.get(endpoint)
                 if res.status_code == 200:
                     raw_urls = res.json().get("urls", [])
