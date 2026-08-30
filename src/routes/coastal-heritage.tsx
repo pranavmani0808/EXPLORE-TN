@@ -50,7 +50,7 @@ const COASTAL_HERITAGE_PLANS: ExplorePlan[] = [
   },
 ];
 
-export function CoastalHeritagePage() {
+function CoastalHeritagePage() {
   return (
     <AppShell>
       <PageHeader

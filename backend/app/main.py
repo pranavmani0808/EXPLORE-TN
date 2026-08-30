@@ -93,6 +93,8 @@ app.add_exception_handler(Exception, global_exception_handler)
 
 # Include Routers
 app.include_router(health_router)
+app.include_router(health_router, prefix=settings.API_V1_STR)
+app.include_router(health_router, prefix="/api")
 app.include_router(places_router, prefix=settings.API_V1_STR)
 app.include_router(admin_router, prefix=settings.API_V1_STR)
 app.include_router(jobs_router, prefix=settings.API_V1_STR)

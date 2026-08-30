@@ -82,7 +82,7 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string 
   "elephant beach": { lat: 11.9961, lng: 92.9515, desc: "Elephant Beach Sea Walk" },
 };
 
-export function PlannerPage() {
+function PlannerPage() {
   const { requireAuth } = useAuthGuard();
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([

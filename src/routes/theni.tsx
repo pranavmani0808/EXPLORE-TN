@@ -79,7 +79,7 @@ const THENI_EXPLORE_PLANS: ExplorePlan[] = [
   },
 ];
 
-export function TheniTripPlannerPage() {
+function TheniTripPlannerPage() {
   return (
     <AppShell>
       <PageHeader

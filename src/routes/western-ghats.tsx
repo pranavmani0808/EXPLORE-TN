@@ -51,7 +51,7 @@ const WESTERN_GHATS_PLANS: ExplorePlan[] = [
   },
 ];
 
-export function WesternGhatsRoutePage() {
+function WesternGhatsRoutePage() {
   return (
     <AppShell>
       <PageHeader

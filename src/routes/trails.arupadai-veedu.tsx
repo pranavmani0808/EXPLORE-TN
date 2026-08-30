@@ -45,7 +45,7 @@ export const Route = createFileRoute("/trails/arupadai-veedu")({
   component: ArupadaiVeeduTrailPage,
 });
 
-export function ArupadaiVeeduTrailPage() {
+function ArupadaiVeeduTrailPage() {
   const navigate = useNavigate();
   const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
   const [osrmRoutePoints, setOsrmRoutePoints] = useState<Array<[number, number]>>([]);

@@ -52,7 +52,7 @@ const HILLS_OF_TN_PLANS: ExplorePlan[] = [
   },
 ];
 
-export function HillsOfTNPage() {
+function HillsOfTNPage() {
   return (
     <AppShell>
       <PageHeader

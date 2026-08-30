@@ -27,7 +27,7 @@ export const Route = createFileRoute("/routes")({
   component: RoutesPage,
 });
 
-export function RoutesPage() {
+function RoutesPage() {
   const navigate = useNavigate();
   const search = Route.useSearch();
 

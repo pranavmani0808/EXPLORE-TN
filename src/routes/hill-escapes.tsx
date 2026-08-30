@@ -64,7 +64,7 @@ const HILL_ESCAPES_PLANS: ExplorePlan[] = [
   },
 ];
 
-export function HillEscapesPage() {
+function HillEscapesPage() {
   return (
     <AppShell>
       <PageHeader

@@ -28,7 +28,7 @@ export const Route = createFileRoute("/adventures")({
   component: AdventuresPage,
 });
 
-export function AdventuresPage() {
+function AdventuresPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<AdventureCategory>("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");

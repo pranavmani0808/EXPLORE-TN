@@ -49,7 +49,7 @@ const MADURAI_PLANS: ExplorePlan[] = [
   },
 ];
 
-export function ExploreMaduraiPage() {
+function ExploreMaduraiPage() {
   return (
     <AppShell>
       <PageHeader
