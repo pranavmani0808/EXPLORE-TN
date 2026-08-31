@@ -23,17 +23,23 @@ const aiSuggestions = [
 export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   const [query, setQuery] = useState("");
   const [backendSuggestions, setBackendSuggestions] = useState<BackendSearchSuggestion[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
 
   useEffect(() => {
     if (!query.trim()) {
       setBackendSuggestions([]);
+      setIsSearching(false);
       return;
     }
+    setIsSearching(true);
     const timer = setTimeout(() => {
       fetchAutocompleteSuggestions(query).then((suggestions) => {
         setBackendSuggestions(suggestions);
+        setIsSearching(false);
+      }).catch(() => {
+        setIsSearching(false);
       });
-    }, 150);
+    }, 250);
     return () => clearTimeout(timer);
   }, [query]);
 
@@ -80,27 +86,69 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
             {/* Live Backend Search Results if Query Present */}
             {query.trim() && (
               <div>
-                <p className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 mb-3 flex items-center gap-2">
-                  <Server className="size-3.5" /> Live Backend Search Results
-                </p>
-                <div className="space-y-1.5">
-                  {backendSuggestions.map((s) => (
-                    <div
-                      key={s.id}
-                      onClick={() => onOpenChange(false)}
-                      className="flex items-center justify-between p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-emerald-500/15 hover:border-emerald-500/30 transition cursor-pointer"
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <MapPin className="size-4 text-emerald-400" />
-                        <span className="font-semibold text-sm text-white">{s.name}</span>
-                      </div>
-                      <span className="text-xs font-mono text-slate-400">{s.district} • {s.category}</span>
-                    </div>
-                  ))}
-                  {!backendSuggestions.length && (
-                    <p className="text-sm text-slate-400 py-3 text-center">Searching places matching "{query}"...</p>
-                  )}
+                <div className="flex items-center justify-between mb-3">
+                  <p className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                    <Server className="size-3.5" /> LIVE BACKEND SEARCH RESULTS
+                  </p>
+                  <span className="text-[10px] font-mono text-slate-400">{backendSuggestions.length} Matches Found</span>
                 </div>
+
+                {isSearching ? (
+                  <p className="text-xs text-emerald-400 font-mono py-4 text-center animate-pulse">
+                    Searching canonical database for "{query}"...
+                  </p>
+                ) : backendSuggestions.length > 0 ? (
+                  <div className="space-y-2">
+                    {backendSuggestions.map((s) => {
+                      const slug = s.slug || s.id;
+                      const categories = (s.categories || [s.category]).map(c => c.charAt(0).toUpperCase() + c.slice(1));
+
+                      return (
+                        <div
+                          key={s.id}
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition gap-3"
+                        >
+                          <div className="space-y-1">
+                            <div className="flex items-center gap-2">
+                              <MapPin className="size-4 text-emerald-400 shrink-0" />
+                              <span className="font-bold text-sm text-white">{s.name}</span>
+                            </div>
+                            <div className="flex items-center gap-2 text-xs text-slate-400 pl-6">
+                              <span>{s.district}, {s.state || "Tamil Nadu"}</span>
+                              <span>•</span>
+                              <span className="text-emerald-400 font-medium">{categories.slice(0, 3).join(" • ")}</span>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-2 pl-6 sm:pl-0">
+                            <Link
+                              to={`/place/$slug`}
+                              params={{ slug }}
+                              onClick={() => onOpenChange(false)}
+                              className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold text-xs border border-emerald-500/30 transition"
+                            >
+                              View Details
+                            </Link>
+                            <Link
+                              to="/discover"
+                              onClick={() => onOpenChange(false)}
+                              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-xs transition"
+                            >
+                              View on Map
+                            </Link>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-8 text-center space-y-2 bg-white/5 rounded-2xl border border-white/10">
+                    <p className="text-sm font-semibold text-slate-300">No canonical places found matching "{query}"</p>
+                    <p className="text-xs text-slate-400">
+                      Try searching for <span className="text-emerald-400 font-mono">"vallichunai"</span>, <span className="text-emerald-400 font-mono">"piranmalai"</span>, <span className="text-emerald-400 font-mono">"mathoor"</span>, or <span className="text-emerald-400 font-mono">"sivaganga"</span>.
+                    </p>
+                  </div>
+                )}
               </div>
             )}
 

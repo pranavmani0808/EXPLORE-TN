@@ -158,9 +158,9 @@ async def list_place_categories(request: Request):
 @router.get("/search/autocomplete", response_model=ResponseEnvelope[List[dict]])
 async def autocomplete_places(q: str, request: Request):
     trace_id = getattr(request.state, "trace_id", "tr-default")
-    results = places_service.search_places_by_category_and_location(q)
+    results = places_service.search_places(q)
     return ResponseEnvelope(
-        data=results.get("places", []),
+        data=results,
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 

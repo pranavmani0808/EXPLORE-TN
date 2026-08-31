@@ -2262,19 +2262,72 @@ class PlacesService:
         matched.sort(key=lambda x: x.get("detourDistanceKm", 0.0))
         return matched
 
+    def search_places(self, query: str, category: Optional[str] = None) -> List[dict]:
+        if not query or not query.strip():
+            return []
+
+        q_raw = query.strip().lower()
+        q_norm = re.sub(r'[^a-z0-9]+', '', q_raw)
+
+        matches = []
+        for p in self.get_all_places():
+            # Check category filter if provided
+            if category and category.lower() not in ["all", "none", ""]:
+                cats = [c.lower() for c in p.get("categories", [])]
+                if category.lower() not in cats and p.get("category", "").lower() != category.lower():
+                    continue
+
+            name_raw = p.get("name", "").lower()
+            name_norm = re.sub(r'[^a-z0-9]+', '', name_raw)
+
+            slug_raw = p.get("slug", "").lower()
+            slug_norm = re.sub(r'[^a-z0-9]+', '', slug_raw)
+
+            district_raw = p.get("district", "").lower()
+            city_raw = p.get("city", "").lower()
+            state_raw = p.get("state", "").lower()
+
+            aliases_norm = [re.sub(r'[^a-z0-9]+', '', str(a).lower()) for a in p.get("aliases", [])]
+            search_terms_norm = [re.sub(r'[^a-z0-9]+', '', str(t).lower()) for t in p.get("search_terms", [])]
+
+            score = 0
+            if q_norm == name_norm or q_norm == slug_norm:
+                score += 100
+            elif q_norm in name_norm or name_norm in q_norm:
+                score += 85
+            elif any(q_norm in a or a in q_norm for a in aliases_norm):
+                score += 80
+            elif any(q_norm in t or t in q_norm for t in search_terms_norm):
+                score += 70
+            elif q_raw in name_raw or q_raw in district_raw or q_raw in city_raw or q_raw in state_raw:
+                score += 50
+            elif any(q_raw in str(tag).lower() for tag in p.get("tags", [])):
+                score += 40
+
+            if score > 0:
+                p_copy = dict(p)
+                p_copy["_search_score"] = score
+                matches.append(p_copy)
+
+        matches.sort(key=lambda x: (-x["_search_score"], -x.get("rating", 0.0), x.get("name", "")))
+        return matches
+
     def search_places_by_category_and_location(self, query: str, category: Optional[str] = None, radius_km: float = 50.0) -> Dict[str, Any]:
         resolved = self.resolve_destination(query)
+        places_list = self.search_places(query, category=category)
         if resolved["confidence"] in ["HIGH", "MEDIUM"] and resolved["latitude"] and resolved["longitude"]:
             nearby = self.find_nearby_places(resolved["latitude"], resolved["longitude"], radius_km=radius_km, category=category)
             return {
                 "resolvedDestination": resolved,
                 "category": category,
-                "nearbyPlaces": nearby
+                "nearbyPlaces": nearby,
+                "places": places_list
             }
         return {
             "resolvedDestination": resolved,
             "category": category,
-            "nearbyPlaces": []
+            "nearbyPlaces": [],
+            "places": places_list
         }
 
     def add_place(self, place_id: str, name: str, district: str, category: str, description: str, latitude: float, longitude: float, image_url: str = None, best_time: str = "Year Round", highlights: List[str] = None, tags: List[str] = None) -> dict:
