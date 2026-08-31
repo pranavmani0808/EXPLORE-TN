@@ -14,6 +14,7 @@ import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AdventuresRouteImport } from './routes/adventures'
 import { Route as CoastalHeritageRouteImport } from './routes/coastal-heritage'
 import { Route as CommunityRouteImport } from './routes/community'
+import { Route as DiscoverRouteImport } from './routes/discover'
 import { Route as ExploreRouteImport } from './routes/explore'
 import { Route as HillEscapesRouteImport } from './routes/hill-escapes'
 import { Route as HillsOfTnRouteImport } from './routes/hills-of-tn'
@@ -51,6 +52,11 @@ const CoastalHeritageRoute = CoastalHeritageRouteImport.update({
 const CommunityRoute = CommunityRouteImport.update({
   id: '/community',
   path: '/community',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DiscoverRoute = DiscoverRouteImport.update({
+  id: '/discover',
+  path: '/discover',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ExploreRoute = ExploreRouteImport.update({
@@ -125,6 +131,7 @@ export interface FileRoutesByFullPath {
   '/adventures': typeof AdventuresRoute
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
+  '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/hill-escapes': typeof HillEscapesRoute
   '/hills-of-tn': typeof HillsOfTnRoute
@@ -145,6 +152,7 @@ export interface FileRoutesByTo {
   '/adventures': typeof AdventuresRoute
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
+  '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/hill-escapes': typeof HillEscapesRoute
   '/hills-of-tn': typeof HillsOfTnRoute
@@ -166,6 +174,7 @@ export interface FileRoutesById {
   '/adventures': typeof AdventuresRoute
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
+  '/discover': typeof DiscoverRoute
   '/explore': typeof ExploreRoute
   '/hill-escapes': typeof HillEscapesRoute
   '/hills-of-tn': typeof HillsOfTnRoute
@@ -188,6 +197,7 @@ export interface FileRouteTypes {
     | '/adventures'
     | '/coastal-heritage'
     | '/community'
+    | '/discover'
     | '/explore'
     | '/hill-escapes'
     | '/hills-of-tn'
@@ -208,6 +218,7 @@ export interface FileRouteTypes {
     | '/adventures'
     | '/coastal-heritage'
     | '/community'
+    | '/discover'
     | '/explore'
     | '/hill-escapes'
     | '/hills-of-tn'
@@ -228,6 +239,7 @@ export interface FileRouteTypes {
     | '/adventures'
     | '/coastal-heritage'
     | '/community'
+    | '/discover'
     | '/explore'
     | '/hill-escapes'
     | '/hills-of-tn'
@@ -249,6 +261,7 @@ export interface RootRouteChildren {
   AdventuresRoute: typeof AdventuresRoute
   CoastalHeritageRoute: typeof CoastalHeritageRoute
   CommunityRoute: typeof CommunityRoute
+  DiscoverRoute: typeof DiscoverRoute
   ExploreRoute: typeof ExploreRoute
   HillEscapesRoute: typeof HillEscapesRoute
   HillsOfTnRoute: typeof HillsOfTnRoute
@@ -299,6 +312,13 @@ declare module '@tanstack/react-router' {
       path: '/community'
       fullPath: '/community'
       preLoaderRoute: typeof CommunityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/discover': {
+      id: '/discover'
+      path: '/discover'
+      fullPath: '/discover'
+      preLoaderRoute: typeof DiscoverRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/explore': {
@@ -401,6 +421,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdventuresRoute: AdventuresRoute,
   CoastalHeritageRoute: CoastalHeritageRoute,
   CommunityRoute: CommunityRoute,
+  DiscoverRoute: DiscoverRoute,
   ExploreRoute: ExploreRoute,
   HillEscapesRoute: HillEscapesRoute,
   HillsOfTnRoute: HillsOfTnRoute,

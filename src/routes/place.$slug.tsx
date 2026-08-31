@@ -17,6 +17,7 @@ import {
   Fuel,
   Lightbulb,
   ArrowLeft,
+  Map,
   CheckCircle2,
   Camera,
   MessageSquare,
@@ -121,9 +122,9 @@ function PlacePage() {
           <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-10 sm:px-6">
             <Link
               to="/explore"
-              className="glass mb-6 inline-flex items-center gap-2 rounded-full px-3 py-2 text-xs font-medium"
+              className="glass mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-foreground border border-border hover:bg-card transition"
             >
-              <ArrowLeft className="size-3.5" aria-hidden /> Back to map
+              <ArrowLeft className="size-3.5" aria-hidden /> Back to All Places
             </Link>
             <p className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
               <MapPin className="size-4 text-emerald-500" aria-hidden /> {place.district} District · {place.distanceFromChennai} from Chennai
@@ -136,6 +137,13 @@ function PlacePage() {
               <span className="glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-mono font-bold text-amber-400">
                 <Star className="size-4 fill-current" aria-hidden /> {place.rating} · {place.reviews} verified reviews
               </span>
+
+              <Link
+                to="/discover"
+                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition"
+              >
+                <Map className="size-4" /> View on Map
+              </Link>
 
               {/* Explicit "I've Been Here" Visit Button */}
               <Button

@@ -52,22 +52,19 @@ function useTheme() {
 }
 
 // Explore Dropdown Content Items
-const DISCOVER_COLLECTIONS = [
-  { to: "/explore", label: "Tamil Nadu", desc: "Full-screen spatial map & catalog", icon: Map },
-  { to: "/madurai", label: "Madurai", desc: "Temples, landmarks & street food", icon: Landmark },
-  { to: "/theni", label: "Theni", desc: "Waterfalls, tea estates & river trails", icon: Flame },
-  { to: "/hills-of-tn", label: "TN Hills", desc: "Kolli, Yelagiri, Gingee & Kalrayan", icon: Mountain },
-  { to: "/western-ghats", label: "Western Ghats", desc: "Kinnakorai, Mullayanagiri & Agumbe", icon: Trees },
-  { to: "/coastal-heritage", label: "Coastal Routes", desc: "Chennai to Dhanushkodi road trip", icon: Compass },
-];
-
-const EXPERIENCE_ITEMS = [
-  { to: "/explore?cat=temples", label: "Temples", icon: Landmark },
-  { to: "/explore?cat=waterfalls", label: "Waterfalls", icon: CloudRain },
-  { to: "/hill-escapes", label: "Hills", icon: Mountain },
-  { to: "/explore?cat=beaches", label: "Beaches", icon: Waves },
-  { to: "/madurai", label: "Food Trails", icon: Utensils },
-  { to: "/explore?cat=adventure", label: "Adventure", icon: Footprints },
+const EXPLORE_CATEGORIES = [
+  { to: "/explore", label: "All Places", icon: Compass },
+  { to: "/explore", search: "?category=adventure", label: "Adventures", icon: Footprints },
+  { to: "/explore", search: "?category=mountain&trekking=true", label: "Trekking", icon: Mountain },
+  { to: "/explore", search: "?category=waterfall", label: "Waterfalls", icon: CloudRain },
+  { to: "/explore", search: "?category=mountain", label: "Hills & Viewpoints", icon: Mountain },
+  { to: "/explore", search: "?category=coastal", label: "Beaches", icon: Waves },
+  { to: "/explore", search: "?category=temple", label: "Temples", icon: Landmark },
+  { to: "/explore", search: "?category=lake", label: "Lakes", icon: Waves },
+  { to: "/explore", search: "?category=heritage", label: "Heritage", icon: Landmark },
+  { to: "/explore", search: "?category=food", label: "Food", icon: Utensils },
+  { to: "/explore", search: "?tag=hidden", label: "Hidden Places", icon: Sparkles },
+  { to: "/explore", search: "?tag=rural", label: "Rural Experiences", icon: Trees },
 ];
 
 export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
@@ -82,9 +79,10 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
   const pathname = location.pathname;
 
-  // Active check for Explore hierarchy (includes all destination sub-pages)
+  // Active check for Explore hierarchy
   const isExploreActive =
     pathname === "/explore" ||
+    pathname === "/discover" ||
     pathname === "/madurai" ||
     pathname === "/theni" ||
     pathname === "/hills-of-tn" ||
@@ -141,7 +139,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           )}
         </div>
 
-        {/* Center: Scalable Primary Navigation (5 Main Items) */}
+        {/* Center: Primary Navigation */}
         <div className="hidden items-center gap-1.5 lg:flex">
           {/* 1. Explore Popover Menu */}
           <div
@@ -158,7 +156,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                   : "text-slate-600 dark:text-[#A1A8B3]",
               )}
             >
-              <Map className="size-4" />
+              <Compass className="size-4" />
               <span>Explore</span>
               <ChevronDown className={`size-3.5 transition-transform ${exploreMenuOpen ? "rotate-180 text-emerald-400" : ""}`} />
             </Link>
@@ -171,64 +169,42 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.98 }}
                   transition={{ duration: 0.18 }}
-                  className="absolute top-full left-0 mt-3 w-[540px] rounded-3xl border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#121821]/95 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-900 dark:text-white"
+                  className="absolute top-full left-0 mt-3 w-[520px] rounded-3xl border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#121821]/95 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-900 dark:text-white"
                 >
-                  <div className="grid grid-cols-2 gap-6">
-                    {/* Discover Column */}
-                    <div>
-                      <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1">
-                        <Compass className="size-3" /> Discover Regions
-                      </div>
-                      <div className="space-y-1">
-                        {DISCOVER_COLLECTIONS.map((c) => {
-                          const Icon = c.icon;
-                          return (
-                            <Link
-                              key={c.to}
-                              to={c.to}
-                              onClick={() => setExploreMenuOpen(false)}
-                              className="flex items-start gap-2.5 p-2 rounded-2xl transition hover:bg-slate-100 dark:hover:bg-white/10 group"
-                            >
-                              <Icon className="size-4 text-emerald-500 shrink-0 mt-0.5 group-hover:scale-110 transition-transform" />
-                              <div>
-                                <div className="text-xs font-bold text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                                  {c.label}
-                                </div>
-                                <div className="text-[10px] text-slate-500 dark:text-slate-400 line-clamp-1">
-                                  {c.desc}
-                                </div>
-                              </div>
-                            </Link>
-                          );
-                        })}
-                      </div>
+                  <div>
+                    <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1">
+                      <Compass className="size-3" /> DISCOVER TAMIL NADU
                     </div>
 
-                    {/* Experiences Column */}
-                    <div>
-                      <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1">
-                        <Sparkles className="size-3" /> Experiences
-                      </div>
-                      <div className="grid grid-cols-2 gap-1.5">
-                        {EXPERIENCE_ITEMS.map((exp) => {
-                          const Icon = exp.icon;
-                          return (
-                            <Link
-                              key={exp.label}
-                              to={exp.to}
-                              onClick={() => setExploreMenuOpen(false)}
-                              className="flex items-center gap-2 p-2 rounded-xl text-xs font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-emerald-600 dark:hover:text-emerald-400 transition"
-                            >
-                              <Icon className="size-3.5 text-emerald-500 shrink-0" />
-                              <span>{exp.label}</span>
-                            </Link>
-                          );
-                        })}
-                      </div>
+                    <div className="grid grid-cols-3 gap-2">
+                      {EXPLORE_CATEGORIES.map((c) => {
+                        const Icon = c.icon;
+                        return (
+                          <Link
+                            key={c.label}
+                            to={c.to}
+                            onClick={() => setExploreMenuOpen(false)}
+                            className="flex items-center gap-2 p-2.5 rounded-2xl border border-transparent hover:border-emerald-500/20 hover:bg-emerald-500/5 transition text-xs font-semibold text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400"
+                          >
+                            <Icon className="size-4 text-emerald-500 shrink-0" />
+                            <span className="truncate">{c.label}</span>
+                          </Link>
+                        );
+                      })}
+                    </div>
 
-                      <div className="mt-4 p-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/20 text-[11px] text-slate-700 dark:text-slate-300">
-                        💡 Explore 52+ canonical destinations with Leaflet dark map tiles & isolated route engine.
-                      </div>
+                    <div className="mt-4 border-t border-slate-200 dark:border-white/10 pt-3">
+                      <Link
+                        to="/discover"
+                        onClick={() => setExploreMenuOpen(false)}
+                        className="flex items-center justify-between w-full p-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-xs hover:bg-emerald-500/20 transition group"
+                      >
+                        <span className="flex items-center gap-2">
+                          <Map className="size-4 text-emerald-500" />
+                          <span>🗺️ Explore on Interactive Map</span>
+                        </span>
+                        <span className="text-xs text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
+                      </Link>
                     </div>
                   </div>
                 </motion.div>
