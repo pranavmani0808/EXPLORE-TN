@@ -57,6 +57,8 @@ class Settings(BaseSettings):
         "https://explore-tn-trails-main.vercel.app",
         "https://explore-tn-trails-main-dnrgi59oo-chatterbox1.vercel.app",
         "https://explore-tn-trails-main-phctvk9o7-chatterbox1.vercel.app",
+        "https://explore-tn-backend.onrender.com",
+        "https://explore-tn.onrender.com",
     ]
     
     # Rate Limiting & Timeouts
