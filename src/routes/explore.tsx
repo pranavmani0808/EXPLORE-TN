@@ -281,11 +281,12 @@ function ExploreByExperiencePage() {
   // Filter places based on selected category (checking primary AND multi-categories array)
   const categoryFilteredPlaces = useMemo(() => {
     return places.filter((p) => {
+      if (!p) return false;
       const cats = p.categories || [];
-      const primaryCat = p.category.toLowerCase();
+      const primaryCat = (p.category || "").toLowerCase();
       const subCat = (p.subcategory || "").toLowerCase();
       const tagsStr = str(p.tags || []).toLowerCase();
-      const nameLower = p.name.toLowerCase();
+      const nameLower = (p.name || "").toLowerCase();
 
       let matchCategory = false;
 
@@ -321,16 +322,16 @@ function ExploreByExperiencePage() {
 
       // District Filter
       if (selectedDistrict !== "All Districts") {
-        if (p.district.toLowerCase() !== selectedDistrict.toLowerCase()) return false;
+        if ((p.district || "").toLowerCase() !== selectedDistrict.toLowerCase()) return false;
       }
 
       // Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
-        const matchName = p.name.toLowerCase().includes(q);
-        const matchDist = p.district.toLowerCase().includes(q);
-        const matchCat = p.category.toLowerCase().includes(q);
-        const matchTag = p.tagline?.toLowerCase().includes(q);
+        const matchName = (p.name || "").toLowerCase().includes(q);
+        const matchDist = (p.district || "").toLowerCase().includes(q);
+        const matchCat = (p.category || "").toLowerCase().includes(q);
+        const matchTag = (p.tagline || "").toLowerCase().includes(q);
         if (!matchName && !matchDist && !matchCat && !matchTag) return false;
       }
 
@@ -375,9 +376,10 @@ function ExploreByExperiencePage() {
               const Icon = tile.icon;
               const isSelected = selectedCategory === tile.id;
               const count = places.filter((p) => {
+                if (!p) return false;
                 const cats = p.categories || [];
-                const catLower = p.category.toLowerCase();
-                const nameLower = p.name.toLowerCase();
+                const catLower = (p.category || "").toLowerCase();
+                const nameLower = (p.name || "").toLowerCase();
                 if (tile.id === "waterfall") return cats.includes("waterfall") || catLower === "waterfall" || nameLower.includes("fall");
                 if (tile.id === "trekking") return cats.includes("trekking") || p.is_trekking || catLower === "mountain";
                 if (tile.id === "beaches") return cats.includes("beaches") || catLower === "coastal";
