@@ -91,6 +91,33 @@ async def create_admin_destination(
         meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
     )
 
+@router.put("/destinations/{destination_id}", response_model=ResponseEnvelope[DestinationDetailDTO])
+async def update_admin_destination(
+    destination_id: str,
+    payload: DestinationDetailDTO,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("destinations.update"))
+):
+    trace_id = getattr(request.state, "trace_id", "tr-dest-update") if request else "tr-dest-update"
+    updated = admin_dashboard_service.update_destination(destination_id, payload, user_email=current_user.email)
+    return ResponseEnvelope(
+        data=updated,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
+@router.delete("/destinations/{destination_id}", response_model=ResponseEnvelope[dict])
+async def delete_admin_destination(
+    destination_id: str,
+    request: Request = None,
+    current_user: UserContext = Depends(check_permission("destinations.delete"))
+):
+    trace_id = getattr(request.state, "trace_id", "tr-dest-delete") if request else "tr-dest-delete"
+    success = admin_dashboard_service.delete_destination(destination_id, user_email=current_user.email)
+    return ResponseEnvelope(
+        data={"deleted": success, "id": destination_id},
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
 # 3. Attractions Management (Single Source of Truth)
 @router.get("/attractions", response_model=ResponseEnvelope[List[AttractionDetailDTO]])
 async def get_admin_attractions(

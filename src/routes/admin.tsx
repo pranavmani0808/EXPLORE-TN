@@ -115,6 +115,45 @@ function AdminOperationsCenter() {
   const [newCatInput, setNewCatInput] = useState("");
   const [showAddDestModal, setShowAddDestModal] = useState(false);
 
+  // Edit & Delete Destination State
+  const [editingDest, setEditingDest] = useState<DestinationDetail | null>(null);
+  const [showEditModal, setShowEditModal] = useState<boolean>(false);
+
+  const handleOpenEditModal = (dest: DestinationDetail) => {
+    setEditingDest({ ...dest });
+    setShowEditModal(true);
+    setInspectingEntityId(null);
+  };
+
+  const handleSaveEditDestination = async () => {
+    if (!editingDest || !editingDest.name || !editingDest.district || !editingDest.description) {
+      toast.error("Please fill in all required destination fields.");
+      return;
+    }
+    try {
+      const updated = await AdminDashboardApiRepository.updateDestination(editingDest.id, editingDest);
+      setDestinations((prev) => prev.map((d) => (d.id === updated.id ? updated : d)));
+      toast.success(`✓ Successfully updated ${updated.name} in master database!`);
+      setShowEditModal(false);
+      setEditingDest(null);
+      loadAdminData();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update destination");
+    }
+  };
+
+  const handleDeleteDestination = async (id: string, name: string) => {
+    if (!window.confirm(`Are you sure you want to delete '${name}' from the master database?`)) return;
+    try {
+      await AdminDashboardApiRepository.deleteDestination(id);
+      setDestinations((prev) => prev.filter((d) => d.id !== id));
+      toast.success(`✓ Deleted destination '${name}'`);
+      loadAdminData();
+    } catch (err: any) {
+      toast.error(err.message || "Failed to delete destination");
+    }
+  };
+
   // Entity Detail Inspection Modal State
   const [inspectingEntityId, setInspectingEntityId] = useState<string | null>(null);
   const [entityPerf, setEntityPerf] = useState<EntityPerformance | null>(null);
@@ -469,8 +508,8 @@ function AdminOperationsCenter() {
 
                         <div className="flex items-center gap-2">
                           <Button size="sm" variant="outline" onClick={() => openEntityInspection(d.id)} className="gap-1"><Eye className="h-4 w-4" /> View Details</Button>
-                          <Button size="sm" variant="outline" onClick={() => openEntityInspection(d.id)} className="gap-1"><Edit className="h-4 w-4" /> Edit</Button>
-                          <Button size="sm" variant="ghost" onClick={() => toast.error("Role authorization required to delete master place")} className="text-rose-500"><Trash2 className="h-4 w-4" /></Button>
+                          <Button size="sm" variant="outline" onClick={() => handleOpenEditModal(d)} className="gap-1 text-emerald-600 border-emerald-500/30 hover:bg-emerald-500/10 dark:text-emerald-400"><Edit className="h-4 w-4" /> Edit</Button>
+                          <Button size="sm" variant="outline" onClick={() => handleDeleteDestination(d.id, d.name)} className="gap-1 text-rose-500 border-rose-500/30 hover:bg-rose-500/10"><Trash2 className="h-4 w-4" /></Button>
                         </div>
                       </div>
                     ))}
@@ -1106,12 +1145,104 @@ function AdminOperationsCenter() {
                   <Button variant="outline" size="sm" onClick={() => { toast.success(`Publish status verified for ${entityPerf.entityName}`); setInspectingEntityId(null); }}>
                     Verify Publish Status
                   </Button>
-                  <Button size="sm" onClick={() => { toast.success(`Opened edit editor for ${entityPerf.entityName}`); setInspectingEntityId(null); }}>
-                    Edit Details
+                  <Button size="sm" onClick={() => {
+                    const targetId = entityPerf?.entityId;
+                    const targetName = entityPerf?.entityName;
+                    const found = destinations.find((d) => d.id === targetId || d.name === targetName);
+                    if (found) {
+                      handleOpenEditModal(found);
+                    } else {
+                      handleOpenEditModal({
+                        id: targetId || "place-id",
+                        name: targetName || "Explore TN Place",
+                        district: entityPerf?.district || "Madurai",
+                        category: entityPerf?.category || "heritage",
+                        description: "",
+                        latitude: entityPerf?.latitude || 9.9252,
+                        longitude: entityPerf?.longitude || 78.1198,
+                        bestTimeToVisit: "Year Round",
+                        openingInfo: "06:00 AM - 08:00 PM",
+                        imageUrl: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220",
+                        highlights: ["Landmark"],
+                        activities: ["Sightseeing"],
+                        nearbyAttractions: [],
+                        metaTitle: "",
+                        metaDescription: "",
+                        slug: targetId || "place-id",
+                        status: "Published"
+                      });
+                    }
+                  }} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-1">
+                    <Edit className="h-4 w-4" /> Edit Details
                   </Button>
                 </div>
               </div>
             ) : null}
+          </div>
+        </div>
+      )}
+
+      {/* Real Interactive Edit Destination Modal */}
+      {showEditModal && editingDest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-border bg-card p-6 shadow-2xl space-y-4 max-h-[90vh] overflow-y-auto">
+            <div className="flex items-center justify-between border-b border-border pb-3">
+              <div>
+                <h3 className="text-xl font-bold text-foreground font-serif">Edit Place — {editingDest.name}</h3>
+                <p className="text-xs text-muted-foreground">ID: <span className="font-mono">{editingDest.id}</span></p>
+              </div>
+              <button onClick={() => { setShowEditModal(false); setEditingDest(null); }} className="text-muted-foreground hover:text-foreground">✕</button>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Place Name *</label>
+                <input type="text" value={editingDest.name || ""} onChange={(e) => setEditingDest({ ...editingDest, name: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-border bg-background font-semibold" placeholder="Place Name" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">District *</label>
+                <input type="text" value={editingDest.district || ""} onChange={(e) => setEditingDest({ ...editingDest, district: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-border bg-background" placeholder="e.g. Madurai" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Category *</label>
+                <input type="text" value={editingDest.category || ""} onChange={(e) => setEditingDest({ ...editingDest, category: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-border bg-background" placeholder="e.g. heritage" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Best Time to Visit</label>
+                <input type="text" value={editingDest.bestTimeToVisit || ""} onChange={(e) => setEditingDest({ ...editingDest, bestTimeToVisit: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-border bg-background" placeholder="e.g. October to March" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Latitude *</label>
+                <input type="number" step="0.0001" value={editingDest.latitude ?? 9.9252} onChange={(e) => setEditingDest({ ...editingDest, latitude: Number(e.target.value) })} className="w-full px-3 py-2 rounded-xl border border-border bg-background font-mono" />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Longitude *</label>
+                <input type="number" step="0.0001" value={editingDest.longitude ?? 78.1198} onChange={(e) => setEditingDest({ ...editingDest, longitude: Number(e.target.value) })} className="w-full px-3 py-2 rounded-xl border border-border bg-background font-mono" />
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Image URL</label>
+                <input type="text" value={editingDest.imageUrl || ""} onChange={(e) => setEditingDest({ ...editingDest, imageUrl: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-border bg-background text-xs font-mono" placeholder="https://images.unsplash.com/..." />
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Status</label>
+                <select value={editingDest.status || "Published"} onChange={(e) => setEditingDest({ ...editingDest, status: e.target.value as any })} className="w-full px-3 py-2 rounded-xl border border-border bg-background">
+                  <option value="Published">Published</option>
+                  <option value="Draft">Draft</option>
+                  <option value="Archived">Archived</option>
+                </select>
+              </div>
+              <div className="md:col-span-2">
+                <label className="block text-xs font-bold text-muted-foreground mb-1">Description *</label>
+                <textarea rows={4} value={editingDest.description || ""} onChange={(e) => setEditingDest({ ...editingDest, description: e.target.value })} className="w-full px-3 py-2 rounded-xl border border-border bg-background" placeholder="Detailed place description..." />
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
+              <Button variant="outline" onClick={() => { setShowEditModal(false); setEditingDest(null); }}>Cancel</Button>
+              <Button onClick={handleSaveEditDestination} className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold gap-2">
+                <CheckCircle2 className="h-4 w-4" /> Save Changes
+              </Button>
+            </div>
           </div>
         </div>
       )}

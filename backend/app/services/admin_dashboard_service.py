@@ -264,6 +264,76 @@ class AdminDashboardService:
         )
         return payload
 
+    def update_destination(self, destination_id: str, payload: DestinationDetailDTO, user_email: str = "popzdesigngroup@gmail.com") -> DestinationDetailDTO:
+        try:
+            place = places_service.get_place_by_id_or_slug(destination_id)
+        except Exception:
+            place = None
+
+        if place:
+            place["name"] = payload.name
+            place["display_name"] = f"{payload.name}, {payload.district}"
+            place["district"] = payload.district
+            place["category"] = payload.category
+            place["description"] = payload.description
+            place["latitude"] = float(payload.latitude)
+            place["longitude"] = float(payload.longitude)
+            place["image"] = payload.imageUrl
+            place["imageUrl"] = payload.imageUrl
+            place["best_time"] = payload.bestTimeToVisit
+            if payload.highlights:
+                place["highlights"] = payload.highlights
+            if payload.activities:
+                place["activities"] = payload.activities
+            place["version"] = place.get("version", 1) + 1
+        else:
+            places_service.add_place(
+                place_id=payload.id,
+                name=payload.name,
+                district=payload.district,
+                category=payload.category,
+                description=payload.description,
+                latitude=payload.latitude,
+                longitude=payload.longitude,
+                image_url=payload.imageUrl,
+                best_time=payload.bestTimeToVisit,
+                highlights=payload.highlights,
+                tags=payload.activities
+            )
+
+        self._audit_logs.append(
+            AuditLogEntryDTO(
+                id=f"aud-{int(time.time()*1000)}",
+                userEmail=user_email,
+                action="DESTINATION_UPDATED",
+                resource=payload.name,
+                details=f"Updated canonical destination '{payload.name}' in master PostGIS/places_service database. District: {payload.district}.",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
+        )
+        return payload
+
+    def delete_destination(self, destination_id: str, user_email: str = "popzdesigngroup@gmail.com") -> bool:
+        target_key = None
+        for k, v in places_service._places_db.items():
+            if k == destination_id or v.get("id") == destination_id or v.get("slug") == destination_id:
+                target_key = k
+                break
+        if target_key:
+            del places_service._places_db[target_key]
+
+        self._audit_logs.append(
+            AuditLogEntryDTO(
+                id=f"aud-{int(time.time()*1000)}",
+                userEmail=user_email,
+                action="DESTINATION_DELETED",
+                resource=destination_id,
+                details=f"Deleted destination '{destination_id}' from master PostGIS/places_service database.",
+                timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ")
+            )
+        )
+        return True
+
     # Single Source of Truth: Get Attractions dynamically from master places_service
     def get_attractions(self, category: Optional[str] = None) -> List[AttractionDetailDTO]:
         master_places = places_service.get_all_places()

@@ -279,6 +279,27 @@ export class AdminDashboardApiRepository {
     return env.data;
   }
 
+  static async updateDestination(id: string, payload: DestinationDetail): Promise<DestinationDetail> {
+    const res = await fetch(`${this.baseUrl}/destinations/${encodeURIComponent(id)}`, {
+      method: 'PUT',
+      headers: this.getHeaders(),
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) throw new Error('Failed to update destination');
+    const env = await res.json();
+    return env.data;
+  }
+
+  static async deleteDestination(id: string): Promise<boolean> {
+    const res = await fetch(`${this.baseUrl}/destinations/${encodeURIComponent(id)}`, {
+      method: 'DELETE',
+      headers: this.getHeaders()
+    });
+    if (!res.ok) throw new Error('Failed to delete destination');
+    const env = await res.json();
+    return env.data.deleted;
+  }
+
   static async getAttractions(category?: string): Promise<AttractionDetail[]> {
     const url = category ? `${this.baseUrl}/attractions?category=${encodeURIComponent(category)}` : `${this.baseUrl}/attractions`;
     const res = await fetch(url, { headers: this.getHeaders() });
