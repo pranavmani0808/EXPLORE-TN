@@ -26,6 +26,7 @@ import {
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { getApiBaseUrl } from "@/lib/api-client/config";
+import { CANONICAL_PLACES } from "@/lib/data/canonical-places";
 
 export const Route = createFileRoute("/explore")({
   head: () => ({
@@ -239,13 +240,40 @@ function ExploreByExperiencePage() {
         const res = await fetch(`${getApiBaseUrl()}/api/v1/places`);
         if (res.ok) {
           const env = await res.json();
-          setPlaces(env.data || []);
+          if (env.data && env.data.length > 0) {
+            setPlaces(env.data);
+            setLoading(false);
+            return;
+          }
         }
       } catch (err) {
-        console.error("Failed to load real backend places:", err);
-      } finally {
-        setLoading(false);
+        console.warn("Failed to fetch backend places, utilizing canonical registry fallback:", err);
       }
+
+      // Instant Fallback to client-side CANONICAL_PLACES registry (24+ verified destinations)
+      const fallbackPlaces: PlaceItem[] = CANONICAL_PLACES.map((p) => ({
+        id: p.id,
+        slug: p.slug,
+        name: p.name || p.canonicalName,
+        display_name: p.canonicalName,
+        district: p.district,
+        state: p.state,
+        category: p.primaryCategory,
+        subcategory: p.categories[1] || p.primaryCategory,
+        categories: p.categories,
+        tagline: p.tagline,
+        description: p.description,
+        latitude: p.latitude,
+        longitude: p.longitude,
+        image: p.image,
+        rating: p.rating || 4.8,
+        verified: p.verified,
+        is_trekking: p.categories.includes("trekking"),
+        tags: p.tags,
+      }));
+
+      setPlaces(fallbackPlaces);
+      setLoading(false);
     }
     loadPlaces();
   }, []);
