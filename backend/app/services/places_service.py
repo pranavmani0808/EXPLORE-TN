@@ -1868,6 +1868,43 @@ class PlacesService:
                 p["createdAt"] = "2026-08-20T10:00:00Z"
             if "state" not in p:
                 p["state"] = "Tamil Nadu"
+
+            # Derive multi-categories tag list
+            if "categories" not in p:
+                cats = set()
+                cat_lower = (p.get("category") or "").lower()
+                sub_lower = (p.get("subcategory") or "").lower()
+                name_lower = (p.get("name") or "").lower()
+                desc_lower = (p.get("description") or "").lower()
+                tags_str = str(p.get("tags") or []).lower()
+
+                if cat_lower:
+                    cats.add(cat_lower)
+                if sub_lower:
+                    cats.add(sub_lower)
+
+                if p.get("is_trekking") or cat_lower in ["mountain", "hill"] or sub_lower == "trekking" or "trek" in name_lower or "hill" in name_lower:
+                    cats.add("trekking")
+                    cats.add("hills")
+                if cat_lower == "waterfall" or "fall" in name_lower or "aruvi" in name_lower:
+                    cats.add("waterfall")
+                    cats.add("nature")
+                if cat_lower == "coastal" or sub_lower == "beach" or "beach" in name_lower:
+                    cats.add("beaches")
+                    cats.add("coastal")
+                if cat_lower == "heritage" or "fort" in name_lower or "palace" in name_lower or "aqueduct" in name_lower or "ruins" in name_lower:
+                    cats.add("heritage")
+                if cat_lower == "temple" or "temple" in name_lower or "kovil" in name_lower:
+                    cats.add("temple")
+                if cat_lower == "lake" or "lake" in name_lower or "dam" in name_lower or "lagoon" in name_lower or "reservoir" in name_lower:
+                    cats.add("lake")
+                if sub_lower == "rural_tourism" or "village" in name_lower or "rural" in tags_str or "countryside" in desc_lower:
+                    cats.add("rural")
+                    cats.add("nature")
+                if "hidden" in tags_str or p.get("verified") is False or "secluded" in desc_lower or "lesser-known" in desc_lower or "offbeat" in desc_lower:
+                    cats.add("hidden")
+                p["categories"] = list(cats)
+
         return list(self._places_db.values())
 
     def _build_resolved_dict(self, place: dict, confidence: str, matched_alias: str = None, extracted_activity: str = None) -> dict:

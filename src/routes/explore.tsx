@@ -18,7 +18,10 @@ import {
   Sparkles,
   Trees,
   SlidersHorizontal,
-  ExternalLink,
+  Sun,
+  Camera,
+  Layers,
+  ChevronRight,
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -27,15 +30,15 @@ import { getApiBaseUrl } from "@/lib/api-client/config";
 export const Route = createFileRoute("/explore")({
   head: () => ({
     meta: [
-      { title: "Explore All Places — ExplorerTN" },
+      { title: "Explore Tamil Nadu by Experience — ExplorerTN" },
       {
         name: "description",
         content:
-          "Discover places, adventures & hidden experiences across all 38 districts of Tamil Nadu.",
+          "Explore Tamil Nadu by experience: Waterfalls, Trekking, Beaches, Hills, Lakes, Heritage, Food, Hidden Places & Rural Experiences.",
       },
     ],
   }),
-  component: ExploreAllPlacesPage,
+  component: ExploreByExperiencePage,
 });
 
 interface PlaceItem {
@@ -47,6 +50,7 @@ interface PlaceItem {
   state?: string;
   category: string;
   subcategory?: string;
+  categories?: string[];
   tagline?: string;
   description?: string;
   latitude: number;
@@ -60,20 +64,134 @@ interface PlaceItem {
   tags?: string[];
 }
 
-const CATEGORY_PILLS = [
-  { id: "all", label: "All", icon: Compass },
-  { id: "places", label: "Places", icon: MapPin },
-  { id: "adventure", label: "Adventures", icon: Footprints },
-  { id: "trekking", label: "Trekking", icon: Mountain },
-  { id: "waterfall", label: "Waterfalls", icon: CloudRain },
-  { id: "hills", label: "Hills", icon: Mountain },
-  { id: "beaches", label: "Beaches", icon: Waves },
-  { id: "lake", label: "Lakes", icon: Waves },
-  { id: "temple", label: "Temples", icon: Landmark },
-  { id: "heritage", label: "Heritage", icon: Landmark },
-  { id: "food", label: "Food", icon: Utensils },
-  { id: "hidden", label: "Hidden", icon: Sparkles },
-  { id: "rural", label: "Rural", icon: Trees },
+interface CategoryTile {
+  id: string;
+  title: string;
+  subtitle: string;
+  icon: any;
+  color: string;
+  bgGradient: string;
+  badgeColor: string;
+}
+
+const CATEGORY_TILES: CategoryTile[] = [
+  {
+    id: "waterfall",
+    title: "Waterfalls & Falls",
+    subtitle: "Cascades, pools & herbal falls",
+    icon: CloudRain,
+    color: "text-cyan-400",
+    bgGradient: "from-cyan-500/10 via-cyan-500/5 to-transparent border-cyan-500/30",
+    badgeColor: "bg-cyan-500/15 text-cyan-400 border-cyan-500/30",
+  },
+  {
+    id: "trekking",
+    title: "Trekking & Hiking",
+    subtitle: "Craggy peaks, trails & hill forts",
+    icon: Mountain,
+    color: "text-amber-400",
+    bgGradient: "from-amber-500/10 via-amber-500/5 to-transparent border-amber-500/30",
+    badgeColor: "bg-amber-500/15 text-amber-400 border-amber-500/30",
+  },
+  {
+    id: "beaches",
+    title: "Beaches & Coastline",
+    subtitle: "Bay of Bengal & surfing points",
+    icon: Waves,
+    color: "text-blue-400",
+    bgGradient: "from-blue-500/10 via-blue-500/5 to-transparent border-blue-500/30",
+    badgeColor: "bg-blue-500/15 text-blue-400 border-blue-500/30",
+  },
+  {
+    id: "hills",
+    title: "Hills & Mountains",
+    subtitle: "Nilgiris, Western Ghats & view passes",
+    icon: Mountain,
+    color: "text-emerald-400",
+    bgGradient: "from-emerald-500/10 via-emerald-500/5 to-transparent border-emerald-500/30",
+    badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+  },
+  {
+    id: "lake",
+    title: "Lakes & Dams",
+    subtitle: "Reservoirs, lagoons & backwaters",
+    icon: Waves,
+    color: "text-sky-400",
+    bgGradient: "from-sky-500/10 via-sky-500/5 to-transparent border-sky-500/30",
+    badgeColor: "bg-sky-500/15 text-sky-400 border-sky-500/30",
+  },
+  {
+    id: "nature",
+    title: "Nature & Forests",
+    subtitle: "Mangroves, reserves & wildlife",
+    icon: Trees,
+    color: "text-green-400",
+    bgGradient: "from-green-500/10 via-green-500/5 to-transparent border-green-500/30",
+    badgeColor: "bg-green-500/15 text-green-400 border-green-500/30",
+  },
+  {
+    id: "temple",
+    title: "Temples & Shrines",
+    subtitle: "Pancha Bhoota & Chola architectural marvels",
+    icon: Landmark,
+    color: "text-orange-400",
+    bgGradient: "from-orange-500/10 via-orange-500/5 to-transparent border-orange-500/30",
+    badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+  },
+  {
+    id: "heritage",
+    title: "Heritage & Historical",
+    subtitle: "UNESCO stone monuments, forts & aqueducts",
+    icon: Landmark,
+    color: "text-purple-400",
+    bgGradient: "from-purple-500/10 via-purple-500/5 to-transparent border-purple-500/30",
+    badgeColor: "bg-purple-500/15 text-purple-400 border-purple-500/30",
+  },
+  {
+    id: "adventure",
+    title: "Adventure Activities",
+    subtitle: "Coracle rides, dune surfing & cable cars",
+    icon: Footprints,
+    color: "text-rose-400",
+    bgGradient: "from-rose-500/10 via-rose-500/5 to-transparent border-rose-500/30",
+    badgeColor: "bg-rose-500/15 text-rose-400 border-rose-500/30",
+  },
+  {
+    id: "food",
+    title: "Food & Local Experiences",
+    subtitle: "Madurai street food, Jigarthanda & Halwa",
+    icon: Utensils,
+    color: "text-amber-300",
+    bgGradient: "from-amber-500/10 via-amber-500/5 to-transparent border-amber-500/30",
+    badgeColor: "bg-amber-500/15 text-amber-300 border-amber-500/30",
+  },
+  {
+    id: "rural",
+    title: "Villages & Rural",
+    subtitle: "Agrarian countryside, paddy fields & ponds",
+    icon: Trees,
+    color: "text-lime-400",
+    bgGradient: "from-lime-500/10 via-lime-500/5 to-transparent border-lime-500/30",
+    badgeColor: "bg-lime-500/15 text-lime-400 border-lime-500/30",
+  },
+  {
+    id: "viewpoint",
+    title: "Viewpoints & Sunsets",
+    subtitle: "High elevation ridge points & confluences",
+    icon: Sun,
+    color: "text-yellow-400",
+    bgGradient: "from-yellow-500/10 via-yellow-500/5 to-transparent border-yellow-500/30",
+    badgeColor: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+  },
+  {
+    id: "hidden",
+    title: "Hidden & Offbeat",
+    subtitle: "Lesser-known cascades & quiet spots",
+    icon: Sparkles,
+    color: "text-teal-400",
+    bgGradient: "from-teal-500/10 via-teal-500/5 to-transparent border-teal-500/30",
+    badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
+  },
 ];
 
 const TN_DISTRICTS = [
@@ -87,14 +205,14 @@ const TN_DISTRICTS = [
   "Villupuram", "Virudhunagar"
 ];
 
-function ExploreAllPlacesPage() {
+function ExploreByExperiencePage() {
   const [places, setPlaces] = useState<PlaceItem[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeCategory, setActiveCategory] = useState("all");
+  const [selectedCategory, setSelectedCategory] = useState<string>("waterfall");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("All Districts");
 
-  // Read URL query params on mount if navigated via dropdown
+  // Read URL query params on mount
   useEffect(() => {
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
@@ -103,13 +221,13 @@ function ExploreAllPlacesPage() {
       const tag = params.get("tag");
 
       if (isTrek === "true") {
-        setActiveCategory("trekking");
+        setSelectedCategory("trekking");
       } else if (cat) {
-        if (cat === "mountain") setActiveCategory("hills");
-        else if (cat === "coastal") setActiveCategory("beaches");
-        else setActiveCategory(cat);
+        if (cat === "mountain") setSelectedCategory("hills");
+        else if (cat === "coastal") setSelectedCategory("beaches");
+        else setSelectedCategory(cat);
       } else if (tag) {
-        setActiveCategory(tag);
+        setSelectedCategory(tag);
       }
     }
   }, []);
@@ -132,41 +250,53 @@ function ExploreAllPlacesPage() {
     loadPlaces();
   }, []);
 
-  const filteredPlaces = useMemo(() => {
+  // Filter places based on selected category (checking primary AND multi-categories array)
+  const categoryFilteredPlaces = useMemo(() => {
     return places.filter((p) => {
-      // Category filter logic
-      if (activeCategory === "places") {
-        // All canonical places
-      } else if (activeCategory === "adventure") {
-        if (p.category !== "adventure" && !p.tags?.includes("adventure") && !p.is_trekking) return false;
-      } else if (activeCategory === "trekking") {
-        if (!p.is_trekking && p.subcategory !== "trekking" && p.subcategory !== "short_trek" && !p.tags?.includes("trekking")) return false;
-      } else if (activeCategory === "waterfall") {
-        if (p.category !== "waterfall" && p.subcategory !== "waterfall" && !p.name.toLowerCase().includes("fall") && !p.name.toLowerCase().includes("aruvi")) return false;
-      } else if (activeCategory === "hills") {
-        if (p.category !== "mountain" && p.subcategory !== "viewpoint" && !p.name.toLowerCase().includes("hill") && !p.name.toLowerCase().includes("peak")) return false;
-      } else if (activeCategory === "beaches") {
-        if (p.category !== "coastal" && p.subcategory !== "beach" && !p.name.toLowerCase().includes("beach")) return false;
-      } else if (activeCategory === "lake") {
-        if (p.category !== "lake" && p.subcategory !== "lake" && !p.name.toLowerCase().includes("lake") && !p.name.toLowerCase().includes("dam") && !p.name.toLowerCase().includes("lagoon")) return false;
-      } else if (activeCategory === "temple") {
-        if (p.category !== "temple" && p.subcategory !== "temple" && !p.name.toLowerCase().includes("temple") && !p.name.toLowerCase().includes("kovil")) return false;
-      } else if (activeCategory === "heritage") {
-        if (p.category !== "heritage" && p.subcategory !== "heritage" && p.subcategory !== "fort" && !p.tags?.includes("heritage")) return false;
-      } else if (activeCategory === "food") {
-        if (p.category !== "food" && p.subcategory !== "food" && !p.tags?.includes("food")) return false;
-      } else if (activeCategory === "hidden") {
-        if (p.rating && p.rating < 4.8 && !p.tags?.includes("hidden") && !p.tags?.includes("locality_unverified_lake") && !p.tags?.includes("rural_tourism")) return false;
-      } else if (activeCategory === "rural") {
-        if (p.subcategory !== "rural_tourism" && !p.tags?.includes("rural_tourism") && !p.tags?.includes("countryside")) return false;
+      const cats = p.categories || [];
+      const primaryCat = p.category.toLowerCase();
+      const subCat = (p.subcategory || "").toLowerCase();
+      const tagsStr = str(p.tags || []).toLowerCase();
+      const nameLower = p.name.toLowerCase();
+
+      let matchCategory = false;
+
+      if (selectedCategory === "waterfall") {
+        matchCategory = cats.includes("waterfall") || primaryCat === "waterfall" || subCat === "waterfall" || nameLower.includes("fall") || nameLower.includes("aruvi");
+      } else if (selectedCategory === "trekking") {
+        matchCategory = cats.includes("trekking") || p.is_trekking || primaryCat === "mountain" || subCat === "trekking" || nameLower.includes("trek");
+      } else if (selectedCategory === "beaches") {
+        matchCategory = cats.includes("beaches") || cats.includes("coastal") || primaryCat === "coastal" || subCat === "beach" || nameLower.includes("beach");
+      } else if (selectedCategory === "hills") {
+        matchCategory = cats.includes("hills") || primaryCat === "mountain" || subCat === "viewpoint" || nameLower.includes("hill") || nameLower.includes("peak");
+      } else if (selectedCategory === "lake") {
+        matchCategory = cats.includes("lake") || primaryCat === "lake" || subCat === "lake" || nameLower.includes("lake") || nameLower.includes("dam") || nameLower.includes("lagoon");
+      } else if (selectedCategory === "nature") {
+        matchCategory = cats.includes("nature") || primaryCat === "wildlife" || primaryCat === "forest" || subCat === "mangrove";
+      } else if (selectedCategory === "temple") {
+        matchCategory = cats.includes("temple") || primaryCat === "temple" || subCat === "temple" || nameLower.includes("temple") || nameLower.includes("kovil");
+      } else if (selectedCategory === "heritage") {
+        matchCategory = cats.includes("heritage") || primaryCat === "heritage" || subCat === "fort" || subCat === "palace" || nameLower.includes("fort") || nameLower.includes("aqueduct");
+      } else if (selectedCategory === "adventure") {
+        matchCategory = cats.includes("adventure") || primaryCat === "adventure" || p.is_trekking || tagsStr.includes("adventure");
+      } else if (selectedCategory === "food") {
+        matchCategory = cats.includes("food") || primaryCat === "food" || tagsStr.includes("food");
+      } else if (selectedCategory === "rural") {
+        matchCategory = cats.includes("rural") || subCat === "rural_tourism" || tagsStr.includes("rural");
+      } else if (selectedCategory === "viewpoint") {
+        matchCategory = cats.includes("viewpoint") || subCat === "viewpoint" || tagsStr.includes("viewpoint");
+      } else if (selectedCategory === "hidden") {
+        matchCategory = cats.includes("hidden") || (p.rating && p.rating < 4.8) || tagsStr.includes("hidden") || p.verified === false;
+      } else {
+        matchCategory = true;
       }
 
-      // District filter logic
+      // District Filter
       if (selectedDistrict !== "All Districts") {
         if (p.district.toLowerCase() !== selectedDistrict.toLowerCase()) return false;
       }
 
-      // Search query logic
+      // Search Query
       if (searchQuery.trim()) {
         const q = searchQuery.toLowerCase();
         const matchName = p.name.toLowerCase().includes(q);
@@ -176,136 +306,184 @@ function ExploreAllPlacesPage() {
         if (!matchName && !matchDist && !matchCat && !matchTag) return false;
       }
 
-      return true;
+      return matchCategory;
     });
-  }, [places, activeCategory, selectedDistrict, searchQuery]);
+  }, [places, selectedCategory, selectedDistrict, searchQuery]);
 
-  const getCategoryBadge = (p: PlaceItem) => {
-    if (p.is_trekking || p.subcategory === "trekking") return { label: "⛰ Trekking", color: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20" };
-    if (p.category === "waterfall" || p.subcategory === "short_trek") return { label: "💧 Waterfall", color: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/20" };
-    if (p.category === "heritage" || p.subcategory === "fort") return { label: "🌉 Heritage", color: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20" };
-    if (p.category === "coastal" || p.subcategory === "beach") return { label: "🏖 Beach", color: "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20" };
-    if (p.category === "temple") return { label: "🛕 Temple", color: "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20" };
-    if (p.category === "mountain") return { label: "⛰ Hill Station", color: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20" };
-    if (p.subcategory === "rural_tourism") return { label: "🌾 Rural Experience", color: "bg-lime-500/10 text-lime-600 dark:text-lime-400 border-lime-500/20" };
-    return { label: `📍 ${p.category.toUpperCase()}`, color: "bg-primary/10 text-primary border-primary/20" };
-  };
+  const selectedCategoryTile = CATEGORY_TILES.find((t) => t.id === selectedCategory) || CATEGORY_TILES[0];
 
   return (
     <AppShell>
-      <div className="min-h-screen bg-background font-sans text-foreground pb-20">
-        {/* Header Section */}
+      <div className="min-h-screen bg-background font-sans text-foreground pb-24">
+        {/* Hero Section */}
         <div className="relative border-b border-border bg-gradient-to-b from-emerald-500/5 via-transparent to-transparent pt-28 pb-10 px-4 sm:px-8">
-          <div className="max-w-7xl mx-auto flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold mb-3 border border-emerald-500/20">
-                <Compass className="size-3.5" /> EXPLORE TAMIL NADU
-              </div>
-              <h1 className="text-4xl sm:text-5xl font-extrabold font-serif tracking-tight text-foreground">
-                Explore Tamil Nadu
-              </h1>
-              <p className="text-base sm:text-lg text-muted-foreground mt-2 max-w-2xl">
-                Discover places, adventures & hidden experiences across all 38 districts.
-              </p>
+          <div className="max-w-7xl mx-auto text-center space-y-4">
+            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-mono text-xs font-bold border border-emerald-500/20">
+              <Compass className="size-4 text-emerald-500" /> EXPLORE TAMIL NADU
             </div>
-
-            {/* Spatial Map Action Banner */}
-            <Link
-              to="/discover"
-              className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-xl shadow-emerald-600/20 transition group shrink-0"
-            >
-              <Map className="size-4" />
-              <span>Launch Interactive Spatial Map</span>
-              <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
+            <h1 className="text-4xl sm:text-6xl font-extrabold font-serif tracking-tight text-foreground">
+              Discover Tamil Nadu Your Way
+            </h1>
+            <p className="text-base sm:text-lg text-muted-foreground max-w-2xl mx-auto">
+              Explore canonical destinations grouped by experience: waterfalls, hill treks, coastal beaches, heritage aqueducts & rural villages.
+            </p>
           </div>
         </div>
 
-        {/* Filter Pills Bar & Search Bar */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 space-y-6">
-          {/* Category Filter Pills */}
-          <div className="flex items-center gap-2 overflow-x-auto pb-2 scrollbar-none">
-            {CATEGORY_PILLS.map((pill) => {
-              const Icon = pill.icon;
-              const isActive = activeCategory === pill.id;
+        {/* 🧭 Visual Category Grid Tiles */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-10">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h2 className="text-xl font-bold font-serif text-foreground">Explore by Experience Category</h2>
+              <p className="text-xs text-muted-foreground">Select a category to filter destinations across Tamil Nadu</p>
+            </div>
+            <div className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20">
+              {places.length} Real Destinations Live
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3.5">
+            {CATEGORY_TILES.map((tile) => {
+              const Icon = tile.icon;
+              const isSelected = selectedCategory === tile.id;
+              const count = places.filter((p) => {
+                const cats = p.categories || [];
+                const catLower = p.category.toLowerCase();
+                const nameLower = p.name.toLowerCase();
+                if (tile.id === "waterfall") return cats.includes("waterfall") || catLower === "waterfall" || nameLower.includes("fall");
+                if (tile.id === "trekking") return cats.includes("trekking") || p.is_trekking || catLower === "mountain";
+                if (tile.id === "beaches") return cats.includes("beaches") || catLower === "coastal";
+                if (tile.id === "hills") return cats.includes("hills") || catLower === "mountain";
+                if (tile.id === "lake") return cats.includes("lake") || catLower === "lake";
+                if (tile.id === "heritage") return cats.includes("heritage") || catLower === "heritage";
+                if (tile.id === "temple") return cats.includes("temple") || catLower === "temple";
+                if (tile.id === "rural") return cats.includes("rural") || p.subcategory === "rural_tourism";
+                if (tile.id === "hidden") return cats.includes("hidden") || p.verified === false;
+                return cats.includes(tile.id) || catLower === tile.id;
+              }).length;
+
               return (
                 <button
-                  key={pill.id}
-                  onClick={() => setActiveCategory(pill.id)}
-                  className={`flex items-center gap-2 px-4 py-2 rounded-2xl text-xs font-bold whitespace-nowrap transition border ${
-                    isActive
-                      ? "bg-emerald-600 text-white border-emerald-600 shadow-md shadow-emerald-600/20"
-                      : "bg-card text-muted-foreground border-border hover:border-emerald-500/30 hover:text-foreground"
+                  key={tile.id}
+                  onClick={() => setSelectedCategory(tile.id)}
+                  className={`p-4 rounded-3xl border text-left transition-all duration-300 flex flex-col justify-between h-32 group ${
+                    isSelected
+                      ? "bg-emerald-600 text-white border-emerald-600 shadow-lg shadow-emerald-600/20 scale-[1.02]"
+                      : `bg-card border-border hover:border-emerald-500/40 hover:bg-emerald-500/5`
                   }`}
                 >
-                  <Icon className="size-3.5" />
-                  <span>{pill.label}</span>
+                  <div className="flex items-center justify-between">
+                    <span className={`p-2 rounded-2xl ${isSelected ? "bg-white/20 text-white" : "bg-accent/60 " + tile.color}`}>
+                      <Icon className="size-5" />
+                    </span>
+                    <span className={`text-[10px] font-mono font-bold px-2 py-0.5 rounded-full ${isSelected ? "bg-white/20 text-white" : "bg-accent text-muted-foreground"}`}>
+                      {count}
+                    </span>
+                  </div>
+
+                  <div>
+                    <h3 className={`text-xs font-bold line-clamp-1 ${isSelected ? "text-white" : "text-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400"}`}>
+                      {tile.title}
+                    </h3>
+                    <p className={`text-[10px] line-clamp-1 mt-0.5 ${isSelected ? "text-white/80" : "text-muted-foreground"}`}>
+                      {tile.subtitle}
+                    </p>
+                  </div>
                 </button>
               );
             })}
           </div>
 
-          {/* Search Bar & District Dropdown */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 bg-card border border-border p-3 rounded-2xl shadow-sm">
-            <div className="relative w-full sm:w-96">
-              <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by place name, district, or keyword..."
-                className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-border bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
-              />
-            </div>
-
-            <div className="flex items-center gap-3 w-full sm:w-auto justify-between sm:justify-end">
-              <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground">
-                <Filter className="size-3.5" />
-                <select
-                  value={selectedDistrict}
-                  onChange={(e) => setSelectedDistrict(e.target.value)}
-                  className="px-3 py-2 rounded-xl border border-border bg-background text-xs font-bold text-foreground focus:outline-none"
-                >
-                  {TN_DISTRICTS.map((dist) => (
-                    <option key={dist} value={dist}>
-                      {dist}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-3 py-2 rounded-xl border border-emerald-500/20 whitespace-nowrap">
-                {filteredPlaces.length} Places Found
+          {/* Secondary Action: Interactive Map Banner */}
+          <div className="mt-8 p-5 rounded-3xl border border-emerald-500/30 bg-emerald-500/10 dark:bg-emerald-500/15 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <span className="p-3 rounded-2xl bg-emerald-600 text-white shadow-md">
+                <Map className="size-6" />
+              </span>
+              <div>
+                <h3 className="text-sm font-bold text-foreground">Prefer spatial exploration?</h3>
+                <p className="text-xs text-muted-foreground">Launch our 100% full-screen interactive Leaflet map with GIS node hierarchy.</p>
               </div>
             </div>
+            <Link
+              to="/discover"
+              className="px-5 py-2.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-lg shadow-emerald-600/20 transition flex items-center gap-2 shrink-0"
+            >
+              <span>🗺️ Explore on Interactive Map</span>
+              <ArrowRight className="size-4" />
+            </Link>
           </div>
         </div>
 
-        {/* Real-Data Card Grid */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8">
+        {/* Category Experience Results Header & Filters */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-10 space-y-6">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-5">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className={`text-xs font-bold px-3 py-1 rounded-full border ${selectedCategoryTile.badgeColor}`}>
+                  {selectedCategoryTile.title}
+                </span>
+                <span className="text-xs text-muted-foreground font-mono">
+                  {categoryFilteredPlaces.length} matching places
+                </span>
+              </div>
+              <h2 className="text-2xl sm:text-3xl font-extrabold font-serif text-foreground mt-2">
+                {selectedCategoryTile.title} in Tamil Nadu
+              </h2>
+            </div>
+
+            {/* Filter Toolbar */}
+            <div className="flex flex-col sm:flex-row items-center gap-3">
+              {/* Search Box */}
+              <div className="relative w-full sm:w-72">
+                <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search in this category..."
+                  className="w-full pl-10 pr-4 py-2 rounded-xl border border-border bg-card text-xs font-medium focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+                />
+              </div>
+
+              {/* District Filter Dropdown */}
+              <select
+                value={selectedDistrict}
+                onChange={(e) => setSelectedDistrict(e.target.value)}
+                className="w-full sm:w-auto px-3 py-2 rounded-xl border border-border bg-card text-xs font-bold text-foreground focus:outline-none"
+              >
+                {TN_DISTRICTS.map((dist) => (
+                  <option key={dist} value={dist}>
+                    {dist}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Cards Grid */}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <div key={n} className="h-72 rounded-3xl bg-card border border-border animate-pulse" />
               ))}
             </div>
-          ) : filteredPlaces.length === 0 ? (
-            <div className="text-center py-20 bg-card border border-border rounded-3xl p-8 max-w-xl mx-auto space-y-4">
+          ) : categoryFilteredPlaces.length === 0 ? (
+            <div className="text-center py-16 bg-card border border-border rounded-3xl p-8 max-w-md mx-auto space-y-4">
               <div className="inline-flex p-4 rounded-full bg-amber-500/10 text-amber-500">
                 <SlidersHorizontal className="size-8" />
               </div>
-              <h3 className="text-xl font-bold font-serif text-foreground">No places match your filter</h3>
-              <p className="text-sm text-muted-foreground">
-                Try selecting a different category, clearing search terms, or choosing "All Districts".
+              <h3 className="text-lg font-bold font-serif text-foreground">No destinations found</h3>
+              <p className="text-xs text-muted-foreground">
+                No places match your search criteria in {selectedCategoryTile.title}. Try clearing district filters or search keywords.
               </p>
-              <Button onClick={() => { setActiveCategory("all"); setSearchQuery(""); setSelectedDistrict("All Districts"); }}>
-                Reset Filters
+              <Button size="sm" onClick={() => { setSearchQuery(""); setSelectedDistrict("All Districts"); }}>
+                Reset Search Filters
               </Button>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredPlaces.map((p) => {
-                const badge = getCategoryBadge(p);
+              {categoryFilteredPlaces.map((p) => {
                 const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
 
                 return (
@@ -317,7 +495,7 @@ function ExploreAllPlacesPage() {
                     className="group rounded-3xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
                   >
                     <div>
-                      {/* Image Header */}
+                      {/* Image Preview */}
                       <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
                         <img
                           src={img}
@@ -326,13 +504,6 @@ function ExploreAllPlacesPage() {
                           loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                        {/* Top Category Badge */}
-                        <div className="absolute top-3 left-3">
-                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md ${badge.color}`}>
-                            {badge.label}
-                          </span>
-                        </div>
 
                         {/* Rating Overlay */}
                         <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold text-amber-400 border border-white/10">
@@ -360,17 +531,29 @@ function ExploreAllPlacesPage() {
                         <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
                           {p.tagline || p.description}
                         </p>
+
+                        {/* Multi-category tags badge row */}
+                        <div className="flex flex-wrap gap-1.5 pt-2">
+                          {p.categories?.slice(0, 3).map((catTag) => (
+                            <span
+                              key={catTag}
+                              className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-accent/60 text-muted-foreground border border-border/50 uppercase"
+                            >
+                              {catTag}
+                            </span>
+                          ))}
+                        </div>
                       </div>
                     </div>
 
-                    {/* Card Footer Actions */}
-                    <div className="p-5 pt-0 flex items-center gap-2 border-t border-border/50 mt-4 pt-3">
+                    {/* Card Actions */}
+                    <div className="p-5 pt-0 flex items-center gap-2 border-t border-border/50 mt-3 pt-3">
                       <Link
                         to={`/place/$slug`}
                         params={{ slug: p.slug || p.id }}
                         className="flex-1 text-center py-2 px-3 rounded-xl bg-accent/50 hover:bg-accent text-xs font-bold text-foreground transition"
                       >
-                        Details
+                        Explore Details
                       </Link>
                       <Link
                         to="/discover"
@@ -390,4 +573,9 @@ function ExploreAllPlacesPage() {
       </div>
     </AppShell>
   );
+}
+
+function str(val: any): string {
+  if (Array.isArray(val)) return val.join(" ");
+  return String(val || "");
 }
