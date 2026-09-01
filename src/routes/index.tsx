@@ -13,6 +13,7 @@ import { SearchPanel } from "@/components/site/search-panel";
 import { Button } from "@/components/ui/button";
 import { categories, places, scenicRoute, arupadaiVeeduTemples } from "@/data/places";
 import { adventureActivities, AdventureActivity } from "@/data/adventures";
+import { PeakTravelGuide } from "@/components/site/peak-travel-guide";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -289,6 +290,9 @@ function Index() {
           </div>
         </div>
       </section>
+
+      {/* Peak Travel Seasons & Best Time to Visit Guide */}
+      <PeakTravelGuide />
 
       {/* Trending */}
       <Section
