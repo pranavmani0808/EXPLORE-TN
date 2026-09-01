@@ -5,8 +5,23 @@ from backend.app.schemas.places import PlaceCreate, PlaceResponse, PlaceFeedback
 from backend.app.schemas.envelope import ResponseEnvelope, MetaInfo
 from backend.app.core.security import decode_supabase_jwt, check_permission, UserContext, verify_self_approval_restriction
 from backend.app.services.places_service import places_service
+from backend.app.services.weather_service import weather_service
 
 router = APIRouter(prefix="/places", tags=["Places"])
+
+@router.get("/{slug}/weather", response_model=ResponseEnvelope[dict])
+async def get_place_weather(slug: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    place = places_service.get_place_by_id_or_slug(slug)
+    dest_name = place.get("name") if place else slug
+    lat = place.get("latitude") if place else None
+    lon = place.get("longitude") if place else None
+    
+    forecast = weather_service.get_weather_forecast(dest_name, lat=lat, lon=lon, trace_id=trace_id)
+    return ResponseEnvelope(
+        data=forecast.model_dump() if hasattr(forecast, "model_dump") else forecast.dict(),
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
 
 @router.get("", response_model=ResponseEnvelope[List[PlaceResponse]])
 async def list_places(request: Request, category: Optional[str] = None):

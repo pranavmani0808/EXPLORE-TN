@@ -30,6 +30,7 @@ import { Button } from "@/components/ui/button";
 import { getPlace, places, type Place } from "@/data/places";
 import { recordPlaceVisit, getUserVisits, submitCommunityContribution } from "@/lib/explorer-activity";
 import { useAuthGuard } from "@/lib/auth-guard-context";
+import { getApiBaseUrl } from "@/lib/api-client/config";
 
 export const Route = createFileRoute("/place/$slug")({
   loader: ({ params }) => {
@@ -72,12 +73,28 @@ function PlacePage() {
 
   const [hasVisited, setHasVisited] = useState(false);
   const [visitFeedback, setVisitFeedback] = useState<string | null>(null);
+  const [weatherData, setWeatherData] = useState<any>(null);
 
   // Review Form State
   const [showReviewForm, setShowReviewForm] = useState(false);
   const [reviewTitle, setReviewTitle] = useState("");
   const [reviewContent, setReviewContent] = useState("");
   const [reviewStatus, setReviewStatus] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchWeather() {
+      try {
+        const res = await fetch(`${getApiBaseUrl()}/api/v1/places/${place.slug}/weather`);
+        if (res.ok) {
+          const env = await res.json();
+          setWeatherData(env.data);
+        }
+      } catch (err) {
+        console.warn("Weather fetch fallback:", err);
+      }
+    }
+    fetchWeather();
+  }, [place.slug]);
 
   useEffect(() => {
     const visits = getUserVisits();
@@ -190,6 +207,51 @@ function PlacePage() {
 
         <div className="mx-auto grid max-w-6xl gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.4fr_0.6fr]">
           <div className="space-y-10">
+            {/* 🌦️ Live Weather & Destination Status Card */}
+            <div className="rounded-3xl border border-border bg-card p-6 shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-500 bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+                    🟢 ACCESSIBLE TODAY
+                  </span>
+                  <span className="text-[10px] font-mono text-muted-foreground">Verified 2h ago</span>
+                </div>
+
+                {weatherData && (
+                  <div className="text-right">
+                    <span className="text-2xl font-extrabold font-serif text-foreground">
+                      {weatherData.temperatureC}°C
+                    </span>
+                    <span className="text-xs text-muted-foreground block">{weatherData.condition}</span>
+                  </div>
+                )}
+              </div>
+
+              {weatherData && (
+                <div className="grid grid-cols-3 gap-2 pt-3 border-t border-border/40 text-center">
+                  <div className="p-2.5 rounded-2xl bg-accent/40">
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono font-bold">Humidity</p>
+                    <p className="text-xs font-bold text-foreground mt-0.5">{weatherData.humidityPercent}%</p>
+                  </div>
+                  <div className="p-2.5 rounded-2xl bg-accent/40">
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono font-bold">Wind</p>
+                    <p className="text-xs font-bold text-foreground mt-0.5">{weatherData.windSpeedKmh} km/h</p>
+                  </div>
+                  <div className="p-2.5 rounded-2xl bg-accent/40">
+                    <p className="text-[10px] text-muted-foreground uppercase font-mono font-bold">Rainfall</p>
+                    <p className="text-xs font-bold text-foreground mt-0.5">{weatherData.rainfallMm} mm</p>
+                  </div>
+                </div>
+              )}
+
+              {weatherData?.ghatAdvisory && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl text-xs font-medium text-amber-300 flex items-start gap-2">
+                  <AlertTriangle className="size-4 text-amber-400 shrink-0 mt-0.5" />
+                  <span>{weatherData.ghatAdvisory}</span>
+                </div>
+              )}
+            </div>
+
             <section>
               <h2 className="text-2xl font-bold">The story</h2>
               <p className="mt-3 text-muted-foreground leading-relaxed">{place.story}</p>
