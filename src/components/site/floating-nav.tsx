@@ -54,17 +54,19 @@ function useTheme() {
 // Explore Dropdown Content Items
 const EXPLORE_CATEGORIES = [
   { to: "/explore", label: "All Places", icon: Compass },
-  { to: "/explore", search: "?category=adventure", label: "Adventures", icon: Footprints },
-  { to: "/explore", search: "?category=mountain&trekking=true", label: "Trekking", icon: Mountain },
-  { to: "/explore", search: "?category=waterfall", label: "Waterfalls", icon: CloudRain },
-  { to: "/explore", search: "?category=mountain", label: "Hills & Viewpoints", icon: Mountain },
-  { to: "/explore", search: "?category=coastal", label: "Beaches", icon: Waves },
-  { to: "/explore", search: "?category=temple", label: "Temples", icon: Landmark },
-  { to: "/explore", search: "?category=lake", label: "Lakes", icon: Waves },
-  { to: "/explore", search: "?category=heritage", label: "Heritage", icon: Landmark },
-  { to: "/explore", search: "?category=food", label: "Food", icon: Utensils },
-  { to: "/explore", search: "?tag=hidden", label: "Hidden Places", icon: Sparkles },
-  { to: "/explore", search: "?tag=rural", label: "Rural Experiences", icon: Trees },
+  { to: "/explore/falls", label: "Falls & Waterfalls", icon: CloudRain },
+  { to: "/explore/trekking", label: "Trekking & Hiking", icon: Mountain },
+  { to: "/explore/beaches", label: "Beaches & Coastline", icon: Waves },
+  { to: "/explore/hills", label: "Hills & Mountains", icon: Mountain },
+  { to: "/explore/lakes", label: "Lakes & Dams", icon: Waves },
+  { to: "/explore/nature", label: "Nature & Forest", icon: Trees },
+  { to: "/explore/temples", label: "Temples & Shrines", icon: Landmark },
+  { to: "/explore/heritage", label: "Heritage & Historical", icon: Landmark },
+  { to: "/explore/adventure", label: "Adventure Activities", icon: Footprints },
+  { to: "/explore/viewpoints", label: "Viewpoints & Sunsets", icon: Sun },
+  { to: "/explore/food", label: "Food & Local Trails", icon: Utensils },
+  { to: "/explore/rural", label: "Rural Experiences", icon: Trees },
+  { to: "/explore/hidden", label: "Hidden & Offbeat", icon: Sparkles },
 ];
 
 export function FloatingNav({ onSearch }: { onSearch?: () => void }) {

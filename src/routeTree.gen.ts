@@ -26,6 +26,7 @@ import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RoutesRouteImport } from './routes/routes'
 import { Route as TheniRouteImport } from './routes/theni'
 import { Route as WesternGhatsRouteImport } from './routes/western-ghats'
+import { Route as ExploreCategoryRouteImport } from './routes/explore.$category'
 import { Route as PlaceSlugRouteImport } from './routes/place.$slug'
 import { Route as TrailsArupadaiVeeduRouteImport } from './routes/trails.arupadai-veedu'
 
@@ -114,6 +115,11 @@ const WesternGhatsRoute = WesternGhatsRouteImport.update({
   path: '/western-ghats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ExploreCategoryRoute = ExploreCategoryRouteImport.update({
+  id: '/$category',
+  path: '/$category',
+  getParentRoute: () => ExploreRoute,
+} as any)
 const PlaceSlugRoute = PlaceSlugRouteImport.update({
   id: '/place/$slug',
   path: '/place/$slug',
@@ -132,7 +138,7 @@ export interface FileRoutesByFullPath {
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
   '/discover': typeof DiscoverRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof ExploreRouteWithChildren
   '/hill-escapes': typeof HillEscapesRoute
   '/hills-of-tn': typeof HillsOfTnRoute
   '/login': typeof LoginRoute
@@ -143,6 +149,7 @@ export interface FileRoutesByFullPath {
   '/routes': typeof RoutesRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
+  '/explore/$category': typeof ExploreCategoryRoute
   '/place/$slug': typeof PlaceSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
@@ -153,7 +160,7 @@ export interface FileRoutesByTo {
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
   '/discover': typeof DiscoverRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof ExploreRouteWithChildren
   '/hill-escapes': typeof HillEscapesRoute
   '/hills-of-tn': typeof HillsOfTnRoute
   '/login': typeof LoginRoute
@@ -164,6 +171,7 @@ export interface FileRoutesByTo {
   '/routes': typeof RoutesRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
+  '/explore/$category': typeof ExploreCategoryRoute
   '/place/$slug': typeof PlaceSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
@@ -175,7 +183,7 @@ export interface FileRoutesById {
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
   '/discover': typeof DiscoverRoute
-  '/explore': typeof ExploreRoute
+  '/explore': typeof ExploreRouteWithChildren
   '/hill-escapes': typeof HillEscapesRoute
   '/hills-of-tn': typeof HillsOfTnRoute
   '/login': typeof LoginRoute
@@ -186,6 +194,7 @@ export interface FileRoutesById {
   '/routes': typeof RoutesRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
+  '/explore/$category': typeof ExploreCategoryRoute
   '/place/$slug': typeof PlaceSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
@@ -209,6 +218,7 @@ export interface FileRouteTypes {
     | '/routes'
     | '/theni'
     | '/western-ghats'
+    | '/explore/$category'
     | '/place/$slug'
     | '/trails/arupadai-veedu'
   fileRoutesByTo: FileRoutesByTo
@@ -230,6 +240,7 @@ export interface FileRouteTypes {
     | '/routes'
     | '/theni'
     | '/western-ghats'
+    | '/explore/$category'
     | '/place/$slug'
     | '/trails/arupadai-veedu'
   id:
@@ -251,6 +262,7 @@ export interface FileRouteTypes {
     | '/routes'
     | '/theni'
     | '/western-ghats'
+    | '/explore/$category'
     | '/place/$slug'
     | '/trails/arupadai-veedu'
   fileRoutesById: FileRoutesById
@@ -262,7 +274,7 @@ export interface RootRouteChildren {
   CoastalHeritageRoute: typeof CoastalHeritageRoute
   CommunityRoute: typeof CommunityRoute
   DiscoverRoute: typeof DiscoverRoute
-  ExploreRoute: typeof ExploreRoute
+  ExploreRoute: typeof ExploreRouteWithChildren
   HillEscapesRoute: typeof HillEscapesRoute
   HillsOfTnRoute: typeof HillsOfTnRoute
   LoginRoute: typeof LoginRoute
@@ -398,6 +410,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WesternGhatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/explore/$category': {
+      id: '/explore/$category'
+      path: '/$category'
+      fullPath: '/explore/$category'
+      preLoaderRoute: typeof ExploreCategoryRouteImport
+      parentRoute: typeof ExploreRoute
+    }
     '/place/$slug': {
       id: '/place/$slug'
       path: '/place/$slug'
@@ -415,6 +434,17 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface ExploreRouteChildren {
+  ExploreCategoryRoute: typeof ExploreCategoryRoute
+}
+
+const ExploreRouteChildren: ExploreRouteChildren = {
+  ExploreCategoryRoute: ExploreCategoryRoute,
+}
+
+const ExploreRouteWithChildren =
+  ExploreRoute._addFileChildren(ExploreRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
@@ -422,7 +452,7 @@ const rootRouteChildren: RootRouteChildren = {
   CoastalHeritageRoute: CoastalHeritageRoute,
   CommunityRoute: CommunityRoute,
   DiscoverRoute: DiscoverRoute,
-  ExploreRoute: ExploreRoute,
+  ExploreRoute: ExploreRouteWithChildren,
   HillEscapesRoute: HillEscapesRoute,
   HillsOfTnRoute: HillsOfTnRoute,
   LoginRoute: LoginRoute,
