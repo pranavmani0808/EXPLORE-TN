@@ -9,6 +9,15 @@ from backend.app.services.weather_service import weather_service
 
 router = APIRouter(prefix="/places", tags=["Places"])
 
+@router.get("/{slug}/intelligence", response_model=ResponseEnvelope[dict])
+async def get_place_intelligence(slug: str, request: Request):
+    trace_id = getattr(request.state, "trace_id", "tr-default")
+    intel = places_service.get_place_intelligence(slug)
+    return ResponseEnvelope(
+        data=intel,
+        meta=MetaInfo(traceId=trace_id, timestamp=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
+    )
+
 @router.get("/{slug}/weather", response_model=ResponseEnvelope[dict])
 async def get_place_weather(slug: str, request: Request):
     trace_id = getattr(request.state, "trace_id", "tr-default")
