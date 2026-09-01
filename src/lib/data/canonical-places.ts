@@ -39,6 +39,8 @@ export interface ExplorerPlace {
   tags: string[];
   highlights?: string[];
   aliases?: string[];
+  placeType?: "city" | "town" | "attraction" | "village";
+  minZoom?: number;
   metadata?: {
     bestTime?: string;
     duration?: string;
@@ -442,10 +444,226 @@ const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
     verified: true,
     tags: ["ramsar", "bird_sanctuary", "migratory_birds"]
+  },
+
+  // Tamil Nadu Major Cities & Municipalities Layer
+  "coimbatore-city": {
+    id: "p-coimbatore-city",
+    canonicalName: "Coimbatore Corporation",
+    name: "Coimbatore",
+    slug: "coimbatore",
+    district: "Coimbatore",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 11.0168,
+    longitude: 76.9558,
+    categories: ["tourist-places"],
+    primaryCategory: "tourist-places",
+    tagline: "Manchester of South India at Western Ghats foothills",
+    description: "Major industrial city and gateway to Nilgiris, Valparai, and Siruvani.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["coimbatore", "city", "corporation"]
+  },
+  "tiruchirappalli-city": {
+    id: "p-trichy-city",
+    canonicalName: "Tiruchirappalli (Trichy) Corporation",
+    name: "Tiruchirappalli",
+    slug: "tiruchirappalli",
+    district: "Tiruchirappalli",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.7905,
+    longitude: 78.7047,
+    categories: ["heritage", "temples"],
+    primaryCategory: "heritage",
+    tagline: "Historic Rockfort city along the Cauvery River delta",
+    description: "Central Tamil Nadu hub famed for Rockfort Temple, Srirangam, and Grand Anicut.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["trichy", "tiruchirappalli", "city"]
+  },
+  "salem-city": {
+    id: "p-salem-city",
+    canonicalName: "Salem Corporation",
+    name: "Salem",
+    slug: "salem",
+    district: "Salem",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 11.6643,
+    longitude: 78.1460,
+    categories: ["hills", "tourist-places"],
+    primaryCategory: "hills",
+    tagline: "Steel & Mango City surrounded by Shevaroy & Yercaud hills",
+    description: "Major North-Central junction city at the base of Yercaud and Mettur Dam.",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["salem", "city", "corporation"]
+  },
+  "tirunelveli-city": {
+    id: "p-tirunelveli-city",
+    canonicalName: "Tirunelveli Corporation",
+    name: "Tirunelveli",
+    slug: "tirunelveli",
+    district: "Tirunelveli",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 8.7139,
+    longitude: 77.7567,
+    categories: ["heritage", "temples"],
+    primaryCategory: "heritage",
+    tagline: "Ancient Tamirabarani river city famous for Nellaiappar Temple & Halwa",
+    description: "Historic city along Tamirabarani River, gateway to Courtallam and Manjolai.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["tirunelveli", "city", "corporation"]
+  },
+  "erode-city": {
+    id: "p-erode-city",
+    canonicalName: "Erode Corporation",
+    name: "Erode",
+    slug: "erode",
+    district: "Erode",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 11.3410,
+    longitude: 77.7172,
+    categories: ["tourist-places"],
+    primaryCategory: "tourist-places",
+    tagline: "Turmeric & Textile City along the Cauvery River",
+    description: "Prominent agricultural & industrial hub in Western Tamil Nadu.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["erode", "city"]
+  },
+  "vellore-city": {
+    id: "p-vellore-city",
+    canonicalName: "Vellore Corporation",
+    name: "Vellore",
+    slug: "vellore",
+    district: "Vellore",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 12.9165,
+    longitude: 79.1325,
+    categories: ["heritage", "temples"],
+    primaryCategory: "heritage",
+    tagline: "Historic Fort & Temple City of Northern Tamil Nadu",
+    description: "Fort city famous for Vijayanagara stone fortress and Golden Temple.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["vellore", "city"]
+  },
+  "thoothukudi-city": {
+    id: "p-thoothukudi-city",
+    canonicalName: "Thoothukudi (Tuticorin) Corporation",
+    name: "Thoothukudi",
+    slug: "thoothukudi",
+    district: "Thoothukudi",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 8.7642,
+    longitude: 78.1348,
+    categories: ["coastal", "beaches"],
+    primaryCategory: "beaches",
+    tagline: "Pearl City & major deep-sea port along the Gulf of Mannar",
+    description: "Major port city in southern Tamil Nadu, famous for macaroons and salt pans.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["tuticorin", "thoothukudi", "city"]
+  },
+  "nagercoil-city": {
+    id: "p-nagercoil-city",
+    canonicalName: "Nagercoil Corporation",
+    name: "Nagercoil",
+    slug: "nagercoil",
+    district: "Kanyakumari",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 8.1833,
+    longitude: 77.4119,
+    categories: ["tourist-places", "heritage"],
+    primaryCategory: "tourist-places",
+    tagline: "District Headquarters of Kanyakumari nestled between Western Ghats & Arabian Sea",
+    description: "Southernmost city hub near Thiruvattar, Suchindram, Padmanabhapuram, and Cape Comorin.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["nagercoil", "kanyakumari", "city"]
+  },
+  "thanjavur-city": {
+    id: "p-thanjavur-city",
+    canonicalName: "Thanjavur Corporation",
+    name: "Thanjavur",
+    slug: "thanjavur",
+    district: "Thanjavur",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.7870,
+    longitude: 79.1378,
+    categories: ["heritage", "temples"],
+    primaryCategory: "heritage",
+    tagline: "Rice Bowl of Tamil Nadu & Great Living Chola Temples seat",
+    description: "Cultural capital of Chola kingdom, home to Brihadeeswarar Temple and Royal Palace.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["thanjavur", "chola", "city"]
+  },
+  "dindigul-city": {
+    id: "p-dindigul-city",
+    canonicalName: "Dindigul Corporation",
+    name: "Dindigul",
+    slug: "dindigul",
+    district: "Dindigul",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.3673,
+    longitude: 77.9803,
+    categories: ["heritage", "food"],
+    primaryCategory: "heritage",
+    tagline: "Rockfort & Biryani City at Kodaikanal foothills",
+    description: "Historic junction city dominated by 17th-century Dindigul Rock Fort.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    tags: ["dindigul", "city"]
   }
 };
 
 export const CANONICAL_PLACES: ExplorerPlace[] = Object.values(KNOWN_DESTINATIONS);
+
+export function searchLocations(query: string): ExplorerPlace[] {
+  if (!query || !query.trim()) return CANONICAL_PLACES.slice(0, 10);
+  const q = query.toLowerCase().trim();
+
+  return CANONICAL_PLACES.filter((p) => {
+    const nameMatch = (p.name || "").toLowerCase().includes(q) || (p.canonicalName || "").toLowerCase().includes(q);
+    const distMatch = (p.district || "").toLowerCase().includes(q);
+    const slugMatch = (p.slug || "").toLowerCase().includes(q);
+    const aliasMatch = (p.aliases || []).some((a) => a.toLowerCase().includes(q));
+    const tagMatch = (p.tags || []).some((t) => t.toLowerCase().includes(q));
+    return nameMatch || distMatch || slugMatch || aliasMatch || tagMatch;
+  });
+}
 
 export function resolvePlaceById(placeId: string): ExplorerPlace {
   if (!placeId || !placeId.trim()) {

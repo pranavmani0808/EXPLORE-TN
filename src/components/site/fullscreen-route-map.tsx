@@ -20,7 +20,7 @@ import {
   Plus,
   Bookmark,
 } from "lucide-react";
-import { CANONICAL_PLACES, resolvePlaceById, ExplorerPlace } from "@/lib/data/canonical-places";
+import { CANONICAL_PLACES, resolvePlaceById, searchLocations, ExplorerPlace } from "@/lib/data/canonical-places";
 import { RouteApiRepository, IsolatedRouteResultDTO, RouteOption } from "@/lib/api-client/routes";
 import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
 import { useAuthGuard } from "@/lib/auth-guard-context";
@@ -680,7 +680,7 @@ export function FullscreenRouteMap({
 
               {/* Origin Spotlight Dropdown */}
               {searchFocused === "origin" && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-52 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
                   <div
                     onClick={() => {
                       handleUseCurrentLocation();
@@ -690,22 +690,46 @@ export function FullscreenRouteMap({
                   >
                     <LocateFixed className="w-4 h-4" /> Use My Current GPS Location
                   </div>
-                  {CANONICAL_PLACES.filter((p) =>
-                    (p.canonicalName || p.name).toLowerCase().includes(originQuery.toLowerCase())
-                  ).slice(0, 8).map((place) => (
-                    <div
-                      key={place.id}
-                      onClick={() => {
-                        setSelectedOrigin(place);
-                        setOriginQuery("");
-                        setSearchFocused(null);
-                      }}
-                      className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
-                    >
-                      <span className="font-semibold">📍 {place.canonicalName || place.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono">{place.district}</span>
-                    </div>
-                  ))}
+
+                  {searchLocations(originQuery).map((place) => {
+                    const iconSymbol =
+                      place.placeType === "city"
+                        ? "📍"
+                        : place.primaryCategory === "waterfalls"
+                        ? "💧"
+                        : place.primaryCategory === "trekking"
+                        ? "⛰️"
+                        : place.primaryCategory === "temples"
+                        ? "🛕"
+                        : place.primaryCategory === "heritage"
+                        ? "🏛️"
+                        : place.primaryCategory === "beaches"
+                        ? "🏖️"
+                        : "📍";
+
+                    return (
+                      <div
+                        key={place.id}
+                        onClick={() => {
+                          setSelectedOrigin(place);
+                          setOriginQuery("");
+                          setSearchFocused(null);
+                        }}
+                        className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>{iconSymbol}</span>
+                          <div>
+                            <span className="font-bold text-white block">{place.canonicalName || place.name}</span>
+                            <span className="text-[10px] text-slate-400">{place.district} District</span>
+                          </div>
+                        </div>
+                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-emerald-300 uppercase">
+                          {place.placeType === "city" ? "CITY" : place.primaryCategory}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
@@ -716,7 +740,7 @@ export function FullscreenRouteMap({
                 <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0"></span>
                 <input
                   type="text"
-                  placeholder="Select Destination..."
+                  placeholder="Search city, waterfall, trek or place..."
                   value={searchFocused === "destination" ? destinationQuery : (selectedDestination ? selectedDestination.canonicalName || selectedDestination.name : destinationQuery)}
                   onChange={(e) => {
                     setDestinationQuery(e.target.value);
@@ -734,23 +758,46 @@ export function FullscreenRouteMap({
 
               {/* Destination Spotlight Dropdown */}
               {searchFocused === "destination" && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-52 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
-                  {CANONICAL_PLACES.filter((p) =>
-                    (p.canonicalName || p.name).toLowerCase().includes(destinationQuery.toLowerCase())
-                  ).slice(0, 8).map((place) => (
-                    <div
-                      key={place.id}
-                      onClick={() => {
-                        setSelectedDestination(place);
-                        setDestinationQuery("");
-                        setSearchFocused(null);
-                      }}
-                      className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
-                    >
-                      <span className="font-semibold">⛰️ {place.canonicalName || place.name}</span>
-                      <span className="text-[10px] text-slate-400 font-mono">{place.district}</span>
-                    </div>
-                  ))}
+                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
+                  {searchLocations(destinationQuery).map((place) => {
+                    const iconSymbol =
+                      place.placeType === "city"
+                        ? "📍"
+                        : place.primaryCategory === "waterfalls"
+                        ? "💧"
+                        : place.primaryCategory === "trekking"
+                        ? "⛰️"
+                        : place.primaryCategory === "temples"
+                        ? "🛕"
+                        : place.primaryCategory === "heritage"
+                        ? "🏛️"
+                        : place.primaryCategory === "beaches"
+                        ? "🏖️"
+                        : "📍";
+
+                    return (
+                      <div
+                        key={place.id}
+                        onClick={() => {
+                          setSelectedDestination(place);
+                          setDestinationQuery("");
+                          setSearchFocused(null);
+                        }}
+                        className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span>{iconSymbol}</span>
+                          <div>
+                            <span className="font-bold text-white block">{place.canonicalName || place.name}</span>
+                            <span className="text-[10px] text-slate-400">{place.district} District</span>
+                          </div>
+                        </div>
+                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-sky-300 uppercase">
+                          {place.placeType === "city" ? "CITY" : place.primaryCategory}
+                        </span>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
