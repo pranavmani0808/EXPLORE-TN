@@ -16,6 +16,7 @@ import { Toaster } from "sonner";
 import { CookieBanner } from "../components/site/cookie-banner";
 import { UxStateListeners } from "../components/site/ux-state-listeners";
 import { GsapGlobalProvider } from "../components/site/gsap-provider";
+import { RouteLoadingBar } from "../components/site/route-loading-bar";
 
 function NotFoundComponent() {
   return (
@@ -137,6 +138,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <AuthGuardProvider>
         <GsapGlobalProvider>
+          <RouteLoadingBar />
           <UxStateListeners />
           <Toaster position="top-right" theme="dark" richColors />
           <Outlet />
