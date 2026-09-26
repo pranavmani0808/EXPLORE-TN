@@ -15,6 +15,7 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { arupadaiVeeduTemples, type Place } from "@/data/places";
 import { PlannerApiRepository } from "@/lib/api-client/planner";
+import { cn } from "@/lib/utils";
 import {
   Map,
   MapMarker,
@@ -49,6 +50,18 @@ function ArupadaiVeeduTrailPage() {
   const navigate = useNavigate();
   const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
   const [osrmRoutePoints, setOsrmRoutePoints] = useState<Array<[number, number]>>([]);
+  const [selectedStopIndex, setSelectedStopIndex] = useState<number>(0);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([10.5, 78.5]);
+  const [mapZoom, setMapZoom] = useState<number>(7);
+
+  const handleSelectStop = (index: number) => {
+    setSelectedStopIndex(index);
+    const temple = arupadaiVeeduTemples[index];
+    if (temple && temple.coords) {
+      setMapCenter(temple.coords);
+      setMapZoom(11);
+    }
+  };
 
   const handleAddToTrip = (slug: string) => {
     setAddedTrips((prev) => ({ ...prev, [slug]: true }));
@@ -181,52 +194,140 @@ function ArupadaiVeeduTrailPage() {
         </div>
       </section>
 
-      {/* Main Content Container with Dark Background & Interactive Mapcn Dev Map */}
-      <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+      {/* Main Content Container with Split 2-Column Trail Map & Shrines Navigator */}
+      <div className="mx-auto max-w-[1600px] px-4 py-12 sm:px-6">
         {/* Interactive Mapcn.dev Route Map Section */}
-        <div className="mb-14 space-y-3">
-          <div className="flex items-center justify-between">
+        <div className="mb-14 space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
             <div>
-              <h2 className="text-2xl font-bold">Interactive Trail Map</h2>
-              <p className="text-sm text-muted-foreground">
-                Mapcn.dev Leaflet tile map with real OSRM road route geometry & PostGIS coordinates.
-              </p>
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-1 text-xs font-mono font-bold text-amber-400">
+                  Sequential Road Route 1 → 6
+                </span>
+                <span className="text-xs text-zinc-400 font-mono">
+                  ~1,200 km Total Circuit
+                </span>
+              </div>
+              <h2 className="text-2xl font-black text-white font-display mt-1">Interactive Trail Map & Route Navigator</h2>
             </div>
-            <Button onClick={handlePlanWithAI} variant="outline" size="sm" className="rounded-xl">
+            <Button onClick={handlePlanWithAI} variant="outline" size="sm" className="rounded-xl border-amber-500/30 text-amber-300 hover:bg-amber-500/10">
               <Sparkles className="mr-1.5 size-3.5 text-amber-400" /> Optimize Route in Trip Copilot
             </Button>
           </div>
 
-          <div className="glass overflow-hidden rounded-3xl p-2 shadow-elevate border border-amber-500/20">
-            <Map center={[10.5, 78.5]} zoom={7} style="dark" className="h-[420px] w-full rounded-2xl border-0">
-              <MapControls position="top-right" />
+          {/* 2-COLUMN SPLIT LAYOUT (LEFT: STOP DETAILS NAVIGATOR / RIGHT: INTERACTIVE MAP) */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            
+            {/* LEFT SIDE COLUMN: STOP DETAILS LIST (1 to 6) */}
+            <div className="lg:col-span-4 flex flex-col rounded-3xl border border-zinc-800 bg-zinc-900/90 p-4 shadow-2xl space-y-3">
+              <div className="flex items-center justify-between pb-2.5 border-b border-zinc-800">
+                <div className="flex items-center gap-2">
+                  <span className="grid size-7 place-items-center rounded-lg bg-amber-500/20 text-amber-400 font-bold text-xs">
+                    #1-6
+                  </span>
+                  <div>
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">Route Shrines Navigator</h3>
+                    <p className="text-[10px] text-zinc-400">Click any stop to focus map pin</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => {
+                    setMapCenter([10.5, 78.5]);
+                    setMapZoom(7);
+                  }}
+                  className="text-[11px] font-semibold text-zinc-400 hover:text-amber-400 transition"
+                >
+                  Reset Map View ↺
+                </button>
+              </div>
 
-              {/* Render Animated OSRM Multi-Waypoint Road Route Line */}
-              {displayRoutePoints.length > 1 && (
-                <MapRoute coordinates={displayRoutePoints} animated color="#f59e0b" weight={4} />
-              )}
+              {/* Stops List (1 to 6) */}
+              <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1 scrollbar-none">
+                {arupadaiVeeduTemples.map((temple, idx) => {
+                  const isSelected = selectedStopIndex === idx;
+                  return (
+                    <button
+                      key={temple.slug}
+                      onClick={() => handleSelectStop(idx)}
+                      className={cn(
+                        "w-full text-left p-3 rounded-2xl border transition-all duration-200 flex items-start gap-3 cursor-pointer group",
+                        isSelected
+                          ? "bg-amber-500/15 border-amber-500/60 ring-1 ring-amber-500/40 text-white shadow-lg"
+                          : "bg-zinc-950/60 border-zinc-800/80 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-900"
+                      )}
+                    >
+                      {/* Numbered Badge */}
+                      <span className={cn(
+                        "flex size-7 shrink-0 items-center justify-center rounded-xl text-xs font-black transition-colors mt-0.5",
+                        isSelected
+                          ? "bg-amber-400 text-zinc-950 shadow-md shadow-amber-500/20"
+                          : "bg-zinc-800 text-amber-400 border border-zinc-700 group-hover:bg-amber-500/20"
+                      )}>
+                        {idx + 1}
+                      </span>
 
-              {/* Render All 6 Temple Markers */}
-              {arupadaiVeeduTemples.map((temple, idx) => (
-                <MapMarker key={temple.slug} latitude={temple.coords![0]} longitude={temple.coords![1]}>
-                  <MarkerContent>
-                    <span className="flex size-6 items-center justify-center rounded-full bg-amber-500 font-bold text-[10px] text-black ring-4 ring-amber-500/40 shadow-lg">
-                      {idx + 1}
-                    </span>
-                  </MarkerContent>
-                  <MarkerLabel>{temple.name}</MarkerLabel>
-                  <MarkerTooltip>{temple.tagline}</MarkerTooltip>
-                  <MarkerPopup title={temple.name} rating={temple.rating}>
-                    <p className="text-xs text-muted-foreground">{temple.district} District</p>
-                    <Button asChild size="sm" className="mt-2 w-full rounded-lg text-[11px]">
-                      <Link to="/place/$slug" params={{ slug: temple.slug }}>
-                        View Place Details
-                      </Link>
-                    </Button>
-                  </MarkerPopup>
-                </MapMarker>
-              ))}
-            </Map>
+                      {/* Stop Info */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-1">
+                          <h4 className={cn("text-xs font-extrabold truncate", isSelected ? "text-amber-300" : "text-white group-hover:text-amber-300")}>
+                            {temple.name}
+                          </h4>
+                          <span className="text-[10px] font-mono text-amber-400 font-bold shrink-0">
+                            ★ {temple.rating}
+                          </span>
+                        </div>
+                        <p className="text-[10px] text-zinc-400 truncate mt-0.5">{temple.district} District</p>
+                        <p className="text-[11px] text-zinc-300 line-clamp-1 mt-1 font-medium">{temple.tagline}</p>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* RIGHT SIDE WORKSPACE: MAP CANVAS */}
+            <div className="lg:col-span-8 rounded-3xl border border-amber-500/20 bg-zinc-950 p-2 shadow-2xl relative overflow-hidden flex flex-col justify-between">
+              <Map center={mapCenter} zoom={mapZoom} style="dark" className="h-[520px] w-full rounded-2xl border-0">
+                <MapControls position="top-right" />
+
+                {/* Render Animated OSRM Multi-Waypoint Road Route Line */}
+                {displayRoutePoints.length > 1 && (
+                  <MapRoute coordinates={displayRoutePoints} animated color="#f59e0b" weight={4} />
+                )}
+
+                {/* Render All 6 Temple Markers */}
+                {arupadaiVeeduTemples.map((temple, idx) => {
+                  const isSelected = selectedStopIndex === idx;
+                  return (
+                    <MapMarker key={temple.slug} latitude={temple.coords![0]} longitude={temple.coords![1]}>
+                      <MarkerContent>
+                        <button
+                          onClick={() => handleSelectStop(idx)}
+                          className={cn(
+                            "flex size-7 items-center justify-center rounded-full font-black text-xs transition-transform shadow-lg cursor-pointer",
+                            isSelected
+                              ? "bg-amber-400 text-zinc-950 scale-125 ring-4 ring-amber-400/50"
+                              : "bg-amber-500 text-zinc-950 hover:scale-110 ring-2 ring-zinc-950"
+                          )}
+                        >
+                          {idx + 1}
+                        </button>
+                      </MarkerContent>
+                      <MarkerLabel>{temple.name}</MarkerLabel>
+                      <MarkerTooltip>{temple.tagline}</MarkerTooltip>
+                      <MarkerPopup title={temple.name} rating={temple.rating}>
+                        <p className="text-xs text-muted-foreground">{temple.district} District · Stop #{idx + 1}</p>
+                        <Button asChild size="sm" className="mt-2 w-full rounded-lg text-[11px]">
+                          <Link to="/place/$slug" params={{ slug: temple.slug }}>
+                            View Place Details
+                          </Link>
+                        </Button>
+                      </MarkerPopup>
+                    </MapMarker>
+                  );
+                })}
+              </Map>
+            </div>
           </div>
         </div>
 
