@@ -449,11 +449,11 @@ function ExploreByExperiencePage() {
         </div>
 
         {/* SPLIT LAYOUT: LEFT SIDE NAVBAR & RIGHT WORKSPACE */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8">
+        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-8 pt-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
 
             {/* LEFT SIDE NAVBAR (Experience Categories Stepper / Sidebar) */}
-            <aside className="lg:col-span-4 sticky top-24 space-y-4">
+            <aside className="lg:col-span-4 xl:col-span-3 sticky top-24 space-y-4">
               <div className="transform-gpu rounded-3xl bg-zinc-900/95 border border-zinc-800 p-5 shadow-2xl space-y-4">
                 <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
                   <div>
@@ -531,7 +531,7 @@ function ExploreByExperiencePage() {
             </aside>
 
             {/* RIGHT WORKSPACE (Filtered Results & Search Toolbar) */}
-            <section className="lg:col-span-8 space-y-6">
+            <section className="lg:col-span-8 xl:col-span-9 space-y-6">
               {/* Category Header & Filters Toolbar */}
               <div className="transform-gpu rounded-3xl bg-zinc-900/95 border border-zinc-800 p-6 shadow-2xl space-y-4">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
@@ -601,7 +601,7 @@ function ExploreByExperiencePage() {
 
                 {/* Cards Grid */}
                 {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                     {[1, 2, 3, 4, 5, 6].map((n) => (
                       <div key={n} className="h-64 rounded-2xl bg-zinc-950 border border-zinc-800 animate-pulse" />
                     ))}
@@ -620,7 +620,7 @@ function ExploreByExperiencePage() {
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
                     {categoryFilteredPlaces.map((p, idx) => {
                       const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
 
