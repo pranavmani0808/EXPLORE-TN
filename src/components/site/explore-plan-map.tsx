@@ -60,19 +60,22 @@ export interface ExplorePlanMapProps {
   className?: string;
 }
 
+const DEFAULT_ORIGIN_OPTIONS: OriginOption[] = [
+  { placeId: "direct-trail", name: "Direct Trail (Start at Stop 1)", latitude: 0, longitude: 0 },
+  { placeId: "madurai-hub", name: "Madurai Central Hub", latitude: 9.9195, longitude: 78.1193 },
+  { placeId: "theni", name: "Theni Central Hub", latitude: 10.0104, longitude: 77.4768 },
+  { placeId: "chennai", name: "Chennai", latitude: 13.0827, longitude: 80.2707 },
+  { placeId: "coimbatore", name: "Coimbatore", latitude: 11.0168, longitude: 76.9558 },
+  { placeId: "bengaluru", name: "Bengaluru", latitude: 12.9716, longitude: 77.5946 },
+];
+
 // In-Memory Route Leg Cache (Key: `originPlaceId:destPlaceId:mode`)
 const ROUTE_LEG_CACHE = new Map<string, { distanceKm: number; durationMins: number; polyline: [number, number][] }>();
 
 export function ExplorePlanMap({
   plans,
   initialPlanId,
-  originOptions = [
-    { placeId: "theni", name: "Theni Central Hub", latitude: 10.0104, longitude: 77.4768 },
-    { placeId: "madurai", name: "Madurai City", latitude: 9.9195, longitude: 78.1193 },
-    { placeId: "chennai", name: "Chennai", latitude: 13.0827, longitude: 80.2707 },
-    { placeId: "coimbatore", name: "Coimbatore", latitude: 11.0168, longitude: 76.9558 },
-    { placeId: "bengaluru", name: "Bengaluru", latitude: 12.9716, longitude: 77.5946 },
-  ],
+  originOptions = DEFAULT_ORIGIN_OPTIONS,
   title,
   subtitle,
   className = "",
@@ -112,7 +115,7 @@ export function ExplorePlanMap({
 
     try {
       return currentPlan.stops.map((stop) => {
-        const canonical = resolvePlace(stop.placeId);
+        const canonical = resolvePlaceById(stop.placeId);
         if (!canonical) {
           throw new DestinationResolutionError(stop.placeId);
         }
@@ -128,7 +131,10 @@ export function ExplorePlanMap({
     }
   }, [currentPlan]);
 
-  // Segment Road Route Calculation with Stale Request Protection
+  // Check if an external origin hub is selected (not direct trail)
+  const isExternalOriginSelected = selectedOrigin && selectedOrigin.placeId !== "direct-trail";
+
+  // Segment Road Route Calculation
   useEffect(() => {
     if (resolvedStops.length < 2) return;
 
@@ -139,11 +145,13 @@ export function ExplorePlanMap({
     const calculateAllSegments = async () => {
       const segments: Array<{ distanceKm: number; durationMins: number; polyline: [number, number][] }> = [];
 
-      // Combine Origin + Stops for full journey routing
-      const waypoints = [
-        { latitude: selectedOrigin.latitude, longitude: selectedOrigin.longitude, name: selectedOrigin.name },
-        ...resolvedStops.map((s) => ({ latitude: s.place.latitude, longitude: s.place.longitude, name: s.place.name })),
-      ];
+      // Combine optional external origin + Plan Stops
+      const waypoints = isExternalOriginSelected
+        ? [
+            { latitude: selectedOrigin.latitude, longitude: selectedOrigin.longitude, name: selectedOrigin.name },
+            ...resolvedStops.map((s) => ({ latitude: s.place.latitude, longitude: s.place.longitude, name: s.place.name })),
+          ]
+        : resolvedStops.map((s) => ({ latitude: s.place.latitude, longitude: s.place.longitude, name: s.place.name }));
 
       for (let i = 0; i < waypoints.length - 1; i++) {
         const origin = waypoints[i];
@@ -188,7 +196,7 @@ export function ExplorePlanMap({
     };
 
     calculateAllSegments();
-  }, [selectedPlanId, selectedOrigin, travelMode, resolvedStops]);
+  }, [selectedPlanId, selectedOrigin, travelMode, resolvedStops, isExternalOriginSelected]);
 
   // Leaflet Map Initialization & Dynamic Marker / Polyline Layer Update
   useEffect(() => {
@@ -210,7 +218,7 @@ export function ExplorePlanMap({
       if (!leafletMapRef.current) {
         const map = L.map(mapContainerRef.current, {
           center: [resolvedStops[0].place.latitude, resolvedStops[0].place.longitude],
-          zoom: 10,
+          zoom: 11,
           zoomControl: false,
         });
 
@@ -235,13 +243,47 @@ export function ExplorePlanMap({
 
       const bounds = L.latLngBounds([]);
 
-      // 1. Plot Numbered Stop Markers (①, ②, ③, ④...)
+      // 1. Plot External Starting Hub Marker if selected
+      if (isExternalOriginSelected) {
+        bounds.extend([selectedOrigin.latitude, selectedOrigin.longitude]);
+
+        const originIcon = L.divIcon({
+          className: "custom-origin-marker",
+          html: `
+            <div style="
+              background-color: #0284c7;
+              color: white;
+              font-weight: 800;
+              font-size: 10px;
+              padding: 4px 8px;
+              border-radius: 12px;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+              border: 2px solid white;
+              box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+              white-space: nowrap;
+            ">
+              START: ${selectedOrigin.name.split(" ")[0]}
+            </div>
+          `,
+          iconSize: [80, 24],
+          iconAnchor: [40, 12],
+        });
+
+        const originMarker = L.marker([selectedOrigin.latitude, selectedOrigin.longitude], { icon: originIcon }).addTo(map);
+        originMarker.bindTooltip(`START HUB: ${selectedOrigin.name}`, { direction: "top", offset: [0, -12] });
+        markersRef.current.push(originMarker);
+      }
+
+      // 2. Plot Plan Stop Markers (Numbered 1, 2, 3, 4...)
       resolvedStops.forEach((stop, idx) => {
         const place = stop.place;
         bounds.extend([place.latitude, place.longitude]);
 
-        const numberCircle = idx === 0 ? "START" : `${idx}`;
-        const markerBg = idx === selectedStopIndex ? "#10b981" : idx === 0 ? "#0284c7" : "#0f172a";
+        const stopNumber = `${idx + 1}`;
+        const isSelected = idx === selectedStopIndex;
+        const markerBg = isSelected ? "#10b981" : "#0f172a";
 
         const customIcon = L.divIcon({
           className: "custom-stop-marker",
@@ -250,7 +292,7 @@ export function ExplorePlanMap({
               background-color: ${markerBg};
               color: white;
               font-weight: 800;
-              font-size: 12px;
+              font-size: 13px;
               width: 32px;
               height: 32px;
               border-radius: 50%;
@@ -261,7 +303,7 @@ export function ExplorePlanMap({
               box-shadow: 0 4px 14px rgba(0,0,0,0.35);
               transition: all 0.2s ease;
             ">
-              ${numberCircle}
+              ${stopNumber}
             </div>
           `,
           iconSize: [32, 32],
@@ -270,14 +312,14 @@ export function ExplorePlanMap({
 
         const marker = L.marker([place.latitude, place.longitude], { icon: customIcon }).addTo(map);
 
-        marker.bindTooltip(`${idx === 0 ? "START" : idx}. ${place.canonicalName || place.name}`, {
-          permanent: idx === selectedStopIndex,
+        marker.bindTooltip(`${stopNumber}. ${place.canonicalName || place.name}`, {
+          permanent: isSelected,
           direction: "top",
           offset: [0, -16],
           className: "custom-decluttered-map-tooltip",
         });
 
-        const legDist = idx > 0 && segmentData[idx] ? `${segmentData[idx].distanceKm} km` : "Starting Hub";
+        const legDist = idx > 0 && segmentData[idx] ? `${segmentData[idx].distanceKm} km` : isExternalOriginSelected ? "Via Hub" : "Start";
         const legDuration = idx > 0 && segmentData[idx] ? `${segmentData[idx].durationMins} min` : "0 min";
 
         marker.bindPopup(`
@@ -304,15 +346,28 @@ export function ExplorePlanMap({
         markersRef.current.push(marker);
       });
 
-      // 2. Draw Solid Road Polyline Segments
+      // 3. Draw Solid Road Polyline Segments with Google Maps Casing
       segmentData.forEach((seg, idx) => {
         if (seg.polyline && seg.polyline.length > 0) {
-          const isSelectedLeg = idx === selectedStopIndex;
-          const polyline = L.polyline(seg.polyline, {
+          const legIndex = isExternalOriginSelected ? idx - 1 : idx;
+          const isSelectedLeg = legIndex === selectedStopIndex;
+
+          // Outer casing border (Google Maps road outline)
+          L.polyline(seg.polyline, {
+            color: "#0f172a",
+            weight: isSelectedLeg ? 10 : 7,
+            opacity: 0.85,
+            lineJoin: "round",
+            lineCap: "round",
+          }).addTo(polylineGroup);
+
+          // Inner navigation route line
+          L.polyline(seg.polyline, {
             color: isSelectedLeg ? "#10b981" : "#0284c7",
             weight: isSelectedLeg ? 6 : 4,
-            opacity: isSelectedLeg ? 0.95 : 0.8,
+            opacity: 0.95,
             lineJoin: "round",
+            lineCap: "round",
           }).addTo(polylineGroup);
 
           seg.polyline.forEach((pt) => bounds.extend(pt));
@@ -328,7 +383,7 @@ export function ExplorePlanMap({
     return () => {
       isMounted = false;
     };
-  }, [resolvedStops, segmentData, selectedStopIndex]);
+  }, [resolvedStops, segmentData, selectedStopIndex, selectedOrigin, isExternalOriginSelected]);
 
   // Focus Map Viewport on selected stop card
   const handleSelectStop = (idx: number) => {
@@ -336,8 +391,9 @@ export function ExplorePlanMap({
     const stop = resolvedStops[idx];
     if (stop && leafletMapRef.current) {
       leafletMapRef.current.flyTo([stop.place.latitude, stop.place.longitude], 13, { duration: 1 });
-      if (markersRef.current[idx]) {
-        markersRef.current[idx].openPopup();
+      const markerOffset = isExternalOriginSelected ? idx + 1 : idx;
+      if (markersRef.current[markerOffset]) {
+        markersRef.current[markerOffset].openPopup();
       }
     }
   };
@@ -370,8 +426,9 @@ export function ExplorePlanMap({
     let currentMins = parseInt(startTime.split(":")[0], 10) * 60 + parseInt(startTime.split(":")[1], 10);
 
     return resolvedStops.map((stop, idx) => {
-      if (idx > 0 && segmentData[idx]) {
-        currentMins += segmentData[idx].durationMins;
+      const segIndex = isExternalOriginSelected ? idx + 1 : idx;
+      if (idx > 0 && segmentData[segIndex]) {
+        currentMins += segmentData[segIndex].durationMins;
       }
       const arrivalMins = currentMins;
       const visitMins = stop.visitDurationMinutes || 60;
@@ -390,11 +447,11 @@ export function ExplorePlanMap({
         stop,
         arrivalTime: formatTime(arrivalMins),
         departureTime: formatTime(departureMins),
-        driveFromPrevKm: idx > 0 && segmentData[idx] ? segmentData[idx].distanceKm : 0,
-        driveFromPrevMins: idx > 0 && segmentData[idx] ? segmentData[idx].durationMins : 0,
+        driveFromPrevKm: segmentData[segIndex] ? segmentData[segIndex].distanceKm : 0,
+        driveFromPrevMins: segmentData[segIndex] ? segmentData[segIndex].durationMins : 0,
       };
     });
-  }, [isTripActive, startTime, resolvedStops, segmentData]);
+  }, [isTripActive, startTime, resolvedStops, segmentData, isExternalOriginSelected]);
 
   return (
     <div className={`space-y-6 ${className}`}>
@@ -436,55 +493,40 @@ export function ExplorePlanMap({
         )}
       </div>
 
-      {/* Resolution Error Banner if place resolution fails */}
-      {resolutionError && (
-        <div className="rounded-2xl border border-rose-200 dark:border-rose-900/50 bg-rose-50 dark:bg-rose-950/40 p-4 flex items-center gap-3 text-rose-800 dark:text-rose-200 text-sm">
-          <ShieldAlert className="size-5 shrink-0 text-rose-600 dark:text-rose-400" />
-          <div className="flex-1 font-medium">{resolutionError}</div>
-        </div>
-      )}
-
-      {/* Control Bar: Origin Selector, Mode Toggle, Start Trip */}
-      <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-4 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3 w-full md:w-auto">
-          {/* Origin Selector */}
+      {/* Control Bar: Starting Hub & Mode Selector */}
+      <div className="flex flex-wrap items-center justify-between gap-4 rounded-2xl bg-slate-900 border border-slate-800 p-4 text-white shadow-xl">
+        <div className="flex flex-wrap items-center gap-4">
           <div className="flex items-center gap-2">
-            <MapPin className="size-4 text-emerald-500 shrink-0" />
-            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Start From:</span>
+            <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">Start From:</span>
             <select
               value={selectedOrigin.placeId}
               onChange={(e) => {
                 const found = originOptions.find((o) => o.placeId === e.target.value);
                 if (found) setSelectedOrigin(found);
               }}
-              className="bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-lg px-3 py-1.5 text-xs font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+              className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
               {originOptions.map((o) => (
-                <option key={o.placeId} value={o.placeId} className="dark:bg-slate-900">
+                <option key={o.placeId} value={o.placeId}>
                   {o.name}
                 </option>
               ))}
             </select>
           </div>
 
-          {/* Travel Mode Toggle */}
-          <div className="flex items-center gap-1 bg-slate-100 dark:bg-white/5 p-1 rounded-lg border border-slate-200 dark:border-white/10">
+          <div className="flex items-center gap-1.5 bg-slate-800 p-1 rounded-xl border border-slate-700">
             <button
               onClick={() => setTravelMode("driving")}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
-                travelMode === "driving"
-                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                travelMode === "driving" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
               }`}
             >
               <Car className="size-3.5" /> Car
             </button>
             <button
               onClick={() => setTravelMode("motorcycle")}
-              className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold transition-all ${
-                travelMode === "motorcycle"
-                  ? "bg-white dark:bg-slate-800 text-slate-900 dark:text-white shadow-sm"
-                  : "text-slate-500 hover:text-slate-800 dark:hover:text-slate-200"
+              className={`flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg transition-all ${
+                travelMode === "motorcycle" ? "bg-emerald-500 text-slate-950 shadow" : "text-slate-400 hover:text-white"
               }`}
             >
               <Bike className="size-3.5" /> Motorcycle
@@ -492,200 +534,144 @@ export function ExplorePlanMap({
           </div>
         </div>
 
-        {/* Start Trip Button */}
-        <div className="flex items-center gap-3 w-full md:w-auto justify-end">
-          {!isTripActive ? (
-            <Button
-              onClick={() => setIsTripActive(true)}
-              className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl px-4 py-2 flex items-center gap-2 shadow-md shadow-emerald-600/20"
-            >
-              <Play className="size-3.5 fill-current" /> Start Trip Schedule →
-            </Button>
-          ) : (
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
-                <Clock className="size-3.5 animate-spin" /> Active Itinerary
-              </span>
-              <Button
-                onClick={() => setIsTripActive(false)}
-                variant="outline"
-                className="text-xs font-bold rounded-xl px-3 py-1.5"
-              >
-                Reset
-              </Button>
-            </div>
-          )}
-        </div>
+        <Button
+          onClick={() => setIsTripActive(!isTripActive)}
+          className={`h-9 rounded-xl font-bold text-xs ${
+            isTripActive ? "bg-amber-500 text-slate-950 hover:bg-amber-400" : "bg-emerald-500 text-slate-950 hover:bg-emerald-400"
+          }`}
+        >
+          {isTripActive ? <RotateCcw className="mr-1.5 size-4" /> : <Play className="mr-1.5 size-4" />}
+          {isTripActive ? "Reset Trip Schedule" : "Start Trip Schedule →"}
+        </Button>
       </div>
 
-      {/* Dynamic Summary Banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-4 shadow-sm">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Driving Distance</div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
+      {/* Summary Cards Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Driving Distance</span>
+          <div className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
             {routeLoading ? "Calculating..." : `${totalDrivingKm} km`}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-4 shadow-sm">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Driving Time</div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Driving Time</span>
+          <div className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
             {routeLoading ? "..." : formatHours(totalDrivingMins)}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-4 shadow-sm">
-          <div className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Visit Duration</div>
-          <div className="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">
+        <div className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-4">
+          <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Visit Duration</span>
+          <div className="text-xl font-extrabold text-slate-900 dark:text-white mt-0.5">
             {formatHours(totalVisitMins)}
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 dark:border-emerald-900/50 bg-emerald-50/50 dark:bg-emerald-950/20 p-4 shadow-sm">
-          <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Trip Duration</div>
-          <div className="text-xl sm:text-2xl font-black text-emerald-700 dark:text-emerald-300 mt-1">
+        <div className="rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4">
+          <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider">Total Trip Duration</span>
+          <div className="text-xl font-extrabold text-emerald-600 dark:text-emerald-400 mt-0.5">
             {routeLoading ? "..." : formatHours(totalTripMins)}
           </div>
         </div>
       </div>
 
-      {/* Main 2-Column Desktop / Responsive Layout */}
-      <div className="grid gap-6 lg:grid-cols-12">
-        {/* Interactive Leaflet Road Route Map */}
-        <div className="lg:col-span-7 flex flex-col rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] shadow-sm overflow-hidden min-h-[420px] lg:min-h-[540px] relative">
-          <div ref={mapContainerRef} className="w-full h-full min-h-[420px] lg:min-h-[540px] z-0" />
+      {/* Main Split Layout: Map Left + Timeline Right */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* MAP DISPLAY COLUMN */}
+        <div className="lg:col-span-6 relative h-[480px] rounded-3xl overflow-hidden border border-slate-200 dark:border-white/10 shadow-2xl">
+          <div ref={mapContainerRef} className="size-full" />
 
-          {/* Map Legend Overlay */}
-          <div className="absolute top-4 left-4 z-10 rounded-xl bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-3 py-2 border border-slate-200 dark:border-white/10 shadow-md text-xs font-medium space-y-1">
+          {/* Map Legend Floating Banner */}
+          <div className="absolute top-3 left-3 z-[1000] flex flex-col gap-1 rounded-xl bg-slate-950/85 p-2.5 backdrop-blur-md text-[10px] text-white border border-slate-800 shadow-md">
             <div className="flex items-center gap-2">
-              <span className="size-2.5 rounded-full bg-sky-600" /> <span>Start Hub</span>
+              <span className="size-2.5 rounded-full bg-[#0284c7]" /> <span>Start Hub</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="size-2.5 rounded-full bg-slate-900 dark:bg-white" /> <span>Stops</span>
+              <span className="size-2.5 rounded-full bg-[#0f172a] border border-white" /> <span>Stops (1, 2, 3...)</span>
             </div>
             <div className="flex items-center gap-2">
-              <span className="size-2.5 rounded-full bg-emerald-500" /> <span>Active Selected</span>
+              <span className="size-2.5 rounded-full bg-[#10b981]" /> <span>Active Selected</span>
             </div>
           </div>
         </div>
 
-        {/* Timeline & Stop Details Panel */}
-        <div className="lg:col-span-5 flex flex-col space-y-4">
-          <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-6 shadow-sm flex-1">
-            <h3 className="font-bold text-slate-900 dark:text-white flex items-center justify-between">
-              <span>Itinerary Timeline & Stops ({resolvedStops.length})</span>
-              <span className="text-xs font-mono text-slate-400">Canonical Resolved</span>
+        {/* ITINERARY TIMELINE & STOPS RIGHT COLUMN */}
+        <div className="lg:col-span-6 space-y-4 rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-white/5 p-5">
+          <div className="flex items-center justify-between">
+            <h3 className="font-display text-lg font-extrabold text-slate-900 dark:text-white">
+              Itinerary Timeline & Stops ({resolvedStops.length})
             </h3>
+            <span className="text-xs font-mono text-emerald-600 dark:text-emerald-400 font-bold">Canonical Resolved</span>
+          </div>
 
-            <div className="mt-4 space-y-4 max-h-[480px] overflow-y-auto pr-1">
-              {isTripActive && itinerarySchedule.length > 0 ? (
-                // Active Schedule Itinerary Mode
-                itinerarySchedule.map((sched, idx) => (
-                  <div
-                    key={sched.stop.placeId}
-                    onClick={() => handleSelectStop(idx)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                      idx === selectedStopIndex
-                        ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 ring-2 ring-emerald-500/20"
-                        : "border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="size-6 rounded-full bg-emerald-600 text-white font-bold text-xs flex items-center justify-center">
-                          {idx === 0 ? "START" : idx}
-                        </span>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">
-                          {sched.stop.place.canonicalName || sched.stop.place.name}
-                        </span>
-                      </div>
-                      <span className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-900/50 px-2 py-0.5 rounded">
-                        {sched.arrivalTime}
-                      </span>
-                    </div>
+          <div className="space-y-3">
+            {resolvedStops.map((stop, idx) => {
+              const isSelected = idx === selectedStopIndex;
+              const place = stop.place;
 
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">
-                      {sched.stop.place.tagline}
-                    </p>
-
-                    {idx > 0 && (
-                      <div className="mt-3 text-xs text-slate-500 border-t border-slate-200/60 dark:border-white/5 pt-2 flex items-center justify-between">
-                        <span>Drive from previous: <strong>{sched.driveFromPrevKm} km</strong></span>
-                        <span>ETA: <strong>{sched.driveFromPrevMins} mins</strong></span>
-                      </div>
-                    )}
-
-                    <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-white/5">
-                      <span className="text-xs font-medium text-slate-500">Visit: {sched.stop.visitDurationMinutes || 60} mins</span>
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${sched.stop.place.latitude},${sched.stop.place.longitude}&travelmode=driving`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 flex items-center gap-1"
+              return (
+                <div
+                  key={stop.placeId}
+                  onClick={() => handleSelectStop(idx)}
+                  className={`p-4 rounded-2xl border transition-all cursor-pointer ${
+                    isSelected
+                      ? "border-emerald-500 bg-emerald-500/10 shadow-lg ring-1 ring-emerald-500/50"
+                      : "border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/60 hover:bg-slate-100 dark:hover:bg-slate-900"
+                  }`}
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-start gap-3">
+                      <div
+                        className={`size-8 rounded-full flex items-center justify-center text-xs font-extrabold text-white shrink-0 ${
+                          isSelected ? "bg-emerald-500" : "bg-slate-900"
+                        }`}
                       >
-                        Navigate →
-                      </a>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                // Standard Stop Timeline Mode
-                resolvedStops.map((stop, idx) => (
-                  <div
-                    key={stop.placeId}
-                    onClick={() => handleSelectStop(idx)}
-                    className={`p-4 rounded-2xl border transition-all cursor-pointer ${
-                      idx === selectedStopIndex
-                        ? "border-emerald-500 bg-emerald-50/50 dark:bg-emerald-950/30 ring-2 ring-emerald-500/20"
-                        : "border-slate-100 dark:border-white/5 bg-slate-50 dark:bg-white/5 hover:border-slate-300"
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-2">
-                        <span className="size-6 rounded-full bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-xs flex items-center justify-center">
-                          {idx === 0 ? "START" : idx}
-                        </span>
-                        <span className="font-bold text-sm text-slate-900 dark:text-white">
-                          {stop.place.canonicalName || stop.place.name}
-                        </span>
+                        {idx + 1}
                       </div>
-                      <span className="text-xs font-semibold text-slate-500 dark:text-slate-400">
-                        {stop.place.district}
+
+                      <div className="space-y-1">
+                        <div className="flex items-center gap-2">
+                          <h4 className="font-display font-bold text-sm text-slate-900 dark:text-white">{place.canonicalName || place.name}</h4>
+                          <span className="text-[10px] text-slate-500 font-mono">{stop.placeId}</span>
+                        </div>
+
+                        <p className="text-xs text-slate-600 dark:text-slate-400">{place.tagline || place.description}</p>
+
+                        {/* Activities */}
+                        {stop.activities && stop.activities.length > 0 && (
+                          <div className="flex flex-wrap gap-1 pt-1">
+                            {stop.activities.map((act, i) => (
+                              <span key={i} className="text-[10px] px-2 py-0.5 rounded-md bg-slate-100 dark:bg-white/10 text-slate-700 dark:text-slate-300 font-medium">
+                                {act}
+                              </span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <a
+                      href={`https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}&travelmode=driving`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline shrink-0"
+                    >
+                      Navigate →
+                    </a>
+                  </div>
+
+                  <div className="mt-3 flex items-center justify-between text-[11px] text-slate-500 border-t border-slate-200 dark:border-white/10 pt-2 font-mono">
+                    <span>Rec. Visit: {stop.visitDurationMinutes || 60} min</span>
+                    {isTripActive && itinerarySchedule[idx] && (
+                      <span className="text-emerald-600 dark:text-emerald-400 font-bold">
+                        Arrival: {itinerarySchedule[idx].arrivalTime}
                       </span>
-                    </div>
-
-                    <p className="text-xs text-slate-600 dark:text-slate-400 mt-2 line-clamp-2">
-                      {stop.place.tagline}
-                    </p>
-
-                    {stop.activities && stop.activities.length > 0 && (
-                      <div className="mt-2 flex flex-wrap gap-1">
-                        {stop.activities.slice(0, 3).map((act, i) => (
-                          <span
-                            key={i}
-                            className="text-[10px] bg-slate-200/60 dark:bg-white/10 text-slate-700 dark:text-slate-300 px-2 py-0.5 rounded-md font-medium"
-                          >
-                            {act}
-                          </span>
-                        ))}
-                      </div>
                     )}
-
-                    <div className="mt-3 flex items-center justify-between pt-2 border-t border-slate-200/60 dark:border-white/5">
-                      <span className="text-xs font-medium text-slate-500">Rec. Visit: {stop.visitDurationMinutes || 60} min</span>
-                      <a
-                        href={`https://www.google.com/maps/dir/?api=1&destination=${stop.place.latitude},${stop.place.longitude}&travelmode=driving`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 flex items-center gap-1"
-                      >
-                        Navigate →
-                      </a>
-                    </div>
                   </div>
-                ))
-              )}
-            </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>

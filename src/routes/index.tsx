@@ -1,379 +1,451 @@
 import { useState } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
-import { Search, ArrowRight, Compass, Mountain, Sparkles, MapPin, Maximize2, Flame, Plus, Check } from "lucide-react";
+import {
+  Search,
+  ArrowRight,
+  Compass,
+  Mountain,
+  Sparkles,
+  MapPin,
+  Maximize2,
+  Check,
+  Landmark,
+  CloudRain,
+  Waves,
+  Utensils,
+  Footprints,
+  Trees,
+  Star,
+  Map as MapIcon,
+  Route as RouteIcon,
+  ShieldAlert,
+} from "lucide-react";
 import heroImg from "@/assets/hero-ghats.jpg";
 import { AppShell } from "@/components/site/app-shell";
 import { GoogleMapHero } from "@/components/site/google-map-hero";
 import { DedicatedMapModal } from "@/components/site/dedicated-map-modal";
 import { PlaceCard } from "@/components/site/place-card";
-import { AdventureCard } from "@/components/site/adventure-card";
-import { AdventureDetailModal } from "@/components/site/adventure-detail-modal";
 import { SearchPanel } from "@/components/site/search-panel";
 import { Button } from "@/components/ui/button";
-import { categories, places, scenicRoute, arupadaiVeeduTemples } from "@/data/places";
-import { adventureActivities, AdventureActivity } from "@/data/adventures";
+import { places } from "@/data/places";
+import { KolamDivider } from "@/components/site/kolam-divider";
 import { PeakTravelGuide } from "@/components/site/peak-travel-guide";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ExplorerTN — Discover hidden Tamil Nadu" },
+      { title: "ExploreTN — Explore Tamil Nadu. Beyond the usual." },
       {
         name: "description",
         content:
-          "Map-first discovery of Tamil Nadu: hidden waterfalls, ghat road rides, temple trails, Arupadai Veedu sacred circuit, food crawls, viewpoints and weekend escapes.",
+          "Discover heritage trails, hill escapes, and coastal journeys across Tamil Nadu. Build a trip around what you love.",
       },
-      { property: "og:title", content: "ExplorerTN — Discover hidden Tamil Nadu" },
+      { property: "og:title", content: "ExploreTN — Explore Tamil Nadu. Beyond the usual." },
       {
         property: "og:description",
-        content: "Hidden waterfalls, scenic ghat roads, Arupadai Veedu temple trails and food routes across Tamil Nadu.",
+        content: "Discover heritage trails, hill escapes, and coastal journeys across Tamil Nadu.",
       },
     ],
   }),
   component: Index,
 });
 
-const suggestions = [
-  "Arupadai Veedu trip",
-  "Weekend bike ride",
-  "Hidden waterfalls",
-  "Best food in Madurai",
-  "Temples near Thanjavur",
-  "Sunrise trekking",
+// Category Interest Tiles (Popz Design Section 2)
+const INTEREST_CATEGORIES = [
+  { slug: "temples", title: "Heritage & Temples", icon: Landmark, count: "480+ Places", bg: "from-amber-500/20 to-amber-700/10", border: "border-amber-500/30", text: "text-amber-400" },
+  { slug: "hills", title: "Hill Escapes", icon: Mountain, count: "120+ Viewpoints", bg: "from-emerald-500/20 to-emerald-700/10", border: "border-emerald-500/30", text: "text-emerald-400" },
+  { slug: "falls", title: "Waterfalls & Streams", icon: CloudRain, count: "85+ Waterfalls", bg: "from-sky-500/20 to-sky-700/10", border: "border-sky-500/30", text: "text-sky-400" },
+  { slug: "beaches", title: "Coastal Journeys", icon: Waves, count: "140 km Coast", bg: "from-cyan-500/20 to-cyan-700/10", border: "border-cyan-500/30", text: "text-cyan-400" },
+  { slug: "food", title: "Culinary Trails", icon: Utensils, count: "90+ Local Spots", bg: "from-orange-500/20 to-orange-700/10", border: "border-orange-500/30", text: "text-orange-400" },
+  { slug: "trekking", title: "Forest & Wildlife", icon: Trees, count: "32 Trails", bg: "from-green-500/20 to-green-700/10", border: "border-green-500/30", text: "text-green-400" },
 ];
 
-function Section({
-  title,
-  subtitle,
-  children,
-  action,
-}: {
-  title: string;
-  subtitle: string;
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}) {
-  return (
-    <section className="mx-auto max-w-6xl px-4 py-14 sm:px-6 sm:py-20">
-      <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h2 className="text-2xl font-bold sm:text-4xl">{title}</h2>
-          <p className="mt-2 max-w-xl text-sm text-muted-foreground sm:text-base">{subtitle}</p>
-        </div>
-        {action}
-      </div>
-      {children}
-    </section>
-  );
-}
+// District Highlights (Popz Design Section 4)
+const DISTRICT_HIGHLIGHTS = [
+  { name: "Madurai", title: "Cultural Capital & Meenakshi Temple", spots: 42, image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80", route: "/madurai" },
+  { name: "Kodaikanal", title: "Princess of Hill Stations & Lakes", spots: 28, image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=800&q=80", route: "/hills-of-tn" },
+  { name: "Theni", title: "Cardamom Valleys & Cloud Mountain Treks", spots: 24, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80", route: "/theni" },
+  { name: "Nilgiris (Ooty)", title: "Tea Estates & Misty Peak Railways", spots: 36, image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80", route: "/western-ghats" },
+  { name: "Thanjavur", title: "Chola Architecture & Great Temples", spots: 31, image: "https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80", route: "/explore/heritage" },
+  { name: "Kanyakumari", title: "Tricontinental Sunset & Sea Confluence", spots: 19, image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80", route: "/coastal-heritage" },
+];
+
+// Signature Editorial Trails (Popz Design Section 5)
+const SIGNATURE_TRAILS = [
+  {
+    title: "Arupadai Veedu Sacred Pilgrimage Circuit",
+    subtitle: "The 6 Holy Abodes of Lord Murugan spanning Thiruthani to Thiruchendur",
+    distance: "1,240 km",
+    duration: "5 Days",
+    stops: 6,
+    bg: "from-amber-950/60 to-zinc-950",
+    badge: "Heritage Pilgrimage",
+    link: "/trails/arupadai-veedu",
+  },
+  {
+    title: "Western Ghats 70-Hairpin Pass Road Trip",
+    subtitle: "Thakkaram to Valparai and Meghamalai cloud estate highways",
+    distance: "460 km",
+    duration: "2 Days",
+    stops: 14,
+    bg: "from-emerald-950/60 to-zinc-950",
+    badge: "Ghat Highway",
+    link: "/routes",
+  },
+  {
+    title: "Coromandel Coastal & Temple Ocean Highway",
+    subtitle: "Scenic coastal stretch connecting Mahabalipuram, Pondicherry & Rameswaram",
+    distance: "580 km",
+    duration: "3 Days",
+    stops: 18,
+    bg: "from-cyan-950/60 to-zinc-950",
+    badge: "Coastal Drive",
+    link: "/routes",
+  },
+];
 
 function Index() {
   const navigate = useNavigate();
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDedicatedMapOpen, setIsDedicatedMapOpen] = useState(false);
   const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
-  const [activeModalActivity, setActiveModalActivity] = useState<AdventureActivity | null>(null);
-  const GOOGLE_MAPS_KEY = import.meta.env.VITE_GOOGLE_MAPS_API_KEY || "";
 
   const handleAddToTrip = (slug: string) => {
     setAddedTrips((prev) => ({ ...prev, [slug]: true }));
   };
 
+  const featuredPlaces = places.slice(0, 6);
+
   return (
     <AppShell>
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
 
-      <AdventureDetailModal
-        activity={activeModalActivity}
-        onClose={() => setActiveModalActivity(null)}
-      />
-
-      {/* Dedicated 100% Fullscreen Map Viewport Modal */}
       <DedicatedMapModal
         isOpen={isDedicatedMapOpen}
         onClose={() => setIsDedicatedMapOpen(false)}
       />
 
-      {/* Dark Mountain Hero Header with Atmospheric Transition */}
-      <section className="relative min-h-[75vh] sm:min-h-[82vh] overflow-hidden bg-[#0B0F14]">
+      {/* SECTION 1: HERO & SEARCH (Popz Design Spec) */}
+      <section className="relative min-h-[82vh] overflow-hidden bg-[#09090b] pt-24 sm:pt-32">
         <motion.img
           src={heroImg}
           alt="Misty Western Ghats at sunrise in Tamil Nadu"
           width={1920}
           height={1200}
-          initial={{ scale: 1.12 }}
+          initial={{ scale: 1.08 }}
           animate={{ scale: 1 }}
-          transition={{ duration: 2.4, ease: "easeOut" }}
-          className="absolute inset-0 size-full object-cover opacity-60"
+          transition={{ duration: 2.2, ease: "easeOut" }}
+          className="absolute inset-0 size-full object-cover opacity-50 filter brightness-90"
         />
-        {/* Dark Vignette & Top Tint Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#0B0F14]/85 via-[#0B0F14]/40 to-transparent" />
+        
+        {/* Natural Dark Vignette (Solid Surface Overlay) */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/85 via-[#09090b]/40 to-[#09090b]" />
 
-        {/* Layered Mountain Dissolve Fade Downward */}
-        <div className="absolute inset-x-0 bottom-0 h-56 bg-gradient-to-b from-transparent via-[#031417]/85 to-[#0B0F14] pointer-events-none" />
-
-        {/* Subtle Ambient Emerald/Teal Atmospheric Fog Glow */}
-        <div className="absolute -bottom-24 left-1/2 -translate-x-1/2 w-[850px] h-[260px] bg-emerald-500/10 blur-[130px] rounded-full pointer-events-none" />
-
-        <div className="relative mx-auto max-w-6xl px-4 pb-16 pt-32 sm:px-6 sm:pt-40">
+        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="max-w-3xl">
-            <motion.p
+            <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="glass inline-flex items-center gap-2 rounded-full px-4 py-1.5 text-xs font-medium tracking-wide text-white border-white/10"
+              className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold text-amber-300 backdrop-blur-md"
             >
-              <Compass className="size-3.5 text-emerald-400" aria-hidden /> Map-First Spatial Platform · 1,240 places · 38 districts
-            </motion.p>
+              <Compass className="size-3.5 text-amber-400" />
+              <span>Verified Travel Intelligence · 1,240 Places · 38 Districts</span>
+            </motion.div>
 
+            {/* Popz Design Hero Headline */}
             <motion.h1
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2, duration: 0.7 }}
-              className="mt-6 text-5xl font-extrabold leading-[0.95] sm:text-7xl text-white"
+              transition={{ delay: 0.2, duration: 0.6 }}
+              className="mt-6 font-display text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl leading-[1.05]"
             >
-              Tamil Nadu,
+              Explore Tamil Nadu.
               <br />
-              <span className="text-gradient font-black">off the map.</span>
+              <span className="text-emerald-400">Beyond the usual.</span>
             </motion.h1>
 
+            {/* Popz Design Hero Subtitle */}
             <motion.p
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.32, duration: 0.7 }}
-              className="mt-6 max-w-xl text-base text-slate-300 sm:text-lg"
+              transition={{ delay: 0.3, duration: 0.6 }}
+              className="mt-5 max-w-2xl text-base text-zinc-300 sm:text-lg leading-relaxed font-normal"
             >
-              Hidden waterfalls, seventy-hairpin ghat roads, Arupadai Veedu sacred temple trails, and midnight food crawls —
-              mapped, verified and built for map-first spatial exploration.
+              Discover heritage trails, hill escapes, and coastal journeys. Build a trip around what you love.
             </motion.p>
 
+            {/* Popz Design Visitor Search Field */}
             <motion.div
-              initial={{ opacity: 0, y: 24 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.44, duration: 0.7 }}
-              className="mt-8 font-sans"
-            >
-              <button
-                type="button"
-                onClick={() => setSearchOpen(true)}
-                className="glass-strong flex w-full max-w-xl items-center gap-3 rounded-2xl px-5 py-4 text-left shadow-elevate transition-shadow hover:shadow-glow bg-[#121821]/85 border-white/15 text-white"
-              >
-                <Search className="size-5 text-emerald-400" aria-hidden />
-                <span className="flex-1 text-sm text-slate-300 sm:text-base">
-                  Where do you want to disappear this weekend?
-                </span>
-                <span className="hidden rounded-lg border border-white/20 bg-white/5 px-2 py-1 text-xs text-slate-300 sm:block">
-                  ⌘K
-                </span>
-              </button>
-
-              <div className="mt-4 flex flex-wrap gap-2">
-                {suggestions.map((s) => (
-                  <button
-                    key={s}
-                    onClick={() => setSearchOpen(true)}
-                    className="glass rounded-full px-3.5 py-2 text-xs font-medium text-slate-300 transition-colors hover:text-white hover:border-emerald-500/40 bg-white/5 border-white/10"
-                  >
-                    {s}
-                  </button>
-                ))}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Prominent Google Map Feature Section on Home Page — Seamless Dark Continuation */}
-      <section className="relative z-10 mx-auto max-w-6xl px-4 pb-12 pt-4 sm:px-6 -mt-6">
-        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2">
-              <MapPin className="size-4 text-emerald-400" />
-              <span className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-400">Core Map Experience</span>
-            </div>
-            <h2 className="mt-2 text-3xl font-bold sm:text-4xl text-white">Interactive Spatial Explorer</h2>
-            <p className="mt-1 text-sm text-slate-400">The heart of ExplorerTN — click pins, filter layers, and discover trails.</p>
-          </div>
-
-          <Button 
-            onClick={() => setIsDedicatedMapOpen(true)} 
-            size="lg" 
-            className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold shadow-lg shadow-emerald-500/20"
-          >
-            <Maximize2 className="size-4 mr-1" /> Launch Full Screen Map <ArrowRight className="size-4 ml-1" />
-          </Button>
-        </div>
-
-        <GoogleMapHero apiKey={GOOGLE_MAPS_KEY} />
-      </section>
-
-      {/* ================================================== */}
-      {/* CURATED FEATURED TRAIL: ARUPADAI VEEDU TRAIL */}
-      {/* ================================================== */}
-      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="glass-strong overflow-hidden rounded-4xl p-6 sm:p-10 shadow-elevate border border-amber-500/20">
-          <div className="flex flex-wrap items-end justify-between gap-6 border-b border-border/60 pb-6">
-            <div>
-              <div className="flex items-center gap-2">
-                <Flame className="size-4 text-amber-400" />
-                <span className="text-xs font-bold uppercase tracking-[0.2em] text-amber-400">
-                  EXPLORE SACRED TAMIL NADU
-                </span>
-              </div>
-              <h2 className="mt-2 text-3xl font-extrabold sm:text-5xl">🛕 Arupadai Veedu Trail</h2>
-              <p className="mt-2 max-w-2xl text-sm text-muted-foreground sm:text-base">
-                Journey through the six sacred abodes of Lord Murugan across Tamil Nadu.
-              </p>
-            </div>
-
-            <Button asChild size="lg" className="rounded-xl bg-amber-500 text-black hover:bg-amber-600 font-bold shadow-lg shadow-amber-500/20">
-              <Link to="/trails/arupadai-veedu">
-                Explore Trail <ArrowRight className="ml-2 size-4" />
-              </Link>
-            </Button>
-          </div>
-
-          {/* Six Destination Cards in Responsive Grid */}
-          <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {arupadaiVeeduTemples.map((temple, idx) => {
-              const isAdded = addedTrips[temple.slug];
-              return (
-                <div
-                  key={temple.slug}
-                  className="group relative flex flex-col overflow-hidden rounded-3xl border border-border bg-card shadow-elevate transition-all hover:border-amber-500/40"
-                >
-                  <div className="absolute left-3 top-3 z-10 rounded-full bg-black/70 px-3 py-1 text-xs font-bold text-amber-400 backdrop-blur-md border border-amber-500/30">
-                    {String(idx + 1).padStart(2, "0")} / 06
-                  </div>
-
-                  <div className="relative h-44 overflow-hidden">
-                    <img
-                      src={temple.image}
-                      alt={temple.name}
-                      loading="lazy"
-                      className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-card via-transparent to-transparent" />
-                  </div>
-
-                  <div className="flex flex-1 flex-col p-4">
-                    <p className="text-[11px] font-semibold text-amber-400">{temple.district} District</p>
-                    <h3 className="mt-1 font-display text-base font-bold line-clamp-1">{temple.name}</h3>
-                    <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">{temple.tagline}</p>
-
-                    <div className="mt-4 grid grid-cols-2 gap-2 pt-2 border-t border-border/40">
-                      <Button asChild variant="outline" size="sm" className="rounded-xl text-[11px]">
-                        <Link to="/place/$slug" params={{ slug: temple.slug }}>
-                          View Place
-                        </Link>
-                      </Button>
-
-                      <Button
-                        onClick={() => handleAddToTrip(temple.slug)}
-                        size="sm"
-                        variant={isAdded ? "secondary" : "default"}
-                        className={
-                          isAdded
-                            ? "rounded-xl text-[11px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 font-bold"
-                            : "rounded-xl text-[11px] bg-amber-500 text-black hover:bg-amber-600 font-semibold"
-                        }
-                      >
-                        {isAdded ? <Check className="mr-1 size-3 text-emerald-400" /> : <Plus className="mr-1 size-3" />}
-                        {isAdded ? "Added" : "Add to Trip"}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      {/* Peak Travel Seasons & Best Time to Visit Guide */}
-      <PeakTravelGuide />
-
-      {/* Trending */}
-      <Section
-        title="Trending this week"
-        subtitle="What explorers are riding to right now."
-        action={
-          <Button asChild variant="ghost" className="rounded-xl">
-            <Link to="/explore">
-              See all <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        }
-      >
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {places.slice(0, 3).map((p) => (
-            <PlaceCard key={p.slug} place={p} />
-          ))}
-        </div>
-      </Section>
-
-      {/* Categories */}
-      <Section title="Explore by obsession" subtitle="Twelve layers of Tamil Nadu, each with its own trail.">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {categories.map((c, i) => (
-            <motion.div
-              key={c.id}
               initial={{ opacity: 0, y: 20 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.05 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.6 }}
+              className="mt-8 flex max-w-xl items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/95 p-2 shadow-2xl backdrop-blur-md"
+            >
+              <Search className="ml-3 size-5 text-zinc-400 shrink-0" />
+              <input
+                type="text"
+                readOnly
+                onClick={() => setSearchOpen(true)}
+                placeholder="Search places, districts, or trails..."
+                className="w-full bg-transparent px-2 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none cursor-pointer"
+              />
+              <Button
+                onClick={() => setSearchOpen(true)}
+                className="rounded-full bg-emerald-500 px-6 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
+              >
+                Search
+              </Button>
+            </motion.div>
+
+            {/* Popz Design Primary & Secondary CTAs */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="mt-8 flex flex-wrap items-center gap-4"
             >
               <Link
-                to={c.id === "spiritual" ? "/trails/arupadai-veedu" : "/explore"}
-                className="group relative block h-48 overflow-hidden rounded-3xl border border-border"
+                to="/explore"
+                className="flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-sm font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
               >
-                <img
-                  src={c.image}
-                  alt={c.label}
-                  loading="lazy"
-                  className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-background via-background/40 to-transparent" />
-                <div className="absolute inset-x-0 bottom-0 p-4">
-                  <h3 className="font-display text-lg font-semibold">{c.label}</h3>
-                  <p className="text-xs text-muted-foreground">{c.blurb}</p>
-                </div>
+                <span>Explore Places</span>
+                <ArrowRight className="size-4" />
+              </Link>
+
+              <Link
+                to="/planner"
+                className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/90 px-7 py-3 text-sm font-bold text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800 transition"
+              >
+                <Sparkles className="size-4 text-emerald-400" />
+                <span>Plan My Trip</span>
               </Link>
             </motion.div>
-          ))}
+          </div>
         </div>
-      </Section>
+      </section>
 
-      {/* Adventure Activities Section */}
-      <Section
-        title="⚡ Adventure Activities across India"
-        subtitle="Paragliding, skydiving, river rafting, scuba diving and gondola rides — discover high-adrenaline experiences."
-        action={
-          <Button asChild variant="ghost" className="rounded-xl font-bold">
-            <Link to="/adventures">
-              Explore All 10 Adventures <ArrowRight className="size-4" />
-            </Link>
-          </Button>
-        }
-      >
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {adventureActivities.slice(0, 6).map((activity) => (
-            <AdventureCard
-              key={activity.id}
-              activity={activity}
-              onSelect={(act) => setActiveModalActivity(act)}
+      <KolamDivider />
+
+      {/* SECTION 2: EXPLORE BY INTEREST (Popz Design Spec) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-8">
+          <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Explore by Interest</h2>
+          <p className="mt-1 text-sm text-zinc-400">Curated collections based on travel themes across Tamil Nadu</p>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {INTEREST_CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <Link
+                key={cat.slug}
+                to="/explore"
+                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
+              >
+                <span className={`grid size-10 place-items-center rounded-xl bg-zinc-950/80 border ${cat.border} ${cat.text}`}>
+                  <Icon className="size-5" />
+                </span>
+                <div className="mt-6">
+                  <h3 className="text-sm font-bold text-zinc-100 group-hover:text-emerald-400 transition">{cat.title}</h3>
+                  <p className="mt-0.5 text-[11px] text-zinc-400">{cat.count}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
+
+      <KolamDivider />
+
+      {/* SECTION 3: FEATURED PLACES (Popz Design Spec: 3-column grid, photo-first) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Featured Destinations</h2>
+            <p className="mt-1 text-sm text-zinc-400">Must-visit places with verified coordinates and practical details</p>
+          </div>
+          <Link
+            to="/explore"
+            className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300"
+          >
+            <span>View All Places</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+
+        {/* 3-Column Responsive Grid */}
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          {featuredPlaces.map((place) => (
+            <PlaceCard
+              key={place.id}
+              place={place}
+              onAddToTrip={handleAddToTrip}
+              isAdded={addedTrips[place.slug]}
             />
           ))}
         </div>
-      </Section>
+      </section>
 
-      <footer className="border-t border-border">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-4 py-10 text-sm text-muted-foreground sm:px-6">
-          <p className="flex items-center gap-2">
-            <Mountain className="size-4 text-primary" aria-hidden /> ExplorerTN — built for people who take the long way.
-          </p>
-          <p>© {new Date().getFullYear()} ExplorerTN</p>
+      <KolamDivider />
+
+      {/* SECTION 4: DISCOVER BY DISTRICT (Popz Design Spec) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-8 flex items-end justify-between">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Discover by District</h2>
+            <p className="mt-1 text-sm text-zinc-400">Explore places grouped by district region and culture</p>
+          </div>
+          <Link
+            to="/madurai"
+            className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300"
+          >
+            <span>Explore Districts</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {DISTRICT_HIGHLIGHTS.map((dist) => (
+            <Link
+              key={dist.name}
+              to={dist.route}
+              className="group relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-xl transition-all duration-300 hover:border-emerald-500/50 hover:shadow-2xl"
+            >
+              <div className="h-48 w-full overflow-hidden">
+                <img
+                  src={dist.image}
+                  alt={dist.name}
+                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                />
+              </div>
+              <div className="p-5">
+                <div className="flex items-center justify-between">
+                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition">{dist.name}</h3>
+                  <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-zinc-700">
+                    {dist.spots} Spots
+                  </span>
+                </div>
+                <p className="mt-1 text-xs text-zinc-400 line-clamp-2">{dist.title}</p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <KolamDivider />
+
+      {/* SECTION 5: SIGNATURE EDITORIAL TRAILS (Popz Design Spec) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-8">
+          <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Signature Travel Trails</h2>
+          <p className="mt-1 text-sm text-zinc-400">Curated themed circuits with road distance and verified itineraries</p>
+        </div>
+
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {SIGNATURE_TRAILS.map((trail) => (
+            <div
+              key={trail.title}
+              className={`flex flex-col justify-between rounded-3xl border border-zinc-800 bg-gradient-to-b ${trail.bg} p-6 shadow-xl`}
+            >
+              <div>
+                <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                  {trail.badge}
+                </span>
+                <h3 className="mt-4 font-display text-lg font-bold text-white leading-snug">{trail.title}</h3>
+                <p className="mt-2 text-xs text-zinc-300 leading-relaxed">{trail.subtitle}</p>
+              </div>
+
+              <div className="mt-8 pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
+                <div className="flex items-center gap-3 font-mono text-zinc-400">
+                  <span>🛣️ {trail.distance}</span>
+                  <span>⏱️ {trail.duration}</span>
+                </div>
+                <Link
+                  to={trail.link}
+                  className="flex items-center gap-1 font-bold text-emerald-400 hover:text-emerald-300"
+                >
+                  <span>View Trail</span>
+                  <ArrowRight className="size-3.5" />
+                </Link>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <KolamDivider />
+
+      {/* SECTION 6: MAP PREVIEW (Popz Design Spec: Non-wheel-hijacking lightweight preview) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h2 className="font-display text-2xl font-bold text-white sm:text-3xl">Interactive Map Explorer</h2>
+            <p className="mt-1 text-sm text-zinc-400">Discover places geographically across all districts of Tamil Nadu</p>
+          </div>
+          <Link
+            to="/explore"
+            className="flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
+          >
+            <MapIcon className="size-3.5" />
+            <span>Open Map Explorer</span>
+          </Link>
+        </div>
+
+        <div className="relative overflow-hidden rounded-3xl border border-zinc-800 shadow-2xl">
+          <GoogleMapHero GOOGLE_MAPS_KEY={""} onOpenDedicatedMap={() => setIsDedicatedMapOpen(true)} />
+        </div>
+      </section>
+
+      <KolamDivider />
+
+      {/* SECTION 7: TRIP PLANNER SPOTLIGHT (Popz Design Spec) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <div className="rounded-3xl border border-zinc-800 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
+          <div className="max-w-xl">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 text-xs font-bold text-emerald-400">
+              <Sparkles className="size-3.5" /> AI Trip Copilot
+            </span>
+            <h2 className="mt-4 font-display text-3xl font-bold text-white sm:text-4xl">Plan your custom trip in seconds</h2>
+            <p className="mt-3 text-sm text-zinc-300 leading-relaxed">
+              Tell us your starting point, interests, and budget. Our planner builds an itinerary with real road distances, fuel estimates, elevation profiles, and day-by-day schedules.
+            </p>
+          </div>
+
+          <Link
+            to="/planner"
+            className="shrink-0 flex items-center gap-2 rounded-full bg-emerald-500 px-8 py-4 text-sm font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-xl shadow-emerald-500/20"
+          >
+            <span>Launch Trip Planner</span>
+            <ArrowRight className="size-4" />
+          </Link>
+        </div>
+      </section>
+
+      <KolamDivider />
+
+      {/* SECTION 8: TRAVEL GUIDANCE (Popz Design Spec) */}
+      <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
+        <PeakTravelGuide />
+      </section>
+
+      {/* SECTION 9: FOOTER (Popz Design Spec: Clear attribution + subtle admin link) */}
+      <footer className="border-t border-zinc-800 bg-[#09090b] text-zinc-400 py-12 mt-16">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="font-display font-bold text-white text-base">Explore<span className="text-emerald-400">TN</span></span>
+            <span>· Tamil Nadu Travel Discovery & Intelligence Platform</span>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-6 text-zinc-400">
+            <Link to="/explore" className="hover:text-white transition">Places</Link>
+            <Link to="/routes" className="hover:text-white transition">Routes</Link>
+            <Link to="/community" className="hover:text-white transition">Guides</Link>
+            <Link to="/legal/privacy" className="hover:text-white transition">Privacy</Link>
+            <Link to="/legal/terms" className="hover:text-white transition">Terms</Link>
+            <Link to="/admin" className="hover:text-emerald-400 text-zinc-400 transition font-mono">Admin Portal</Link>
+          </div>
         </div>
       </footer>
     </AppShell>

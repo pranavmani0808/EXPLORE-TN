@@ -11,9 +11,6 @@ import {
   Menu,
   Sun,
   Moon,
-  Mic,
-  Server,
-  Flame,
   Mountain,
   Landmark,
   ChevronDown,
@@ -24,10 +21,16 @@ import {
   CloudRain,
   X,
   Shield,
+  Bookmark,
+  Languages,
+  Grid,
+  ArrowRight,
+  Star,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ProfileMenu } from "@/components/site/profile-menu";
+import { DistrictsMegaModal } from "@/components/site/districts-mega-modal";
 import { cn } from "@/lib/utils";
 import { checkBackendHealth } from "@/lib/api";
 import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
@@ -51,46 +54,93 @@ function useTheme() {
   return { dark, toggle };
 }
 
-// Explore Dropdown Content Items
-const EXPLORE_CATEGORIES = [
-  { to: "/explore", label: "All Places", icon: Compass },
-  { to: "/explore/falls", label: "Falls & Waterfalls", icon: CloudRain },
-  { to: "/explore/trekking", label: "Trekking & Hiking", icon: Mountain },
-  { to: "/explore/beaches", label: "Beaches & Coastline", icon: Waves },
-  { to: "/explore/hills", label: "Hills & Mountains", icon: Mountain },
-  { to: "/explore/lakes", label: "Lakes & Dams", icon: Waves },
-  { to: "/explore/nature", label: "Nature & Forest", icon: Trees },
-  { to: "/explore/temples", label: "Temples & Shrines", icon: Landmark },
-  { to: "/explore/heritage", label: "Heritage & Historical", icon: Landmark },
-  { to: "/explore/adventure", label: "Adventure Activities", icon: Footprints },
-  { to: "/explore/viewpoints", label: "Viewpoints & Sunsets", icon: Sun },
-  { to: "/explore/food", label: "Food & Local Trails", icon: Utensils },
-  { to: "/explore/rural", label: "Rural Experiences", icon: Trees },
-  { to: "/explore/hidden", label: "Hidden & Offbeat", icon: Sparkles },
+// Structured Destination Categories for Hover Menu
+const DESTINATION_CATEGORIES = [
+  {
+    title: "Popular Districts",
+    icon: Landmark,
+    badge: "38 Available",
+    items: [
+      { to: "/districts/madurai", label: "Madurai District", subtitle: "Temple City & Nayak Heritage" },
+      { to: "/districts/chennai", label: "Chennai District", subtitle: "Capital City & Marina Coast" },
+      { to: "/districts/the-nilgiris", label: "The Nilgiris (Ooty)", subtitle: "Queen of Hill Stations" },
+      { to: "/districts/dindigul", label: "Dindigul (Kodaikanal)", subtitle: "Princess of Hills & Biryani" },
+      { to: "/districts/thanjavur", label: "Thanjavur District", subtitle: "Chola Big Temple & Art" },
+      { to: "/districts/ramanathapuram", label: "Rameswaram District", subtitle: "Island Temple & Pamban" },
+    ],
+  },
+  {
+    title: "Hill Stations & Ghats",
+    icon: Mountain,
+    badge: "Cool Escapes",
+    items: [
+      { to: "/districts/the-nilgiris", label: "Ooty & Coonoor", subtitle: "Toy Train & Tea Gardens" },
+      { to: "/districts/dindigul", label: "Kodaikanal Hills", subtitle: "Pine Forests & Star Lake" },
+      { to: "/districts/theni", label: "Meghamalai Highwavys", subtitle: "Cloud Mountains & Tea" },
+      { to: "/districts/salem", label: "Yercaud Loop Road", subtitle: "Shevaroy Hills & Coffee" },
+      { to: "/districts/namakkal", label: "Kolli Hills 70 Curves", subtitle: "Hairpin Drive & Agaya Gangai" },
+      { to: "/districts/tirupathur", label: "Yelagiri Hills", subtitle: "Swamimalai Trek & Lake" },
+    ],
+  },
+  {
+    title: "Heritage & Temples",
+    icon: Landmark,
+    badge: "Sacred Sites",
+    items: [
+      { to: "/madurai", label: "Meenakshi Amman Temple", subtitle: "14 Painted Towers & Sculptures" },
+      { to: "/districts/thanjavur", label: "Brihadeeswarar Big Temple", subtitle: "1000-Yr Chola Architecture" },
+      { to: "/districts/ramanathapuram", label: "Rameswaram Temple", subtitle: "22 Holy Wells & Ocean Corridor" },
+      { to: "/districts/tiruvannamalai", label: "Annamalaiyar Temple", subtitle: "Sacred Fire Lingam & Giri Trail" },
+      { to: "/districts/kancheepuram", label: "Kanchipuram Silk & Shrine", subtitle: "City of 1000 Temples" },
+      { to: "/districts/tiruchirappalli", label: "Srirangam Ranganathar", subtitle: "Largest Functioning Temple" },
+    ],
+  },
+  {
+    title: "Waterfalls & Beaches",
+    icon: Waves,
+    badge: "Nature Havens",
+    items: [
+      { to: "/districts/dharmapuri", label: "Hogenakkal Falls", subtitle: "Niagara of South India" },
+      { to: "/districts/tenkasi", label: "Courtallam Falls", subtitle: "Herbal Spa Waterfalls" },
+      { to: "/districts/kanniyakumari", label: "Kanniyakumari Coast", subtitle: "3-Ocean Confluence Sunrise" },
+      { to: "/districts/chengalpattu", label: "Mahabalipuram Shore", subtitle: "UNESCO Stone Reliefs & Beach" },
+      { to: "/districts/thoothukudi", label: "Roche Park & Coast", subtitle: "Pearl City Sea Promenade" },
+      { to: "/districts/nagapattinam", label: "Velankanni Beach", subtitle: "White Basilica Promenade" },
+    ],
+  },
 ];
 
 export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
   const location = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
-  const [exploreMenuOpen, setExploreMenuOpen] = useState(false);
+  const [destMenuOpen, setDestMenuOpen] = useState(false);
+  const [districtsModalOpen, setDistrictsModalOpen] = useState(false);
+  const [lang, setLang] = useState<"en" | "ta">("en");
   const [isBackendLive, setIsBackendLive] = useState(false);
   const { dark, toggle } = useTheme();
 
   const menuTimeoutRef = useRef<any>(null);
-
   const pathname = location.pathname;
 
-  // Active check for Explore hierarchy
-  const isExploreActive =
-    pathname === "/explore" ||
-    pathname === "/discover" ||
+  useEffect(() => {
+    const storedLang = localStorage.getItem("etn-lang") as "en" | "ta";
+    if (storedLang) setLang(storedLang);
+  }, []);
+
+  const toggleLanguage = () => {
+    const nextLang = lang === "en" ? "ta" : "en";
+    setLang(nextLang);
+    localStorage.setItem("etn-lang", nextLang);
+  };
+
+  const isDestinationsActive =
     pathname === "/madurai" ||
+    pathname.startsWith("/districts") ||
     pathname === "/theni" ||
     pathname === "/hills-of-tn" ||
     pathname === "/western-ghats" ||
-    pathname === "/coastal-heritage" ||
-    pathname === "/hill-escapes";
+    pathname === "/coastal-heritage";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 24);
@@ -100,234 +150,220 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const handleMouseEnterExplore = () => {
+  const handleMouseEnterDest = () => {
     if (menuTimeoutRef.current) clearTimeout(menuTimeoutRef.current);
-    setExploreMenuOpen(true);
+    setDestMenuOpen(true);
   };
 
-  const handleMouseLeaveExplore = () => {
+  const handleMouseLeaveDest = () => {
     menuTimeoutRef.current = setTimeout(() => {
-      setExploreMenuOpen(false);
-    }, 150);
+      setDestMenuOpen(false);
+    }, 180);
   };
 
   return (
-    <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-6 font-sans">
-      <nav
-        className={cn(
-          "mx-auto flex h-[72px] max-w-[1400px] items-center justify-between gap-6 rounded-full px-7 transition-all duration-300 backdrop-blur-[24px]",
-          scrolled
-            ? "bg-white/90 dark:bg-[#121821]/85 border border-slate-200 dark:border-white/15 shadow-[0_10px_30px_rgba(0,0,0,0.08)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]"
-            : "bg-white/80 dark:bg-[#121821]/72 border border-slate-200 dark:border-white/10 shadow-[0_10px_30px_rgba(0,0,0,0.05)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)]",
-        )}
-        aria-label="Main Navigation"
-      >
-        {/* Left: Brand Logo & API Status */}
-        <div className="flex items-center gap-3 shrink-0">
-          <Link to="/" className="flex items-center gap-2.5" aria-label="ExplorerTN home">
-            <span className="grid size-10 place-items-center rounded-2xl bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-black shadow-lg shadow-emerald-500/20">
-              <Compass className="size-6 text-white dark:text-black" aria-hidden />
-            </span>
-            <span className="font-display text-lg font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Explorer<span className="text-emerald-600 dark:text-emerald-400">TN</span>
-            </span>
-          </Link>
-
-          {isBackendLive && (
-            <div className="hidden xl:flex items-center gap-1.5 px-3 py-1 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 text-xs rounded-full font-mono font-bold">
-              <Server className="size-3.5 text-emerald-600 dark:text-emerald-400" />
-              <span>API Live</span>
-            </div>
+    <>
+      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-5 font-sans">
+        <nav
+          className={cn(
+            "mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-5 rounded-full px-6 transition-all duration-300 backdrop-blur-[24px]",
+            scrolled
+              ? "bg-[#09090b]/90 border border-zinc-800 shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+              : "bg-[#09090b]/75 border border-zinc-800/80 shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
           )}
-        </div>
-
-        {/* Center: Primary Navigation */}
-        <div className="hidden items-center gap-1.5 lg:flex">
-          {/* 1. Explore Popover Menu */}
-          <div
-            className="relative"
-            onMouseEnter={handleMouseEnterExplore}
-            onMouseLeave={handleMouseLeaveExplore}
-          >
-            <Link
-              to="/explore"
-              className={cn(
-                "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white",
-                isExploreActive
-                  ? "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30"
-                  : "text-slate-600 dark:text-[#A1A8B3]",
-              )}
-            >
-              <Compass className="size-4" />
-              <span>Explore</span>
-              <ChevronDown className={`size-3.5 transition-transform ${exploreMenuOpen ? "rotate-180 text-emerald-400" : ""}`} />
+          aria-label="Main Navigation"
+        >
+          {/* Left: Brand Logo */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link to="/" className="flex items-center gap-2.5" aria-label="ExploreTN home">
+              <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500 text-zinc-950 font-black shadow-lg shadow-emerald-500/25">
+                <Compass className="size-6 text-zinc-950" aria-hidden />
+              </span>
+              <span className="font-display text-xl font-extrabold tracking-tight text-white">
+                Explore<span className="text-emerald-400">TN</span>
+              </span>
             </Link>
+          </div>
 
-            {/* Explore Hover/Click Dropdown Popover */}
-            <AnimatePresence>
-              {exploreMenuOpen && (
-                <motion.div
-                  initial={{ opacity: 0, y: 8, scale: 0.98 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                  transition={{ duration: 0.18 }}
-                  className="absolute top-full left-0 mt-3 w-[520px] rounded-3xl border border-slate-200 dark:border-white/15 bg-white/95 dark:bg-[#121821]/95 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-900 dark:text-white"
-                >
-                  <div>
-                    <div className="text-[10px] font-mono text-emerald-600 dark:text-emerald-400 font-bold uppercase tracking-wider mb-3 flex items-center gap-1">
-                      <Compass className="size-3" /> DISCOVER TAMIL NADU
+          {/* Center: Main Visitor Navigation */}
+          <div className="hidden items-center gap-1.5 lg:flex">
+            {/* 1. Destinations Dropdown */}
+            <div
+              className="relative"
+              onMouseEnter={handleMouseEnterDest}
+              onMouseLeave={handleMouseLeaveDest}
+            >
+              <button
+                type="button"
+                onClick={() => setDistrictsModalOpen(true)}
+                className={cn(
+                  "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:bg-zinc-800/60 hover:text-white cursor-pointer",
+                  isDestinationsActive
+                    ? "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30"
+                    : "text-zinc-300",
+                )}
+              >
+                <Landmark className="size-4 text-amber-400" />
+                <span>{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
+                <ChevronDown className={`size-3.5 transition-transform ${destMenuOpen ? "rotate-180 text-emerald-400" : ""}`} />
+              </button>
+
+              {/* Mega Destinations Dropdown Popover */}
+              <AnimatePresence>
+                {destMenuOpen && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                    transition={{ duration: 0.2 }}
+                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-[840px] rounded-3xl border border-zinc-800 bg-[#09090b]/98 backdrop-blur-2xl p-6 shadow-2xl z-50 text-white"
+                  >
+                    {/* Header Action Banner */}
+                    <div className="mb-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-950/80 via-zinc-900 to-amber-950/80 border border-emerald-500/30 p-3 px-4">
+                      <div className="flex items-center gap-3">
+                        <span className="grid size-9 place-items-center rounded-xl bg-emerald-500 text-zinc-950 font-black">
+                          <Compass className="size-5" />
+                        </span>
+                        <div>
+                          <div className="text-xs font-bold text-white">
+                            {lang === "ta" ? "தமிழ்நாட்டின் 38 மாவட்டங்கள்" : "Explore All 38 Districts of Tamil Nadu"}
+                          </div>
+                          <div className="text-[11px] text-zinc-400">
+                            {lang === "ta" ? "அனைத்து இடங்களின் முழு பட்டியல்" : "Launch scroll animated column catalog"}
+                          </div>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => {
+                          setDestMenuOpen(false);
+                          setDistrictsModalOpen(true);
+                        }}
+                        className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/20"
+                      >
+                        <Grid className="size-3.5" />
+                        <span>{lang === "ta" ? "அனைத்து 38 மாவட்டங்கள்" : "All 38 Districts Stream"}</span>
+                        <ArrowRight className="size-3.5" />
+                      </button>
                     </div>
 
-                    <div className="grid grid-cols-3 gap-2">
-                      {EXPLORE_CATEGORIES.map((c) => {
-                        const Icon = c.icon;
+                    {/* Categorized 4-Column Grid */}
+                    <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+                      {DESTINATION_CATEGORIES.map((cat) => {
+                        const Icon = cat.icon;
                         return (
-                          <Link
-                            key={c.label}
-                            to={c.to}
-                            onClick={() => setExploreMenuOpen(false)}
-                            className="flex items-center gap-2 p-2.5 rounded-2xl border border-transparent hover:border-emerald-500/20 hover:bg-emerald-500/5 transition text-xs font-semibold text-slate-800 dark:text-slate-200 hover:text-emerald-600 dark:hover:text-emerald-400"
-                          >
-                            <Icon className="size-4 text-emerald-500 shrink-0" />
-                            <span className="truncate">{c.label}</span>
-                          </Link>
+                          <div key={cat.title} className="flex flex-col gap-2">
+                            <div className="flex items-center justify-between pb-1.5 border-b border-zinc-800/80">
+                              <span className="flex items-center gap-1.5 text-xs font-bold text-amber-400">
+                                <Icon className="size-3.5 text-amber-400" />
+                                <span>{cat.title}</span>
+                              </span>
+                              <span className="rounded-full bg-zinc-900 px-2 py-0.5 text-[9px] font-mono text-zinc-400">
+                                {cat.badge}
+                              </span>
+                            </div>
+
+                            <div className="flex flex-col gap-1 mt-1">
+                              {cat.items.map((item) => (
+                                <Link
+                                  key={item.label}
+                                  to={item.to}
+                                  onClick={() => setDestMenuOpen(false)}
+                                  className="group flex flex-col rounded-xl p-2 hover:bg-zinc-900/90 transition"
+                                >
+                                  <span className="text-xs font-bold text-zinc-200 group-hover:text-emerald-400 transition-colors flex items-center justify-between">
+                                    <span>{item.label}</span>
+                                    <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-emerald-400">→</span>
+                                  </span>
+                                  <span className="text-[10px] text-zinc-400 truncate mt-0.5">{item.subtitle}</span>
+                                </Link>
+                              ))}
+                            </div>
+                          </div>
                         );
                       })}
                     </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
 
-                    <div className="mt-4 border-t border-slate-200 dark:border-white/10 pt-3">
-                      <Link
-                        to="/discover"
-                        onClick={() => setExploreMenuOpen(false)}
-                        className="flex items-center justify-between w-full p-3 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold text-xs hover:bg-emerald-500/20 transition group"
-                      >
-                        <span className="flex items-center gap-2">
-                          <Map className="size-4 text-emerald-500" />
-                          <span>🗺️ Explore on Interactive Map</span>
-                        </span>
-                        <span className="text-xs text-emerald-600 dark:text-emerald-400 group-hover:translate-x-1 transition-transform">→</span>
-                      </Link>
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+          {/* 2. Map Explorer */}
+          <Link
+            to="/explore"
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/60 hover:text-white"
+            activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
+          >
+            <Map className="size-4 text-emerald-400" />
+            <span>{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
+          </Link>
 
-          {/* 2. Routes */}
+          {/* 3. Trails & Routes */}
           <Link
             to="/routes"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/60 hover:text-white"
+            activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
           >
-            <Route className="size-4" />
-            <span>Routes</span>
+            <Route className="size-4 text-emerald-400" />
+            <span>{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
           </Link>
 
-          {/* 3. Adventures */}
-          <Link
-            to="/adventures"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
-          >
-            <Footprints className="size-4" />
-            <span>Adventures</span>
-          </Link>
-
-          {/* 4. AI Planner */}
-          <Link
-            to="/planner"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
-          >
-            <Sparkles className="size-4 text-emerald-500" />
-            <span>AI Planner</span>
-          </Link>
-
-          {/* 5. Community */}
+          {/* 4. Travel Guides */}
           <Link
             to="/community"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-slate-600 dark:text-[#A1A8B3] transition-all hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
-            activeProps={{ className: "bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-bold border border-emerald-500/30" }}
+            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/60 hover:text-white"
+            activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
           >
-            <Users className="size-4" />
-            <span>Community</span>
+            <Users className="size-4 text-zinc-400" />
+            <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
           </Link>
         </div>
 
-        {/* Right Section: Search Bar & Profile Controls */}
-        <div className="flex items-center gap-3 ml-auto shrink-0">
-          {/* Search Bar */}
-          <motion.button
-            type="button"
-            onClick={onSearch}
-            initial={{ width: 240 }}
-            whileHover={{ width: 300 }}
-            whileFocus={{ width: 300 }}
-            transition={{ type: "spring", stiffness: 250, damping: 24 }}
-            className="hidden md:flex h-[46px] items-center justify-between gap-3 rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/72 px-4 backdrop-blur-[24px] shadow-sm transition-all hover:border-emerald-500/50 hover:shadow-[0_0_0_4px_rgba(16,185,129,0.1)] cursor-pointer group"
-          >
-            <div className="flex items-center gap-2 min-w-0">
-              <Search className="size-4 text-slate-400 dark:text-[#A1A8B3] group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors shrink-0" aria-hidden />
-              <span className="truncate text-xs font-medium text-slate-500 dark:text-[#A1A8B3] group-hover:text-slate-900 dark:group-hover:text-white transition-colors">
-                Search places & routes...
-              </span>
-            </div>
-
-            <div className="flex items-center gap-1.5 shrink-0">
-              <kbd className="inline-flex items-center rounded-md border border-slate-200 dark:border-white/15 bg-slate-100 dark:bg-white/5 px-1.5 py-0.5 text-[10px] font-mono text-slate-500 dark:text-[#A1A8B3]">
-                ⌘ K
-              </kbd>
-            </div>
-          </motion.button>
-
-          {/* Mobile Search Button */}
+        {/* Right Utility Section & Primary Action CTA */}
+        <div className="flex items-center gap-2.5 ml-auto shrink-0">
+          {/* Search Trigger Button */}
           <button
             type="button"
             onClick={onSearch}
-            className="flex md:hidden size-10 items-center justify-center rounded-full border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/72 backdrop-blur-[24px] text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white"
-            aria-label="Search"
+            className="hidden md:flex h-[42px] items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-4 text-xs text-zinc-400 hover:border-zinc-700 hover:text-white transition cursor-pointer"
           >
-            <Search className="size-4" />
+            <Search className="size-3.5 text-zinc-400" />
+            <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search places or trails..."}</span>
+            <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">⌘K</kbd>
           </button>
 
-          {/* Utility Controls & Profile Menu */}
-          <div className="hidden items-center gap-2 sm:flex">
-            {isAdminUser(getCurrentAuthUser()) && (
-              <Link
-                to="/admin"
-                className="hidden xl:flex items-center gap-1.5 px-3 py-1.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 text-xs rounded-full font-mono font-bold hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-black transition"
-              >
-                <Shield className="size-3.5" />
-                <span>Admin</span>
-              </Link>
-            )}
+          {/* Language Switcher Toggle (தமிழ் / English) */}
+          <button
+            type="button"
+            onClick={toggleLanguage}
+            className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs font-bold text-amber-300 hover:border-amber-500/50 hover:bg-zinc-800 transition"
+            title="Switch Language / மொழியை மாற்றுக"
+          >
+            <Languages className="size-3.5 text-amber-400" />
+            <span>{lang === "en" ? "தமிழ்" : "English"}</span>
+          </button>
 
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full size-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50 text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm"
-              aria-label="Notifications"
-            >
-              <Bell className="size-4" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="rounded-full size-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50 text-slate-600 dark:text-[#A1A8B3] hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-white/20 shadow-sm cursor-pointer"
-              onClick={toggle}
-              aria-label="Toggle theme"
-            >
-              {dark ? <Sun className="size-4 text-amber-400" /> : <Moon className="size-4 text-slate-700" />}
-            </Button>
+          {/* Saved Places */}
+          <Link
+            to="/profile"
+            className="hidden sm:flex items-center justify-center size-10 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
+            title={lang === "ta" ? "சேமித்த இடங்கள்" : "Saved Places"}
+          >
+            <Bookmark className="size-4 text-zinc-300" />
+          </Link>
 
-            <ProfileMenu dark={dark} toggleTheme={toggle} />
-          </div>
+          {/* Primary CTA Button: Plan My Trip */}
+          <Link
+            to="/planner"
+            className="flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-xs font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
+          >
+            <Sparkles className="size-3.5 text-zinc-950 fill-zinc-950" />
+            <span>{lang === "ta" ? "பயணம் திட்டமிடுக" : "Plan My Trip"}</span>
+          </Link>
 
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden rounded-full size-10 border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/50"
+            className="lg:hidden rounded-full size-10 border border-zinc-800 bg-zinc-900 text-zinc-300"
             onClick={() => setOpen((o) => !o)}
             aria-label="Open menu"
             aria-expanded={open}
@@ -339,103 +375,87 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
       {/* Structured Mobile Drawer */}
       {open && (
-        <div className="mx-auto mt-3 max-w-[1400px] rounded-3xl p-5 lg:hidden border border-slate-200 dark:border-white/15 shadow-2xl bg-white/95 dark:bg-[#121821]/95 backdrop-blur-[24px] text-slate-900 dark:text-white space-y-4 max-h-[85vh] overflow-y-auto">
-          {/* Primary Navigation */}
-          <div>
-            <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
-              Primary Navigation
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {[
-                { to: "/explore", label: "Explore", icon: Map },
-                { to: "/routes", label: "Routes", icon: Route },
-                { to: "/adventures", label: "Adventures", icon: Footprints },
-                { to: "/planner", label: "AI Planner", icon: Sparkles },
-                { to: "/community", label: "Community", icon: Users },
-              ].map((l) => {
-                const Icon = l.icon;
-                return (
-                  <Link
-                    key={l.to}
-                    to={l.to}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-white/10"
-                    activeProps={{ className: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400" }}
-                  >
-                    <Icon className="size-4 text-emerald-500" />
-                    <span>{l.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
+        <div className="mx-auto mt-3 max-w-[1400px] rounded-3xl p-5 lg:hidden border border-zinc-800 bg-[#09090b]/98 backdrop-blur-2xl text-white space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl">
+          <div className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider mb-2">
+            {lang === "ta" ? "பயண வழிசெலுத்தல்" : "TRAVEL NAVIGATION"}
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              to="/madurai"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+            >
+              <Landmark className="size-4 text-amber-400" />
+              <span>{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
+            </Link>
+            <Link
+              to="/explore"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+            >
+              <Map className="size-4 text-emerald-400" />
+              <span>{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
+            </Link>
+            <Link
+              to="/routes"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+            >
+              <Route className="size-4 text-emerald-400" />
+              <span>{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
+            </Link>
+            <Link
+              to="/community"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+            >
+              <Users className="size-4 text-zinc-400" />
+              <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+            </Link>
           </div>
 
-          <hr className="border-slate-200 dark:border-white/10" />
+          <div className="flex items-center justify-between border-t border-zinc-800 pt-3">
+            <button
+              type="button"
+              onClick={toggleLanguage}
+              className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-bold text-amber-300"
+            >
+              <Languages className="size-4 text-amber-400" />
+              <span>{lang === "en" ? "தமிழ் பதிப்பு" : "English Version"}</span>
+            </button>
 
-          {/* Discover Collections */}
-          <div>
-            <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
-              Discover Destinations
-            </div>
-            <div className="grid grid-cols-2 gap-1.5">
-              {DISCOVER_COLLECTIONS.map((c) => {
-                const Icon = c.icon;
-                return (
-                  <Link
-                    key={c.to}
-                    to={c.to}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-2 rounded-2xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
-                  >
-                    <Icon className="size-3.5 text-emerald-500" />
-                    <span>{c.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
+            <button
+              type="button"
+              onClick={() => {
+                setOpen(false);
+                setDistrictsModalOpen(true);
+              }}
+              className="flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs font-bold text-amber-400"
+            >
+              <Grid className="size-3.5" />
+              <span>{lang === "ta" ? "38 மாவட்டங்கள்" : "38 Districts Stream"}</span>
+            </button>
+
+            <Link
+              to="/planner"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-zinc-950"
+            >
+              <Sparkles className="size-3.5 fill-zinc-950" />
+              <span>{lang === "ta" ? "திட்டமிடுக" : "Plan My Trip"}</span>
+            </Link>
           </div>
-
-          <hr className="border-slate-200 dark:border-white/10" />
-
-          {/* Experiences */}
-          <div>
-            <div className="text-[10px] font-mono font-bold text-emerald-600 dark:text-emerald-400 uppercase tracking-wider mb-2">
-              Experiences
-            </div>
-            <div className="grid grid-cols-3 gap-1.5">
-              {EXPERIENCE_ITEMS.map((exp) => {
-                const Icon = exp.icon;
-                return (
-                  <Link
-                    key={exp.label}
-                    to={exp.to}
-                    onClick={() => setOpen(false)}
-                    className="flex items-center gap-1.5 p-2 rounded-xl text-[11px] font-semibold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10"
-                  >
-                    <Icon className="size-3.5 text-emerald-500" />
-                    <span>{exp.label}</span>
-                  </Link>
-                );
-              })}
-            </div>
-          </div>
-
-          <hr className="border-slate-200 dark:border-white/10" />
-
-          <button
-            type="button"
-            onClick={toggle}
-            className="flex w-full items-center justify-between rounded-2xl px-4 py-2.5 text-xs font-bold text-slate-700 dark:text-slate-200 bg-slate-100 dark:bg-white/5"
-          >
-            <span className="flex items-center gap-2">
-              {dark ? <Sun className="size-4 text-amber-400" /> : <Moon className="size-4 text-slate-700" />}
-              {dark ? "Light mode" : "Dark mode"}
-            </span>
-            <span className="text-[10px] text-slate-400 font-mono">Toggle</span>
-          </button>
         </div>
       )}
+
+      {/* Full-Screen All 38 Districts Animated Marquee Stream Modal */}
+      <DistrictsMegaModal
+        isOpen={districtsModalOpen}
+        onClose={() => setDistrictsModalOpen(false)}
+        lang={lang}
+      />
     </header>
+    </>
   );
 }
 
@@ -454,7 +474,7 @@ export function MobileTabBar() {
 
   return (
     <nav
-      className="fixed inset-x-3 bottom-3 z-50 flex items-center justify-around rounded-2xl px-2 py-2 sm:hidden bg-white/90 dark:bg-[#121821]/90 backdrop-blur-[24px] border border-slate-200 dark:border-white/15 shadow-lg"
+      className="fixed inset-x-3 bottom-3 z-50 flex items-center justify-around rounded-2xl px-2 py-2 sm:hidden bg-[#09090b]/90 backdrop-blur-[24px] border border-zinc-800 shadow-lg"
       aria-label="Mobile Bottom Bar"
     >
       {[
@@ -472,8 +492,8 @@ export function MobileTabBar() {
             className={cn(
               "flex min-h-11 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium transition-colors",
               l.isActive
-                ? "text-emerald-600 dark:text-emerald-400 font-bold"
-                : "text-slate-600 dark:text-muted-foreground",
+                ? "text-emerald-400 font-bold"
+                : "text-zinc-400",
             )}
           >
             <Icon className="size-5" aria-hidden />

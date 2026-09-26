@@ -18,6 +18,7 @@ import {
   UserPlus,
 } from "lucide-react";
 import { getCurrentAuthUser, clearAuthSession, UserProfile, isAdminUser } from "@/lib/auth-rbac";
+import { useAuthGuard } from "@/lib/auth-guard-context";
 import { LayoutDashboard, Shield } from "lucide-react";
 
 interface ProfileMenuProps {
@@ -66,22 +67,26 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
     };
   }, []);
 
-  // If user is NOT signed in, render Sign In / Sign Up buttons
+  const { openAuthModal } = useAuthGuard();
+
+  // If user is NOT signed in, render Sign In / Sign Up buttons with inline auth modal
   if (!currentUser) {
     return (
       <div className="flex items-center gap-2 font-sans">
-        <Link
-          to="/login"
-          className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white rounded-full transition hover:bg-slate-100 dark:hover:bg-white/10 flex items-center gap-1.5"
+        <button
+          type="button"
+          onClick={() => openAuthModal("Sign in to save your trip plans, preferences, and personal collections.")}
+          className="px-4 py-2 text-xs font-bold text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white rounded-full transition hover:bg-slate-100 dark:hover:bg-white/10 flex items-center gap-1.5 cursor-pointer"
         >
           <LogIn className="size-3.5" /> Sign In
-        </Link>
-        <Link
-          to="/login"
-          className="px-4 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black rounded-full shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5"
+        </button>
+        <button
+          type="button"
+          onClick={() => openAuthModal("Create an account to save your personalized AI route plans and unlock trails.")}
+          className="px-4 py-2 text-xs font-extrabold bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black rounded-full shadow-md shadow-emerald-500/20 transition flex items-center gap-1.5 cursor-pointer"
         >
           <UserPlus className="size-3.5" /> Sign Up
-        </Link>
+        </button>
       </div>
     );
   }

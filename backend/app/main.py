@@ -24,6 +24,7 @@ from backend.app.api.v1.user_resources import router as user_resources_router
 from backend.app.api.v1.crawl import router as crawl_router
 from backend.app.api.v1.integrations import router as integrations_router
 from backend.app.api.v1.tn_geo import router as geo_router
+from backend.app.api.v1.ai_travel import router as ai_travel_router
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -106,6 +107,8 @@ app.include_router(user_resources_router, prefix=settings.API_V1_STR)
 app.include_router(crawl_router, prefix=settings.API_V1_STR)
 app.include_router(integrations_router, prefix=settings.API_V1_STR)
 app.include_router(geo_router, prefix=settings.API_V1_STR)
+app.include_router(ai_travel_router, prefix=settings.API_V1_STR)
+app.include_router(ai_travel_router, prefix="/api")
 app.include_router(integrations_router, prefix="/api/v1/weather_legacy")
 app.include_router(routes_engine_router, prefix="/api")
 

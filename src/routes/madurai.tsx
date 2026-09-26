@@ -1,21 +1,23 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { AppShell, PageHeader } from "@/components/site/app-shell";
+import { AppShell } from "@/components/site/app-shell";
+import { DistrictView } from "@/components/site/district-view";
+import { TAMIL_NADU_DISTRICTS } from "@/lib/data/districts";
 import { ExplorePlanMap, ExplorePlan } from "@/components/site/explore-plan-map";
 
 export const Route = createFileRoute("/madurai")({
   head: () => ({
     meta: [
-      { title: "Explore Madurai — Temples, Tourist Places & Taste Madurai | ExplorerTN" },
+      { title: "Explore Madurai District — Temples, Heritage, Food & Thrift Bazaars | ExplorerTN" },
       {
         name: "description",
         content:
-          "Discover Meenakshi Amman Temple, Thirupparankundram, Alagar Kovil, Pazhamudircholai, Thirumalai Nayakkar Mahal, Gandhi Museum, Samanar Hills, Vandiyur Teppakulam, Vaigai River, Jigarthanda and Madurai food.",
+          "Dedicated Madurai district guide featuring standalone Madurai district map, Meenakshi Temple, Puthu Mandapam thrift market, Famous Jigarthanda, Konar Mess Kari Dosa, and Nayak Palace.",
       },
-      { property: "og:title", content: "Explore Madurai — ExplorerTN" },
+      { property: "og:title", content: "Explore Madurai District — ExplorerTN" },
       {
         property: "og:description",
         content:
-          "Dedicated Madurai city guide covering ancient temples, historic landmarks, iconic local street food, interactive map, and AI Trip Planner integration.",
+          "Explore Madurai city & district: standalone map, temples, heritage sites, street food legends, and famous thrift markets.",
       },
     ],
   }),
@@ -36,33 +38,40 @@ const MADURAI_PLANS: ExplorePlan[] = [
     ],
   },
   {
-    id: "madurai-heritage-landmarks",
-    title: "Plan 2 — Historic Landmarks & Royal Palaces",
-    subtitle: "Thirumalai Nayakkar Mahal → Gandhi Museum → Samanar Hills → Vandiyur Teppakulam",
-    description: "1636 Nayak royal palace, freedom struggle museum, 9th-century Jain rock-cut beds, and 16-acre temple tank.",
+    id: "madurai-thrift-food-trail",
+    title: "Plan 2 — Madurai Heritage, Thrift Markets & Food Trail",
+    subtitle: "Puthu Mandapam → Avani Moola St → Famous Jigarthanda → Konar Mess",
+    description: "400-year-old Nayak tailoring market arcade, tie-and-dye silk street, badam-gum Jigarthanda drink, and 3-tier Mutton Kari Dosa.",
     stops: [
-      { placeId: "thirumalai-mahal", order: 1, visitDurationMinutes: 90, activities: ["82ft Giant White Pillars", "Swarga Vilasam Courtyard"] },
-      { placeId: "gandhi-museum-madurai", order: 2, visitDurationMinutes: 90, activities: ["Freedom Struggle Gallery", "Tamukkam Summer Palace"] },
-      { placeId: "samanar-hills", order: 3, visitDurationMinutes: 120, activities: ["9th-Century Jain Bas-Reliefs", "Sunset Over Madurai Plains"] },
-      { placeId: "vandiyur-teppakulam", order: 4, visitDurationMinutes: 60, activities: ["16-Acre Water Tank", "Maiya Mandapam Pavilion"] },
+      { placeId: "puthu-mandapam", order: 1, visitDurationMinutes: 90, activities: ["16th-Century Carved Tailor Pillars", "1-Hour Custom Kurtas"] },
+      { placeId: "avani-moola-street", order: 2, visitDurationMinutes: 90, activities: ["Madurai Sungudi Silk Sarees", "Traditional Crafts"] },
+      { placeId: "famous-jigarthanda", order: 3, visitDurationMinutes: 45, activities: ["Original Special Jigarthanda", "Almond Resin Cream"] },
+      { placeId: "konar-mess", order: 4, visitDurationMinutes: 60, activities: ["3-Tier Mutton Kari Dosa", "Spicy Bone Marrow Fry"] },
     ],
   },
 ];
 
+const MADURAI_ORIGIN_OPTIONS = [
+  { placeId: "madurai-hub", name: "Madurai Hub (Meenakshi Temple)", latitude: 9.9195, longitude: 78.1193 },
+  { placeId: "thirupparankundram-hub", name: "Thirupparankundram Junction", latitude: 9.8789, longitude: 78.0722 },
+  { placeId: "alagar-kovil-hub", name: "Alagar Kovil Gate", latitude: 10.0736, longitude: 78.2144 },
+  { placeId: "madurai-junction", name: "Madurai Railway Junction", latitude: 9.9175, longitude: 78.1118 },
+  { placeId: "theni", name: "Theni Central Hub", latitude: 10.0104, longitude: 77.4768 },
+];
+
 function ExploreMaduraiPage() {
+  const maduraiData = TAMIL_NADU_DISTRICTS["madurai"];
+
   return (
     <AppShell>
-      <PageHeader
-        eyebrow="MADURAI · TAMIL NADU"
-        title="Explore Madurai City Discovery"
-        description="Ancient temples, historic royal palaces, Jain rock-cut hills, and iconic street food of Madurai."
-      />
+      <DistrictView district={maduraiData} />
 
-      <div className="mx-auto max-w-7xl px-4 pb-20 sm:px-6 font-sans">
+      <div className="mx-auto max-w-7xl px-4 py-16 sm:px-6 font-sans border-t border-zinc-800">
         <ExplorePlanMap
           plans={MADURAI_PLANS}
-          title="Madurai City & Heritage Curated Plans"
-          subtitle="Select a Madurai plan to view real road network routes, segment distances, and live navigation."
+          originOptions={MADURAI_ORIGIN_OPTIONS}
+          title="Madurai City Curated Navigation Plans"
+          subtitle="Select a Madurai plan to view turn-by-turn road network routes, segment distances, and live navigation."
         />
       </div>
     </AppShell>

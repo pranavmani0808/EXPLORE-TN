@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
+import { getGoogleTileUrl } from "@/lib/google-maps-loader";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Route as RouteIcon,
@@ -169,7 +170,7 @@ export function RoutesManagementModule() {
         attributionControl: false,
       });
 
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      L.tileLayer(getGoogleTileUrl("roadmap"), {
         maxZoom: 19,
         subdomains: "abcd",
       }).addTo(map);
@@ -196,11 +197,23 @@ export function RoutesManagementModule() {
 
     const latLngs: [number, number][] = selectedRoute.waypoints.map((w) => [w.lat, w.lng]);
 
+    // Outer casing border (Google Maps road outline)
+    L.polyline(latLngs, {
+      color: "#0f172a",
+      weight: 9,
+      opacity: 0.85,
+      lineJoin: "round",
+      lineCap: "round",
+    }).addTo(map);
+
+    // Inner navigation core polyline
     const polyline = L.polyline(latLngs, {
       color: "#10b981",
       weight: 5,
-      opacity: 0.9,
+      opacity: 0.95,
       dashArray: "6, 8",
+      lineJoin: "round",
+      lineCap: "round",
     }).addTo(map);
 
     map.fitBounds(polyline.getBounds(), { padding: [40, 40] });

@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { places, Place } from "@/data/places";
 import { MapPin, Star, ShieldCheck, ExternalLink } from "lucide-react";
 import { Link } from "@tanstack/react-router";
+import { getGoogleTileUrl } from "@/lib/google-maps-loader";
 
 export function GoogleMapHero({ apiKey }: { apiKey?: string }) {
   const [selectedPlace, setSelectedPlace] = useState<Place | null>(places[0]);
@@ -38,8 +39,8 @@ export function GoogleMapHero({ apiKey }: { apiKey?: string }) {
         attributionControl: false,
       });
 
-      // Add Esri Dark Gray Base High-Res Real Map Tile Layer
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      // Add High-Clarity Google Maps / OpenStreetMap Tile Layer
+      L.tileLayer(getGoogleTileUrl("roadmap", apiKey), {
         maxZoom: 19,
         subdomains: "abcd",
       }).addTo(map);

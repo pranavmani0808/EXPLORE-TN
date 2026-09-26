@@ -65,21 +65,28 @@ function ArupadaiVeeduTrailPage() {
     .map((t) => t.coords)
     .filter((c): c is [number, number] => c !== undefined);
 
-  // Fetch real multi-waypoint OSRM road geometry from backend via PlannerApiRepository
+  // Fetch real multi-waypoint OSRM road geometry connecting shrines sequentially 1 -> 2 -> 3 -> 4 -> 5 -> 6
   useEffect(() => {
     let active = true;
 
     async function fetchTrailRoute() {
       try {
-        const data = await PlannerApiRepository.sendChatMessage("Plan an Arupadai Veedu trip");
-        const coords = data?.route?.geometry?.coordinates;
-        if (active && coords && Array.isArray(coords) && coords.length > 0) {
-          // OSRM coordinates are [lng, lat], convert to [lat, lng] for Leaflet
-          const pts: Array<[number, number]> = coords.map(([lng, lat]: [number, number]) => [lat, lng]);
-          setOsrmRoutePoints(pts);
+        const waypointsStr = arupadaiVeeduTemples
+          .map((t) => `${t.longitude},${t.latitude}`)
+          .join(";");
+        const osrmUrl = `https://router.project-osrm.org/route/v1/driving/${waypointsStr}?overview=full&geometries=geojson`;
+        const response = await fetch(osrmUrl);
+        if (response.ok) {
+          const json = await response.json();
+          const coords = json.routes?.[0]?.geometry?.coordinates;
+          if (active && coords && Array.isArray(coords) && coords.length > 0) {
+            const pts: Array<[number, number]> = coords.map(([lng, lat]: [number, number]) => [lat, lng]);
+            setOsrmRoutePoints(pts);
+            return;
+          }
         }
       } catch (err) {
-        console.warn("Could not load OSRM road route for trail map, fallback to pins", err);
+        console.warn("OSRM direct multi-waypoint fetch notice, fallback to static sequential points", err);
       }
     }
 
@@ -98,7 +105,7 @@ function ArupadaiVeeduTrailPage() {
       <section className="relative min-h-[65vh] w-full overflow-hidden bg-slate-950 text-white">
         {/* Layer 0: Background Temple Hero Image */}
         <img
-          src={arupadaiVeeduTemples[2]!.image}
+          src={arupadaiVeeduTemples[2]?.image || arupadaiVeeduTemples[0]?.image}
           alt="Arupadai Veedu Trail - Sacred Murugan Abodes"
           className="absolute inset-0 size-full object-cover object-center opacity-65 z-0"
         />

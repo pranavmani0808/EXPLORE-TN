@@ -140,6 +140,20 @@ export function subscribeToAuthChanges(callback: (user: UserProfile | null) => v
   const handler = (e: any) => {
     callback(e.detail);
   };
+  const storageHandler = (e: StorageEvent) => {
+    if (e.key === "etn_auth_user") {
+      try {
+        const updated = e.newValue ? JSON.parse(e.newValue) : null;
+        callback(updated);
+      } catch {
+        callback(null);
+      }
+    }
+  };
   window.addEventListener("etn_auth_updated", handler);
-  return () => window.removeEventListener("etn_auth_updated", handler);
+  window.addEventListener("storage", storageHandler);
+  return () => {
+    window.removeEventListener("etn_auth_updated", handler);
+    window.removeEventListener("storage", storageHandler);
+  };
 }

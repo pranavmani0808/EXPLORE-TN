@@ -21,6 +21,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getGoogleTileUrl, loadGoogleMapsScript } from "@/lib/google-maps-loader";
 
 // Types & Interfaces
 export interface LatLng {
@@ -130,13 +131,15 @@ export function Map({
 
         const getTileUrl = (s: MapStyle) => {
           if (s === "satellite") {
-            return "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+            return getGoogleTileUrl("satellite");
           }
           if (s === "outdoors") {
-            return "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+            return getGoogleTileUrl("terrain");
           }
-          return "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+          return getGoogleTileUrl("roadmap");
         };
+
+        loadGoogleMapsScript().catch(() => {});
 
         const tileLayer = L.tileLayer(getTileUrl(initialStyle), {
           maxZoom: 19,
@@ -157,6 +160,13 @@ export function Map({
         map.on("move", handleMapMove);
         map.on("zoomend", handleMapMove);
 
+        // Force Leaflet viewport recalculation after mount
+        setTimeout(() => {
+          if (map) {
+            map.invalidateSize();
+          }
+        }, 150);
+
         setIsLoaded(true);
       } catch (err) {
         console.error("Leaflet Mapcn initialization fallback", err);
@@ -166,8 +176,16 @@ export function Map({
 
     initLeaflet();
 
+    const handleResize = () => {
+      if (leafletMapRef.current) {
+        leafletMapRef.current.invalidateSize();
+      }
+    };
+    window.addEventListener("resize", handleResize);
+
     return () => {
       isMounted = false;
+      window.removeEventListener("resize", handleResize);
       if (leafletMapRef.current) {
         leafletMapRef.current.remove();
         leafletMapRef.current = null;
@@ -187,10 +205,10 @@ export function Map({
 
     const tileUrl =
       style === "satellite"
-        ? "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+        ? getGoogleTileUrl("satellite")
         : style === "outdoors"
-        ? "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        : "https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}";
+        ? getGoogleTileUrl("terrain")
+        : getGoogleTileUrl("roadmap");
 
     const newTiles = L.tileLayer(tileUrl, { maxZoom: 19, subdomains: "abcd" });
     newTiles.addTo(map);
@@ -445,11 +463,22 @@ export function MarkerTooltip({ children, className }: MarkerTooltipProps) {
 export interface MapPopupProps {
   latitude: number;
   longitude: number;
+  onClose?: () => void;
+  closeButton?: boolean;
+  focusAfterOpen?: boolean;
+  closeOnClick?: boolean;
   children: ReactNode;
   className?: string;
 }
 
-export function MapPopup({ latitude, longitude, children, className }: MapPopupProps) {
+export function MapPopup({
+  latitude,
+  longitude,
+  onClose,
+  closeButton = false,
+  children,
+  className,
+}: MapPopupProps) {
   const { center, zoom, leafletMap } = useMap();
   let leftPct = 50 + (longitude - center[1]) * 15 * Math.pow(2, zoom - 7);
   let topPct = 50 - (latitude - center[0]) * 25 * Math.pow(2, zoom - 7);
@@ -473,10 +502,21 @@ export function MapPopup({ latitude, longitude, children, className }: MapPopupP
     <div
       style={{ left: `${leftPct}%`, top: `${topPct}%` }}
       className={cn(
-        "absolute -translate-x-1/2 -translate-y-full z-25 mb-2 rounded-2xl border border-border bg-card/95 p-3 shadow-elevate backdrop-blur-xl",
+        "absolute -translate-x-1/2 -translate-y-full z-30 mb-2 min-w-56 rounded-2xl border border-slate-700 bg-slate-900/95 p-4 text-white shadow-2xl backdrop-blur-xl",
         className,
       )}
+      onClick={(e) => e.stopPropagation()}
     >
+      {closeButton && onClose && (
+        <button
+          type="button"
+          onClick={onClose}
+          className="absolute right-2.5 top-2.5 rounded-full p-1 text-slate-400 hover:bg-white/10 hover:text-white transition cursor-pointer"
+          aria-label="Close popup"
+        >
+          <X className="size-3.5" />
+        </button>
+      )}
       {children}
     </div>
   );
@@ -553,20 +593,27 @@ export function MapControls({ position = "top-right", className }: MapControlsPr
 export interface MapRouteProps {
   coordinates: Array<[number, number]>;
   color?: string;
+  casingColor?: string;
   weight?: number;
+  casingWeight?: number;
   animated?: boolean;
+  opacity?: number;
   className?: string;
 }
 
 export function MapRoute({
   coordinates,
-  color = "#f59e0b",
-  weight = 4,
+  color = "#10b981",
+  casingColor = "#0f172a",
+  weight = 6,
+  casingWeight = 10,
   animated = false,
+  opacity = 0.95,
   className,
 }: MapRouteProps) {
   const { leafletMap } = useMap();
   const polylineRef = useRef<any>(null);
+  const casingRef = useRef<any>(null);
 
   useEffect(() => {
     if (!leafletMap || !coordinates || coordinates.length < 2) return;
@@ -577,19 +624,33 @@ export function MapRoute({
       const L = await import("leaflet");
       if (!active || !leafletMap) return;
 
+      if (casingRef.current) {
+        leafletMap.removeLayer(casingRef.current);
+      }
       if (polylineRef.current) {
         leafletMap.removeLayer(polylineRef.current);
       }
 
-      const polyline = L.polyline(coordinates, {
-        color: color,
-        weight: weight,
+      // 1. Outer Google Maps Style Road Casing (Border outline)
+      const casing = L.polyline(coordinates, {
+        color: casingColor,
+        weight: casingWeight || weight + 4,
         opacity: 0.9,
         lineCap: "round",
         lineJoin: "round",
-        dashArray: animated ? "6, 8" : undefined,
       }).addTo(leafletMap);
 
+      // 2. Inner Google Maps Style Navigation Route Core
+      const polyline = L.polyline(coordinates, {
+        color: color,
+        weight: weight,
+        opacity: opacity,
+        lineCap: "round",
+        lineJoin: "round",
+        dashArray: animated ? "8, 10" : undefined,
+      }).addTo(leafletMap);
+
+      casingRef.current = casing;
       polylineRef.current = polyline;
     }
 
@@ -597,13 +658,17 @@ export function MapRoute({
 
     return () => {
       active = false;
-      if (polylineRef.current && leafletMap) {
+      if (leafletMap) {
         try {
-          leafletMap.removeLayer(polylineRef.current);
+          if (casingRef.current) leafletMap.removeLayer(casingRef.current);
+          if (polylineRef.current) leafletMap.removeLayer(polylineRef.current);
         } catch {}
       }
     };
-  }, [leafletMap, coordinates, color, weight, animated]);
+  }, [leafletMap, coordinates, color, casingColor, weight, casingWeight, animated, opacity]);
+
+  // If Leaflet map is mounted, do not render duplicate SVG fallback overlay
+  if (leafletMap) return null;
 
   // Fallback SVG polyline if Leaflet map is initializing
   const { center, zoom } = useMap();
@@ -613,18 +678,8 @@ export function MapRoute({
 
   const pointsString = coordinates
     .map(([lat, lng]) => {
-      let x = 50 + (lng - center[1]) * 15 * scale;
-      let y = 50 - (lat - center[0]) * 25 * scale;
-      if (leafletMap) {
-        try {
-          const container = leafletMap.getContainer();
-          const point = leafletMap.latLngToContainerPoint([lat, lng]);
-          if (container && container.clientWidth && container.clientHeight) {
-            x = (point.x / container.clientWidth) * 100;
-            y = (point.y / container.clientHeight) * 100;
-          }
-        } catch {}
-      }
+      const x = 50 + (lng - center[1]) * 15 * scale;
+      const y = 50 - (lat - center[0]) * 25 * scale;
       return `${x},${y}`;
     })
     .join(" ");
@@ -634,12 +689,19 @@ export function MapRoute({
       <polyline
         points={pointsString}
         fill="none"
+        stroke={casingColor}
+        strokeWidth={(casingWeight || weight + 4) * 0.2}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <polyline
+        points={pointsString}
+        fill="none"
         stroke={color}
-        strokeWidth={weight * 0.35}
+        strokeWidth={weight * 0.2}
         strokeLinecap="round"
         strokeLinejoin="round"
         strokeDasharray={animated ? "4 4" : undefined}
-        className={animated ? "animate-pulse" : undefined}
       />
     </svg>
   );

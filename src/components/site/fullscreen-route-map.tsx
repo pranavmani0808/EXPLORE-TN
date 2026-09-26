@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { getGoogleTileUrl } from "@/lib/google-maps-loader";
 import {
   MapPin,
   Navigation,
@@ -374,7 +375,7 @@ export function FullscreenRouteMap({
           attributionControl: false,
         });
 
-        L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+        L.tileLayer(getGoogleTileUrl("roadmap"), {
           maxZoom: 19,
           subdomains: "abcd",
         }).addTo(map);
@@ -449,8 +450,6 @@ export function FullscreenRouteMap({
     markersRef.current = [];
     polylineGroup.clearLayers();
 
-    if (stops.length === 0) return;
-
     const bounds = L.latLngBounds([]);
 
     // 1. Render Numbered Stop Markers (①, ②, ③...) on true WGS84 GPS points
@@ -459,7 +458,7 @@ export function FullscreenRouteMap({
 
       const numberLabel = idx === 0 ? "START" : idx === stops.length - 1 ? "END" : `${idx}`;
       const isSelected = idx === selectedStopIndex;
-      const pinBg = isSelected ? "#10b981" : idx === 0 ? "#0284c7" : "#0f172a";
+      const pinBg = isSelected ? "#2563eb" : idx === 0 ? "#0284c7" : "#0f172a";
 
       const customIcon = L.divIcon({
         className: `custom-route-pin-${place.id}`,
@@ -495,30 +494,121 @@ export function FullscreenRouteMap({
         zIndexOffset: isSelected ? 2000 : 1000 - idx,
       }).addTo(map);
 
-      marker.bindTooltip(`${idx + 1}. ${place.canonicalName || place.name}`, {
-        permanent: isSelected,
-        direction: "auto",
-        offset: [0, -14],
-        className: "custom-decluttered-map-tooltip",
+      // Mapcn Exact Dark Popup Window on Hover / Click (matching user spec)
+      const popupHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; width: 260px; text-align: left; box-sizing: border-box; padding: 2px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <h3 style="font-weight: 700; font-size: 15px; color: #ffffff; margin: 0; letter-spacing: -0.01em;">
+              ${place.canonicalName || place.name}
+            </h3>
+          </div>
+          <p style="font-size: 13px; color: #a1a1aa; margin: 0 0 4px 0; line-height: 1.5;">
+            ${place.tagline || place.description || "Famous destination in Tamil Nadu."}
+          </p>
+          <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5;">
+            District: ${place.district || "Tamil Nadu"} · Rating: ${place.rating || 4.8} ★
+          </p>
+          <button 
+            onclick="this.closest('.leaflet-popup')?.querySelector('.leaflet-popup-close-button')?.click()"
+            style="margin-top: 14px; width: 100%; padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #ffffff; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; text-align: center;"
+            onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.08)'"
+          >
+            Close
+          </button>
+        </div>
+      `;
+
+      marker.bindPopup(popupHtml, {
+        className: "custom-mapcn-popup-window",
+        closeButton: true,
+        autoPan: true,
       });
 
+      marker.on("mouseover", () => marker.openPopup());
       marker.on("click", () => {
         setSelectedStopIndex(idx);
+        marker.openPopup();
         map.flyTo([place.latitude, place.longitude], 11, { animate: true, duration: 1.2 });
       });
 
       markersRef.current.push(marker);
     });
 
-    // 2. Render Solid Real Road-Following Polylines
+    // Render surrounding Tamil Nadu places as interactive mapcn markers with Hover Popup
+    CANONICAL_PLACES.forEach((canonicalPlace) => {
+      if (stops.some((s) => s.id === canonicalPlace.id || Math.abs(s.latitude - canonicalPlace.latitude) < 0.01)) return;
+
+      const placeIcon = L.divIcon({
+        className: `tn-place-pin-${canonicalPlace.id}`,
+        html: `
+          <div style="width: 14px; height: 14px; border-radius: 50%; background: #3b82f6; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.4)'" onmouseout="this.style.transform='scale(1)'"></div>
+        `,
+        iconSize: [14, 14],
+        iconAnchor: [7, 7],
+      });
+
+      const canonicalMarker = L.marker([canonicalPlace.latitude, canonicalPlace.longitude], {
+        icon: placeIcon,
+        zIndexOffset: 500,
+      }).addTo(map);
+
+      const placePopupHtml = `
+        <div style="font-family: system-ui, -apple-system, sans-serif; width: 260px; text-align: left; box-sizing: border-box; padding: 2px;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
+            <h3 style="font-weight: 700; font-size: 15px; color: #ffffff; margin: 0; letter-spacing: -0.01em;">
+              ${canonicalPlace.canonicalName || canonicalPlace.name}
+            </h3>
+          </div>
+          <p style="font-size: 13px; color: #a1a1aa; margin: 0 0 4px 0; line-height: 1.5;">
+            ${canonicalPlace.tagline || canonicalPlace.description || "Famous landmark in Tamil Nadu."}
+          </p>
+          <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5;">
+            District: ${canonicalPlace.district} District · Rating: ${canonicalPlace.rating || 4.8} ★
+          </p>
+          <button 
+            onclick="this.closest('.leaflet-popup')?.querySelector('.leaflet-popup-close-button')?.click()"
+            style="margin-top: 14px; width: 100%; padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #ffffff; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; text-align: center;"
+            onmouseover="this.style.background='rgba(255,255,255,0.18)'"
+            onmouseout="this.style.background='rgba(255,255,255,0.08)'"
+          >
+            Close
+          </button>
+        </div>
+      `;
+
+      canonicalMarker.bindPopup(placePopupHtml, {
+        className: "custom-mapcn-popup-window",
+        closeButton: true,
+        autoPan: true,
+      });
+
+      canonicalMarker.on("mouseover", () => canonicalMarker.openPopup());
+
+      markersRef.current.push(canonicalMarker);
+    });
+
+    // 2. Draw Solid Road Polyline Segments with Google Maps Casing
     segmentData.forEach((seg, idx) => {
       if (seg.polyline && seg.polyline.length > 0) {
         const isSelectedLeg = idx === selectedStopIndex;
+
+        // Outer casing border (Google Maps road outline)
         L.polyline(seg.polyline, {
-          color: isSelectedLeg ? "#10b981" : "#0284c7",
-          weight: isSelectedLeg ? 6 : 4,
-          opacity: isSelectedLeg ? 0.95 : 0.8,
+          color: "#0f172a",
+          weight: isSelectedLeg ? 10 : 7,
+          opacity: 0.85,
           lineJoin: "round",
+          lineCap: "round",
+        }).addTo(polylineGroup);
+
+        // Inner navigation core line (ELECTRIC BLUE)
+        L.polyline(seg.polyline, {
+          color: isSelectedLeg ? "#3b82f6" : "#2563eb",
+          weight: isSelectedLeg ? 8 : 6,
+          opacity: 0.95,
+          lineJoin: "round",
+          lineCap: "round",
         }).addTo(polylineGroup);
 
         seg.polyline.forEach((pt) => bounds.extend(pt));
@@ -860,14 +950,62 @@ export function FullscreenRouteMap({
             )}
           </div>
 
-          {/* NO ROUTE STATE */}
+          {/* TAMIL NADU DATABASE PLACES LIST */}
           {(!selectedOrigin || !selectedDestination) && (
-            <div className="flex-1 flex flex-col items-center justify-center p-6 text-center">
-              <Navigation className="w-8 h-8 text-emerald-400 mb-2 animate-bounce" />
-              <h3 className="text-sm font-bold text-white">Select Origin & Destination</h3>
-              <p className="text-xs text-slate-400 mt-1 max-w-xs">
-                Choose your starting location and destination above to calculate real road distance, ETAs, and rest recommendations.
-              </p>
+            <div className="flex-1 min-h-0 overflow-y-auto py-2 space-y-2 pr-1 custom-scrollbar">
+              <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between px-1">
+                <span>Tamil Nadu Destinations ({CANONICAL_PLACES.length} Places)</span>
+                <span className="text-sky-400 text-[9px] font-semibold">Database Live</span>
+              </div>
+              {CANONICAL_PLACES.map((place) => {
+                const iconSymbol =
+                  place.primaryCategory === "waterfalls"
+                    ? "💧"
+                    : place.primaryCategory === "trekking"
+                    ? "⛰️"
+                    : place.primaryCategory === "temples"
+                    ? "🛕"
+                    : place.primaryCategory === "heritage"
+                    ? "🏛️"
+                    : place.primaryCategory === "beaches"
+                    ? "🏖️"
+                    : "📍";
+
+                return (
+                  <div
+                    key={place.id}
+                    className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-sky-500/40 transition flex items-center justify-between text-xs group"
+                  >
+                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                      <span className="text-base shrink-0">{iconSymbol}</span>
+                      <div className="min-w-0">
+                        <div className="font-bold text-white truncate group-hover:text-sky-400 transition">
+                          {place.canonicalName || place.name}
+                        </div>
+                        <div className="text-[10px] text-slate-400 truncate">
+                          {place.district} District · ★ {place.rating || 4.8}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1 shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => setSelectedOrigin(place)}
+                        className="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-black font-extrabold text-[10px] transition cursor-pointer"
+                      >
+                        Origin
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedDestination(place)}
+                        className="px-2 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500 text-sky-300 hover:text-black font-extrabold text-[10px] transition cursor-pointer"
+                      >
+                        Dest
+                      </button>
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
 

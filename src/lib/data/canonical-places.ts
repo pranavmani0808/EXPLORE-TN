@@ -80,7 +80,7 @@ export function validatePlaceCoordinates(place: ExplorerPlace): boolean {
 }
 
 // Well-known coordinates map for server destination resolution fallbacks
-const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
+export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
   madurai: {
     id: "p-meenakshi-temple",
     canonicalName: "Meenakshi Amman Temple",
@@ -98,6 +98,150 @@ const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
     verified: true,
     tags: ["temple", "gopuram", "madurai"]
+  },
+  "meenakshi-amman-temple": {
+    id: "p-meenakshi-amman-temple",
+    canonicalName: "Meenakshi Sundareswarar Temple",
+    name: "Meenakshi Amman Temple",
+    slug: "meenakshi-amman-temple",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9195,
+    longitude: 78.1193,
+    categories: ["temples", "heritage"],
+    primaryCategory: "temples",
+    tagline: "14 Gopurams, Hall of 1000 Pillars & Golden Lotus Tank",
+    description: "The heart of Madurai city, dedicated to Goddess Meenakshi and Lord Sundareswarar.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["temple", "meenakshi", "gopuram"]
+  },
+  "thirupparankundram-temple": {
+    id: "p-thirupparankundram-temple",
+    canonicalName: "Thirupparankundram Murugan Temple",
+    name: "Thirupparankundram Temple",
+    slug: "thirupparankundram-temple",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.8789,
+    longitude: 78.0722,
+    categories: ["temples"],
+    primaryCategory: "temples",
+    tagline: "1st Arupadai Veedu shrine carved into rock hill",
+    description: "6th-century rock-cut temple where Lord Murugan wed Princess Deivayanai.",
+    image: "https://images.unsplash.com/photo-1627894483216-2138af692e32?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["temple", "arupadai", "rockcut"]
+  },
+  "alagar-kovil": {
+    id: "p-alagar-kovil",
+    canonicalName: "Alagar Kovil Kallazhagar Temple",
+    name: "Alagar Kovil",
+    slug: "alagar-kovil",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.0736,
+    longitude: 78.2144,
+    categories: ["temples"],
+    primaryCategory: "temples",
+    tagline: "Kallazhagar Vishnu shrine at foot of Alagar Hills",
+    description: "Ancient Vishnu shrine famous for golden vimanam and hill forest setting.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["temple", "alagar", "vishnu"]
+  },
+  "pazhamudircholai-temple": {
+    id: "p-pazhamudircholai-temple",
+    canonicalName: "Pazhamudircholai Murugan Temple",
+    name: "Pazhamudircholai Temple",
+    slug: "pazhamudircholai-temple",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.0886,
+    longitude: 78.2231,
+    categories: ["temples"],
+    primaryCategory: "temples",
+    tagline: "5th Arupadai Veedu shrine in Solaimalai forest",
+    description: "Hill sanctuary celebrated as the abode where Lord Murugan tested poetess Avvaiyar.",
+    image: "https://images.unsplash.com/photo-1544644181-1484b3fdfc62?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["temple", "arupadai", "solaimalai"]
+  },
+  "puthu-mandapam": {
+    id: "p-puthu-mandapam",
+    canonicalName: "Puthu Mandapam Ancient Thrift Arcade",
+    name: "Puthu Mandapam",
+    slug: "puthu-mandapam",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9192,
+    longitude: 78.1198,
+    categories: ["thrift-streets", "heritage"],
+    primaryCategory: "thrift-streets",
+    tagline: "400-year Nayak pillared tailor market opposite East Gopuram",
+    description: "Historic tailor market arcade featuring 100+ cotton dress tailors & handicrafts.",
+    image: "https://images.unsplash.com/photo-1555529669-e69e7aa0ba9a?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["thrift", "tailors", "market"]
+  },
+  "avani-moola-street": {
+    id: "p-avani-moola-street",
+    canonicalName: "Avani Moola Street Silk Bazaar",
+    name: "Avani Moola Street",
+    slug: "avani-moola-street",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9185,
+    longitude: 78.1210,
+    categories: ["thrift-streets"],
+    primaryCategory: "thrift-streets",
+    tagline: "Traditional Sungudi cotton & silk saree bazaar",
+    description: "Shopping artery famous for genuine tie-and-dye Madurai Sungudi sarees.",
+    image: "https://images.unsplash.com/photo-1607082348824-0a96f2a4b9da?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["silk", "sungudi", "bazaar"]
+  },
+  "famous-jigarthanda": {
+    id: "p-famous-jigarthanda",
+    canonicalName: "Famous Jigarthanda (Town Hall Road)",
+    name: "Famous Jigarthanda",
+    slug: "famous-jigarthanda",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9181,
+    longitude: 78.1172,
+    categories: ["food-spots"],
+    primaryCategory: "food-spots",
+    tagline: "Madurai's legendary cooling almond gum & basundi drink",
+    description: "Original home of Madurai's signature drink prepared with almond resin and ice cream.",
+    image: "https://images.unsplash.com/photo-1572490122747-3968b75cc699?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["jigarthanda", "food", "drink"]
+  },
+  "konar-mess": {
+    id: "p-konar-mess",
+    canonicalName: "Konar Mess — Famous Kari Dosa",
+    name: "Konar Mess",
+    slug: "konar-mess",
+    district: "Madurai",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.9165,
+    longitude: 78.1189,
+    categories: ["food-spots"],
+    primaryCategory: "food-spots",
+    tagline: "Pioneer of 3-layer Madurai Kari Dosa in Simmakkal",
+    description: "70-year-old legendary mess famous for 3-tiered Kari Dosa and mutton chukka.",
+    image: "https://images.unsplash.com/photo-1610192244261-3f33de3f55e4?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    tags: ["karidosa", "konarmess", "food"]
   },
   kodaikanal: {
     id: "p-kodaikanal-lake",
@@ -646,6 +790,132 @@ const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     placeType: "city",
     minZoom: 1,
     tags: ["dindigul", "city"]
+  },
+
+  // Virudhunagar & Southern Districts
+  virudhunagar: {
+    id: "p-virudhunagar-city",
+    canonicalName: "Virudhunagar District & Srivilliputhur",
+    name: "Virudhunagar",
+    slug: "virudhunagar",
+    district: "Virudhunagar",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.5872,
+    longitude: 77.9514,
+    categories: ["heritage", "temples", "food", "tourist-places"],
+    primaryCategory: "heritage",
+    tagline: "Land of Srivilliputhur Andal Gopuram (TN Seal), Ennai Parotta & Sivakasi",
+    description: "Historic district featuring Srivilliputhur Andal Temple (official seal of Government of Tamil Nadu), Kamarajar Memorial House, Sivakasi printing hub, and famous culinary parotta legends.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    aliases: ["virudhunagr", "virudhunagar", "virudhunagar district", "srivilliputhur", "sivakasi", "virdhunagar", "virudunagar"],
+    tags: ["virudhunagar", "virudhunagr", "srivilliputhur", "andal_temple", "tn_emblem", "ennai_parotta", "sivakasi"]
+  },
+  "srivilliputhur-andal-temple": {
+    id: "p-srivilliputhur-andal-temple",
+    canonicalName: "Srivilliputhur Andal Temple",
+    name: "Srivilliputhur",
+    slug: "srivilliputhur-andal-temple",
+    district: "Virudhunagar",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.5097,
+    longitude: 77.6322,
+    categories: ["temples", "heritage", "tourist-places"],
+    primaryCategory: "temples",
+    tagline: "Official Emblem of Tamil Nadu Government — 192ft 11-tiered Rajagopuram",
+    description: "Birthplace of Saint Andal and Periyalvar, featuring a grand 192-foot Rajagopuram which serves as the official seal of the Government of Tamil Nadu.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    aliases: ["srivilliputhur", "srivilliputhur temple", "andal temple", "tn emblem temple", "virudhunagar temple", "virudhunagr temple"],
+    tags: ["srivilliputhur", "andal", "tn_emblem", "gopuram", "virudhunagar"]
+  },
+  sivakasi: {
+    id: "p-sivakasi-city",
+    canonicalName: "Sivakasi Corporation",
+    name: "Sivakasi",
+    slug: "sivakasi",
+    district: "Virudhunagar",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.4533,
+    longitude: 77.7972,
+    categories: ["heritage", "tourist-places"],
+    primaryCategory: "heritage",
+    tagline: "Firecracker & Offset Printing Capital of India",
+    description: "Major commercial city in Virudhunagar district, famous for Badrakali Amman Temple, offset printing presses, and fireworks industries.",
+    image: "https://images.unsplash.com/photo-1548625361-1858e994918e?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    aliases: ["sivakasi", "sivakasi city", "virudhunagar sivakasi"],
+    tags: ["sivakasi", "printing", "virudhunagar"]
+  },
+  karur: {
+    id: "p-karur-city",
+    canonicalName: "Karur Corporation",
+    name: "Karur",
+    slug: "karur",
+    district: "Karur",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 10.9601,
+    longitude: 78.0766,
+    categories: ["heritage", "temples"],
+    primaryCategory: "heritage",
+    tagline: "Textile City & Pasupatheeswarar Temple Seat",
+    description: "Ancient Chola textile hub along the Amaravathi River.",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    aliases: ["karur", "karur city"],
+    tags: ["karur", "textile", "shiva"]
+  },
+  ramanathapuram: {
+    id: "p-ramanathapuram-city",
+    canonicalName: "Ramanathapuram Palace & Hub",
+    name: "Ramanathapuram",
+    slug: "ramanathapuram",
+    district: "Ramanathapuram",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.3639,
+    longitude: 78.8395,
+    categories: ["heritage", "tourist-places"],
+    primaryCategory: "heritage",
+    tagline: "Seat of Ramnad Kingdom & Gateway to Rameswaram Island",
+    description: "Historic coastal district headquarters featuring Ramalinga Vilasam Palace.",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    aliases: ["ramnad", "ramanathapuram"],
+    tags: ["ramnad", "palace", "rameswaram_gateway"]
+  },
+  tenkasi: {
+    id: "p-tenkasi-city",
+    canonicalName: "Tenkasi Heritage & Waterfalls Hub",
+    name: "Tenkasi",
+    slug: "tenkasi",
+    district: "Tenkasi",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 8.9593,
+    longitude: 77.3150,
+    categories: ["waterfalls", "temples"],
+    primaryCategory: "waterfalls",
+    tagline: "Kasi of the South & Gateway to Courtallam Herbal Falls",
+    description: "Scenic Western Ghats foothills town famous for Kasi Viswanathar Temple and Courtallam cascades.",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    placeType: "city",
+    minZoom: 1,
+    aliases: ["tenkasi", "kasi viswanathar"],
+    tags: ["tenkasi", "courtallam", "waterfalls"]
   }
 };
 
@@ -670,15 +940,23 @@ export function resolvePlaceById(placeId: string): ExplorerPlace {
     throw new DestinationResolutionError(placeId);
   }
   const rawId = placeId.toLowerCase().trim();
+
+  // 1. Direct key match in KNOWN_DESTINATIONS
+  if (KNOWN_DESTINATIONS[rawId]) return KNOWN_DESTINATIONS[rawId];
+
   const place = Object.values(KNOWN_DESTINATIONS).find((p) => p.id.toLowerCase() === rawId || p.slug.toLowerCase() === rawId);
   if (place) return place;
+
+  // 2. Fuzzy match lookup
+  const fuzzyPlace = resolvePlace(placeId);
+  if (fuzzyPlace) return fuzzyPlace;
 
   return {
     id: `p-${rawId}`,
     canonicalName: placeId,
     name: placeId,
     slug: rawId,
-    district: "Tamil Nadu",
+    district: "Madurai",
     state: "Tamil Nadu",
     country: "India",
     latitude: 9.9195,
@@ -696,24 +974,69 @@ export function resolvePlaceById(placeId: string): ExplorerPlace {
 export function resolvePlace(query: string): ExplorerPlace | null {
   if (!query || !query.trim()) return null;
   const rawQ = query.toLowerCase().trim();
+  const normQ = rawQ.replace(/[^a-z0-9]/g, "");
 
+  // 1. Fuzzy & Typo matches for Virudhunagar / Virudhunagr / Srivilliputhur / Sivakasi
+  if (normQ.includes("virudhu") || normQ.includes("virudunagar") || normQ.includes("virdhunagar") || normQ.includes("srivilliputhur") || normQ.includes("sivakasi")) {
+    if (normQ.includes("srivilliputhur") || normQ.includes("andal")) {
+      return KNOWN_DESTINATIONS["srivilliputhur-andal-temple"];
+    }
+    if (normQ.includes("sivakasi")) {
+      return KNOWN_DESTINATIONS["sivakasi"];
+    }
+    return KNOWN_DESTINATIONS["virudhunagar"];
+  }
+
+  // 2. Direct match in KNOWN_DESTINATIONS dictionary
   for (const [key, place] of Object.entries(KNOWN_DESTINATIONS)) {
-    if (rawQ.includes(key) || place.id.toLowerCase() === rawQ || place.slug.toLowerCase() === rawQ) {
+    const keyMatch = rawQ.includes(key) || key.includes(rawQ) || normQ.includes(key.replace(/[^a-z0-9]/g, ""));
+    const nameMatch = place.name.toLowerCase().includes(rawQ) || rawQ.includes(place.name.toLowerCase());
+    const canonicalMatch = place.canonicalName.toLowerCase().includes(rawQ) || rawQ.includes(place.canonicalName.toLowerCase());
+    const slugMatch = place.slug.toLowerCase() === rawQ || place.id.toLowerCase() === rawQ;
+    const aliasMatch = (place.aliases || []).some((a) => a.toLowerCase().includes(rawQ) || rawQ.includes(a.toLowerCase()));
+
+    if (keyMatch || nameMatch || canonicalMatch || slugMatch || aliasMatch) {
       return place;
     }
   }
 
-  // Generic place fallback for arbitrary query string
+  // 3. Keyword-based destination coordinate resolution for well-known regions
+  if (rawQ.includes("ooty") || rawQ.includes("udagamandalam") || rawQ.includes("nilgiris") || rawQ.includes("coonoor")) {
+    return KNOWN_DESTINATIONS["ooty"];
+  }
+  if (rawQ.includes("kanyakumari") || rawQ.includes("kanniyakumari") || rawQ.includes("nagercoil")) {
+    return KNOWN_DESTINATIONS["nagercoil-city"] || {
+      id: "p-kanyakumari",
+      canonicalName: "Kanyakumari",
+      name: "Kanyakumari",
+      slug: "kanyakumari",
+      district: "Kanyakumari",
+      state: "Tamil Nadu",
+      country: "India",
+      latitude: 8.0883,
+      longitude: 77.5385,
+      categories: ["coastal", "beaches", "heritage"],
+      primaryCategory: "coastal",
+      tagline: "Land's End of India where three seas converge",
+      description: "Coastal southern tip famous for Vivekananda Rock Memorial and Thiruvalluvar Statue.",
+      image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+      verified: true,
+      tags: ["kanyakumari", "lands_end"]
+    };
+  }
+
+  // 4. Generic place fallback for arbitrary query string (centered safely in Virudhunagar / Central TN if virudhunagar match)
+  const isVirudhuFallback = rawQ.includes("virudh") || rawQ.includes("virud");
   return {
     id: `p-${rawQ.replace(/\s+/g, "-")}`,
     canonicalName: query,
     name: query,
     slug: rawQ.replace(/\s+/g, "-"),
-    district: query,
+    district: isVirudhuFallback ? "Virudhunagar" : query,
     state: "Tamil Nadu",
     country: "India",
-    latitude: 9.9252,
-    longitude: 78.1198,
+    latitude: isVirudhuFallback ? 9.5872 : 10.5000,
+    longitude: isVirudhuFallback ? 77.9514 : 78.5000,
     categories: ["tourist-places"],
     primaryCategory: "tourist-places",
     tagline: `Destination sight in ${query}`,
@@ -723,3 +1046,4 @@ export function resolvePlace(query: string): ExplorerPlace | null {
     tags: [rawQ]
   };
 }
+

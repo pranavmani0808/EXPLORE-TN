@@ -232,18 +232,19 @@ export class AdminDashboardApiRepository {
 
   private static getHeaders(): HeadersInit {
     try {
-      const userRaw = localStorage.getItem('etn_auth_user');
+      const userRaw = typeof window !== "undefined" ? localStorage.getItem('etn_auth_user') : null;
       if (userRaw) {
         const user = JSON.parse(userRaw);
-        return {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer fake-jwt-token-for-${user.email || 'usr-popz-admin'}`
-        };
+        if (user && user.email) {
+          return {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer user-session-token-${user.id || 'admin'}`
+          };
+        }
       }
     } catch {}
     return {
-      'Content-Type': 'application/json',
-      'Authorization': 'Bearer fake-jwt-token-for-popzdesigngroup@gmail.com'
+      'Content-Type': 'application/json'
     };
   }
 

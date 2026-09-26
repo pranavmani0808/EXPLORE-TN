@@ -11,22 +11,27 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { AuthGuardProvider } from "../lib/auth-guard-context";
+import { Toaster } from "sonner";
+import { CookieBanner } from "../components/site/cookie-banner";
+import { UxStateListeners } from "../components/site/ux-state-listeners";
+import { GsapGlobalProvider } from "../components/site/gsap-provider";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100 font-sans">
+      <div className="max-w-md text-center space-y-4">
+        <h1 className="text-8xl font-black text-emerald-400 tracking-tight">404</h1>
+        <h2 className="text-xl font-bold text-white">Destination Off the Map</h2>
+        <p className="text-xs text-slate-400">
+          The trail or route page you're looking for doesn't exist or has been relocated in Tamil Nadu.
         </p>
-        <div className="mt-6">
+        <div className="pt-4">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-6 py-3 text-xs font-black text-black transition-colors hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
           >
-            Go home
+            Go Back Home →
           </Link>
         </div>
       </div>
@@ -42,13 +47,13 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
+    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100 font-sans">
+      <div className="max-w-md text-center space-y-4">
+        <h1 className="text-2xl font-black text-rose-400 tracking-tight">
+          System Signal Interrupted (500)
         </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+        <p className="text-xs text-slate-400">
+          Something went wrong loading this route. You can try refreshing or return to the main map.
         </p>
         <div className="mt-6 flex flex-wrap justify-center gap-2">
           <button
@@ -56,15 +61,15 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-black transition-colors hover:bg-emerald-400"
           >
-            Try again
+            Try Again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-5 py-2.5 text-xs font-bold text-slate-200 transition-colors hover:bg-slate-800"
           >
-            Go home
+            Go Home
           </a>
         </div>
       </div>
@@ -125,18 +130,18 @@ function RootShell({ children }: { children: ReactNode }) {
   );
 }
 
-
-import { AuthGuardProvider } from "../lib/auth-guard-context";
-import { Toaster } from "sonner";
-
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthGuardProvider>
-        <Toaster position="top-right" theme="dark" richColors />
-        <Outlet />
+        <GsapGlobalProvider>
+          <UxStateListeners />
+          <Toaster position="top-right" theme="dark" richColors />
+          <Outlet />
+          <CookieBanner />
+        </GsapGlobalProvider>
       </AuthGuardProvider>
     </QueryClientProvider>
   );

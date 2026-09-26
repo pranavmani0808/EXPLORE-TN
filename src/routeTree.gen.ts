@@ -10,8 +10,12 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as R403RouteImport } from './routes/403'
+import { Route as R500RouteImport } from './routes/500'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AdventuresRouteImport } from './routes/adventures'
+import { Route as AiPlanRouteImport } from './routes/ai-plan'
+import { Route as BillingRouteImport } from './routes/billing'
 import { Route as CoastalHeritageRouteImport } from './routes/coastal-heritage'
 import { Route as CommunityRouteImport } from './routes/community'
 import { Route as DiscoverRouteImport } from './routes/discover'
@@ -20,19 +24,43 @@ import { Route as HillEscapesRouteImport } from './routes/hill-escapes'
 import { Route as HillsOfTnRouteImport } from './routes/hills-of-tn'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as MaduraiRouteImport } from './routes/madurai'
+import { Route as MaintenanceRouteImport } from './routes/maintenance'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as OpsRouteImport } from './routes/ops'
 import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RoutesRouteImport } from './routes/routes'
+import { Route as SupportRouteImport } from './routes/support'
 import { Route as TheniRouteImport } from './routes/theni'
 import { Route as WesternGhatsRouteImport } from './routes/western-ghats'
+import { Route as DistrictsDistrictSlugRouteImport } from './routes/districts.$districtSlug'
 import { Route as ExploreCategoryRouteImport } from './routes/explore.$category'
+import { Route as LegalCommunityGuidelinesRouteImport } from './routes/legal.community-guidelines'
+import { Route as LegalCookiesRouteImport } from './routes/legal.cookies'
+import { Route as LegalDisclaimerRouteImport } from './routes/legal.disclaimer'
+import { Route as LegalPrivacyRouteImport } from './routes/legal.privacy'
+import { Route as LegalRefundsRouteImport } from './routes/legal.refunds'
+import { Route as LegalSecurityRouteImport } from './routes/legal.security'
+import { Route as LegalTermsRouteImport } from './routes/legal.terms'
+import { Route as PaymentFailedRouteImport } from './routes/payment.failed'
+import { Route as PaymentPendingRouteImport } from './routes/payment.pending'
+import { Route as PaymentSuccessRouteImport } from './routes/payment.success'
 import { Route as PlaceSlugRouteImport } from './routes/place.$slug'
 import { Route as TrailsArupadaiVeeduRouteImport } from './routes/trails.arupadai-veedu'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R403Route = R403RouteImport.update({
+  id: '/403',
+  path: '/403',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R500Route = R500RouteImport.update({
+  id: '/500',
+  path: '/500',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -43,6 +71,16 @@ const AdminRoute = AdminRouteImport.update({
 const AdventuresRoute = AdventuresRouteImport.update({
   id: '/adventures',
   path: '/adventures',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiPlanRoute = AiPlanRouteImport.update({
+  id: '/ai-plan',
+  path: '/ai-plan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BillingRoute = BillingRouteImport.update({
+  id: '/billing',
+  path: '/billing',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CoastalHeritageRoute = CoastalHeritageRouteImport.update({
@@ -85,6 +123,16 @@ const MaduraiRoute = MaduraiRouteImport.update({
   path: '/madurai',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MaintenanceRoute = MaintenanceRouteImport.update({
+  id: '/maintenance',
+  path: '/maintenance',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OpsRoute = OpsRouteImport.update({
   id: '/ops',
   path: '/ops',
@@ -105,6 +153,11 @@ const RoutesRoute = RoutesRouteImport.update({
   path: '/routes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SupportRoute = SupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TheniRoute = TheniRouteImport.update({
   id: '/theni',
   path: '/theni',
@@ -115,10 +168,66 @@ const WesternGhatsRoute = WesternGhatsRouteImport.update({
   path: '/western-ghats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DistrictsDistrictSlugRoute = DistrictsDistrictSlugRouteImport.update({
+  id: '/districts/$districtSlug',
+  path: '/districts/$districtSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExploreCategoryRoute = ExploreCategoryRouteImport.update({
   id: '/$category',
   path: '/$category',
   getParentRoute: () => ExploreRoute,
+} as any)
+const LegalCommunityGuidelinesRoute =
+  LegalCommunityGuidelinesRouteImport.update({
+    id: '/legal/community-guidelines',
+    path: '/legal/community-guidelines',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const LegalCookiesRoute = LegalCookiesRouteImport.update({
+  id: '/legal/cookies',
+  path: '/legal/cookies',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalDisclaimerRoute = LegalDisclaimerRouteImport.update({
+  id: '/legal/disclaimer',
+  path: '/legal/disclaimer',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalPrivacyRoute = LegalPrivacyRouteImport.update({
+  id: '/legal/privacy',
+  path: '/legal/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalRefundsRoute = LegalRefundsRouteImport.update({
+  id: '/legal/refunds',
+  path: '/legal/refunds',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalSecurityRoute = LegalSecurityRouteImport.update({
+  id: '/legal/security',
+  path: '/legal/security',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LegalTermsRoute = LegalTermsRouteImport.update({
+  id: '/legal/terms',
+  path: '/legal/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentFailedRoute = PaymentFailedRouteImport.update({
+  id: '/payment/failed',
+  path: '/payment/failed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentPendingRoute = PaymentPendingRouteImport.update({
+  id: '/payment/pending',
+  path: '/payment/pending',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PaymentSuccessRoute = PaymentSuccessRouteImport.update({
+  id: '/payment/success',
+  path: '/payment/success',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PlaceSlugRoute = PlaceSlugRouteImport.update({
   id: '/place/$slug',
@@ -133,8 +242,12 @@ const TrailsArupadaiVeeduRoute = TrailsArupadaiVeeduRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/500': typeof R500Route
   '/admin': typeof AdminRoute
   '/adventures': typeof AdventuresRoute
+  '/ai-plan': typeof AiPlanRoute
+  '/billing': typeof BillingRoute
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
   '/discover': typeof DiscoverRoute
@@ -143,20 +256,38 @@ export interface FileRoutesByFullPath {
   '/hills-of-tn': typeof HillsOfTnRoute
   '/login': typeof LoginRoute
   '/madurai': typeof MaduraiRoute
+  '/maintenance': typeof MaintenanceRoute
+  '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
+  '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
+  '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
+  '/legal/community-guidelines': typeof LegalCommunityGuidelinesRoute
+  '/legal/cookies': typeof LegalCookiesRoute
+  '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/security': typeof LegalSecurityRoute
+  '/legal/terms': typeof LegalTermsRoute
+  '/payment/failed': typeof PaymentFailedRoute
+  '/payment/pending': typeof PaymentPendingRoute
+  '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/500': typeof R500Route
   '/admin': typeof AdminRoute
   '/adventures': typeof AdventuresRoute
+  '/ai-plan': typeof AiPlanRoute
+  '/billing': typeof BillingRoute
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
   '/discover': typeof DiscoverRoute
@@ -165,21 +296,39 @@ export interface FileRoutesByTo {
   '/hills-of-tn': typeof HillsOfTnRoute
   '/login': typeof LoginRoute
   '/madurai': typeof MaduraiRoute
+  '/maintenance': typeof MaintenanceRoute
+  '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
+  '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
+  '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
+  '/legal/community-guidelines': typeof LegalCommunityGuidelinesRoute
+  '/legal/cookies': typeof LegalCookiesRoute
+  '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/security': typeof LegalSecurityRoute
+  '/legal/terms': typeof LegalTermsRoute
+  '/payment/failed': typeof PaymentFailedRoute
+  '/payment/pending': typeof PaymentPendingRoute
+  '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/500': typeof R500Route
   '/admin': typeof AdminRoute
   '/adventures': typeof AdventuresRoute
+  '/ai-plan': typeof AiPlanRoute
+  '/billing': typeof BillingRoute
   '/coastal-heritage': typeof CoastalHeritageRoute
   '/community': typeof CommunityRoute
   '/discover': typeof DiscoverRoute
@@ -188,13 +337,27 @@ export interface FileRoutesById {
   '/hills-of-tn': typeof HillsOfTnRoute
   '/login': typeof LoginRoute
   '/madurai': typeof MaduraiRoute
+  '/maintenance': typeof MaintenanceRoute
+  '/onboarding': typeof OnboardingRoute
   '/ops': typeof OpsRoute
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
+  '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
+  '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
+  '/legal/community-guidelines': typeof LegalCommunityGuidelinesRoute
+  '/legal/cookies': typeof LegalCookiesRoute
+  '/legal/disclaimer': typeof LegalDisclaimerRoute
+  '/legal/privacy': typeof LegalPrivacyRoute
+  '/legal/refunds': typeof LegalRefundsRoute
+  '/legal/security': typeof LegalSecurityRoute
+  '/legal/terms': typeof LegalTermsRoute
+  '/payment/failed': typeof PaymentFailedRoute
+  '/payment/pending': typeof PaymentPendingRoute
+  '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
 }
@@ -202,8 +365,12 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/403'
+    | '/500'
     | '/admin'
     | '/adventures'
+    | '/ai-plan'
+    | '/billing'
     | '/coastal-heritage'
     | '/community'
     | '/discover'
@@ -212,20 +379,38 @@ export interface FileRouteTypes {
     | '/hills-of-tn'
     | '/login'
     | '/madurai'
+    | '/maintenance'
+    | '/onboarding'
     | '/ops'
     | '/planner'
     | '/profile'
     | '/routes'
+    | '/support'
     | '/theni'
     | '/western-ghats'
+    | '/districts/$districtSlug'
     | '/explore/$category'
+    | '/legal/community-guidelines'
+    | '/legal/cookies'
+    | '/legal/disclaimer'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/security'
+    | '/legal/terms'
+    | '/payment/failed'
+    | '/payment/pending'
+    | '/payment/success'
     | '/place/$slug'
     | '/trails/arupadai-veedu'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/403'
+    | '/500'
     | '/admin'
     | '/adventures'
+    | '/ai-plan'
+    | '/billing'
     | '/coastal-heritage'
     | '/community'
     | '/discover'
@@ -234,20 +419,38 @@ export interface FileRouteTypes {
     | '/hills-of-tn'
     | '/login'
     | '/madurai'
+    | '/maintenance'
+    | '/onboarding'
     | '/ops'
     | '/planner'
     | '/profile'
     | '/routes'
+    | '/support'
     | '/theni'
     | '/western-ghats'
+    | '/districts/$districtSlug'
     | '/explore/$category'
+    | '/legal/community-guidelines'
+    | '/legal/cookies'
+    | '/legal/disclaimer'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/security'
+    | '/legal/terms'
+    | '/payment/failed'
+    | '/payment/pending'
+    | '/payment/success'
     | '/place/$slug'
     | '/trails/arupadai-veedu'
   id:
     | '__root__'
     | '/'
+    | '/403'
+    | '/500'
     | '/admin'
     | '/adventures'
+    | '/ai-plan'
+    | '/billing'
     | '/coastal-heritage'
     | '/community'
     | '/discover'
@@ -256,21 +459,39 @@ export interface FileRouteTypes {
     | '/hills-of-tn'
     | '/login'
     | '/madurai'
+    | '/maintenance'
+    | '/onboarding'
     | '/ops'
     | '/planner'
     | '/profile'
     | '/routes'
+    | '/support'
     | '/theni'
     | '/western-ghats'
+    | '/districts/$districtSlug'
     | '/explore/$category'
+    | '/legal/community-guidelines'
+    | '/legal/cookies'
+    | '/legal/disclaimer'
+    | '/legal/privacy'
+    | '/legal/refunds'
+    | '/legal/security'
+    | '/legal/terms'
+    | '/payment/failed'
+    | '/payment/pending'
+    | '/payment/success'
     | '/place/$slug'
     | '/trails/arupadai-veedu'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  R403Route: typeof R403Route
+  R500Route: typeof R500Route
   AdminRoute: typeof AdminRoute
   AdventuresRoute: typeof AdventuresRoute
+  AiPlanRoute: typeof AiPlanRoute
+  BillingRoute: typeof BillingRoute
   CoastalHeritageRoute: typeof CoastalHeritageRoute
   CommunityRoute: typeof CommunityRoute
   DiscoverRoute: typeof DiscoverRoute
@@ -279,12 +500,26 @@ export interface RootRouteChildren {
   HillsOfTnRoute: typeof HillsOfTnRoute
   LoginRoute: typeof LoginRoute
   MaduraiRoute: typeof MaduraiRoute
+  MaintenanceRoute: typeof MaintenanceRoute
+  OnboardingRoute: typeof OnboardingRoute
   OpsRoute: typeof OpsRoute
   PlannerRoute: typeof PlannerRoute
   ProfileRoute: typeof ProfileRoute
   RoutesRoute: typeof RoutesRoute
+  SupportRoute: typeof SupportRoute
   TheniRoute: typeof TheniRoute
   WesternGhatsRoute: typeof WesternGhatsRoute
+  DistrictsDistrictSlugRoute: typeof DistrictsDistrictSlugRoute
+  LegalCommunityGuidelinesRoute: typeof LegalCommunityGuidelinesRoute
+  LegalCookiesRoute: typeof LegalCookiesRoute
+  LegalDisclaimerRoute: typeof LegalDisclaimerRoute
+  LegalPrivacyRoute: typeof LegalPrivacyRoute
+  LegalRefundsRoute: typeof LegalRefundsRoute
+  LegalSecurityRoute: typeof LegalSecurityRoute
+  LegalTermsRoute: typeof LegalTermsRoute
+  PaymentFailedRoute: typeof PaymentFailedRoute
+  PaymentPendingRoute: typeof PaymentPendingRoute
+  PaymentSuccessRoute: typeof PaymentSuccessRoute
   PlaceSlugRoute: typeof PlaceSlugRoute
   TrailsArupadaiVeeduRoute: typeof TrailsArupadaiVeeduRoute
 }
@@ -296,6 +531,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/403': {
+      id: '/403'
+      path: '/403'
+      fullPath: '/403'
+      preLoaderRoute: typeof R403RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/500': {
+      id: '/500'
+      path: '/500'
+      fullPath: '/500'
+      preLoaderRoute: typeof R500RouteImport
       parentRoute: typeof rootRouteImport
     }
     '/admin': {
@@ -310,6 +559,20 @@ declare module '@tanstack/react-router' {
       path: '/adventures'
       fullPath: '/adventures'
       preLoaderRoute: typeof AdventuresRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-plan': {
+      id: '/ai-plan'
+      path: '/ai-plan'
+      fullPath: '/ai-plan'
+      preLoaderRoute: typeof AiPlanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/billing': {
+      id: '/billing'
+      path: '/billing'
+      fullPath: '/billing'
+      preLoaderRoute: typeof BillingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/coastal-heritage': {
@@ -368,6 +631,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MaduraiRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/maintenance': {
+      id: '/maintenance'
+      path: '/maintenance'
+      fullPath: '/maintenance'
+      preLoaderRoute: typeof MaintenanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/ops': {
       id: '/ops'
       path: '/ops'
@@ -396,6 +673,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoutesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/support': {
+      id: '/support'
+      path: '/support'
+      fullPath: '/support'
+      preLoaderRoute: typeof SupportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/theni': {
       id: '/theni'
       path: '/theni'
@@ -410,12 +694,89 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WesternGhatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/districts/$districtSlug': {
+      id: '/districts/$districtSlug'
+      path: '/districts/$districtSlug'
+      fullPath: '/districts/$districtSlug'
+      preLoaderRoute: typeof DistrictsDistrictSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explore/$category': {
       id: '/explore/$category'
       path: '/$category'
       fullPath: '/explore/$category'
       preLoaderRoute: typeof ExploreCategoryRouteImport
       parentRoute: typeof ExploreRoute
+    }
+    '/legal/community-guidelines': {
+      id: '/legal/community-guidelines'
+      path: '/legal/community-guidelines'
+      fullPath: '/legal/community-guidelines'
+      preLoaderRoute: typeof LegalCommunityGuidelinesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/cookies': {
+      id: '/legal/cookies'
+      path: '/legal/cookies'
+      fullPath: '/legal/cookies'
+      preLoaderRoute: typeof LegalCookiesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/disclaimer': {
+      id: '/legal/disclaimer'
+      path: '/legal/disclaimer'
+      fullPath: '/legal/disclaimer'
+      preLoaderRoute: typeof LegalDisclaimerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/privacy': {
+      id: '/legal/privacy'
+      path: '/legal/privacy'
+      fullPath: '/legal/privacy'
+      preLoaderRoute: typeof LegalPrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/refunds': {
+      id: '/legal/refunds'
+      path: '/legal/refunds'
+      fullPath: '/legal/refunds'
+      preLoaderRoute: typeof LegalRefundsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/security': {
+      id: '/legal/security'
+      path: '/legal/security'
+      fullPath: '/legal/security'
+      preLoaderRoute: typeof LegalSecurityRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/legal/terms': {
+      id: '/legal/terms'
+      path: '/legal/terms'
+      fullPath: '/legal/terms'
+      preLoaderRoute: typeof LegalTermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/failed': {
+      id: '/payment/failed'
+      path: '/payment/failed'
+      fullPath: '/payment/failed'
+      preLoaderRoute: typeof PaymentFailedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/pending': {
+      id: '/payment/pending'
+      path: '/payment/pending'
+      fullPath: '/payment/pending'
+      preLoaderRoute: typeof PaymentPendingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/payment/success': {
+      id: '/payment/success'
+      path: '/payment/success'
+      fullPath: '/payment/success'
+      preLoaderRoute: typeof PaymentSuccessRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/place/$slug': {
       id: '/place/$slug'
@@ -447,8 +808,12 @@ const ExploreRouteWithChildren =
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  R403Route: R403Route,
+  R500Route: R500Route,
   AdminRoute: AdminRoute,
   AdventuresRoute: AdventuresRoute,
+  AiPlanRoute: AiPlanRoute,
+  BillingRoute: BillingRoute,
   CoastalHeritageRoute: CoastalHeritageRoute,
   CommunityRoute: CommunityRoute,
   DiscoverRoute: DiscoverRoute,
@@ -457,12 +822,26 @@ const rootRouteChildren: RootRouteChildren = {
   HillsOfTnRoute: HillsOfTnRoute,
   LoginRoute: LoginRoute,
   MaduraiRoute: MaduraiRoute,
+  MaintenanceRoute: MaintenanceRoute,
+  OnboardingRoute: OnboardingRoute,
   OpsRoute: OpsRoute,
   PlannerRoute: PlannerRoute,
   ProfileRoute: ProfileRoute,
   RoutesRoute: RoutesRoute,
+  SupportRoute: SupportRoute,
   TheniRoute: TheniRoute,
   WesternGhatsRoute: WesternGhatsRoute,
+  DistrictsDistrictSlugRoute: DistrictsDistrictSlugRoute,
+  LegalCommunityGuidelinesRoute: LegalCommunityGuidelinesRoute,
+  LegalCookiesRoute: LegalCookiesRoute,
+  LegalDisclaimerRoute: LegalDisclaimerRoute,
+  LegalPrivacyRoute: LegalPrivacyRoute,
+  LegalRefundsRoute: LegalRefundsRoute,
+  LegalSecurityRoute: LegalSecurityRoute,
+  LegalTermsRoute: LegalTermsRoute,
+  PaymentFailedRoute: PaymentFailedRoute,
+  PaymentPendingRoute: PaymentPendingRoute,
+  PaymentSuccessRoute: PaymentSuccessRoute,
   PlaceSlugRoute: PlaceSlugRoute,
   TrailsArupadaiVeeduRoute: TrailsArupadaiVeeduRoute,
 }

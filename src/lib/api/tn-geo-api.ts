@@ -44,30 +44,46 @@ export class TNGeoApiRepository {
   }
 
   static async getDistricts(): Promise<TNGeoNode[]> {
-    const res = await fetch(`${this.baseUrl}/districts`);
-    if (!res.ok) throw new Error('Failed to fetch districts');
-    const env = await res.json();
-    return env.data;
+    try {
+      const res = await fetch(`${this.baseUrl}/districts`);
+      if (!res.ok) return [];
+      const env = await res.json();
+      return env.data || [];
+    } catch {
+      return [];
+    }
   }
 
   static async getChildren(nodeId: string): Promise<TNGeoNode[]> {
-    const res = await fetch(`${this.baseUrl}/nodes/${encodeURIComponent(nodeId)}/children`);
-    if (!res.ok) throw new Error('Failed to fetch child administrative nodes');
-    const env = await res.json();
-    return env.data;
+    try {
+      const res = await fetch(`${this.baseUrl}/nodes/${encodeURIComponent(nodeId)}/children`);
+      if (!res.ok) return [];
+      const env = await res.json();
+      return env.data || [];
+    } catch {
+      return [];
+    }
   }
 
   static async searchGeo(query: string): Promise<TNGeoSearchResult> {
-    const res = await fetch(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`);
-    if (!res.ok) throw new Error('Failed to search geographic directory');
-    const env = await res.json();
-    return env.data;
+    try {
+      const res = await fetch(`${this.baseUrl}/search?q=${encodeURIComponent(query)}`);
+      if (!res.ok) return { query, totalMatches: 0, nodes: [] };
+      const env = await res.json();
+      return env.data || { query, totalMatches: 0, nodes: [] };
+    } catch {
+      return { query, totalMatches: 0, nodes: [] };
+    }
   }
 
-  static async getAreaDetail(areaId: string): Promise<TNGeoAreaDetail> {
-    const res = await fetch(`${this.baseUrl}/area/${encodeURIComponent(areaId)}`);
-    if (!res.ok) throw new Error('Failed to fetch area details');
-    const env = await res.json();
-    return env.data;
+  static async getAreaDetail(areaId: string): Promise<TNGeoAreaDetail | null> {
+    try {
+      const res = await fetch(`${this.baseUrl}/area/${encodeURIComponent(areaId)}`);
+      if (!res.ok) return null;
+      const env = await res.json();
+      return env.data || null;
+    } catch {
+      return null;
+    }
   }
 }

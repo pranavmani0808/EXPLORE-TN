@@ -57,6 +57,18 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
     const updatedUser = getCurrentAuthUser();
     setUser(updatedUser);
 
+    if (updatedUser) {
+      try {
+        const { syncGuestDraftToUserAccount } = await import("./user-saved-trips");
+        const synced = syncGuestDraftToUserAccount(updatedUser.id);
+        if (synced) {
+          toast.success(`Welcome ${updatedUser.name}! Your AI trip (${synced.origin} → ${synced.destination}) has been saved to your account 🎉`);
+        }
+      } catch (err) {
+        console.error("Error syncing guest draft:", err);
+      }
+    }
+
     if (pendingAction) {
       try {
         await pendingAction();

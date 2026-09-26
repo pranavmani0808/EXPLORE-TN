@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import { CANONICAL_PLACES, ExplorerPlace, PlaceCategory } from "@/lib/data/canonical-places";
+import { getGoogleTileUrl } from "@/lib/google-maps-loader";
 import {
   MapPin,
   Star,
@@ -199,7 +200,7 @@ export function DedicatedMapModal({
         attributionControl: false,
       });
 
-      L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}", {
+      L.tileLayer(getGoogleTileUrl("roadmap"), {
         maxZoom: 19,
         subdomains: "abcd",
       }).addTo(map);

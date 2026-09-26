@@ -21,8 +21,13 @@ import {
   Check,
   ArrowRight,
   Bookmark,
+  Trash2,
+  PlusCircle,
+  RefreshCw,
+  Award
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
+import { AITravelPlannerInput } from "@/components/site/ai-travel-planner-input";
 import { Button } from "@/components/ui/button";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { toast } from "sonner";
@@ -99,7 +104,64 @@ function PlannerPage() {
 
   // Dynamic Route & Planner Response State
   const [plannerData, setPlannerData] = useState<PlannerChatResponseDTO | null>(null);
+  const [aiPlanData, setAiPlanData] = useState<any | null>(null);
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
+
+  const handleAISearch = async (params: {
+    query: string;
+    origin?: string;
+    destination?: string;
+    days?: number;
+    categories?: string[];
+  }) => {
+    setLoading(true);
+    setErrorMsg(null);
+    try {
+      const res = await PlannerApiRepository.planAITravel(params);
+      setAiPlanData(res);
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", text: params.query },
+        { role: "assistant", text: res.summary || `AI Plan generated for ${params.query}` }
+      ]);
+      toast.success("AI Travel Plan generated successfully ✓");
+    } catch (err: any) {
+      console.error(err);
+      // Fallback to chat assistant if standard AI plan route fails
+      handleSendMessage(params.query);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleRemoveStop = async (placeId: string) => {
+    if (!aiPlanData) return;
+    try {
+      const res = await PlannerApiRepository.modifyAIPlan({
+        current_plan: aiPlanData,
+        action: "remove_stop",
+        target_stop_id: placeId
+      });
+      setAiPlanData(res);
+      toast.info("Stop removed. Route recalculated ✓");
+    } catch (err: any) {
+      toast.error("Failed to modify route stop.");
+    }
+  };
+
+  const handleAddHiddenPlaces = async () => {
+    if (!aiPlanData) return;
+    try {
+      const res = await PlannerApiRepository.modifyAIPlan({
+        current_plan: aiPlanData,
+        action: "add_hidden"
+      });
+      setAiPlanData(res);
+      toast.success("Added hidden gem place to itinerary ✓");
+    } catch (err: any) {
+      toast.error("Failed to add hidden place.");
+    }
+  };
   const [timeline, setTimeline] = useState<Array<{ time: string; name: string; description: string }>>([
     {
       time: "06:00 AM",
@@ -209,12 +271,20 @@ function PlannerPage() {
     handleSendMessage(text);
   };
 
-  // Extract Route Coordinates & Markers dynamically from API response
-  const rawCoords = plannerData?.route?.geometry?.coordinates || [];
-  const mapRoutePoints: Array<[number, number]> = rawCoords.map(([lng, lat]) => [lat, lng]);
+  // Extract Route Coordinates & Markers dynamically from API response (prioritizing AI Plan state)
+  const stops = aiPlanData?.ordered_stops || [];
+  const rawCoords = aiPlanData?.route_polyline_points || (plannerData?.route?.geometry?.coordinates || []).map(([lng, lat]) => [lat, lng]);
+  
+  const mapRoutePoints: Array<[number, number]> = (aiPlanData?.route_polyline_points && aiPlanData.route_polyline_points.length > 0)
+    ? aiPlanData.route_polyline_points
+    : rawCoords.length > 0
+    ? rawCoords
+    : stops.length > 0
+    ? stops.map((s: any) => [s.lat, s.lng])
+    : [];
 
-  const originName = plannerData?.plannerState?.origin || "Chennai";
-  const destName = plannerData?.plannerState?.destination || "Destination";
+  const originName = aiPlanData?.origin?.name || plannerData?.plannerState?.origin || "Madurai";
+  const destName = aiPlanData?.destination?.name || plannerData?.plannerState?.destination || "Ooty";
   const overnightTravel = plannerData?.plannerState?.overnightTravel || false;
 
   const originCityKey = originName.toLowerCase();
@@ -228,13 +298,13 @@ function PlannerPage() {
     ? { lat: mapRoutePoints[0][0], lng: mapRoutePoints[0][1], desc: `${canonicalOrigin?.canonicalName || originName} Departure` }
     : canonicalOrigin
     ? { lat: canonicalOrigin.latitude, lng: canonicalOrigin.longitude, desc: `${canonicalOrigin.canonicalName} (${canonicalOrigin.district})` }
-    : (CITY_COORDINATES[originCityKey] || { lat: 13.0827, lng: 80.2707, desc: `${originName} Departure` });
+    : (CITY_COORDINATES[originCityKey] || { lat: 9.9252, lng: 78.1198, desc: `${originName} Departure` });
 
   const destPos = mapRoutePoints.length > 0
     ? { lat: mapRoutePoints[mapRoutePoints.length - 1][0], lng: mapRoutePoints[mapRoutePoints.length - 1][1], desc: `${canonicalDest?.canonicalName || destName} Target Destination` }
     : canonicalDest
     ? { lat: canonicalDest.latitude, lng: canonicalDest.longitude, desc: `${canonicalDest.canonicalName} (${canonicalDest.district})` }
-    : (CITY_COORDINATES[destCityKey] || { lat: 9.9252, lng: 78.1198, desc: `${destName} Target Destination` });
+    : (CITY_COORDINATES[destCityKey] || { lat: 11.4102, lng: 76.6950, desc: `${destName} Target Destination` });
 
   const centerLat = (originPos.lat + destPos.lat) / 2;
   const centerLng = (originPos.lng + destPos.lng) / 2;
@@ -259,7 +329,93 @@ function PlannerPage() {
         subtitle="Conversational route & feasibility engine powered by PostGIS spatial database, OSRM highway routing, and OpenSERP web evidence."
       />
 
-      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+      <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-6">
+        {/* Prominent AI Travel Intelligence Engine Input Bar */}
+        <AITravelPlannerInput onSearch={handleAISearch} isLoading={loading} />
+
+        {/* AI Travel Plan Summary & Controls Banner */}
+        {aiPlanData && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="p-5 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-lg text-white space-y-3"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-500/20 pb-3">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                    {aiPlanData.intent_type || "AI PLAN"}
+                  </span>
+                  <h3 className="font-bold text-lg text-emerald-300">{aiPlanData.title}</h3>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">{aiPlanData.summary}</p>
+              </div>
+
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  onClick={handleAddHiddenPlaces}
+                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold"
+                >
+                  <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Hidden Places
+                </Button>
+              </div>
+            </div>
+
+            {/* AI Ordered Stops Cards List */}
+            <div className="space-y-3 pt-2">
+              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Compass className="w-4 h-4 text-emerald-400" /> Ranked Itinerary Stops ({aiPlanData.ordered_stops?.length || 0})
+              </h4>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {aiPlanData.ordered_stops?.map((stop: any, idx: number) => (
+                  <div
+                    key={stop.place_id || idx}
+                    className="p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/80 flex items-start justify-between gap-3 text-xs"
+                  >
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-[10px]">
+                          {stop.order || idx + 1}
+                        </span>
+                        <span className="font-bold text-white text-sm">{stop.name}</span>
+                      </div>
+
+                      <div className="flex items-center gap-2 text-[11px] text-slate-300">
+                        <span className="text-emerald-400 font-medium">{stop.category}</span>
+                        <span>•</span>
+                        <span>{stop.district}</span>
+                      </div>
+
+                      <p className="text-[11px] text-slate-400 line-clamp-2">{stop.rationale}</p>
+
+                      <div className="flex items-center gap-2 pt-1">
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[10px] font-semibold border border-emerald-500/20 flex items-center gap-1">
+                          <Award className="w-3 h-3 text-emerald-400" />
+                          {stop.provenance?.source || "ExploreTN Verified"}
+                        </span>
+                        <span className="text-[10px] text-slate-400">
+                          {stop.recommended_visit_mins} mins visit
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveStop(stop.place_id || stop.slug)}
+                      className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+                      title="Remove stop and recalculate route"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+
         <div className="grid gap-8 lg:grid-cols-12">
 
           {/* Left Column: Chat Conversation Stream */}

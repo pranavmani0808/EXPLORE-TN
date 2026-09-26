@@ -108,4 +108,63 @@ export class PlannerApiRepository {
     const json = await response.json();
     return json.data;
   }
+
+  static async planAITravel(params: {
+    query: string;
+    origin?: string;
+    destination?: string;
+    days?: number;
+    interests?: string[];
+    categories?: string[];
+    radius_km?: number;
+  }): Promise<any> {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/v1/ai_travel/plan`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI Travel Plan error HTTP ${response.status}`);
+    }
+    return await response.json();
+  }
+
+  static async discoverAIDestination(params: {
+    query: string;
+    radius_km?: number;
+    categories?: string[];
+  }): Promise<any> {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/v1/ai_travel/discover`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI Destination Discovery error HTTP ${response.status}`);
+    }
+    return await response.json();
+  }
+
+  static async modifyAIPlan(params: {
+    current_plan: any;
+    action: string;
+    target_stop_id?: string;
+    prompt?: string;
+  }): Promise<any> {
+    const baseUrl = getApiBaseUrl();
+    const response = await fetch(`${baseUrl}/api/v1/ai_travel/modify`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(params),
+    });
+
+    if (!response.ok) {
+      throw new Error(`AI Plan Modify error HTTP ${response.status}`);
+    }
+    return await response.json();
+  }
 }

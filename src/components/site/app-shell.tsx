@@ -24,9 +24,9 @@ export function PageHeader({
   description: string;
 }) {
   return (
-    <header className="mx-auto max-w-6xl px-4 pb-8 pt-28 sm:px-6 sm:pt-36">
+    <header className="gsap-section mx-auto max-w-6xl px-4 pb-8 pt-28 sm:px-6 sm:pt-36">
       <p className="text-xs font-semibold uppercase tracking-[0.2em] text-primary">{eyebrow}</p>
-      <h1 className="mt-3 text-4xl font-bold sm:text-6xl">{title}</h1>
+      <h1 className="gsap-heading mt-3 text-4xl font-black sm:text-6xl tracking-tight">{title}</h1>
       <p className="mt-4 max-w-2xl text-base text-muted-foreground sm:text-lg">{description}</p>
     </header>
   );

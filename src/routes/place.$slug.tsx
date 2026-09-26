@@ -83,18 +83,28 @@ function PlacePage() {
   const [reviewStatus, setReviewStatus] = useState<string | null>(null);
 
   useEffect(() => {
+    const controller = new AbortController();
     async function fetchWeather() {
       try {
-        const res = await fetch(`${getApiBaseUrl()}/api/v1/places/${place.slug}/weather`);
+        const res = await fetch(`${getApiBaseUrl()}/api/v1/places/${place.slug}/weather`, {
+          signal: controller.signal,
+        });
         if (res.ok) {
           const env = await res.json();
-          setWeatherData(env.data);
+          if (!controller.signal.aborted) {
+            setWeatherData(env.data);
+          }
         }
-      } catch (err) {
-        console.warn("Weather fetch fallback:", err);
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.warn("Weather fetch fallback:", err);
+        }
       }
     }
     fetchWeather();
+    return () => {
+      controller.abort();
+    };
   }, [place.slug]);
 
   useEffect(() => {
