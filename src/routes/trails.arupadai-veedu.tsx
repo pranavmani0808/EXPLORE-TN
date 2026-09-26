@@ -313,7 +313,6 @@ function ArupadaiVeeduTrailPage() {
                           {idx + 1}
                         </button>
                       </MarkerContent>
-                      <MarkerLabel>{temple.name}</MarkerLabel>
                       <MarkerTooltip>{temple.tagline}</MarkerTooltip>
                       <MarkerPopup title={temple.name} rating={temple.rating}>
                         <p className="text-xs text-muted-foreground">{temple.district} District · Stop #{idx + 1}</p>

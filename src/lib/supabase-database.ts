@@ -88,6 +88,20 @@ export interface SupabaseAuditLogRecord {
   created_at: string;
 }
 
+export interface SupabaseUserRecord {
+  id: string;
+  name: string;
+  email: string;
+  avatar_url?: string;
+  role: string;
+  status: string;
+  explorer_rank?: string;
+  district_count?: number;
+  xp?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 // In-memory cache for seamless ultra-fast response while primary memory syncs
 let isSeededInMemory = false;
 let memoryPlacesCache: SupabasePlaceRecord[] = [];
@@ -432,6 +446,61 @@ export class SupabaseDatabaseRepository {
     }
   }
 
+  // --- USER TABLE & RBAC MODULE (SUPABASE PRIMARY MEMORY) ---
+  static async upsertUserRecord(user: { id: string; name: string; email: string; avatar?: string; role: string; status?: string; rank?: string; districtCount?: number; xp?: number }): Promise<boolean> {
+    try {
+      const record: SupabaseUserRecord = {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        avatar_url: user.avatar || "",
+        role: user.role,
+        status: user.status || "active",
+        explorer_rank: user.rank || "Explorer",
+        district_count: user.districtCount || 0,
+        xp: user.xp || 0,
+        updated_at: new Date().toISOString()
+      };
+      const { error } = await supabase.from('users').upsert([record], { onConflict: 'email' });
+      if (error) {
+        console.warn("[Supabase Primary Memory] user record upsert notice:", error.message);
+      }
+      return true;
+    } catch (err) {
+      console.warn("[Supabase Primary Memory] Error saving user record:", err);
+      return false;
+    }
+  }
+
+  static async getUserRecord(idOrEmail: string): Promise<SupabaseUserRecord | null> {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('*')
+        .or(`id.eq.${idOrEmail},email.eq.${idOrEmail}`)
+        .maybeSingle();
+
+      if (!error && data) {
+        return data as SupabaseUserRecord;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  }
+
+  static async updateUserRoleInDB(userId: string, newRole: string): Promise<boolean> {
+    try {
+      const { error } = await supabase.from('users').update({ role: newRole, updated_at: new Date().toISOString() }).eq('id', userId);
+      if (error) {
+        console.warn("[Supabase DB] Error updating user role:", error.message);
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
   // --- AUDIT LOGS & ACTIVITY MODULE (SUPABASE PRIMARY MEMORY) ---
   static async logAdminAction(userEmail: string, action: string, resource: string, details?: string): Promise<boolean> {
     try {
@@ -452,4 +521,5 @@ export class SupabaseDatabaseRepository {
     }
   }
 }
+
 

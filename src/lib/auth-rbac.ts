@@ -118,6 +118,13 @@ export function setAuthSession(user: UserProfile) {
     localStorage.setItem("etn_auth_user", JSON.stringify(user));
     window.dispatchEvent(new CustomEvent("etn_auth_updated", { detail: user }));
   }
+  try {
+    import("./supabase-database").then(({ SupabaseDatabaseRepository }) => {
+      SupabaseDatabaseRepository.upsertUserRecord(user);
+    });
+  } catch {
+    // Graceful silent database sync
+  }
 }
 
 export function updateAuthRole(newRole: UserRole) {
@@ -125,6 +132,13 @@ export function updateAuthRole(newRole: UserRole) {
   if (current) {
     const updated: UserProfile = { ...current, role: newRole };
     setAuthSession(updated);
+    try {
+      import("./supabase-database").then(({ SupabaseDatabaseRepository }) => {
+        SupabaseDatabaseRepository.updateUserRoleInDB(current.id, newRole);
+      });
+    } catch {
+      // Graceful silent database sync
+    }
   }
 }
 
