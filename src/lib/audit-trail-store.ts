@@ -84,6 +84,20 @@ export function recordAuditLog(entry: Omit<AuditTrailEntry, "id" | "timestamp" |
   const updated = [fullEntry, ...list].slice(0, 100);
   localStorage.setItem(STORAGE_KEYS.AUDIT_TRAIL, JSON.stringify(updated));
 
+  // Sync log to Supabase Primary Database Memory
+  try {
+    import("@/lib/supabase-database").then(({ SupabaseDatabaseRepository }) => {
+      SupabaseDatabaseRepository.logAdminAction(
+        entry.performedBy || "Pranav",
+        entry.action,
+        `${entry.entityType}:${entry.entityId}`,
+        entry.details || `${entry.entityType} ${entry.entityName}`
+      );
+    });
+  } catch {
+    // Graceful silent async sync
+  }
+
   addNotification({
     title: `${entry.performedBy} • ${entry.performedByRole.toUpperCase()} • ${entry.action.replace("_", " ")}`,
     message: entry.details || `${entry.entityType.toUpperCase()} "${entry.entityName}" updated`,

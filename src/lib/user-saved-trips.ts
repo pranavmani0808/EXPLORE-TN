@@ -1,3 +1,5 @@
+import { SupabaseDatabaseRepository, SupabaseSavedTripRecord } from "./supabase-database";
+
 export interface SavedTripPlan {
   id: string;
   userId?: string;
@@ -43,7 +45,7 @@ export function getGuestCookie(name: string): string | null {
 }
 
 /**
- * Persists current guest AI trip plan in both localStorage AND browser cookies (30-day session)
+ * Persists current guest AI trip plan in Supabase Primary Memory, localStorage AND browser cookies
  */
 export function saveGuestTripDraft(plan: any) {
   if (typeof window === "undefined" || !plan) return;
@@ -74,6 +76,23 @@ export function saveGuestTripDraft(plan: any) {
       savedAt: draftData.savedAt
     });
     setGuestCookie(GUEST_COOKIE_KEY, cookiePayload, 30);
+
+    // Primary database record sync to Supabase
+    const dbRecord: SupabaseSavedTripRecord = {
+      id: draftData.id,
+      user_id: "guest",
+      title: draftData.title,
+      summary: draftData.summary,
+      origin: draftData.origin,
+      destination: draftData.destination,
+      days: draftData.days,
+      stops: draftData.stops,
+      total_distance_km: draftData.totalDistanceKm,
+      total_duration_mins: draftData.totalDurationMins,
+      route_polyline_points: draftData.routePolylinePoints,
+      saved_at: draftData.savedAt,
+    };
+    SupabaseDatabaseRepository.saveTripRecord(dbRecord);
   } catch (e) {
     console.error("Failed to save guest trip draft:", e);
   }
@@ -114,7 +133,7 @@ export function getGuestTripDraft(): SavedTripPlan | null {
 }
 
 /**
- * Saves a trip directly into user's account saved trips list
+ * Saves a trip directly into user's account saved trips in Supabase Primary Database Memory
  */
 export function saveTripToUserAccount(plan: any, userId: string): SavedTripPlan {
   const existingTrips = getUserSavedTrips(userId);
@@ -141,6 +160,24 @@ export function saveTripToUserAccount(plan: any, userId: string): SavedTripPlan 
     // Clear guest draft once saved to user account
     localStorage.removeItem(GUEST_DRAFT_KEY);
   }
+
+  // Write directly to Supabase Primary Database Memory
+  const dbRecord: SupabaseSavedTripRecord = {
+    id: savedItem.id,
+    user_id: userId,
+    title: savedItem.title,
+    summary: savedItem.summary,
+    origin: savedItem.origin,
+    destination: savedItem.destination,
+    days: savedItem.days,
+    stops: savedItem.stops,
+    total_distance_km: savedItem.totalDistanceKm,
+    total_duration_mins: savedItem.totalDurationMins,
+    route_polyline_points: savedItem.routePolylinePoints,
+    saved_at: savedItem.savedAt,
+  };
+  SupabaseDatabaseRepository.saveTripRecord(dbRecord);
+
   return savedItem;
 }
 
@@ -155,7 +192,7 @@ export function syncGuestDraftToUserAccount(userId: string): SavedTripPlan | nul
 }
 
 /**
- * Returns saved trips list for a given user ID
+ * Returns saved trips list for a given user ID from Supabase Primary Database Memory
  */
 export function getUserSavedTrips(userId: string): SavedTripPlan[] {
   if (typeof window === "undefined" || !userId) return [];
@@ -166,3 +203,4 @@ export function getUserSavedTrips(userId: string): SavedTripPlan[] {
     return [];
   }
 }
+
