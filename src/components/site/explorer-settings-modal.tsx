@@ -46,6 +46,11 @@ import {
   SavedPlaceItem,
   SavedRouteItem,
 } from "@/lib/explorer-gamification";
+import {
+  getActiveDeviceSessions,
+  revokeDeviceSession,
+  DeviceSession,
+} from "@/lib/device-session-manager";
 import { toast } from "sonner";
 
 export interface ExplorerSettingsModalProps {
@@ -137,6 +142,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
   });
   const [savedPlaces, setSavedPlaces] = useState<SavedPlaceItem[]>([]);
   const [savedRoutes, setSavedRoutes] = useState<SavedRouteItem[]>([]);
+  const [sessions, setSessions] = useState<DeviceSession[]>([]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -161,10 +167,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
     setAiAvoidOptions(stored.avoidOptions || ["Toll roads"]);
     setAiPreferOptions(stored.preferOptions || ["Scenic routes"]);
 
-    // Load Live Explorer Stats & Saved Items
+    // Load Live Explorer Stats, Saved Items & Device Sessions
     setStats(getExplorerGamificationStats());
     setSavedPlaces(getSavedPlaces());
     setSavedRoutes(getSavedRoutes());
+    setSessions(getActiveDeviceSessions());
 
     const handlePlacesUpdate = () => {
       setSavedPlaces(getSavedPlaces());
@@ -174,13 +181,18 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
       setSavedRoutes(getSavedRoutes());
       setStats(getExplorerGamificationStats());
     };
+    const handleSessionsUpdate = () => {
+      setSessions(getActiveDeviceSessions());
+    };
 
     window.addEventListener("etn_saved_places_updated", handlePlacesUpdate);
     window.addEventListener("etn_saved_routes_updated", handleRoutesUpdate);
+    window.addEventListener("etn_sessions_updated", handleSessionsUpdate);
 
     return () => {
       window.removeEventListener("etn_saved_places_updated", handlePlacesUpdate);
       window.removeEventListener("etn_saved_routes_updated", handleRoutesUpdate);
+      window.removeEventListener("etn_sessions_updated", handleSessionsUpdate);
     };
   }, [isOpen]);
 
@@ -924,29 +936,55 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {/* TAB 10: SECURITY */}
               {activeTab === "security" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
-                  <h3 className="text-base font-bold text-white">Active Device Sessions</h3>
-                  <div className="space-y-3 font-mono">
-                    <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <Laptop className="size-5 text-emerald-400" />
-                        <div>
-                          <p className="font-bold text-white">MacBook Pro (macOS)</p>
-                          <p className="text-slate-400 text-[11px]">Chennai, TN • Active Now</p>
-                        </div>
-                      </div>
-                      <span className="text-emerald-400 font-bold">Current Session</span>
-                    </div>
+                  <div>
+                    <h3 className="text-base font-bold text-white">Active Device Sessions</h3>
+                    <p className="text-zinc-400 text-xs mt-0.5">
+                      Devices currently authenticated to your ExploreTN account detected via HTTP User-Agent headers.
+                    </p>
+                  </div>
 
-                    <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <Smartphone className="size-5 text-zinc-400" />
-                        <div>
-                          <p className="font-bold text-white">iPhone 15 Pro</p>
-                          <p className="text-slate-400 text-[11px]">Last active: 2 days ago</p>
+                  <div className="space-y-3 font-mono">
+                    {sessions.map((session) => (
+                      <div
+                        key={session.id}
+                        className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center"
+                      >
+                        <div className="flex items-center gap-3">
+                          {session.deviceType === "desktop" ? (
+                            <Laptop className="size-5 text-emerald-400" />
+                          ) : (
+                            <Smartphone className="size-5 text-zinc-400" />
+                          )}
+                          <div>
+                            <p className="font-bold text-white flex items-center gap-2">
+                              <span>{session.deviceName}</span>
+                              <span className="text-[10px] text-zinc-400 font-sans font-normal">({session.browser})</span>
+                            </p>
+                            <p className="text-slate-400 text-[11px]">
+                              {session.location} • {session.lastActive}
+                            </p>
+                          </div>
                         </div>
+
+                        {session.isCurrentSession ? (
+                          <span className="text-emerald-400 font-bold px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px]">
+                            Current Session
+                          </span>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const updated = revokeDeviceSession(session.id);
+                              setSessions(updated);
+                              toast.success(`Revoked session on ${session.deviceName}`);
+                            }}
+                            className="text-rose-400 hover:text-rose-300 font-bold px-3 py-1 rounded-full bg-rose-500/10 border border-rose-500/20 text-[10px] transition cursor-pointer"
+                          >
+                            Revoke
+                          </button>
+                        )}
                       </div>
-                      <button className="text-rose-400 hover:underline">Revoke</button>
-                    </div>
+                    ))}
                   </div>
                 </div>
               )}
