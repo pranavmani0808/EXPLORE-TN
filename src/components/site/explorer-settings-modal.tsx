@@ -372,11 +372,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
             <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between px-2 text-xs">
               <div className="flex items-center gap-2">
                 <span className="grid size-7 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-bold font-mono text-xs">
-                  {name[0] || "P"}
+                  {name ? name[0].toUpperCase() : (currentUser ? currentUser.name[0].toUpperCase() : "G")}
                 </span>
                 <div className="truncate max-w-[110px]">
-                  <p className="font-bold text-white truncate">{name}</p>
-                  <p className="text-[10px] text-zinc-400 truncate">{email}</p>
+                  <p className="font-bold text-white truncate">{name || currentUser?.name || "Guest Explorer"}</p>
+                  <p className="text-[10px] text-zinc-400 truncate">{email || currentUser?.email || "Not signed in"}</p>
                 </div>
               </div>
               <button
@@ -452,7 +452,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       <div className="flex items-center gap-4">
                         <div className="relative">
                           <span className="grid size-16 place-items-center rounded-2xl bg-emerald-500 text-zinc-950 font-black text-2xl shadow-lg shadow-emerald-500/30 font-mono">
-                            {name[0] || "P"}
+                            {name ? name[0].toUpperCase() : (currentUser ? currentUser.name[0].toUpperCase() : "G")}
                           </span>
                           <span className="absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full bg-amber-400 text-zinc-950 font-bold text-[10px]">
                             ★
@@ -460,12 +460,12 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-xl font-black text-white">{name}</h3>
+                            <h3 className="text-xl font-black text-white">{name || currentUser?.name || "Guest Explorer"}</h3>
                             <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
                               Tamil Nadu Explorer
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-400 mt-0.5">@{username} • {homeLocation}</p>
+                          <p className="text-xs text-zinc-400 mt-0.5">@{username || "guest"} • {homeLocation || "Tamil Nadu"}</p>
                           <p className="text-xs text-slate-300 mt-1 italic">"{bio}"</p>
                         </div>
                       </div>

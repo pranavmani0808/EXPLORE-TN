@@ -63,10 +63,22 @@ export const DEFAULT_PREFERENCES: UserTravelPreferences = {
   onboardingCompleted: false,
 };
 
+function getPreferencesStorageKey(): string {
+  if (typeof window === "undefined") return "etn_user_preferences_guest";
+  try {
+    const user = getCurrentAuthUser();
+    if (user && user.id) {
+      return `etn_user_preferences_${user.id}`;
+    }
+  } catch {}
+  return "etn_user_preferences_guest";
+}
+
 export function getStoredPreferences(): UserTravelPreferences {
   if (typeof window === "undefined") return DEFAULT_PREFERENCES;
   try {
-    const raw = localStorage.getItem("etn_user_preferences");
+    const key = getPreferencesStorageKey();
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       return { ...DEFAULT_PREFERENCES, ...parsed };
@@ -79,9 +91,10 @@ export function getStoredPreferences(): UserTravelPreferences {
 
 export function saveStoredPreferences(prefs: Partial<UserTravelPreferences>) {
   if (typeof window === "undefined") return;
+  const key = getPreferencesStorageKey();
   const current = getStoredPreferences();
   const updated = { ...current, ...prefs, onboardingCompleted: true };
-  localStorage.setItem("etn_user_preferences", JSON.stringify(updated));
+  localStorage.setItem(key, JSON.stringify(updated));
   localStorage.setItem("etn_onboarding_completed", "true");
   window.dispatchEvent(new CustomEvent("etn_preferences_updated", { detail: updated }));
 }

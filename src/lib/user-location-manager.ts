@@ -10,10 +10,24 @@ export const DEFAULT_USER_LOCATION: UserLocation = {
   enabled: true,
 };
 
+import { getCurrentAuthUser } from "./auth-rbac";
+
+function getLocationStorageKey(): string {
+  if (typeof window === "undefined") return "etn_user_current_location_guest";
+  try {
+    const user = getCurrentAuthUser();
+    if (user && user.id) {
+      return `etn_user_current_location_${user.id}`;
+    }
+  } catch {}
+  return "etn_user_current_location_guest";
+}
+
 export function getStoredUserLocation(): UserLocation {
   if (typeof window === "undefined") return DEFAULT_USER_LOCATION;
   try {
-    const raw = localStorage.getItem("etn_user_current_location");
+    const key = getLocationStorageKey();
+    const raw = localStorage.getItem(key);
     if (raw) {
       const parsed = JSON.parse(raw);
       return { ...DEFAULT_USER_LOCATION, ...parsed };
@@ -26,9 +40,10 @@ export function getStoredUserLocation(): UserLocation {
 
 export function saveStoredUserLocation(loc: Partial<UserLocation>) {
   if (typeof window === "undefined") return;
+  const key = getLocationStorageKey();
   const current = getStoredUserLocation();
   const updated = { ...current, ...loc };
-  localStorage.setItem("etn_user_current_location", JSON.stringify(updated));
+  localStorage.setItem(key, JSON.stringify(updated));
   window.dispatchEvent(new CustomEvent("etn_location_updated", { detail: updated }));
 }
 
