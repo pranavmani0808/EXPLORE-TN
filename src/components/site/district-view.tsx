@@ -27,8 +27,13 @@ import {
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
-import { useGSAP } from "@gsap/react";
 import { cn } from "@/lib/utils";
+import { getHillDestinationIntelligence } from "@/lib/data/hill-region-intelligence";
+import {
+  DestinationHillIntelligenceCard,
+  MapFacilityLayerToggle,
+  MapFacilityFilterState,
+} from "@/components/site/hill-region-intelligence-components";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -53,6 +58,19 @@ export function DistrictView({ district }: DistrictViewProps) {
   const [selectedCategory, setSelectedCategory] = useState<DistrictCategoryKey>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSpotId, setActiveSpotId] = useState<string | null>(null);
+
+  const hillDestinationIntel = getHillDestinationIntelligence(district.slug);
+  const [facilityFilters, setFacilityFilters] = useState<MapFacilityFilterState>({
+    parking: true,
+    food: true,
+    fuel: true,
+    restroom: false,
+    medical: false,
+    hotels: false,
+    shops: false,
+    water: false,
+    network: false,
+  });
 
   const handleScrollLeft = () => {
     if (spotScrollRef.current) {
@@ -245,6 +263,11 @@ export function DistrictView({ district }: DistrictViewProps) {
           
           {/* LEFT COLUMN (7 COLS): RICH DISTRICT DESCRIPTION & OVERVIEW */}
           <div className="lg:col-span-7 space-y-6">
+            {/* 🏔️ DESTINATION-LEVEL HILL INTELLIGENCE (IF HILL REGION) */}
+            {hillDestinationIntel && (
+              <DestinationHillIntelligenceCard intel={hillDestinationIntel} />
+            )}
+
             <div className="gsap-hero-center-card bg-zinc-900/90 border border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md space-y-5">
               <div>
                 <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">District Overview</h3>
@@ -323,6 +346,9 @@ export function DistrictView({ district }: DistrictViewProps) {
                 </Badge>
               </div>
 
+              {/* Interactive Facility Layer Toggles */}
+              <MapFacilityLayerToggle state={facilityFilters} onChange={setFacilityFilters} />
+
               {/* Leaflet Map Frame */}
               <div className="h-[440px] w-full rounded-2xl overflow-hidden border border-zinc-800 relative">
                 {isMounted ? (
@@ -333,6 +359,7 @@ export function DistrictView({ district }: DistrictViewProps) {
                     selectedCategory={selectedCategory}
                     activeSpotId={activeSpotId}
                     onSelectSpot={(spot) => spot && setActiveSpotId(spot.id)}
+                    facilityFilters={facilityFilters}
                     className="size-full"
                   />
                 ) : (

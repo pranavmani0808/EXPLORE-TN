@@ -13,6 +13,7 @@ interface DistrictExplorerMapProps {
   selectedCategory: DistrictCategoryKey;
   activeSpotId: string | null;
   onSelectSpot: (spot: DistrictSpot | null) => void;
+  facilityFilters?: Record<string, boolean>;
   className?: string;
 }
 
@@ -26,18 +27,16 @@ const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string
 };
 
 function getCategoryIconSymbol(cat: string): string {
-  switch (cat) {
-    case "temples":
-      return "🛕";
-    case "tourist-spots":
-      return "🏛️";
-    case "food-spots":
-      return "🍲";
-    case "thrift-streets":
-      return "🛍️";
-    default:
-      return "📍";
-  }
+  const c = cat.toLowerCase();
+  if (c.includes("temple") || c.includes("spiritual")) return "🛕";
+  if (c.includes("food") || c.includes("culinary") || c.includes("mess")) return "🍱";
+  if (c.includes("thrift") || c.includes("shopping") || c.includes("craft")) return "🛍️";
+  if (c.includes("waterfall") || c.includes("falls") || c.includes("stream")) return "💦";
+  if (c.includes("hill") || c.includes("mountain") || c.includes("trek")) return "🏞️";
+  if (c.includes("beach") || c.includes("coast")) return "🌊";
+  if (c.includes("nature") || c.includes("wildlife") || c.includes("forest")) return "🌿";
+  if (c.includes("heritage") || c.includes("museum") || c.includes("fort")) return "🏛️";
+  return "📍";
 }
 
 function getTileLayerUrl(style: MapTileStyle): string {

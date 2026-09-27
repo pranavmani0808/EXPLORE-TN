@@ -14,6 +14,8 @@ import { toast } from "sonner";
 import { saveGuestTripDraft, saveTripToUserAccount } from "@/lib/user-saved-trips";
 import { getCurrentAuthUser } from "@/lib/auth-rbac";
 import confetti from "canvas-confetti";
+import { getRouteHillIntelligence } from "@/lib/data/hill-region-intelligence";
+import { RouteHillIntelligenceCard, TripReadinessCard } from "@/components/site/hill-region-intelligence-components";
 
 export const Route = createFileRoute("/ai-plan")({
   head: () => ({
@@ -190,10 +192,24 @@ function AIPlanPage() {
   const totalDistance = aiPlan?.total_distance_km || 128;
   const totalDuration = aiPlan?.total_driving_time_mins || 255;
 
+  const originName = aiPlan?.origin?.name || "Chennai";
+  const destName = aiPlan?.destination?.name || "Kodaikanal";
+  const hillRouteIntel = getRouteHillIntelligence(originName, destName);
+
   return (
     <AppShell>
       <div className="mx-auto max-w-7xl px-4 py-6 pt-24 sm:px-6 sm:pt-28 space-y-6">
         
+        {/* 🏔️ HILL TRIP READINESS CHECKLIST */}
+        {hillRouteIntel && (
+          <TripReadinessCard checklist={hillRouteIntel.tripReadinessChecklist} />
+        )}
+
+        {/* 🛣️ LONG-DISTANCE HILL ROUTE & REMOTE STRETCH INTELLIGENCE */}
+        {hillRouteIntel && (
+          <RouteHillIntelligenceCard route={hillRouteIntel} />
+        )}
+
         {/* Main Two-Column Layout (Left 35%, Right 65%) */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
