@@ -44,6 +44,8 @@ import {
 } from "@/components/site/travel-intelligence-components";
 import { getPoiHillIntelligence, PoiHillIntelligence } from "@/lib/data/hill-region-intelligence";
 import { ContextualPoiIntelligenceCard } from "@/components/site/hill-region-intelligence-components";
+import { getKodaiPoiBySlug } from "@/lib/data/kodaikanal-pois";
+import { KodaiPoiDetailView } from "@/components/site/kodai-poi-components";
 
 export const Route = createFileRoute("/place/$slug")({
   loader: ({ params }) => {
@@ -82,6 +84,19 @@ function Fact({ icon: Icon, label, value }: { icon: typeof Gauge; label: string;
 function PlacePage() {
   const { requireAuth } = useAuthGuard();
   const { place } = Route.useLoaderData() as { place: Place };
+
+  const kodaiPoi = getKodaiPoiBySlug(place.slug);
+
+  if (kodaiPoi) {
+    return (
+      <AppShell>
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 py-8">
+          <KodaiPoiDetailView poi={kodaiPoi} />
+        </div>
+      </AppShell>
+    );
+  }
+
   const related = places.filter((p) => p.slug !== place.slug).slice(0, 3);
 
   const travelIntel = getPlaceTravelIntelligence(place.slug);

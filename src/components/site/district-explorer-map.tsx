@@ -28,13 +28,18 @@ const CATEGORY_COLORS: Record<string, { bg: string; border: string; text: string
 
 function getCategoryIconSymbol(cat: string): string {
   const c = cat.toLowerCase();
-  if (c.includes("temple") || c.includes("spiritual")) return "🛕";
+  if (c.includes("lake") || c.includes("water") || c.includes("reservoir") || c.includes("dam")) return "🌊";
+  if (c.includes("waterfall") || c.includes("falls") || c.includes("stream")) return "💦";
+  if (c.includes("viewpoint") || c.includes("peak") || c.includes("cliff") || c.includes("rock")) return "🌄";
+  if (c.includes("park") || c.includes("garden")) return "🌳";
+  if (c.includes("cave") || c.includes("geological")) return "🪨";
+  if (c.includes("forest") || c.includes("nature") || c.includes("sanctuary")) return "🌲";
+  if (c.includes("temple") || c.includes("spiritual") || c.includes("shrine")) return "🛕";
   if (c.includes("food") || c.includes("culinary") || c.includes("mess")) return "🍱";
   if (c.includes("thrift") || c.includes("shopping") || c.includes("craft")) return "🛍️";
-  if (c.includes("waterfall") || c.includes("falls") || c.includes("stream")) return "💦";
-  if (c.includes("hill") || c.includes("mountain") || c.includes("trek")) return "🏞️";
+  if (c.includes("trek") || c.includes("trail") || c.includes("walk")) return "🥾";
+  if (c.includes("village") || c.includes("countryside")) return "🏘️";
   if (c.includes("beach") || c.includes("coast")) return "🌊";
-  if (c.includes("nature") || c.includes("wildlife") || c.includes("forest")) return "🌿";
   if (c.includes("heritage") || c.includes("museum") || c.includes("fort")) return "🏛️";
   return "📍";
 }

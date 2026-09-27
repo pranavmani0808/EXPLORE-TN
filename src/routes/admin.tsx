@@ -82,6 +82,7 @@ import { UserQueriesSupportModule } from "@/components/admin/user-queries-module
 import { PlaceSuggestionsModule } from "@/components/admin/place-suggestions-module";
 import { WeeklyDigestModule } from "@/components/admin/weekly-digest-module";
 import { GeospatialSafetyModule } from "@/components/admin/geospatial-safety-module";
+import { KodaiPoiManagementModule } from "@/components/admin/kodai-poi-management-module";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -99,6 +100,7 @@ export const Route = createFileRoute("/admin")({
 export type AdminSection =
   | "dashboard"
   | "destinations"
+  | "kodai_pois"
   | "place_suggestions"
   | "map_intelligence"
   | "categories"
@@ -261,6 +263,7 @@ function AdminOperationsCenter() {
                 <nav className="space-y-0.5">
                   {[
                     { id: "destinations", label: "Places Management", icon: Globe, count: destinations.length },
+                    { id: "kodai_pois", label: "Kodaikanal POIs (30)", icon: Mountain, badge: "Kodai 30" },
                     { id: "place_suggestions", label: "Place Suggestions & Scout Reviews", icon: Sparkles, badge: "4 New" },
                     { id: "map_intelligence", label: "Map Intelligence & Bounds", icon: Map, badge: "GIS" },
                     { id: "categories", label: "Categories & Taxonomy", icon: Tag },
@@ -568,6 +571,11 @@ function AdminOperationsCenter() {
             {/* 2. PLACES MANAGEMENT */}
             {activeSection === "destinations" && (
               <PlacesManagementModule />
+            )}
+
+            {/* 2a. KODAIKANAL POIS MANAGEMENT */}
+            {activeSection === "kodai_pois" && (
+              <KodaiPoiManagementModule />
             )}
 
             {/* 2b. PLACE SUGGESTIONS & SCOUT REVIEWS */}

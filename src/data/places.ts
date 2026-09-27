@@ -109,12 +109,51 @@ export const places: Place[] = CANONICAL_PLACES.map((p, idx) => {
   };
 });
 
+import { getKodaiPoiBySlug } from "@/lib/data/kodaikanal-pois";
+
 export function getPlace(slug: string): Place | undefined {
   if (!slug) return undefined;
   const q = slug.toLowerCase().trim();
   const foundInPlaces = places.find((p) => p.slug.toLowerCase() === q || p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === q);
   if (foundInPlaces) return foundInPlaces;
-  return DEFAULT_ARUPADAI_VEEDU_TEMPLES.find((p) => p.slug.toLowerCase() === q || p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === q);
+
+  const foundArupadai = DEFAULT_ARUPADAI_VEEDU_TEMPLES.find((p) => p.slug.toLowerCase() === q || p.name.toLowerCase().replace(/[^a-z0-9]/g, "-") === q);
+  if (foundArupadai) return foundArupadai;
+
+  const kodaiPoi = getKodaiPoiBySlug(q);
+  if (kodaiPoi) {
+    return {
+      slug: kodaiPoi.slug,
+      name: kodaiPoi.name,
+      district: "Dindigul",
+      category: "hills",
+      image: kodaiPoi.images[0] || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+      tagline: kodaiPoi.shortDescription,
+      story: kodaiPoi.description,
+      rating: Number((kodaiPoi.popularity / 2).toFixed(1)) || 4.8,
+      reviews: 420,
+      distanceFromChennai: "520 km",
+      difficulty: kodaiPoi.accessibility === "Trek Access Only" ? "Hard" : kodaiPoi.accessibility === "Steep Walk Required" ? "Moderate" : "Easy",
+      bestSeason: kodaiPoi.bestTimeToVisit,
+      roadCondition: kodaiPoi.roadCondition,
+      parking: kodaiPoi.parking.carParking,
+      entryFee: kodaiPoi.entryFee,
+      timings: kodaiPoi.openingHours,
+      safety: kodaiPoi.safetyInformation[0] || "Follow mountain driving & trail safety rules.",
+      weather: kodaiPoi.weather,
+      tips: [kodaiPoi.bestTimeToVisit, `Elevation: ${kodaiPoi.elevation}m MSL`],
+      nearbyFood: kodaiPoi.nearbyFood,
+      nearbyFuel: kodaiPoi.nearbyFuel,
+      x: 35,
+      y: 70,
+      trailOrder: 1,
+      coords: [kodaiPoi.latitude, kodaiPoi.longitude],
+      latitude: kodaiPoi.latitude,
+      longitude: kodaiPoi.longitude,
+    };
+  }
+
+  return undefined;
 }
 
 export const ARUPADAI_VEEDU_SLUGS = [
