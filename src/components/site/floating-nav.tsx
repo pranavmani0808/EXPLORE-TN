@@ -27,6 +27,7 @@ import {
   ArrowRight,
   Star,
   Home,
+  User,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -205,7 +206,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
               <span>Public Site</span>
               <ArrowRight className="size-3.5 text-zinc-400" />
             </Link>
-            <ProfileMenu />
+            <ProfileMenu dark={dark} toggleTheme={toggle} />
           </div>
         </nav>
       </header>
@@ -411,6 +412,9 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <span>{lang === "ta" ? "பயணம் திட்டமிடுக" : "Plan My Trip"}</span>
           </Link>
 
+          {/* Account Icon & Profile Menu Dropdown */}
+          <ProfileMenu dark={dark} toggleTheme={toggle} />
+
           <Button
             variant="ghost"
             size="icon"
@@ -462,6 +466,14 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             >
               <Users className="size-4 text-zinc-400" />
               <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+            </Link>
+            <Link
+              to="/settings"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 col-span-2"
+            >
+              <User className="size-4 text-emerald-400" />
+              <span>{lang === "ta" ? "கணக்கு அமைப்புகள் & சுயவிவரம்" : "Account Settings & Explorer Profile"}</span>
             </Link>
           </div>
 
