@@ -81,6 +81,7 @@ import { ExecutiveSaaSCommandCenter } from "@/components/admin/executive-saas-co
 import { UserQueriesSupportModule } from "@/components/admin/user-queries-module";
 import { PlaceSuggestionsModule } from "@/components/admin/place-suggestions-module";
 import { WeeklyDigestModule } from "@/components/admin/weekly-digest-module";
+import { GeospatialSafetyModule } from "@/components/admin/geospatial-safety-module";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -574,85 +575,9 @@ function AdminOperationsCenter() {
               <PlaceSuggestionsModule onPlaceApproved={loadAdminData} />
             )}
 
-            {/* 3. MAP INTELLIGENCE & GEOGRAPHIC BOUNDARIES */}
+            {/* 3. MAP INTELLIGENCE & GEOSPATIAL SAFETY PIPELINE */}
             {activeSection === "map_intelligence" && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border">
-                  <div>
-                    <h3 className="text-xl font-bold text-foreground font-serif flex items-center gap-2">
-                      <Map className="h-5 w-5 text-emerald-500" /> Map Intelligence & Boundary Control
-                    </h3>
-                    <p className="text-xs text-muted-foreground">Geospatial validation, district clustering, missing coordinates detector & TN boundary check.</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 font-bold border border-emerald-500/20">
-                      ✓ Boundary Verified
-                    </span>
-                  </div>
-                </div>
-
-                {/* Validation Telemetry Badges */}
-                <div className="grid grid-cols-2 sm:grid-cols-5 gap-3 text-center">
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                    <div className="text-xs font-bold text-emerald-400">✓ Valid Coordinates</div>
-                    <div className="text-xl font-black text-white mt-1 font-mono">485</div>
-                  </div>
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                    <div className="text-xs font-bold text-emerald-400">✓ District Matched</div>
-                    <div className="text-xl font-black text-white mt-1 font-mono">38 Districts</div>
-                  </div>
-                  <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/10 p-3">
-                    <div className="text-xs font-bold text-emerald-400">✓ TN Boundary Check</div>
-                    <div className="text-xl font-black text-white mt-1 font-mono">100% Passed</div>
-                  </div>
-                  <div className="rounded-xl border border-amber-500/30 bg-amber-500/10 p-3">
-                    <div className="text-xs font-bold text-amber-400">⚠ Missing Coords</div>
-                    <div className="text-xl font-black text-white mt-1 font-mono">12</div>
-                  </div>
-                  <div className="rounded-xl border border-rose-500/30 bg-rose-500/10 p-3">
-                    <div className="text-xs font-bold text-rose-400">⚠ District Mismatch</div>
-                    <div className="text-xl font-black text-white mt-1 font-mono">3</div>
-                  </div>
-                </div>
-
-                {/* District Hierarchy Tree & Geographic Clusters */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="rounded-xl border border-border p-4 bg-background space-y-3">
-                    <h4 className="font-bold text-sm text-foreground">Tamil Nadu District Tree</h4>
-                    <div className="space-y-1.5 text-xs font-mono text-muted-foreground">
-                      <div className="font-bold text-emerald-400">Tamil Nadu (38 Districts)</div>
-                      <div className="pl-3 border-l border-emerald-500/30 space-y-1">
-                        <div>├── Chennai (42 places)</div>
-                        <div>├── Madurai (18 places)</div>
-                        <div>├── Coimbatore (34 places)</div>
-                        <div>├── Ooty / Nilgiris (28 places)</div>
-                        <div>├── Kanyakumari (22 places)</div>
-                        <div>├── Tirunelveli (19 places)</div>
-                        <div>└── Virudhunagar (15 places)</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="md:col-span-2 rounded-xl border border-border bg-slate-950 p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h4 className="font-bold text-sm text-white">Interactive Geospatial Cluster Preview</h4>
-                      <span className="text-[10px] font-mono text-emerald-400">38 Districts Active</span>
-                    </div>
-                    <div className="h-64 w-full rounded-xl bg-slate-900 border border-slate-800 flex items-center justify-center relative overflow-hidden">
-                      <img
-                        src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220"
-                        alt="TN Map Operations"
-                        className="size-full object-cover opacity-30"
-                      />
-                      <div className="absolute inset-0 flex flex-col items-center justify-center text-center p-4 bg-slate-950/70">
-                        <MapPin className="size-10 text-emerald-400 animate-bounce mb-2" />
-                        <span className="text-sm font-bold text-white">Geospatial Bounds Lock Active</span>
-                        <span className="text-xs text-slate-400">Lat: 8.08°N to 13.5°N | Lng: 76.2°E to 80.3°E</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              <GeospatialSafetyModule />
             )}
 
             {/* 4. CATEGORIES & TAXONOMY */}
