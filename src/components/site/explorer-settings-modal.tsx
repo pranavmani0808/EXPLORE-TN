@@ -34,6 +34,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCurrentAuthUser, UserProfile, updateProfileUser, clearAuthSession } from "@/lib/auth-rbac";
+import { getStoredPreferences, saveStoredPreferences } from "@/components/site/explorer-onboarding-modal";
 import { toast } from "sonner";
 
 export interface ExplorerSettingsModalProps {
@@ -50,34 +51,30 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
   const [name, setName] = useState("");
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
-  const [phone, setPhone] = useState("+91 98765 43210");
-  const [bio, setBio] = useState("Exploring the ancient temples, ghat passes, and waterfalls of Tamil Nadu.");
-  const [homeLocation, setHomeLocation] = useState("Chennai, Tamil Nadu");
+  const [phone, setPhone] = useState("");
+  const [bio, setBio] = useState("");
+  const [homeLocation, setHomeLocation] = useState("");
   const [language, setLanguage] = useState("English");
-  const [emergencyContact, setEmergencyContact] = useState("+91 91234 56789");
+  const [emergencyContact, setEmergencyContact] = useState("");
   const [visibility, setVisibility] = useState<"Public" | "Private">("Public");
 
   // Travel Preferences
-  const [travelStyle, setTravelStyle] = useState<"Relaxed" | "Balanced" | "Adventure">("Adventure");
-  const [transportMode, setTransportMode] = useState<string[]>(["Car", "Bike"]);
+  const [travelStyle, setTravelStyle] = useState<"Relaxed" | "Balanced" | "Adventure">("Balanced");
+  const [transportMode, setTransportMode] = useState<string[]>(["Car"]);
   const [tripPace, setTripPace] = useState<"Slow" | "Moderate" | "Fast">("Moderate");
   const [selectedInterests, setSelectedInterests] = useState<string[]>([
     "Mountains",
     "Waterfalls",
     "Temples",
     "Food",
-    "Heritage",
-    "Adventure",
   ]);
 
   // AI Planner Settings
   const [defaultDuration, setDefaultDuration] = useState(3);
   const [defaultMode, setDefaultMode] = useState("Car");
-  const [aiAvoidOptions, setAiAvoidOptions] = useState<string[]>(["Toll roads", "Difficult ghat roads"]);
+  const [aiAvoidOptions, setAiAvoidOptions] = useState<string[]>(["Toll roads"]);
   const [aiPreferOptions, setAiPreferOptions] = useState<string[]>([
     "Scenic routes",
-    "Tourist attractions",
-    "Food stops",
     "Viewpoints",
   ]);
   const [aiBehavior, setAiBehavior] = useState<"Let AI decide" | "Give me more control" | "Always ask before changing my route">(
@@ -118,23 +115,53 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
   const [unitTemp, setUnitTemp] = useState<"Celsius" | "Fahrenheit">("Celsius");
 
   useEffect(() => {
+    if (!isOpen) return;
     const u = getCurrentAuthUser();
+    const stored = getStoredPreferences();
     setCurrentUser(u);
-    if (u) {
-      setName(u.name || "Pranav");
-      setEmail(u.email || "pranav.admin@exploretn.com");
-      setUsername(u.email ? u.email.split("@")[0] : "pranav_explorer");
-    }
+
+    setName(stored.name || u?.name || "");
+    setEmail(stored.email || u?.email || "");
+    setUsername(stored.username || (u?.email ? u.email.split("@")[0] : ""));
+    setPhone(stored.phone || "");
+    setBio(stored.bio || "");
+    setHomeLocation(stored.homeLocation || "");
+    setEmergencyContact(stored.emergencyContact || "");
+
+    setTravelStyle(stored.travelStyle || "Balanced");
+    setTransportMode(stored.transportMode.length ? stored.transportMode : ["Car"]);
+    setTripPace(stored.tripPace || "Moderate");
+    setSelectedInterests(stored.interests.length ? stored.interests : ["Mountains", "Waterfalls"]);
+
+    setDefaultDuration(stored.defaultTripDuration || 3);
+    setAiAvoidOptions(stored.avoidOptions || ["Toll roads"]);
+    setAiPreferOptions(stored.preferOptions || ["Scenic routes"]);
   }, [isOpen]);
 
   if (!isOpen) return null;
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
+    saveStoredPreferences({
+      name,
+      username,
+      email,
+      phone,
+      bio,
+      homeLocation,
+      emergencyContact,
+      travelStyle,
+      transportMode,
+      tripPace,
+      interests: selectedInterests,
+      defaultTripDuration: defaultDuration,
+      avoidOptions: aiAvoidOptions,
+      preferOptions: aiPreferOptions,
+    });
     if (currentUser) {
       updateProfileUser({ name, email });
     }
-    toast.success("Explorer account settings updated & saved to Supabase DB!");
+    toast.success("Explorer profile & settings updated successfully!");
   };
 
   const toggleTransport = (mode: string) => {
@@ -318,12 +345,24 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                 </h2>
               </div>
 
-              <button
-                onClick={onClose}
-                className="grid size-8 place-items-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
-              >
-                <X className="size-4" />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent("etn_open_onboarding"));
+                  }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition text-xs font-bold"
+                >
+                  <Sparkles className="size-3.5" />
+                  <span>Interactive Setup Wizard</span>
+                </button>
+                <button
+                  onClick={onClose}
+                  className="grid size-8 place-items-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+                >
+                  <X className="size-4" />
+                </button>
+              </div>
             </div>
 
             {/* Scrollable Tab Body */}
