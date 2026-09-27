@@ -26,6 +26,7 @@ import {
   Grid,
   ArrowRight,
   Star,
+  Home,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -122,6 +123,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
   const menuTimeoutRef = useRef<any>(null);
   const pathname = location.pathname;
+  const isAdminRoute = pathname.startsWith("/admin");
 
   useEffect(() => {
     const storedLang = localStorage.getItem("etn-lang") as "en" | "ta";
@@ -160,6 +162,55 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
       setDestMenuOpen(false);
     }, 180);
   };
+
+  if (isAdminRoute) {
+    return (
+      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-5 font-sans">
+        <nav
+          className="mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-5 rounded-full px-6 transition-all duration-300 backdrop-blur-[24px] bg-[#09090b]/90 border border-zinc-800 shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+          aria-label="Admin Navigation"
+        >
+          {/* Left: Brand Logo & Admin Badge */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link to="/admin" className="flex items-center gap-2.5" aria-label="ExploreTN Admin Home">
+              <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500 text-zinc-950 font-black shadow-lg shadow-emerald-500/25">
+                <Shield className="size-6 text-zinc-950" aria-hidden />
+              </span>
+              <span className="font-display text-xl font-extrabold tracking-tight text-white">
+                Explore<span className="text-emerald-400">TN</span>
+              </span>
+            </Link>
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 text-[11px] font-mono font-bold text-emerald-400">
+              <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+              ADMIN CONTROL CENTER
+            </span>
+          </div>
+
+          {/* Center: Admin Control Badge */}
+          <div className="hidden md:flex items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/80 px-4 py-1.5 text-xs font-mono text-zinc-400">
+            <span className="text-emerald-400 font-bold">Role:</span>
+            <span className="text-white font-semibold">SUPER_ADMIN</span>
+            <span className="text-zinc-700">•</span>
+            <span className="text-zinc-300">Geospatial Operations Center</span>
+          </div>
+
+          {/* Right: Exit to Public Site & Profile Menu */}
+          <div className="flex items-center gap-3 shrink-0">
+            <Link
+              to="/"
+              className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-4 py-2 text-xs font-extrabold text-zinc-300 hover:text-white hover:border-zinc-700 hover:bg-zinc-800 transition"
+              title="Return to Visitor Site"
+            >
+              <Compass className="size-4 text-emerald-400" />
+              <span>Public Site</span>
+              <ArrowRight className="size-3.5 text-zinc-400" />
+            </Link>
+            <ProfileMenu />
+          </div>
+        </nav>
+      </header>
+    );
+  }
 
   return (
     <>
@@ -462,6 +513,10 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 export function MobileTabBar() {
   const location = useLocation();
   const pathname = location.pathname;
+
+  if (pathname.startsWith("/admin")) {
+    return null;
+  }
 
   const isExploreActive =
     pathname === "/explore" ||
