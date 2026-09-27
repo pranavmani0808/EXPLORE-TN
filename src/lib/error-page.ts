@@ -1,4 +1,7 @@
-export function renderErrorPage(): string {
+export function renderErrorPage(error?: any): string {
+  const errDetails = error
+    ? (error.stack || error.message || String(error))
+    : "";
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -7,13 +10,14 @@ export function renderErrorPage(): string {
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <style>
       body { font: 15px/1.5 system-ui, -apple-system, sans-serif; background: #fafafa; color: #111; display: grid; place-items: center; min-height: 100vh; margin: 0; padding: 1.5rem; }
-      .card { max-width: 28rem; width: 100%; text-align: center; padding: 2rem; }
+      .card { max-width: 36rem; width: 100%; text-align: center; padding: 2rem; }
       h1 { font-size: 1.25rem; margin: 0 0 0.5rem; }
       p { color: #4b5563; margin: 0 0 1.5rem; }
-      .actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; }
+      .actions { display: flex; gap: 0.5rem; justify-content: center; flex-wrap: wrap; margin-bottom: 1rem; }
       a, button { padding: 0.5rem 1rem; border-radius: 0.375rem; font: inherit; cursor: pointer; text-decoration: none; border: 1px solid transparent; }
       .primary { background: #111; color: #fff; }
       .secondary { background: #fff; color: #111; border-color: #d1d5db; }
+      pre { text-align: left; background: #18181b; color: #f4f4f5; padding: 1rem; border-radius: 0.5rem; overflow-x: auto; font-size: 0.75rem; max-height: 20rem; }
     </style>
   </head>
   <body>
@@ -24,6 +28,7 @@ export function renderErrorPage(): string {
         <button class="primary" onclick="location.reload()">Try again</button>
         <a class="secondary" href="/">Go home</a>
       </div>
+      ${errDetails ? `<details open><summary style="cursor:pointer;color:#666;font-size:0.8rem">Diagnostic Details</summary><pre>${errDetails.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</pre></details>` : ""}
     </div>
   </body>
 </html>`;
