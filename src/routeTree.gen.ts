@@ -30,6 +30,7 @@ import { Route as OpsRouteImport } from './routes/ops'
 import { Route as PlannerRouteImport } from './routes/planner'
 import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as RoutesRouteImport } from './routes/routes'
+import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TheniRouteImport } from './routes/theni'
 import { Route as WesternGhatsRouteImport } from './routes/western-ghats'
@@ -153,6 +154,11 @@ const RoutesRoute = RoutesRouteImport.update({
   path: '/routes',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsRoute = SettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SupportRoute = SupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -262,6 +268,7 @@ export interface FileRoutesByFullPath {
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
+  '/settings': typeof SettingsRoute
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
@@ -302,6 +309,7 @@ export interface FileRoutesByTo {
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
+  '/settings': typeof SettingsRoute
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
@@ -343,6 +351,7 @@ export interface FileRoutesById {
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
+  '/settings': typeof SettingsRoute
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
@@ -385,6 +394,7 @@ export interface FileRouteTypes {
     | '/planner'
     | '/profile'
     | '/routes'
+    | '/settings'
     | '/support'
     | '/theni'
     | '/western-ghats'
@@ -425,6 +435,7 @@ export interface FileRouteTypes {
     | '/planner'
     | '/profile'
     | '/routes'
+    | '/settings'
     | '/support'
     | '/theni'
     | '/western-ghats'
@@ -465,6 +476,7 @@ export interface FileRouteTypes {
     | '/planner'
     | '/profile'
     | '/routes'
+    | '/settings'
     | '/support'
     | '/theni'
     | '/western-ghats'
@@ -506,6 +518,7 @@ export interface RootRouteChildren {
   PlannerRoute: typeof PlannerRoute
   ProfileRoute: typeof ProfileRoute
   RoutesRoute: typeof RoutesRoute
+  SettingsRoute: typeof SettingsRoute
   SupportRoute: typeof SupportRoute
   TheniRoute: typeof TheniRoute
   WesternGhatsRoute: typeof WesternGhatsRoute
@@ -673,6 +686,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RoutesRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings': {
+      id: '/settings'
+      path: '/settings'
+      fullPath: '/settings'
+      preLoaderRoute: typeof SettingsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/support': {
       id: '/support'
       path: '/support'
@@ -828,6 +848,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlannerRoute: PlannerRoute,
   ProfileRoute: ProfileRoute,
   RoutesRoute: RoutesRoute,
+  SettingsRoute: SettingsRoute,
   SupportRoute: SupportRoute,
   TheniRoute: TheniRoute,
   WesternGhatsRoute: WesternGhatsRoute,

@@ -127,6 +127,14 @@ export function setAuthSession(user: UserProfile) {
   }
 }
 
+export function updateProfileUser(partial: Partial<UserProfile>) {
+  const current = getCurrentAuthUser();
+  if (current) {
+    const updated: UserProfile = { ...current, ...partial };
+    setAuthSession(updated);
+  }
+}
+
 export function updateAuthRole(newRole: UserRole) {
   const current = getCurrentAuthUser();
   if (current) {

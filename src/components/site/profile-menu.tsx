@@ -16,6 +16,7 @@ import {
   ChevronRight,
   LogIn,
   UserPlus,
+  Settings,
 } from "lucide-react";
 import { getCurrentAuthUser, clearAuthSession, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { useAuthGuard } from "@/lib/auth-guard-context";
@@ -73,6 +74,13 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
   if (!currentUser) {
     return (
       <div className="flex items-center gap-2 font-sans">
+        <Link
+          to="/settings"
+          className="p-2 rounded-full border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-white/10 transition"
+          title="Explorer Settings"
+        >
+          <Settings className="size-4" />
+        </Link>
         <button
           type="button"
           onClick={() => openAuthModal("Sign in to save your trip plans, preferences, and personal collections.")}
@@ -102,14 +110,12 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
     : "EX";
 
   const mainActions = [
-    { label: "Profile", icon: User, to: "/profile" },
-    { label: "Collections", icon: Bookmark, to: "/explore" },
-    { label: "Explorer Passport", icon: Compass, to: "/profile" },
+    { label: "Profile & Identity", icon: User, to: "/profile" },
+    { label: "Explorer Settings", icon: Settings, to: "/settings" },
+    { label: "Saved Collections", icon: Bookmark, to: "/explore" },
     { label: "AI Expeditions", icon: Sparkles, to: "/planner" },
-    { label: "Notifications", icon: Bell, to: "/profile" },
-    { label: "Offline Maps", icon: Download, to: "/explore" },
-    { label: "Help & Guides", icon: HelpCircle, to: "/community" },
-    { label: "Feedback", icon: MessageSquare, to: "/community" },
+    { label: "Offline Maps", icon: Download, to: "/settings" },
+    { label: "Help & Support", icon: HelpCircle, to: "/support" },
   ];
 
   return (
