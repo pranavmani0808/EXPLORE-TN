@@ -34,6 +34,7 @@ import {
   MapFacilityLayerToggle,
   MapFacilityFilterState,
 } from "@/components/site/hill-region-intelligence-components";
+import { KodaiTouristPlacesSection } from "@/components/site/kodai-poi-components";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -698,6 +699,16 @@ export function DistrictView({ district }: DistrictViewProps) {
               ))}
             </div>
           </div>
+
+          {/* KODAIKANAL TOURIST PLACES SYSTEM SECTION */}
+          {(district.slug === "dindigul" || district.slug === "kodaikanal" || district.name.toLowerCase().includes("dindigul") || district.name.toLowerCase().includes("kodaikanal")) && (
+            <div className="mt-12">
+              <KodaiTouristPlacesSection
+                title="Kodaikanal Tourist Places (30 Mapped Attractions)"
+                subtitle="Complete catalog of lakes, waterfalls, viewpoints, parks, caves, forest trails, and heritage spots across Kodaikanal."
+              />
+            </div>
+          )}
 
         </div>
       </div>

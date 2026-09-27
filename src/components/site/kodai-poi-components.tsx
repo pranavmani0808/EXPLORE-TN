@@ -643,6 +643,86 @@ export function KodaiPoiDetailView({ poi }: { poi: KodaiPoiRecord }) {
           </div>
         </div>
       )}
+
+      {/* BOTTOM SECTION: KODAIKANAL TOURIST PLACES */}
+      <KodaiTouristPlacesSection
+        title="Explore Other Kodaikanal Tourist Places"
+        subtitle="Discover nearby lakes, waterfalls, viewpoints, parks, caves, forest trails, and heritage spots across Kodaikanal."
+        currentPoiSlug={poi.slug}
+      />
     </div>
+  );
+}
+
+// Bottom Section Component listing all 30 Kodaikanal POIs
+export function KodaiTouristPlacesSection({
+  title = "Kodaikanal Tourist Places",
+  subtitle = "Explore mapped attractions, waterfalls, viewpoints, lakes, forest trails & heritage sites across Kodaikanal.",
+  currentPoiSlug,
+}: {
+  title?: string;
+  subtitle?: string;
+  currentPoiSlug?: string;
+}) {
+  const [selectedCategory, setSelectedCategory] = useState<KodaiPoiCategory | "all">("all");
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const allPois = getAllKodaiPois();
+
+  const filteredPois = allPois.filter((p) => {
+    if (currentPoiSlug && p.slug === currentPoiSlug) return false;
+    const matchesCategory = selectedCategory === "all" || p.category === selectedCategory;
+    const matchesSearch =
+      !searchQuery.trim() ||
+      p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.subcategory.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.description.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCategory && matchesSearch;
+  });
+
+  return (
+    <section className="w-full space-y-6 pt-10 border-t border-slate-800/80 my-10 text-slate-200">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2">
+            <span className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400">
+              <Mountain className="w-5 h-5" />
+            </span>
+            <h2 className="text-2xl font-black text-white tracking-tight">{title}</h2>
+            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-mono font-bold">
+              {filteredPois.length} Spots
+            </span>
+          </div>
+          <p className="text-xs text-slate-400 mt-1 max-w-2xl">{subtitle}</p>
+        </div>
+
+        <div className="relative w-full sm:w-72">
+          <input
+            type="text"
+            placeholder="Search Kodaikanal places..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-3 pr-8 py-2 rounded-xl bg-slate-900 border border-slate-800 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500"
+          />
+        </div>
+      </div>
+
+      <KodaiPoiCategoryTabs
+        selectedCategory={selectedCategory}
+        onSelectCategory={setSelectedCategory}
+      />
+
+      {filteredPois.length === 0 ? (
+        <div className="p-10 rounded-2xl border border-dashed border-slate-800 bg-slate-950/40 text-center text-slate-400 text-xs">
+          No Kodaikanal tourist places match your selected filter.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredPois.map((poi) => (
+            <KodaiPoiCard key={poi.id} poi={poi} />
+          ))}
+        </div>
+      )}
+    </section>
   );
 }
