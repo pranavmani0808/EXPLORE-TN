@@ -233,6 +233,14 @@ export function ContextualPoiIntelligenceCard({ poi }: { poi: PoiHillIntelligenc
               </p>
               <p className="text-sm font-bold text-foreground">{poi.parking.carParking}</p>
               <p className="text-[11px] text-muted-foreground font-mono">{poi.parking.distanceFromAttraction}</p>
+              <a
+                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`parking in ${poi.name}, ${poi.district}`)}`}
+                target="_blank"
+                rel="noreferrer"
+                className="inline-flex items-center gap-1 text-[10px] font-bold font-mono text-blue-400 hover:underline pt-1"
+              >
+                <Navigation className="size-3" /> Map Parking Search →
+              </a>
             </div>
 
             <div className="p-4 rounded-2xl bg-accent/30 border border-border/40 space-y-1">

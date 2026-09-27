@@ -183,7 +183,7 @@ export function PlaceTravelInformationSection({ intel }: { intel: PlaceTravelInt
             </div>
 
             <a
-              href={`https://www.google.com/maps/search/?api=1&query=${intel.parking.parkingCoordinates.latitude},${intel.parking.parkingCoordinates.longitude}`}
+              href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`parking in ${intel.placeName}, ${intel.district}`)}`}
               target="_blank"
               rel="noreferrer"
               className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold transition shrink-0 self-start sm:self-auto"
