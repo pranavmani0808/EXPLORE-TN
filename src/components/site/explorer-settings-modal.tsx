@@ -31,10 +31,21 @@ import {
   Flame,
   Star,
   CheckCircle2,
+  Trash2,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCurrentAuthUser, UserProfile, updateProfileUser, clearAuthSession } from "@/lib/auth-rbac";
 import { getStoredPreferences, saveStoredPreferences } from "@/components/site/explorer-onboarding-modal";
+import {
+  getSavedPlaces,
+  removeSavedPlace,
+  getSavedRoutes,
+  removeSavedRoute,
+  getExplorerGamificationStats,
+  ExplorerStats,
+  SavedPlaceItem,
+  SavedRouteItem,
+} from "@/lib/explorer-gamification";
 import { toast } from "sonner";
 
 export interface ExplorerSettingsModalProps {
@@ -114,6 +125,19 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
   const [unitDistance, setUnitDistance] = useState<"Kilometers" | "Miles">("Kilometers");
   const [unitTemp, setUnitTemp] = useState<"Celsius" | "Fahrenheit">("Celsius");
 
+  // Dynamic Gamification & Saved Collections State
+  const [stats, setStats] = useState<ExplorerStats>({
+    districtsExplored: 0,
+    hillStations: 0,
+    waterfalls: 0,
+    placesVisited: 0,
+    xpEarned: 0,
+    level: 1,
+    rankTitle: "Novice Explorer",
+  });
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlaceItem[]>([]);
+  const [savedRoutes, setSavedRoutes] = useState<SavedRouteItem[]>([]);
+
   useEffect(() => {
     if (!isOpen) return;
     const u = getCurrentAuthUser();
@@ -136,6 +160,28 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
     setDefaultDuration(stored.defaultTripDuration || 3);
     setAiAvoidOptions(stored.avoidOptions || ["Toll roads"]);
     setAiPreferOptions(stored.preferOptions || ["Scenic routes"]);
+
+    // Load Live Explorer Stats & Saved Items
+    setStats(getExplorerGamificationStats());
+    setSavedPlaces(getSavedPlaces());
+    setSavedRoutes(getSavedRoutes());
+
+    const handlePlacesUpdate = () => {
+      setSavedPlaces(getSavedPlaces());
+      setStats(getExplorerGamificationStats());
+    };
+    const handleRoutesUpdate = () => {
+      setSavedRoutes(getSavedRoutes());
+      setStats(getExplorerGamificationStats());
+    };
+
+    window.addEventListener("etn_saved_places_updated", handlePlacesUpdate);
+    window.addEventListener("etn_saved_routes_updated", handleRoutesUpdate);
+
+    return () => {
+      window.removeEventListener("etn_saved_places_updated", handlePlacesUpdate);
+      window.removeEventListener("etn_saved_routes_updated", handleRoutesUpdate);
+    };
   }, [isOpen]);
 
   if (!isOpen) return null;
@@ -396,27 +442,31 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
 
                       <div className="text-right border-t sm:border-t-0 sm:border-l border-zinc-800 pt-3 sm:pt-0 sm:pl-4">
                         <div className="text-xs font-mono text-zinc-400">EXPLORER LEVEL</div>
-                        <div className="text-2xl font-black text-amber-400 font-mono">Level 18 Scout</div>
-                        <div className="text-[11px] text-emerald-400 font-mono font-bold">1,850 XP Earned</div>
+                        <div className="text-xl font-black text-amber-400 font-mono">
+                          Level {stats.level} {stats.rankTitle}
+                        </div>
+                        <div className="text-[11px] text-emerald-400 font-mono font-bold">
+                          {stats.xpEarned} XP Earned
+                        </div>
                       </div>
                     </div>
 
                     {/* EXPLORER STATS GRID */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 font-mono">
                       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
-                        <div className="text-xl font-black text-emerald-400">18</div>
+                        <div className="text-xl font-black text-emerald-400">{stats.districtsExplored}</div>
                         <div className="text-[10px] text-zinc-400 uppercase">Districts Explored</div>
                       </div>
                       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
-                        <div className="text-xl font-black text-amber-400">12</div>
+                        <div className="text-xl font-black text-amber-400">{stats.hillStations}</div>
                         <div className="text-[10px] text-zinc-400 uppercase">Hill Stations</div>
                       </div>
                       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
-                        <div className="text-xl font-black text-sky-400">23</div>
+                        <div className="text-xl font-black text-sky-400">{stats.waterfalls}</div>
                         <div className="text-[10px] text-zinc-400 uppercase">Waterfalls</div>
                       </div>
                       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
-                        <div className="text-xl font-black text-purple-400">47</div>
+                        <div className="text-xl font-black text-purple-400">{stats.placesVisited}</div>
                         <div className="text-[10px] text-zinc-400 uppercase">Places Visited</div>
                       </div>
                     </div>
@@ -594,24 +644,66 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {/* TAB 3: SAVED & COLLECTIONS */}
               {activeTab === "collections" && (
                 <div className="space-y-6 max-w-3xl">
-                  <h3 className="text-base font-bold text-white">My Collections & Favorites</h3>
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    {[
-                      { title: "❤️ Weekend Trips", count: 12, icon: "❤️" },
-                      { title: "🏔️ Hill Stations", count: 8, icon: "🏔️" },
-                      { title: "🌊 Waterfalls", count: 14, icon: "🌊" },
-                      { title: "📸 Photography", count: 9, icon: "📸" },
-                      { title: "🛕 Temples", count: 21, icon: "🛕" },
-                    ].map((col) => (
-                      <div key={col.title} className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900/90 flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-white text-sm">{col.title}</p>
-                          <p className="text-xs text-zinc-400">{col.count} saved places</p>
-                        </div>
-                        <ChevronRight className="size-4 text-zinc-500" />
-                      </div>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-white">My Collections & Favorites</h3>
+                      <p className="text-xs text-zinc-400">Places and attractions you have bookmarked across Tamil Nadu</p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold">
+                      {savedPlaces.length} Saved
+                    </span>
                   </div>
+
+                  {savedPlaces.length === 0 ? (
+                    <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 text-center space-y-4">
+                      <div className="grid size-14 place-items-center rounded-2xl bg-zinc-800 text-amber-400 mx-auto">
+                        <Bookmark className="size-7" />
+                      </div>
+                      <div className="max-w-md mx-auto">
+                        <h4 className="text-sm font-bold text-white">No saved places or collections yet</h4>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          Click the bookmark icon on any destination, hill station, or waterfall across ExploreTN to save it here!
+                        </p>
+                      </div>
+                      <div>
+                        <a
+                          href="/explore"
+                          onClick={onClose}
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
+                        >
+                          <Compass className="size-4" />
+                          <span>Explore Places & Destinations →</span>
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {savedPlaces.map((place) => (
+                        <div
+                          key={place.id}
+                          className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900/90 flex justify-between items-center group"
+                        >
+                          <div>
+                            <p className="font-bold text-white text-sm">{place.name}</p>
+                            <p className="text-xs text-zinc-400 mt-0.5">
+                              {place.category} • {place.district}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              removeSavedPlace(place.id);
+                              toast.success(`Removed ${place.name} from saved collections`);
+                            }}
+                            className="p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                            title="Remove from saved"
+                          >
+                            <Trash2 className="size-4" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
@@ -695,23 +787,71 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {/* TAB 5: TRIPS & ROUTES */}
               {activeTab === "trips_routes" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
-                  <h3 className="text-base font-bold text-white">Upcoming & Saved Trips</h3>
-                  <div className="space-y-3">
-                    {[
-                      { title: "Kodaikanal Hill Trail", date: "Oct 4, 2026", stops: 6, status: "Upcoming" },
-                      { title: "Valparai 40-Hairpin Pass", date: "Oct 18, 2026", stops: 9, status: "Upcoming" },
-                    ].map((trip) => (
-                      <div key={trip.title} className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                        <div>
-                          <p className="font-bold text-white text-sm">{trip.title}</p>
-                          <p className="text-zinc-400">{trip.date} • {trip.stops} stops</p>
-                        </div>
-                        <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-mono font-bold text-[10px]">
-                          {trip.status}
-                        </span>
-                      </div>
-                    ))}
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="text-base font-bold text-white">Upcoming & Saved Trips</h3>
+                      <p className="text-zinc-400">Custom routes and itineraries created with AI Trip Copilot</p>
+                    </div>
+                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-bold">
+                      {savedRoutes.length} Trips
+                    </span>
                   </div>
+
+                  {savedRoutes.length === 0 ? (
+                    <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 text-center space-y-4">
+                      <div className="grid size-14 place-items-center rounded-2xl bg-zinc-800 text-emerald-400 mx-auto">
+                        <RouteIcon className="size-7" />
+                      </div>
+                      <div className="max-w-md mx-auto">
+                        <h4 className="text-sm font-bold text-white">No saved trips or custom routes</h4>
+                        <p className="text-xs text-zinc-400 mt-1">
+                          Generate a personalized itinerary using AI Trip Planner or save a route from Trails & Routes to see it here!
+                        </p>
+                      </div>
+                      <div>
+                        <a
+                          href="/planner"
+                          onClick={onClose}
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/20"
+                        >
+                          <Sparkles className="size-4" />
+                          <span>Plan My First Trip with AI →</span>
+                        </a>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {savedRoutes.map((trip) => (
+                        <div
+                          key={trip.id}
+                          className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center"
+                        >
+                          <div>
+                            <p className="font-bold text-white text-sm">{trip.title}</p>
+                            <p className="text-zinc-400 mt-0.5">
+                              {trip.date} • {trip.stops} stops {trip.district ? `• ${trip.district}` : ""}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-3">
+                            <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-mono font-bold text-[10px]">
+                              {trip.status}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                removeSavedRoute(trip.id);
+                                toast.success(`Removed trip ${trip.title}`);
+                              }}
+                              className="p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                              title="Delete route"
+                            >
+                              <Trash2 className="size-4" />
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
