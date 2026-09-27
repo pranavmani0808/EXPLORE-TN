@@ -580,6 +580,196 @@ export class SupabaseDatabaseRepository {
       return false;
     }
   }
+
+  // --- USER QUERIES HELP DESK (SUPABASE PRIMARY MEMORY) ---
+  static async getUserQueries(): Promise<any[]> {
+    try {
+      const { data, error } = await supabase.from('user_queries').select('*').order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        return data.map(q => ({
+          id: q.id,
+          userName: q.user_name || "Explorer",
+          userEmail: q.user_email || "user@exploretn.com",
+          queryType: q.query_type || "General Travel",
+          locationContext: q.location_context || "Tamil Nadu",
+          subject: q.subject || "Travel Inquiry",
+          message: q.message || "",
+          status: q.status || "Open",
+          submittedAt: new Date(q.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          aiSuggestedAnswer: q.ai_suggested_answer,
+          adminReply: q.admin_reply,
+          resolvedBy: q.resolved_by
+        }));
+      }
+    } catch (e) {
+      console.warn("[Supabase DB] Query fetch notice:", e);
+    }
+    // Fallback to localStorage for instant local persistency
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("etn_user_queries");
+      if (stored) {
+        try { return JSON.parse(stored); } catch {}
+      }
+    }
+    return [];
+  }
+
+  static async createUserQuery(query: { userName: string; userEmail: string; queryType: string; locationContext: string; subject: string; message: string; aiSuggestedAnswer?: string }): Promise<any> {
+    const record = {
+      id: `q-${Date.now()}`,
+      user_name: query.userName,
+      user_email: query.userEmail,
+      query_type: query.queryType,
+      location_context: query.locationContext,
+      subject: query.subject,
+      message: query.message,
+      status: "Open",
+      ai_suggested_answer: query.aiSuggestedAnswer || `Verified location details for ${query.locationContext}. Support team will assist shortly.`,
+      created_at: new Date().toISOString()
+    };
+
+    try {
+      await supabase.from('user_queries').insert([record]);
+    } catch (e) {
+      console.warn("[Supabase DB] Error inserting user query:", e);
+    }
+
+    const newItem = {
+      id: record.id,
+      userName: record.user_name,
+      userEmail: record.user_email,
+      queryType: record.query_type,
+      locationContext: record.location_context,
+      subject: record.subject,
+      message: record.message,
+      status: "Open",
+      submittedAt: "Just now",
+      aiSuggestedAnswer: record.ai_suggested_answer
+    };
+
+    if (typeof window !== "undefined") {
+      const existing = await this.getUserQueries();
+      const updated = [newItem, ...existing];
+      localStorage.setItem("etn_user_queries", JSON.stringify(updated));
+    }
+    return newItem;
+  }
+
+  static async resolveUserQuery(queryId: string, replyText: string, resolvedBy: string = "Admin"): Promise<boolean> {
+    try {
+      await supabase.from('user_queries').update({
+        status: "Resolved",
+        admin_reply: replyText,
+        resolved_by: resolvedBy
+      }).eq('id', queryId);
+    } catch (e) {
+      console.warn("[Supabase DB] Resolve query notice:", e);
+    }
+
+    if (typeof window !== "undefined") {
+      const existing = await this.getUserQueries();
+      const updated = existing.map(q => q.id === queryId ? { ...q, status: "Resolved", adminReply: replyText, resolvedBy } : q);
+      localStorage.setItem("etn_user_queries", JSON.stringify(updated));
+    }
+    return true;
+  }
+
+  // --- PLACE SUGGESTIONS STUDIO (SUPABASE PRIMARY MEMORY) ---
+  static async getPlaceSuggestions(): Promise<any[]> {
+    try {
+      const { data, error } = await supabase.from('place_suggestions').select('*').order('created_at', { ascending: false });
+      if (!error && data && data.length > 0) {
+        return data.map(s => ({
+          id: s.id,
+          name: s.name,
+          district: s.district,
+          category: s.category || "hills",
+          submittedBy: s.submitted_by || "Community Scout",
+          scoutBadge: s.scout_badge || "Verified Scout",
+          latitude: s.latitude,
+          longitude: s.longitude,
+          tagline: s.tagline || "",
+          description: s.description || "",
+          image: s.image_url || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+          submittedAt: new Date(s.created_at || Date.now()).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          status: s.status || "Pending"
+        }));
+      }
+    } catch (e) {
+      console.warn("[Supabase DB] Place suggestions fetch notice:", e);
+    }
+
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("etn_place_suggestions");
+      if (stored) {
+        try { return JSON.parse(stored); } catch {}
+      }
+    }
+    return [];
+  }
+
+  static async createPlaceSuggestion(sug: { name: string; district: string; category: string; submittedBy: string; latitude: number; longitude: number; tagline: string; description: string; image?: string }): Promise<any> {
+    const record = {
+      id: `sug-${Date.now()}`,
+      name: sug.name,
+      district: sug.district,
+      category: sug.category,
+      submitted_by: sug.submittedBy,
+      scout_badge: "District Scout",
+      latitude: sug.latitude,
+      longitude: sug.longitude,
+      tagline: sug.tagline,
+      description: sug.description,
+      image_url: sug.image || "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+      status: "Pending",
+      created_at: new Date().toISOString()
+    };
+
+    try {
+      await supabase.from('place_suggestions').insert([record]);
+    } catch (e) {
+      console.warn("[Supabase DB] Error creating place suggestion:", e);
+    }
+
+    const newItem = {
+      id: record.id,
+      name: record.name,
+      district: record.district,
+      category: record.category,
+      submittedBy: record.submitted_by,
+      scoutBadge: record.scout_badge,
+      latitude: record.latitude,
+      longitude: record.longitude,
+      tagline: record.tagline,
+      description: record.description,
+      image: record.image_url,
+      submittedAt: "Just now",
+      status: "Pending"
+    };
+
+    if (typeof window !== "undefined") {
+      const existing = await this.getPlaceSuggestions();
+      const updated = [newItem, ...existing];
+      localStorage.setItem("etn_place_suggestions", JSON.stringify(updated));
+    }
+    return newItem;
+  }
+
+  static async updateSuggestionStatus(id: string, status: "Approved" | "Rejected"): Promise<boolean> {
+    try {
+      await supabase.from('place_suggestions').update({ status }).eq('id', id);
+    } catch (e) {
+      console.warn("[Supabase DB] Error updating suggestion status:", e);
+    }
+
+    if (typeof window !== "undefined") {
+      const existing = await this.getPlaceSuggestions();
+      const updated = existing.map(s => s.id === id ? { ...s, status } : s);
+      localStorage.setItem("etn_place_suggestions", JSON.stringify(updated));
+    }
+    return true;
+  }
 }
+
 
 

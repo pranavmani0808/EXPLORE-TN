@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   ShieldAlert,
@@ -28,7 +28,7 @@ export interface ReviewQueueItem {
   placeName: string;
   rating: number;
   comment: string;
-  aiRiskScore: number; // e.g. 12%
+  aiRiskScore: number;
   gpsValid: boolean;
   duplicateScore: number;
   submittedAt: string;
@@ -44,65 +44,38 @@ export interface ReportItem {
   submittedAt: string;
 }
 
-const initialReviews: ReviewQueueItem[] = [
-  {
-    id: "rev-1",
-    userName: "TrailSeeker_TN",
-    userBadge: "Level 14 Ghat Explorer",
-    placeName: "Kolli Hills 70 Hairpin Pass",
-    rating: 5,
-    comment: "Road section between Hairpin 22 and 26 has loose gravel after morning rain. Stay in low gear!",
-    aiRiskScore: 4,
-    gpsValid: true,
-    duplicateScore: 2,
-    submittedAt: "12 mins ago",
-  },
-  {
-    id: "rev-2",
-    userName: "AnonymousRider",
-    userBadge: "New Explorer",
-    placeName: "Suruli Secret Waterfalls",
-    rating: 1,
-    comment: "Closed entry ticket counter, go around the fence.",
-    aiRiskScore: 78,
-    gpsValid: false,
-    duplicateScore: 64,
-    submittedAt: "35 mins ago",
-  },
-];
-
-const initialReports: ReportItem[] = [
-  {
-    id: "rep-1",
-    reportedBy: "Karthik Raja",
-    targetItem: "Batlagundu Ghat Pass Hairpin 14",
-    reason: "Closed Road",
-    priority: "Critical",
-    status: "Open",
-    submittedAt: "08:15 AM",
-  },
-  {
-    id: "rep-2",
-    reportedBy: "Deepa Sundaram",
-    targetItem: "Agaya Gangai Basin GPS Pin",
-    reason: "Wrong Coordinates",
-    priority: "High",
-    status: "Open",
-    submittedAt: "Yesterday",
-  },
-];
-
 export function CommunityModerationModule() {
-  const [reviewList, setReviewList] = useState<ReviewQueueItem[]>(initialReviews);
-  const [reportList, setReportList] = useState<ReportItem[]>(initialReports);
-  const [activeTab, setActiveTab] = useState<"reviews" | "reports" | "users">("reviews");
+  const [reviewList, setReviewList] = useState<ReviewQueueItem[]>([]);
+  const [reportList, setReportList] = useState<ReportItem[]>([]);
+  const [activeTab, setActiveTab] = useState<"reviews" | "reports">("reviews");
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedRev = localStorage.getItem("etn_community_reviews");
+      if (storedRev) {
+        try { setReviewList(JSON.parse(storedRev)); } catch {}
+      }
+      const storedRep = localStorage.getItem("etn_community_reports");
+      if (storedRep) {
+        try { setReportList(JSON.parse(storedRep)); } catch {}
+      }
+    }
+  }, []);
 
   const handleApproveReview = (id: string) => {
-    setReviewList((prev) => prev.filter((r) => r.id !== id));
+    const updated = reviewList.filter((r) => r.id !== id);
+    setReviewList(updated);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("etn_community_reviews", JSON.stringify(updated));
+    }
   };
 
   const handleResolveReport = (id: string) => {
-    setReportList((prev) => prev.map((rp) => (rp.id === id ? { ...rp, status: "Resolved" } : rp)));
+    const updated = reportList.map((rp) => (rp.id === id ? { ...rp, status: "Resolved" as const } : rp));
+    setReportList(updated);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("etn_community_reports", JSON.stringify(updated));
+    }
   };
 
   return (
@@ -155,7 +128,6 @@ export function CommunityModerationModule() {
                     <span className="text-slate-400">• {rev.submittedAt}</span>
                   </div>
 
-                  {/* AI Safety Metrics */}
                   <div className="flex items-center gap-2 text-[10px] font-mono">
                     <span
                       className={`px-2.5 py-0.5 rounded-full font-bold ${
@@ -193,7 +165,7 @@ export function CommunityModerationModule() {
             ))}
 
             {reviewList.length === 0 && (
-              <p className="text-center text-xs text-slate-400 py-8 font-mono">✓ Review queue is clear! All reviews moderated.</p>
+              <p className="text-center text-xs text-slate-400 py-8 font-mono">✓ Review queue is clear! 0 pending reviews for moderation.</p>
             )}
           </div>
         </div>
@@ -240,6 +212,10 @@ export function CommunityModerationModule() {
                 </div>
               </div>
             ))}
+
+            {reportList.length === 0 && (
+              <p className="text-center text-xs text-slate-400 py-8 font-mono">✓ Reports queue is clear! 0 active user reports.</p>
+            )}
           </div>
         </div>
       )}

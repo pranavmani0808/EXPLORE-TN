@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import {
   HelpCircle,
@@ -17,6 +17,7 @@ import {
   ArrowRight,
   ShieldCheck,
   RefreshCw,
+  Plus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SupabaseDatabaseRepository } from "@/lib/supabase-database";
@@ -37,64 +38,37 @@ export interface UserQueryItem {
   resolvedBy?: string;
 }
 
-const INITIAL_QUERIES: UserQueryItem[] = [
-  {
-    id: "q-101",
-    userName: "Anand Sundaram",
-    userEmail: "anand.s@gmail.com",
-    queryType: "Route Condition",
-    locationContext: "Kolli Hills 70 Hairpin Pass",
-    subject: "Is hairpin bend 35 open after heavy rain?",
-    message: "Planning a motorcycle ride from Namakkal to Kolli Hills tomorrow morning. Are there landslides or road blocks reported on the 70 hairpin stretch?",
-    status: "Open",
-    submittedAt: "10 mins ago",
-    aiSuggestedAnswer: "Kolli Hills 70 Hairpin Pass is currently OPEN with clear weather (22°C). Hairpins 22 to 26 have minor gravel caution. Ride carefully between 6 AM and 5 PM.",
-  },
-  {
-    id: "q-102",
-    userName: "Meera Krishnan",
-    userEmail: "meera.k@outlook.com",
-    queryType: "Missing Spot",
-    locationContext: "Thanjavur District",
-    subject: "Requesting to add Punnainallur Mariamman Temple",
-    message: "Please add Punnainallur Mariamman Temple in Thanjavur to the heritage trail. It is a famous 300-year-old Chola shrine with verified GPS coordinates.",
-    status: "Open",
-    submittedAt: "25 mins ago",
-    aiSuggestedAnswer: "Location verified! Punnainallur Mariamman Temple in Thanjavur can be approved and added to Heritage & Temples category instantly.",
-  },
-  {
-    id: "q-103",
-    userName: "Karthik Raja",
-    userEmail: "karthik.r@yahoo.com",
-    queryType: "Temple Timings",
-    locationContext: "Meenakshi Amman Temple, Madurai",
-    subject: "Golden Lotus Tank darshan timings on Friday",
-    message: "What are the exact morning opening hours for special darshan at Madurai Meenakshi temple on Fridays during festival season?",
-    status: "In Progress",
-    submittedAt: "1 hour ago",
-    aiSuggestedAnswer: "Madurai Meenakshi Amman Temple morning darshan opens at 5:00 AM to 12:30 PM, and reopens 4:00 PM to 9:30 PM. Golden Lotus Tank is open till 8:00 PM.",
-  },
-  {
-    id: "q-104",
-    userName: "Priya Ramesh",
-    userEmail: "priya.ramesh@gmail.com",
-    queryType: "Safety & Weather",
-    locationContext: "Suruli Falls, Theni",
-    subject: "Water level and bath safety at Suruli Falls",
-    message: "Is bathing allowed at Suruli Waterfalls this weekend? Are forest department permits required for family entry?",
-    status: "Resolved",
-    submittedAt: "Yesterday",
-    adminReply: "Suruli Falls is open for family bathing (8 AM - 4 PM). Forest entry ticket is ₹20 at the counter. Safe water levels today.",
-    resolvedBy: "Pranav (SUPER_ADMIN)",
-  },
-];
-
 export function UserQueriesSupportModule() {
-  const [queries, setQueries] = useState<UserQueryItem[]>(INITIAL_QUERIES);
-  const [selectedQuery, setSelectedQuery] = useState<UserQueryItem | null>(INITIAL_QUERIES[0]);
+  const [queries, setQueries] = useState<UserQueryItem[]>([]);
+  const [selectedQuery, setSelectedQuery] = useState<UserQueryItem | null>(null);
   const [replyText, setReplyText] = useState("");
   const [filterStatus, setFilterStatus] = useState<string>("All");
   const [searchQuery, setSearchQuery] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+
+  // New query modal state
+  const [showNewModal, setShowNewModal] = useState(false);
+  const [newUserName, setNewUserName] = useState("");
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newLocation, setNewLocation] = useState("");
+  const [newSubject, setNewSubject] = useState("");
+  const [newMessage, setNewMessage] = useState("");
+  const [newQueryType, setNewQueryType] = useState<"Route Condition" | "Missing Spot" | "Temple Timings" | "Safety & Weather" | "General Travel">("Route Condition");
+
+  const loadQueries = async () => {
+    setIsLoading(true);
+    const data = await SupabaseDatabaseRepository.getUserQueries();
+    setQueries(data);
+    if (data.length > 0 && !selectedQuery) {
+      setSelectedQuery(data[0]);
+      setReplyText(data[0].adminReply || data[0].aiSuggestedAnswer || "");
+    }
+    setIsLoading(false);
+  };
+
+  useEffect(() => {
+    loadQueries();
+  }, []);
 
   const filteredQueries = queries.filter((q) => {
     const matchesStatus = filterStatus === "All" || q.status === filterStatus;
@@ -117,8 +91,10 @@ export function UserQueriesSupportModule() {
     }
   };
 
-  const handleSendReply = () => {
+  const handleSendReply = async () => {
     if (!selectedQuery || !replyText.trim()) return;
+
+    await SupabaseDatabaseRepository.resolveUserQuery(selectedQuery.id, replyText, "Pranav (SUPER_ADMIN)");
 
     setQueries((prev) =>
       prev.map((q) =>
@@ -144,11 +120,57 @@ export function UserQueriesSupportModule() {
         : null
     );
 
-    toast.success(`User query resolved & response dispatched to ${selectedQuery.userEmail}`);
+    toast.success(`User query resolved & response saved to Supabase DB for ${selectedQuery.userEmail}`);
+  };
+
+  const handleCreateNewQuery = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUserName.trim() || !newSubject.trim() || !newMessage.trim()) {
+      toast.error("Please fill in all required fields.");
+      return;
+    }
+
+    const created = await SupabaseDatabaseRepository.createUserQuery({
+      userName: newUserName,
+      userEmail: newUserEmail || "explorer@exploretn.com",
+      queryType: newQueryType,
+      locationContext: newLocation || "Tamil Nadu",
+      subject: newSubject,
+      message: newMessage,
+    });
+
+    setQueries((prev) => [created, ...prev]);
+    setSelectedQuery(created);
+    setReplyText(created.aiSuggestedAnswer || "");
+    setShowNewModal(false);
+    setNewUserName("");
+    setNewUserEmail("");
+    setNewLocation("");
+    setNewSubject("");
+    setNewMessage("");
+    toast.success("New User Query submitted and synchronized with Supabase DB!");
   };
 
   return (
     <div className="space-y-6 font-sans text-slate-100">
+      {/* Top Header & Actions */}
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-xl font-bold text-white flex items-center gap-2">
+            <HelpCircle className="size-5 text-emerald-400" />
+            Travel Helpdesk & User Queries
+          </h2>
+          <p className="text-xs text-slate-400 mt-0.5">Real-time visitor inquiries & support resolution powered by Supabase DB</p>
+        </div>
+
+        <Button
+          onClick={() => setShowNewModal(true)}
+          className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl flex items-center gap-1.5 shadow-lg shadow-emerald-500/20"
+        >
+          <Plus className="size-4" /> Submit Real Query
+        </Button>
+      </div>
+
       {/* Header Stat Strip */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
         <div className="rounded-2xl border border-zinc-800 bg-[#09090b]/80 p-4 backdrop-blur-xl">
@@ -157,7 +179,7 @@ export function UserQueriesSupportModule() {
             <HelpCircle className="size-4 text-emerald-400" />
           </div>
           <div className="mt-2 text-2xl font-extrabold text-white">{queries.length}</div>
-          <div className="mt-1 text-[11px] text-zinc-400">Travel helpdesk inbox</div>
+          <div className="mt-1 text-[11px] text-zinc-400">Live database tickets</div>
         </div>
 
         <div className="rounded-2xl border border-amber-500/20 bg-amber-500/5 p-4 backdrop-blur-xl">
@@ -190,7 +212,11 @@ export function UserQueriesSupportModule() {
           <div className="mt-2 text-2xl font-extrabold text-emerald-400">
             {queries.filter((q) => q.status === "Resolved").length}
           </div>
-          <div className="mt-1 text-[11px] text-emerald-400/80">98.4% resolution rate</div>
+          <div className="mt-1 text-[11px] text-emerald-400/80">
+            {queries.length > 0
+              ? `${Math.round((queries.filter((q) => q.status === "Resolved").length / queries.length) * 100)}% resolution rate`
+              : "0 tickets in queue"}
+          </div>
         </div>
       </div>
 
@@ -227,47 +253,62 @@ export function UserQueriesSupportModule() {
           </div>
 
           <div className="space-y-3 max-h-[600px] overflow-y-auto pr-1">
-            {filteredQueries.map((q) => {
-              const isSelected = selectedQuery?.id === q.id;
-              return (
-                <div
-                  key={q.id}
-                  onClick={() => handleSelectQuery(q)}
-                  className={`cursor-pointer rounded-2xl border p-4 transition ${
-                    isSelected
-                      ? "border-emerald-500/60 bg-emerald-950/20 shadow-lg shadow-emerald-500/10"
-                      : "border-zinc-800 bg-[#09090b]/80 hover:border-zinc-700"
-                  }`}
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="flex items-center gap-2 text-xs font-bold text-white">
-                      <User className="size-3.5 text-emerald-400" />
-                      {q.userName}
-                    </span>
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
-                        q.status === "Open"
-                          ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
-                          : q.status === "In Progress"
-                          ? "bg-sky-500/15 text-sky-400 border border-sky-500/30"
-                          : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
-                      }`}
-                    >
-                      {q.status}
-                    </span>
-                  </div>
+            {filteredQueries.length > 0 ? (
+              filteredQueries.map((q) => {
+                const isSelected = selectedQuery?.id === q.id;
+                return (
+                  <div
+                    key={q.id}
+                    onClick={() => handleSelectQuery(q)}
+                    className={`cursor-pointer rounded-2xl border p-4 transition ${
+                      isSelected
+                        ? "border-emerald-500/60 bg-emerald-950/20 shadow-lg shadow-emerald-500/10"
+                        : "border-zinc-800 bg-[#09090b]/80 hover:border-zinc-700"
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="flex items-center gap-2 text-xs font-bold text-white">
+                        <User className="size-3.5 text-emerald-400" />
+                        {q.userName}
+                      </span>
+                      <span
+                        className={`rounded-full px-2 py-0.5 text-[10px] font-mono font-bold ${
+                          q.status === "Open"
+                            ? "bg-amber-500/15 text-amber-400 border border-amber-500/30"
+                            : q.status === "In Progress"
+                            ? "bg-sky-500/15 text-sky-400 border border-sky-500/30"
+                            : "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30"
+                        }`}
+                      >
+                        {q.status}
+                      </span>
+                    </div>
 
-                  <div className="mt-2 text-xs font-bold text-zinc-200 line-clamp-1">{q.subject}</div>
-                  <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-400">
-                    <span className="flex items-center gap-1 text-emerald-400 font-mono">
-                      <MapPin className="size-3" />
-                      {q.locationContext}
-                    </span>
-                    <span>{q.submittedAt}</span>
+                    <div className="mt-2 text-xs font-bold text-zinc-200 line-clamp-1">{q.subject}</div>
+                    <div className="mt-1 flex items-center justify-between text-[11px] text-zinc-400">
+                      <span className="flex items-center gap-1 text-emerald-400 font-mono">
+                        <MapPin className="size-3" />
+                        {q.locationContext}
+                      </span>
+                      <span>{q.submittedAt}</span>
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              <div className="p-8 text-center border border-dashed border-zinc-800 rounded-3xl bg-[#09090b]/60">
+                <HelpCircle className="size-8 text-zinc-600 mx-auto mb-2" />
+                <p className="text-xs font-bold text-zinc-300">No user queries in database</p>
+                <p className="text-[11px] text-zinc-500 mt-1 mb-4">Click "Submit Real Query" above to test support ticketing.</p>
+                <Button
+                  onClick={() => setShowNewModal(true)}
+                  variant="outline"
+                  className="text-xs border-zinc-700 text-zinc-300 hover:text-white"
+                >
+                  <Plus className="size-3.5 mr-1" /> Add Real Support Ticket
+                </Button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -371,12 +412,108 @@ export function UserQueriesSupportModule() {
               </div>
             </div>
           ) : (
-            <div className="flex h-64 items-center justify-center rounded-3xl border border-zinc-800 bg-[#09090b]/80 text-zinc-500">
-              Select a query from the inbox to inspect and resolve.
+            <div className="flex h-64 items-center justify-center rounded-3xl border border-zinc-800 bg-[#09090b]/80 text-zinc-500 text-xs">
+              Select a user query from the inbox to inspect and respond.
             </div>
           )}
         </div>
       </div>
+
+      {/* Modal: Create New User Query */}
+      {showNewModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-lg rounded-3xl border border-zinc-800 bg-[#09090b] p-6 text-white shadow-2xl space-y-4 font-sans">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <h3 className="text-lg font-bold flex items-center gap-2">
+                <HelpCircle className="size-5 text-emerald-400" />
+                Submit New Support Query
+              </h3>
+              <button onClick={() => setShowNewModal(false)} className="text-zinc-400 hover:text-white">✕</button>
+            </div>
+
+            <form onSubmit={handleCreateNewQuery} className="space-y-3 text-xs">
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">User Name *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Ramesh Kumar"
+                  value={newUserName}
+                  onChange={(e) => setNewUserName(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-zinc-400 mb-1 font-bold">User Email</label>
+                  <input
+                    type="email"
+                    placeholder="ramesh@gmail.com"
+                    value={newUserEmail}
+                    onChange={(e) => setNewUserEmail(e.target.value)}
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-zinc-400 mb-1 font-bold">Query Type</label>
+                  <select
+                    value={newQueryType}
+                    onChange={(e) => setNewQueryType(e.target.value as any)}
+                    className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                  >
+                    <option value="Route Condition">Route Condition</option>
+                    <option value="Missing Spot">Missing Spot</option>
+                    <option value="Temple Timings">Temple Timings</option>
+                    <option value="Safety & Weather">Safety & Weather</option>
+                    <option value="General Travel">General Travel</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">Location Context</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Valparai Ghat Road / Ooty Lake"
+                  value={newLocation}
+                  onChange={(e) => setNewLocation(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">Subject *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="Summary of travel question..."
+                  value={newSubject}
+                  onChange={(e) => setNewSubject(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div>
+                <label className="block text-zinc-400 mb-1 font-bold">Message Detail *</label>
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="Detailed traveler inquiry..."
+                  value={newMessage}
+                  onChange={(e) => setNewMessage(e.target.value)}
+                  className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2">
+                <Button type="button" variant="outline" onClick={() => setShowNewModal(false)} className="border-zinc-800 text-zinc-400">Cancel</Button>
+                <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold">Submit Query to Supabase</Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
