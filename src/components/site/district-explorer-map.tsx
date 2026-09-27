@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import type L from "leaflet";
 import { DistrictSpot, DistrictCategoryKey } from "@/lib/data/districts";
 import { getGoogleTileUrl, loadGoogleMapsScript } from "@/lib/google-maps-loader";
+import { getStoredUserLocation } from "@/lib/user-location-manager";
 import { Badge } from "@/components/ui/badge";
 import { MapPin, Star, Clock, X, Layers } from "lucide-react";
 
@@ -200,6 +201,38 @@ export function DistrictExplorerMap({
     // Clear old markers
     markersRef.current.forEach((marker) => marker.remove());
     markersRef.current.clear();
+
+    // Plot user current location marker if enabled
+    const userLoc = getStoredUserLocation();
+    if (userLoc.enabled && userLoc.coords) {
+      const userIcon = LModule.divIcon({
+        className: "custom-user-location-marker",
+        html: `
+          <div style="
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background-color: #3b82f6;
+            border: 3px solid white;
+            box-shadow: 0 0 12px rgba(59, 130, 246, 0.8);
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+          ">
+            📍
+          </div>
+        `,
+        iconSize: [32, 32],
+        iconAnchor: [16, 16],
+      });
+
+      const userMarker = LModule.marker([userLoc.coords.lat, userLoc.coords.lng], { icon: userIcon }).addTo(map);
+      userMarker.bindTooltip(`Your Current Location (${userLoc.city})`, { direction: "top", offset: [0, -10] });
+      markersRef.current.set("user-current-location", userMarker);
+    }
 
     filteredSpots.forEach((spot) => {
       const colorScheme = CATEGORY_COLORS[spot.category] || CATEGORY_COLORS.temples;

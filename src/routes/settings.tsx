@@ -18,6 +18,9 @@ export const Route = createFileRoute("/settings")({
 
 function SettingsPageRoute() {
   const navigate = useNavigate();
+  const initialTab = typeof window !== "undefined"
+    ? new URLSearchParams(window.location.search).get("tab") || "profile"
+    : "profile";
 
   return (
     <AppShell>
@@ -25,7 +28,7 @@ function SettingsPageRoute() {
         <ExplorerSettingsModal
           isOpen={true}
           onClose={() => navigate({ to: "/" })}
-          defaultTab="profile"
+          defaultTab={initialTab}
         />
       </div>
     </AppShell>

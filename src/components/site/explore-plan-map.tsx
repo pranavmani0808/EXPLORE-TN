@@ -26,6 +26,10 @@ import {
 import { RouteApiRepository, IsolatedRouteResultDTO } from "@/lib/api-client/routes";
 import heroImg from "@/assets/hero-ghats.jpg";
 
+import {
+  getStoredUserLocation,
+} from "@/lib/user-location-manager";
+
 export interface ExplorePlanStop {
   placeId: string;
   order: number;
@@ -80,8 +84,22 @@ export function ExplorePlanMap({
   subtitle,
   className = "",
 }: ExplorePlanMapProps) {
+  const computedOrigins = useMemo(() => {
+    const loc = getStoredUserLocation();
+    if (loc.enabled && loc.coords) {
+      const userOrigin: OriginOption = {
+        placeId: "user-current-location",
+        name: `📍 My Current Location (${loc.city})`,
+        latitude: loc.coords.lat,
+        longitude: loc.coords.lng,
+      };
+      return [userOrigin, ...originOptions];
+    }
+    return originOptions;
+  }, [originOptions]);
+
   const [selectedPlanId, setSelectedPlanId] = useState<string>(initialPlanId || plans[0]?.id || "");
-  const [selectedOrigin, setSelectedOrigin] = useState<OriginOption>(originOptions[0]);
+  const [selectedOrigin, setSelectedOrigin] = useState<OriginOption>(computedOrigins[0]);
   const [travelMode, setTravelMode] = useState<"driving" | "motorcycle">("driving");
   const [selectedStopIndex, setSelectedStopIndex] = useState<number>(0);
 
@@ -501,12 +519,12 @@ export function ExplorePlanMap({
             <select
               value={selectedOrigin.placeId}
               onChange={(e) => {
-                const found = originOptions.find((o) => o.placeId === e.target.value);
+                const found = computedOrigins.find((o) => o.placeId === e.target.value);
                 if (found) setSelectedOrigin(found);
               }}
               className="bg-slate-800 border border-slate-700 rounded-xl px-3 py-1.5 text-xs font-bold text-white focus:outline-none focus:ring-2 focus:ring-emerald-500"
             >
-              {originOptions.map((o) => (
+              {computedOrigins.map((o) => (
                 <option key={o.placeId} value={o.placeId}>
                   {o.name}
                 </option>

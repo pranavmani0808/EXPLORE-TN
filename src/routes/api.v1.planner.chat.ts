@@ -202,35 +202,75 @@ export const APIRoute = createAPIFileRoute("/api/v1/planner/chat")({
         category: "city"
       };
 
+      // Extract Requested Days
+      let days = body.days || body.durationDays || 1;
+      const dayMatch = lowerMsg.match(/(\d+)\s*days?/i) || lowerMsg.match(/(one|two|three|four|five|six|seven|1|2|3|4|5|6|7)\s*days?/i);
+      if (dayMatch) {
+        const mStr = dayMatch[0].toLowerCase();
+        if (mStr.includes("two") || mStr.includes("2")) days = 2;
+        else if (mStr.includes("three") || mStr.includes("3")) days = 3;
+        else if (mStr.includes("four") || mStr.includes("4")) days = 4;
+        else if (mStr.includes("five") || mStr.includes("5")) days = 5;
+        else if (dayMatch[1] && !isNaN(parseInt(dayMatch[1], 10))) days = parseInt(dayMatch[1], 10);
+      }
+
       const profile = getDestinationProfile(detectedDest);
       const interestsStr = session.interests.length > 0 ? session.interests.join(" & ") : "Top Attractions & Food";
 
       let distKm = 460;
       let durationMins = 420;
-      let fuelCostStr = "₹1,438";
       let totalCost = 3088;
 
       if (detectedDest.toLowerCase() === "madurai") {
         distKm = 460;
         durationMins = 420;
-        fuelCostStr = "₹1,438";
         totalCost = 3088;
       } else if (detectedDest.toLowerCase() === "kodaikanal") {
         distKm = 520;
         durationMins = 540;
-        fuelCostStr = "₹1,625";
         totalCost = 3475;
       }
 
-      const assistantMsg = `Planned your 1-day motorcycle trip to ${detectedDest} from ${session.origin} focused on ${interestsStr}. Real road distance across all stops is ${distKm} km round-trip (ETA: ${Math.floor(durationMins/60)}h ${durationMins%60}m). Estimated fuel cost is ${fuelCostStr} (${distKm} km @ 32.0 km/L, ₹100/L). Total estimated cost: ₹${totalCost} (Within Budget for ₹10000).`;
+      const totalDist = distKm * (days === 1 ? 1 : 1.4);
+      const totalDuration = durationMins * (days === 1 ? 1 : 1.4);
+      const calcFuelCost = Math.round(1438 * (days === 1 ? 1 : days * 0.85));
+      const calcTotalCost = totalCost * days;
 
-      const timeline = [
-        { time: "06:00 AM", name: `Depart ${session.origin}`, description: `Begin ride towards ${detectedDest}.` },
-        { time: "09:30 AM", name: "En-route Breakfast Stop", description: "Piping hot South Indian breakfast and coffee on highway." },
-        { time: "01:30 PM", name: `Arrive at ${detectedDest}`, description: `Explore top ${interestsStr} sights in ${detectedDest}.` },
-        { time: "04:30 PM", name: "Local Food & Refreshments", description: `Sample famous local delicacies in ${detectedDest}.` },
-        { time: "09:00 PM", name: `Return to ${session.origin}`, description: `Complete ${distKm} km round-trip journey.` }
-      ];
+      const assistantMsg = `Planned your ${days}-day trip to ${detectedDest} & nearby places within 4-5 hours from ${session.origin} focused on ${interestsStr}. Real road distance across all stops is ${Math.round(totalDist)} km round-trip (ETA: ${Math.floor(totalDuration / 60)}h ${Math.round(totalDuration % 60)}m). Estimated fuel cost is ₹${calcFuelCost} (${Math.round(totalDist)} km @ 32.0 km/L, ₹100/L). Total estimated cost: ₹${calcTotalCost} (Within Budget for ₹${10000 * days}).`;
+
+      let timeline: Array<{ time: string; name: string; description: string }> = [];
+
+      if (days >= 2 && detectedDest.toLowerCase() === "madurai") {
+        timeline = [
+          { time: "Day 1 - 06:00 AM", name: `Depart ${session.origin} for Madurai`, description: `Scenic morning ride/drive towards Madurai.` },
+          { time: "Day 1 - 10:00 AM", name: "Meenakshi Amman Temple & Heritage Circuit", description: "Explore iconic 14 gopurams, Thousand Pillar Hall, and Golden Lotus Tank." },
+          { time: "Day 1 - 01:30 PM", name: "Authentic Madurai Feast", description: "Taste authentic Kari Dosa, Jigarthanda & traditional thali." },
+          { time: "Day 1 - 03:30 PM", name: "Thirumalai Nayakkar Mahal", description: "17th-century Indo-Saracenic palace with grand celestial pavilion." },
+          { time: "Day 1 - 06:30 PM", name: "Pudhumandapam & Local Handicraft Bazaars", description: "Shop brass lamps, Sungudi sarees & local brassware." },
+          { time: "Day 2 - 07:30 AM", name: "Alagar Koyil & Pazhamudircholai (21 km / 45 mins)", description: "Visit Kallazhagar temple in Solaimalai hills and 6th Abode of Lord Murugan." },
+          { time: "Day 2 - 11:30 AM", name: "Samanar Hills & Rock-Cut Inscriptions (15 km)", description: "Explore 2nd century BCE Jain monk rock-cut caves with panoramic valley view." },
+          { time: "Day 2 - 02:30 PM", name: "Thiruparankundram Murugan Temple (8 km)", description: "Monolithic rock-cut temple carved directly into the hill." },
+          { time: "Day 2 - 06:00 PM", name: `Return Journey to ${session.origin}`, description: `Complete ${days}-day multi-district Madurai & nearby expedition.` }
+        ];
+      } else if (days >= 2) {
+        timeline = [
+          { time: "Day 1 - 06:00 AM", name: `Depart ${session.origin} for ${detectedDest}`, description: `Morning ride towards ${detectedDest}.` },
+          { time: "Day 1 - 10:30 AM", name: `${detectedDest} Main Sightseeing Circuit`, description: `Explore primary landmarks and heritage spots in ${detectedDest}.` },
+          { time: "Day 1 - 02:00 PM", name: "Local Dining & Specialty Food", description: `Enjoy local food specialties.` },
+          { time: "Day 1 - 04:30 PM", name: "Viewpoints & Sunset Spot", description: `Experience scenic sunset views.` },
+          { time: "Day 2 - 08:00 AM", name: `Nearby Sights & Waterfalls Circuit (Within 4-5 hours / 40 km)`, description: `Explore surrounding natural waterfalls and viewpoint spots.` },
+          { time: "Day 2 - 01:00 PM", name: "Local Handicrafts & Souvenir Bazaars", description: `Pick up local crafts and items.` },
+          { time: "Day 2 - 05:00 PM", name: `Return Journey to ${session.origin}`, description: `Complete ${days}-day multi-day travel circuit.` }
+        ];
+      } else {
+        timeline = [
+          { time: "06:00 AM", name: `Depart ${session.origin}`, description: `Begin ride towards ${detectedDest}.` },
+          { time: "09:30 AM", name: "En-route Breakfast Stop", description: "Piping hot South Indian breakfast and coffee on highway." },
+          { time: "01:30 PM", name: `Arrive at ${detectedDest}`, description: `Explore top ${interestsStr} sights in ${detectedDest}.` },
+          { time: "04:30 PM", name: "Local Food & Refreshments", description: `Sample famous local delicacies in ${detectedDest}.` },
+          { time: "09:00 PM", name: `Return to ${session.origin}`, description: `Complete ${distKm} km round-trip journey.` }
+        ];
+      }
 
       return new Response(
         JSON.stringify({
@@ -241,15 +281,16 @@ export const APIRoute = createAPIFileRoute("/api/v1/planner/chat")({
             plannerState: {
               origin: session.origin,
               destination: session.destination,
+              durationDays: days,
               interests: session.interests,
               discoveryPhase: "INTERESTS_COLLECTED"
             },
             destinationProfile: profile,
             missingFields: [],
-            recommendations: [detectedDest, "Meenakshi Temple", "Thirumalai Nayakkar Mahal"],
+            recommendations: [detectedDest, "Meenakshi Temple", "Thirumalai Nayakkar Mahal", "Alagar Koyil"],
             route: {
-              distanceKm: distKm,
-              durationMinutes: durationMins,
+              distanceKm: Math.round(totalDist),
+              durationMinutes: Math.round(totalDuration),
               geometry: {
                 type: "LineString",
                 coordinates: [
@@ -264,16 +305,16 @@ export const APIRoute = createAPIFileRoute("/api/v1/planner/chat")({
             },
             elevation: { gainMeters: 450, highestMeters: 350, lowestMeters: 50 },
             costEstimate: {
-              fuelCost: fuelCostStr,
-              numericFuelCost: 1437.5,
-              fuel: 1437.5,
-              food: 1200,
-              tickets: 300,
-              parking: 150,
-              total: totalCost,
-              budget: 10000,
+              fuelCost: `₹${calcFuelCost}`,
+              numericFuelCost: calcFuelCost,
+              fuel: calcFuelCost,
+              food: 1200 * days,
+              tickets: 300 * days,
+              parking: 150 * days,
+              total: calcTotalCost,
+              budget: 10000 * days,
               withinBudget: true,
-              assumptions: `${distKm} km @ 32.0 km/L, ₹100/L`
+              assumptions: `${Math.round(totalDist)} km @ 32.0 km/L, ₹100/L`
             },
             weather: { tempRange: "24–34°C", condition: "Sunny" },
             timeline,
