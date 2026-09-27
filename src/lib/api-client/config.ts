@@ -12,7 +12,9 @@ export function getApiBaseUrl(): string {
 
   // 2. Check Node / Process environment variables
   if (!apiUrl && typeof process !== "undefined" && process.env) {
-    if (process.env.VITE_API_URL) {
+    if (process.env.VERCEL_URL) {
+      apiUrl = `https://${process.env.VERCEL_URL}`;
+    } else if (process.env.VITE_API_URL) {
       apiUrl = process.env.VITE_API_URL;
     } else if (process.env.VITE_API_BASE_URL) {
       apiUrl = process.env.VITE_API_BASE_URL;
@@ -32,9 +34,6 @@ export function getApiBaseUrl(): string {
   }
 
   // 3. Runtime Browser Environment Guard for Production Deployment
-  // When running in a production browser environment (e.g. Vercel deployment),
-  // window.location.hostname is NOT localhost/127.0.0.1.
-  // Use window.location.origin instead of falling back to localhost:8000!
   if (typeof window !== "undefined" && window.location) {
     const hostname = window.location.hostname;
     if (hostname !== "localhost" && hostname !== "127.0.0.1") {
@@ -42,7 +41,12 @@ export function getApiBaseUrl(): string {
     }
   }
 
-  // 4. Default Base URL for local development only
+  // 4. Production SSR environment guard (do not use localhost:8000 on Vercel serverless)
+  if (typeof process !== "undefined" && (process.env?.NODE_ENV === "production" || process.env?.VERCEL)) {
+    return "";
+  }
+
+  // 5. Default Base URL for local development only
   return "http://localhost:8000";
 }
 

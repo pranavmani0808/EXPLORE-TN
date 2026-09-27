@@ -27,6 +27,7 @@ import {
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { getApiBaseUrl } from "@/lib/api-client/config";
+import { PlaceApiRepository } from "@/lib/api-client/places";
 import { CANONICAL_PLACES } from "@/lib/data/canonical-places";
 import { DEFAULT_ARUPADAI_VEEDU_TEMPLES } from "@/data/places";
 import { cn } from "@/lib/utils";
@@ -254,14 +255,29 @@ function ExploreByExperiencePage() {
     async function loadPlaces() {
       try {
         setLoading(true);
-        const res = await fetch(`${getApiBaseUrl()}/api/v1/places`);
-        if (res.ok) {
-          const env = await res.json();
-          if (env.data && env.data.length > 0) {
-            setPlaces(env.data);
-            setLoading(false);
-            return;
-          }
+        const data = await PlaceApiRepository.fetchPlaces();
+        if (data && data.length > 0) {
+          setPlaces(data.map((p: any) => ({
+            id: p.id || p.slug,
+            slug: p.slug,
+            name: p.name || p.canonicalName,
+            display_name: p.canonicalName || p.name,
+            district: p.district,
+            state: p.state || "Tamil Nadu",
+            category: p.category ? p.category.toLowerCase() : "heritage",
+            subcategory: p.subcategories?.[0] || p.category,
+            categories: p.tags || [p.category],
+            tagline: p.tagline || "",
+            description: p.description || "",
+            latitude: p.latitude,
+            longitude: p.longitude,
+            rating: p.rating || 4.8,
+            reviewsCount: p.review_count || 120,
+            image: p.image_url || p.image || "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+            verified: p.is_verified ?? true,
+          })));
+          setLoading(false);
+          return;
         }
       } catch {
         // Fallback
