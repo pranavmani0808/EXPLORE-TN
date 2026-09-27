@@ -18,9 +18,14 @@ export default defineConfig({
   },
   vite: {
     build: {
+      rolldownOptions: {
+        output: {
+          codeSplitting: false,
+        },
+      },
       rollupOptions: {
         output: {
-          inlineDynamicImports: false,
+          inlineDynamicImports: true,
         },
       },
     },
