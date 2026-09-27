@@ -41,9 +41,9 @@ export function getApiBaseUrl(): string {
     }
   }
 
-  // 4. Production SSR environment guard (do not use localhost:8000 on Vercel serverless)
+  // 4. Production SSR environment guard (always return valid absolute URL)
   if (typeof process !== "undefined" && (process.env?.NODE_ENV === "production" || process.env?.VERCEL)) {
-    return "";
+    return "https://explore-tn-ochre.vercel.app";
   }
 
   // 5. Default Base URL for local development only
