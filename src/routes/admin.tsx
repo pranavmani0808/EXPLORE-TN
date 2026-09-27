@@ -304,7 +304,7 @@ function AdminOperationsCenter() {
                 <nav className="space-y-0.5">
                   {[
                     { id: "hotels", label: "Hotels & Resorts", icon: Hotel, count: hotels.length },
-                    { id: "activities", label: "Activities & Adventures", icon: Mountain, count: 24 },
+                    { id: "activities", label: "Activities & Adventures", icon: Mountain, count: attractions.length },
                     { id: "events", label: "Events & Festivals", icon: PartyPopper, count: events.length }
                   ].map((item) => {
                     const Icon = item.icon;
@@ -339,7 +339,7 @@ function AdminOperationsCenter() {
                 </div>
                 <nav className="space-y-0.5">
                   {[
-                    { id: "ai_planner", label: "AI Planner Operations", icon: Bot, badge: "1.4k" },
+                    { id: "ai_planner", label: "AI Planner Operations", icon: Bot, badge: "Telemetry" },
                     { id: "ai_config", label: "AI Configuration & Prompts", icon: Sliders }
                   ].map((item) => {
                     const Icon = item.icon;
@@ -377,7 +377,7 @@ function AdminOperationsCenter() {
                 <nav className="space-y-0.5">
                   {[
                     { id: "crawler", label: "Crawler Pipeline", icon: Database, badge: crawlerDiffs.length },
-                    { id: "data_quality", label: "Data Quality Center", icon: FileCheck, count: 24 }
+                    { id: "data_quality", label: "Data Quality Center", icon: FileCheck, count: destinations.length }
                   ].map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
@@ -414,8 +414,8 @@ function AdminOperationsCenter() {
                 <nav className="space-y-0.5">
                   {[
                     { id: "users", label: "Users & RBAC Matrix", icon: Users, count: users.length },
-                    { id: "user_queries", label: "User Queries & Support Helpdesk", icon: HelpCircle, badge: "3 Open" },
-                    { id: "reviews", label: "Reviews & Moderation", icon: Star, badge: "8 Pending" }
+                    { id: "user_queries", label: "User Queries & Support Helpdesk", icon: HelpCircle, badge: "Helpdesk" },
+                    { id: "reviews", label: "Reviews & Moderation", icon: Star, badge: "Moderation" }
                   ].map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
@@ -451,8 +451,8 @@ function AdminOperationsCenter() {
                 </div>
                 <nav className="space-y-0.5">
                   {[
-                    { id: "media_library", label: "Media Asset Library", icon: Layers, count: 820 },
-                    { id: "articles", label: "Articles & Travel Guides", icon: FileText, count: 14 }
+                    { id: "media_library", label: "Media Asset Library", icon: Layers, count: destinations.length },
+                    { id: "articles", label: "Articles & Travel Guides", icon: FileText, count: cmsSections.length }
                   ].map((item) => {
                     const Icon = item.icon;
                     const isActive = activeSection === item.id;
