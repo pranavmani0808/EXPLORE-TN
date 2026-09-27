@@ -32,6 +32,16 @@ import { recordPlaceVisit, getUserVisits, submitCommunityContribution } from "@/
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { getApiBaseUrl } from "@/lib/api-client/config";
 import { LiveDestinationIntelligencePanel } from "@/components/site/live-destination-intelligence-panel";
+import {
+  getPlaceTravelIntelligence,
+  getGeospatialAroundPlace,
+} from "@/lib/data/travel-intelligence";
+import {
+  PlaceTravelInformationSection,
+  SoloTravelerSection,
+  AroundThisPlaceSection,
+  CommunityReportsSection,
+} from "@/components/site/travel-intelligence-components";
 
 export const Route = createFileRoute("/place/$slug")({
   loader: ({ params }) => {
@@ -71,6 +81,9 @@ function PlacePage() {
   const { requireAuth } = useAuthGuard();
   const { place } = Route.useLoaderData() as { place: Place };
   const related = places.filter((p) => p.slug !== place.slug).slice(0, 3);
+
+  const travelIntel = getPlaceTravelIntelligence(place.slug);
+  const geospatialData = getGeospatialAroundPlace(place.slug);
 
   const [hasVisited, setHasVisited] = useState(false);
   const [visitFeedback, setVisitFeedback] = useState<string | null>(null);
@@ -224,6 +237,18 @@ function PlacePage() {
               initialName={place.name}
               initialDistrict={place.district}
             />
+
+            {/* 🅿️ TRAVEL & ACCESSIBILITY INTELLIGENCE (PARKING, ROAD, HILL SAFETY) */}
+            <PlaceTravelInformationSection intel={travelIntel} />
+
+            {/* 🛡️ SOLO TRAVELER MODE PERSPECTIVE CARD */}
+            <SoloTravelerSection intel={travelIntel} />
+
+            {/* 🌐 "AROUND THIS PLACE" GEOSPATIAL DISCOVERY & SMART MINI-ITINERARY */}
+            <AroundThisPlaceSection targetSlug={place.slug} geospatialData={geospatialData} />
+
+            {/* 🚨 LIVE COMMUNITY REPORTING & ROAD ALERTS */}
+            <CommunityReportsSection placeSlug={place.slug} />
 
             <section>
               <h2 className="text-2xl font-bold">The story</h2>

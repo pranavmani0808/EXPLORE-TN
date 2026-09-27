@@ -238,7 +238,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           </div>
 
           {/* Center: Main Visitor Navigation */}
-          <div className="hidden items-center gap-1.5 lg:flex">
+          <div className="hidden items-center gap-2 lg:flex shrink-0">
             {/* 1. Destinations Dropdown */}
             <div
               className="relative"
@@ -249,15 +249,15 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                 type="button"
                 onClick={() => setDistrictsModalOpen(true)}
                 className={cn(
-                  "flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold transition-all hover:bg-zinc-800/60 hover:text-white cursor-pointer",
+                  "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all duration-200 hover:bg-zinc-800/80 hover:text-white hover:scale-[1.02] cursor-pointer shrink-0",
                   isDestinationsActive
                     ? "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30"
-                    : "text-zinc-300",
+                    : "text-zinc-300 border border-transparent hover:border-zinc-800/60",
                 )}
               >
-                <Landmark className="size-4 text-amber-400" />
-                <span>{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
-                <ChevronDown className={`size-3.5 transition-transform ${destMenuOpen ? "rotate-180 text-emerald-400" : ""}`} />
+                <Landmark className="size-4 text-amber-400 shrink-0" />
+                <span className="whitespace-nowrap">{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
+                <ChevronDown className={`size-3.5 shrink-0 transition-transform ${destMenuOpen ? "rotate-180 text-emerald-400" : ""}`} />
               </button>
 
               {/* Mega Destinations Dropdown Popover */}
@@ -342,31 +342,31 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* 2. Map Explorer */}
           <Link
             to="/explore"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/60 hover:text-white"
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 whitespace-nowrap transition-all duration-200 hover:bg-zinc-800/80 hover:text-white hover:scale-[1.02] shrink-0 border border-transparent hover:border-zinc-800/60"
             activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
           >
-            <Map className="size-4 text-emerald-400" />
-            <span>{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
+            <Map className="size-4 text-emerald-400 shrink-0" />
+            <span className="whitespace-nowrap">{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
           </Link>
 
           {/* 3. Trails & Routes */}
           <Link
             to="/routes"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/60 hover:text-white"
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 whitespace-nowrap transition-all duration-200 hover:bg-zinc-800/80 hover:text-white hover:scale-[1.02] shrink-0 border border-transparent hover:border-zinc-800/60"
             activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
           >
-            <Route className="size-4 text-emerald-400" />
-            <span>{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
+            <Route className="size-4 text-emerald-400 shrink-0" />
+            <span className="whitespace-nowrap">{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
           </Link>
 
           {/* 4. Travel Guides */}
           <Link
             to="/community"
-            className="flex items-center gap-1.5 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 transition-all hover:bg-zinc-800/60 hover:text-white"
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 whitespace-nowrap transition-all duration-200 hover:bg-zinc-800/80 hover:text-white hover:scale-[1.02] shrink-0 border border-transparent hover:border-zinc-800/60"
             activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
           >
-            <Users className="size-4 text-zinc-400" />
-            <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+            <Users className="size-4 text-zinc-400 shrink-0" />
+            <span className="whitespace-nowrap">{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
           </Link>
         </div>
 
