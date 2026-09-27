@@ -67,6 +67,7 @@ import {
 } from "@/lib/api/admin-dashboard-api";
 import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
 import { toast } from "sonner";
+import { HelpCircle, TrendingUp } from "lucide-react";
 
 // Import Specialized Operations Modules
 import { PlacesManagementModule } from "@/components/admin/places-management-module";
@@ -77,6 +78,9 @@ import { CommunityModerationModule } from "@/components/admin/community-moderati
 import { ContentHealthModule } from "@/components/admin/content-health-module";
 import { CMSBuilderModule } from "@/components/admin/cms-builder-module";
 import { ExecutiveSaaSCommandCenter } from "@/components/admin/executive-saas-command-center";
+import { UserQueriesSupportModule } from "@/components/admin/user-queries-module";
+import { PlaceSuggestionsModule } from "@/components/admin/place-suggestions-module";
+import { WeeklyDigestModule } from "@/components/admin/weekly-digest-module";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -94,6 +98,7 @@ export const Route = createFileRoute("/admin")({
 export type AdminSection =
   | "dashboard"
   | "destinations"
+  | "place_suggestions"
   | "map_intelligence"
   | "categories"
   | "routes"
@@ -105,11 +110,13 @@ export type AdminSection =
   | "crawler"
   | "data_quality"
   | "users"
+  | "user_queries"
   | "reviews"
   | "media_library"
   | "articles"
   | "search_analytics"
   | "analytics"
+  | "weekly_digest"
   | "audit"
   | "notifications"
   | "settings"
@@ -253,6 +260,7 @@ function AdminOperationsCenter() {
                 <nav className="space-y-0.5">
                   {[
                     { id: "destinations", label: "Places Management", icon: Globe, count: destinations.length },
+                    { id: "place_suggestions", label: "Place Suggestions & Scout Reviews", icon: Sparkles, badge: "4 New" },
                     { id: "map_intelligence", label: "Map Intelligence & Bounds", icon: Map, badge: "GIS" },
                     { id: "categories", label: "Categories & Taxonomy", icon: Tag },
                     { id: "routes", label: "Routes & Road Trips", icon: Compass, count: 18 }
@@ -401,11 +409,12 @@ function AdminOperationsCenter() {
               {/* GROUP 6: COMMUNITY & MODERATION */}
               <div>
                 <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  👥 COMMUNITY
+                  👥 COMMUNITY & HELPDESK
                 </div>
                 <nav className="space-y-0.5">
                   {[
                     { id: "users", label: "Users & RBAC Matrix", icon: Users, count: users.length },
+                    { id: "user_queries", label: "User Queries & Support Helpdesk", icon: HelpCircle, badge: "3 Open" },
                     { id: "reviews", label: "Reviews & Moderation", icon: Star, badge: "8 Pending" }
                   ].map((item) => {
                     const Icon = item.icon;
@@ -424,9 +433,11 @@ function AdminOperationsCenter() {
                           <Icon className="h-4 w-4" />
                           <span>{item.label}</span>
                         </div>
-                        {item.count !== undefined && (
+                        {item.badge ? (
+                          <span className="rounded-full bg-emerald-500/10 text-emerald-600 px-2 py-0.5 text-[10px] font-bold">{item.badge}</span>
+                        ) : item.count !== undefined ? (
                           <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        )}
+                        ) : null}
                       </button>
                     );
                   })}
@@ -468,13 +479,14 @@ function AdminOperationsCenter() {
                 </nav>
               </div>
 
-              {/* GROUP 8: ANALYTICS & SEARCH */}
+              {/* GROUP 8: ANALYTICS & REPORTS */}
               <div>
                 <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  📈 ANALYTICS & SEARCH
+                  📈 ANALYTICS & REPORTS
                 </div>
                 <nav className="space-y-0.5">
                   {[
+                    { id: "weekly_digest", label: "Weekly Digest & Performance Reports", icon: TrendingUp, badge: "Active" },
                     { id: "search_analytics", label: "Search Management", icon: SearchCode },
                     { id: "analytics", label: "Platform Analytics", icon: BarChart3 }
                   ].map((item) => {
@@ -555,6 +567,11 @@ function AdminOperationsCenter() {
             {/* 2. PLACES MANAGEMENT */}
             {activeSection === "destinations" && (
               <PlacesManagementModule />
+            )}
+
+            {/* 2b. PLACE SUGGESTIONS & SCOUT REVIEWS */}
+            {activeSection === "place_suggestions" && (
+              <PlaceSuggestionsModule onPlaceApproved={loadAdminData} />
             )}
 
             {/* 3. MAP INTELLIGENCE & GEOGRAPHIC BOUNDARIES */}
@@ -887,6 +904,11 @@ function AdminOperationsCenter() {
               </div>
             )}
 
+            {/* 13b. USER QUERIES & HELPDESK SUPPORT */}
+            {activeSection === "user_queries" && (
+              <UserQueriesSupportModule />
+            )}
+
             {/* 14. REVIEWS & MODERATION */}
             {activeSection === "reviews" && (
               <CommunityModerationModule />
@@ -956,6 +978,11 @@ function AdminOperationsCenter() {
                   </div>
                 </div>
               </div>
+            )}
+
+            {/* 18b. WEEKLY DIGEST & PERFORMANCE REPORTS */}
+            {activeSection === "weekly_digest" && (
+              <WeeklyDigestModule />
             )}
 
             {/* 19. AUDIT LOGS */}
