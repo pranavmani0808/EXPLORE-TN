@@ -2,6 +2,7 @@ import "./lib/error-capture";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { resolvePlace } from "./lib/data/canonical-places";
+import { SupabaseDatabaseRepository } from "./lib/supabase-database";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -35,6 +36,35 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // 1b. Places API Endpoints for Real-Time Reflection of Admin Created Spots
+  if (path === "/api/v1/places" && method === "GET") {
+    const category = url.searchParams.get("category") || undefined;
+    const district = url.searchParams.get("district") || undefined;
+    const search = url.searchParams.get("query") || url.searchParams.get("q") || url.searchParams.get("search") || undefined;
+
+    const places = await SupabaseDatabaseRepository.getPublicPlaces({ category, district, search });
+    return new Response(
+      JSON.stringify({ status: "success", count: places.length, data: places }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  if (path === "/api/v1/places" && method === "POST") {
+    try {
+      const body = await request.clone().json().catch(() => ({}));
+      const created = await SupabaseDatabaseRepository.createPlace(body);
+      return new Response(
+        JSON.stringify({ status: "success", data: created }),
+        { status: 201, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err: any) {
+      return new Response(
+        JSON.stringify({ error: { message: err?.message || "Failed to create place" } }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
   }
 
   // 2. AI Trip Copilot Endpoint: POST /api/v1/planner/chat

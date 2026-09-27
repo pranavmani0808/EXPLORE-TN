@@ -106,6 +106,45 @@ export interface SupabaseUserRecord {
 let isSeededInMemory = false;
 let memoryPlacesCache: SupabasePlaceRecord[] = [];
 
+function isMatchCategory(p: any, targetCat?: string): boolean {
+  if (!targetCat || targetCat.toLowerCase() === 'all' || targetCat.toLowerCase() === 'all categories') return true;
+  const target = targetCat.toLowerCase().trim();
+  const cat = (p.category || '').toLowerCase();
+  const prim = (p.primary_category || '').toLowerCase();
+  const tags = Array.isArray(p.tags) ? p.tags.map((t: any) => String(t).toLowerCase()) : [];
+  const allCats = [cat, prim, ...tags];
+
+  if (target === 'hills' || target === 'mountains' || target === 'hill-escapes' || target === 'hills of tn') {
+    return allCats.some(c => c.includes('hill') || c.includes('mountain') || c.includes('peak') || c.includes('ghat') || c.includes('viewpoint') || c.includes('hairpin') || c.includes('shola'));
+  }
+  if (target === 'beaches' || target === 'coastal' || target === 'coastal-heritage') {
+    return allCats.some(c => c.includes('beach') || c.includes('coast') || c.includes('sea') || c.includes('ocean') || c.includes('shore'));
+  }
+  if (target === 'temples' || target === 'heritage' || target === 'spiritual') {
+    return allCats.some(c => c.includes('temple') || c.includes('heritage') || c.includes('spiritual') || c.includes('gopuram') || c.includes('shrine') || c.includes('sacred') || c.includes('fort') || c.includes('palace'));
+  }
+  if (target === 'waterfalls') {
+    return allCats.some(c => c.includes('waterfall') || c.includes('falls') || c.includes('cascade') || c.includes('stream'));
+  }
+  if (target === 'food' || target === 'culinary') {
+    return allCats.some(c => c.includes('food') || c.includes('culinary') || c.includes('mess') || c.includes('eatery') || c.includes('sweet') || c.includes('hotel'));
+  }
+  if (target === 'hidden-spots' || target === 'hidden' || target === 'offbeat') {
+    return allCats.some(c => c.includes('hidden') || c.includes('offbeat') || c.includes('secret') || c.includes('unexplored') || c.includes('remote'));
+  }
+  if (target === 'trending' || target === 'popular') {
+    return (p.rating ?? 4.8) >= 4.5 || allCats.some(c => c.includes('trending') || c.includes('popular') || c.includes('featured'));
+  }
+  if (target === 'nature' || target === 'wildlife') {
+    return allCats.some(c => c.includes('nature') || c.includes('wildlife') || c.includes('forest') || c.includes('sanctuary') || c.includes('reserve') || c.includes('park'));
+  }
+  if (target === 'trekking' || target === 'adventure') {
+    return allCats.some(c => c.includes('trek') || c.includes('adventure') || c.includes('hike') || c.includes('offroad'));
+  }
+
+  return allCats.some(c => c.includes(target) || target.includes(c));
+}
+
 export class SupabaseDatabaseRepository {
   /**
    * Primary Database Health Check for project ref ajxnljrhueiiuwavbrra
@@ -219,49 +258,51 @@ export class SupabaseDatabaseRepository {
    */
   static async getPublicPlaces(filters?: { district?: string; category?: string; search?: string }): Promise<SupabasePlaceRecord[]> {
     try {
-      // 1. Primary Query against Supabase DB
-      let query = supabase
-        .from('places')
-        .select('*')
-        .eq('status', 'published')
-        .eq('visibility', 'public');
-
-      if (filters?.district && filters.district !== 'all' && filters.district !== 'All') {
-        query = query.eq('district', filters.district);
-      }
-
-      if (filters?.category && filters.category !== 'all' && filters.category !== 'All') {
-        query = query.eq('category', filters.category);
-      }
-
-      if (filters?.search) {
-        const searchTerm = `%${filters.search.trim()}%`;
-        query = query.or(`name.ilike.${searchTerm},district.ilike.${searchTerm},description.ilike.${searchTerm}`);
-      }
-
-      const { data, error } = await query.order('rating', { ascending: false });
-
-      if (!error && data && data.length > 0) {
-        memoryPlacesCache = data as SupabasePlaceRecord[];
-        return data as SupabasePlaceRecord[];
-      }
-
-      // If database table was empty or freshly created, trigger auto-seed sync
       if (!isSeededInMemory) {
         await SupabaseDatabaseRepository.seedCanonicalPlacesToSupabase();
       }
 
-      // Return seeded memory cache filtered as requested
-      let result = [...memoryPlacesCache];
+      let dbRecords: SupabasePlaceRecord[] = [];
+      const { data, error } = await supabase
+        .from('places')
+        .select('*')
+        .eq('status', 'published')
+        .eq('visibility', 'public')
+        .order('rating', { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        dbRecords = data as SupabasePlaceRecord[];
+      }
+
+      // Combine DB records with memory cache records (deduped by slug)
+      const combinedMap = new Map<string, SupabasePlaceRecord>();
+      [...memoryPlacesCache, ...dbRecords].forEach(p => {
+        if (p.slug) combinedMap.set(p.slug, p);
+      });
+
+      let result = Array.from(combinedMap.values());
+
+      // Filter by district
       if (filters?.district && filters.district !== 'all' && filters.district !== 'All') {
-        result = result.filter(p => p.district.toLowerCase() === filters.district!.toLowerCase());
+        const d = filters.district.toLowerCase().trim();
+        result = result.filter(p => p.district && (p.district.toLowerCase().includes(d) || d.includes(p.district.toLowerCase())));
       }
+
+      // Filter by category
       if (filters?.category && filters.category !== 'all' && filters.category !== 'All') {
-        result = result.filter(p => p.category.toLowerCase() === filters.category!.toLowerCase());
+        result = result.filter(p => isMatchCategory(p, filters.category));
       }
+
+      // Filter by search query
       if (filters?.search) {
         const q = filters.search.toLowerCase().trim();
-        result = result.filter(p => p.name.toLowerCase().includes(q) || p.district.toLowerCase().includes(q) || p.description.toLowerCase().includes(q));
+        result = result.filter(p =>
+          (p.name && p.name.toLowerCase().includes(q)) ||
+          (p.district && p.district.toLowerCase().includes(q)) ||
+          (p.description && p.description.toLowerCase().includes(q)) ||
+          (p.tagline && p.tagline.toLowerCase().includes(q)) ||
+          (p.tags && p.tags.some(t => String(t).toLowerCase().includes(q)))
+        );
       }
 
       return result;
@@ -276,60 +317,79 @@ export class SupabaseDatabaseRepository {
    */
   static async getPlaceBySlug(slug: string): Promise<SupabasePlaceRecord | null> {
     try {
+      // 1. Memory cache check first
+      const cached = memoryPlacesCache.find(p => p.slug === slug || p.id === slug);
+      if (cached) return cached;
+
+      // 2. Database query
       const { data, error } = await supabase
         .from('places')
         .select('*')
         .eq('slug', slug)
-        .eq('status', 'published')
-        .eq('visibility', 'public')
         .maybeSingle();
 
       if (!error && data) {
+        memoryPlacesCache = [data as SupabasePlaceRecord, ...memoryPlacesCache.filter(p => p.slug !== slug)];
         return data as SupabasePlaceRecord;
       }
 
-      // Check cache memory if DB query yielded null
-      const foundInCache = memoryPlacesCache.find(p => p.slug === slug);
-      if (foundInCache) return foundInCache;
-
-      // Auto seed & re-check
-      await SupabaseDatabaseRepository.seedCanonicalPlacesToSupabase();
-      return memoryPlacesCache.find(p => p.slug === slug) || null;
+      if (!isSeededInMemory) {
+        await SupabaseDatabaseRepository.seedCanonicalPlacesToSupabase();
+        return memoryPlacesCache.find(p => p.slug === slug || p.id === slug) || null;
+      }
+      return null;
     } catch {
-      return memoryPlacesCache.find(p => p.slug === slug) || null;
+      return memoryPlacesCache.find(p => p.slug === slug || p.id === slug) || null;
     }
   }
 
   /**
    * Create new place record directly in Supabase Primary Database Memory
    */
-  static async createPlace(place: Omit<SupabasePlaceRecord, 'id' | 'created_at' | 'updated_at'>): Promise<SupabasePlaceRecord | null> {
+  static async createPlace(placeInput: any): Promise<SupabasePlaceRecord | null> {
     try {
-      const slug = place.slug || place.name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-      const placeData = {
-        ...place,
+      const name = placeInput.name || "New Explorer Spot";
+      const slug = placeInput.slug || name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+      const district = placeInput.district || "General";
+      const category = (placeInput.category || "heritage").toLowerCase();
+
+      const placeRecord: SupabasePlaceRecord = {
+        id: placeInput.id || `plc-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+        name,
+        canonical_name: placeInput.canonical_name || name,
         slug,
-        visibility: place.visibility || 'public',
-        status: place.status || 'published',
+        district,
+        state: placeInput.state || "Tamil Nadu",
+        category,
+        primary_category: placeInput.primary_category || category,
+        latitude: Number(placeInput.latitude || placeInput.coordinates?.latitude || placeInput.lat) || 10.5,
+        longitude: Number(placeInput.longitude || placeInput.coordinates?.longitude || placeInput.lng) || 78.5,
+        tagline: placeInput.tagline || `Verified destination in ${district}`,
+        description: placeInput.description || `Explore ${name} located in ${district}, Tamil Nadu.`,
+        image_url: placeInput.image_url || placeInput.heroImage || placeInput.image || "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+        rating: Number(placeInput.rating) || 5.0,
+        review_count: Number(placeInput.review_count) || 1,
+        is_verified: true,
+        visibility: "public",
+        status: "published",
+        tags: Array.isArray(placeInput.tags) ? placeInput.tags : [category, district.toLowerCase(), "featured", "verified"],
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
       };
 
-      const { data, error } = await supabase.from('places').insert([placeData]).select().single();
+      // 1. Add to local memory cache immediately so UI gets instant reflection
+      memoryPlacesCache = [placeRecord, ...memoryPlacesCache.filter(p => p.slug !== slug)];
+
+      // 2. Persist to Supabase Database table
+      const { data, error } = await supabase.from('places').upsert([placeRecord], { onConflict: 'slug' }).select().single();
       if (error) {
         console.warn("[Supabase DB] Primary insert notice:", error.message);
-        // Save to memory cache as primary
-        const newRecord: SupabasePlaceRecord = {
-          ...placeData,
-          id: `plc-${Date.now()}`,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
-        };
-        memoryPlacesCache = [newRecord, ...memoryPlacesCache];
-        return newRecord;
+      } else if (data) {
+        memoryPlacesCache = [data as SupabasePlaceRecord, ...memoryPlacesCache.filter(p => p.slug !== slug)];
+        return data as SupabasePlaceRecord;
       }
-      if (data) {
-        memoryPlacesCache = [data as SupabasePlaceRecord, ...memoryPlacesCache];
-      }
-      return data as SupabasePlaceRecord;
+
+      return placeRecord;
     } catch (err) {
       console.error("[Supabase DB] Exception in createPlace:", err);
       return null;
