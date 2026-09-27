@@ -261,7 +261,6 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
         { id: "ai_planner", label: "AI Planner Controls", icon: Bot },
         { id: "trips_routes", label: "Trips & Saved Routes", icon: RouteIcon },
         { id: "map_prefs", label: "Map Preferences", icon: Map },
-        { id: "offline_maps", label: "Offline Maps", icon: Download },
       ],
     },
     {
@@ -874,28 +873,6 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         </button>
                       ))}
                     </div>
-                  </div>
-                </div>
-              )}
-
-              {/* TAB 7: OFFLINE MAPS */}
-              {activeTab === "offline_maps" && (
-                <div className="space-y-6 max-w-3xl text-xs font-sans">
-                  <h3 className="text-base font-bold text-white">Downloaded Map Packs</h3>
-                  <div className="space-y-3">
-                    {[
-                      { region: "Nilgiris (Ooty & Coonoor)", size: "420 MB" },
-                      { region: "Kodaikanal & Palani Hills", size: "310 MB" },
-                      { region: "Valparai & Anamalai Ghats", size: "280 MB" },
-                    ].map((pack) => (
-                      <div key={pack.region} className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center font-mono">
-                        <div>
-                          <p className="font-bold text-white">{pack.region}</p>
-                          <p className="text-slate-400 text-[11px]">{pack.size}</p>
-                        </div>
-                        <span className="text-emerald-400 font-bold text-xs">✓ Downloaded</span>
-                      </div>
-                    ))}
                   </div>
                 </div>
               )}

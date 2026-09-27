@@ -204,7 +204,6 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
     { label: "Explorer Settings", icon: Settings, to: "/settings" },
     { label: "Saved Collections", icon: Bookmark, to: "/explore" },
     { label: "AI Expeditions", icon: Sparkles, to: "/planner" },
-    { label: "Offline Maps", icon: Download, to: "/settings" },
     { label: "Help & Support", icon: HelpCircle, to: "/support" },
   ];
 
