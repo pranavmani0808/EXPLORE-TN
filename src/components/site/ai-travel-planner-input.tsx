@@ -65,28 +65,28 @@ export const AITravelPlannerInput: React.FC<AITravelPlannerInputProps> = ({
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-3">
-        <div className="relative flex items-center">
+        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
           <Input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="e.g. 'Plan a 2 day trip from Madurai to Kanyakumari with temples and beaches'..."
-            className="w-full bg-slate-800/90 border-slate-700 text-white placeholder-slate-400 rounded-xl pr-32 pl-4 py-6 text-sm focus:border-emerald-500 focus:ring-emerald-500/20"
+            placeholder="e.g. 'Plan a 2 day trip from Madurai to Kanyakumari'..."
+            className="w-full bg-slate-800/90 border-slate-700 text-white placeholder-slate-400 rounded-xl px-4 py-3 text-xs sm:text-sm focus:border-emerald-500 focus:ring-emerald-500/20 h-11"
           />
-          <div className="absolute right-2 flex items-center gap-2">
+          <div className="flex items-center gap-2 justify-end shrink-0">
             <Button
               type="button"
               variant="ghost"
               size="sm"
               onClick={() => setShowFilters(!showFilters)}
-              className="text-slate-300 hover:text-white hover:bg-slate-700/50"
+              className="text-slate-300 hover:text-white hover:bg-slate-700/50 h-11 px-3 border border-slate-700/80 rounded-xl"
             >
               <Filter className="w-4 h-4 mr-1" />
-              <span className="hidden sm:inline text-xs">Filters</span>
+              <span className="text-xs">Filters</span>
             </Button>
             <Button
               type="submit"
               disabled={isLoading || !query.trim()}
-              className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-semibold px-4 py-2 rounded-lg transition-all"
+              className="bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-5 h-11 rounded-xl transition-all shadow-md shadow-emerald-500/20"
             >
               {isLoading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />

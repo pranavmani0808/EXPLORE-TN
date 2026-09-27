@@ -396,28 +396,31 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
           {/* Right Content Panel */}
           <div className="flex-1 flex flex-col justify-between overflow-hidden bg-[#09090b]">
             {/* Top Modal Navigation Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 px-6 py-4">
-              <div className="flex items-center gap-3">
-                {/* Mobile dropdown selector */}
-                <select
-                  value={activeTab}
-                  onChange={(e) => setActiveTab(e.target.value)}
-                  className="md:hidden rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-1.5 text-xs text-white font-bold"
-                >
-                  {sidebarGroups.flatMap((g) =>
-                    g.items.map((i) => (
-                      <option key={i.id} value={i.id}>
-                        {i.label}
-                      </option>
-                    ))
-                  )}
-                </select>
+            <div className="flex items-center justify-between border-b border-zinc-800 px-4 sm:px-6 py-3.5 gap-2">
+              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 max-w-[calc(100vw-140px)] sm:max-w-md">
+                {/* Mobile scrollable tab pill strip */}
+                <div className="flex md:hidden items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
+                  {sidebarGroups.flatMap((g) => g.items).map((i) => (
+                    <button
+                      key={i.id}
+                      type="button"
+                      onClick={() => setActiveTab(i.id)}
+                      className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
+                        activeTab === i.id
+                          ? "bg-emerald-500 text-zinc-950 shadow"
+                          : "bg-zinc-900 text-zinc-400 border border-zinc-800"
+                      }`}
+                    >
+                      {i.label}
+                    </button>
+                  ))}
+                </div>
                 <h2 className="hidden md:block text-lg font-bold text-white capitalize">
                   {activeTab.replace(/_/g, " ")}
                 </h2>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 shrink-0">
                 <button
                   type="button"
                   onClick={() => {
@@ -426,7 +429,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition text-xs font-bold"
                 >
                   <Sparkles className="size-3.5" />
-                  <span>Interactive Setup Wizard</span>
+                  <span className="hidden sm:inline">Interactive Setup Wizard</span>
+                  <span className="sm:hidden">Wizard</span>
                 </button>
                 <button
                   onClick={onClose}
@@ -438,7 +442,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
             </div>
 
             {/* Scrollable Tab Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className="flex-1 overflow-y-auto p-4 sm:p-6 pb-24 sm:pb-6 space-y-6">
               {/* TAB 1: PROFILE & IDENTITY + EXPLORER PROFILE CARD */}
               {activeTab === "profile" && (
                 <div className="space-y-6 max-w-3xl">

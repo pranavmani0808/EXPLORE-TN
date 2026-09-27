@@ -549,7 +549,7 @@ export function MobileTabBar() {
         { to: "/explore", label: "Explore", icon: Map, isActive: isExploreActive },
         { to: "/routes", label: "Routes", icon: Route, isActive: pathname === "/routes" },
         { to: "/planner", label: "AI Planner", icon: Sparkles, isActive: pathname === "/planner" },
-        { to: "/community", label: "Community", icon: Users, isActive: pathname === "/community" },
+        { to: "/settings", label: "Account", icon: User, isActive: pathname === "/settings" },
       ].map((l) => {
         const Icon = l.icon;
         return (
