@@ -1,7 +1,23 @@
 import { PlaceApiRepository, AIApiRepository, MediaApiRepository, WeatherApiRepository, PlaceDTO, MediaAssetDTO } from "./api-client";
 import { getApiBaseUrl } from "./api-client/config";
 
-export * from "./api-client";
+export {
+  PlaceApiRepository,
+  AIApiRepository,
+  MediaApiRepository,
+  WeatherApiRepository,
+  getApiBaseUrl,
+  type ApiErrorResponse,
+  type CoordinatesDTO,
+  type PlaceDTO,
+  type HomeExperienceDTO,
+  type PlaceExploreCompositeDTO,
+  type TripExperienceDTO,
+  type RouteDTO,
+  type MediaAssetDTO,
+  type WeatherTelemetryDTO,
+  type AIGenerationDTO,
+} from "./api-client";
 
 const API_BASE_URL = getApiBaseUrl();
 

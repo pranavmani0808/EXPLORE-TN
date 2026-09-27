@@ -14,5 +14,19 @@ export default defineConfig({
   },
   nitro: {
     preset: "vercel",
+    inlineDynamicImports: true,
+  },
+  vite: {
+    build: {
+      rollupOptions: {
+        output: {
+          inlineDynamicImports: false,
+        },
+      },
+    },
+    ssr: {
+      noExternal: true,
+      target: "node",
+    },
   },
 });
