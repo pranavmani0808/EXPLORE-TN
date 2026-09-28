@@ -142,21 +142,21 @@ function Index() {
   ).filter(Boolean) as Place[];
 
   return (
-    <AppShell>
+    <AppShell className="bg-[#09090b]">
       {/* Fixed Background Image Backdrop */}
-      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+      <div className="fixed inset-0 z-0 pointer-events-none overflow-hidden">
         <motion.img
           src={heroImg}
           alt="Misty Western Ghats fixed background backdrop"
           width={1920}
           height={1200}
           initial={{ scale: 1.05, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.35 }}
+          animate={{ scale: 1, opacity: 0.55 }}
           transition={{ duration: 1.8, ease: "easeOut" }}
-          className="size-full object-cover filter brightness-75"
+          className="size-full object-cover filter brightness-90 saturate-110"
         />
-        {/* Dark Vignette Gradient Overlay for readability across all scroll sections */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/75 via-[#09090b]/85 to-[#09090b]/95" />
+        {/* Subtle Dark Vignette Overlay for rich backdrop visibility and high readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/40 via-[#09090b]/70 to-[#09090b]/90" />
       </div>
 
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
@@ -166,10 +166,11 @@ function Index() {
         onClose={() => setIsDedicatedMapOpen(false)}
       />
 
-      {/* SECTION 1: HERO & SEARCH (Popz Design Spec) */}
-      <section className="relative min-h-[82vh] overflow-hidden bg-transparent pt-24 sm:pt-32">
-        {/* Natural Dark Vignette (Solid Surface Overlay) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/60 via-transparent to-[#09090b]" />
+      <div className="relative z-10">
+        {/* SECTION 1: HERO & SEARCH (Popz Design Spec) */}
+        <section className="relative min-h-[82vh] overflow-hidden bg-transparent pt-24 sm:pt-32">
+          {/* Natural Dark Vignette (Solid Surface Overlay) */}
+          <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/30 via-transparent to-[#09090b]/80" />
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="max-w-3xl">
@@ -555,6 +556,7 @@ function Index() {
           </div>
         </div>
       </footer>
+      </div>
     </AppShell>
   );
 }

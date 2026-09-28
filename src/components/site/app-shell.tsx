@@ -1,11 +1,12 @@
 import { useState, type ReactNode } from "react";
 import { FloatingNav, MobileTabBar } from "@/components/site/floating-nav";
 import { SearchPanel } from "@/components/site/search-panel";
+import { cn } from "@/lib/utils";
 
-export function AppShell({ children }: { children: ReactNode }) {
+export function AppShell({ children, className }: { children: ReactNode; className?: string }) {
   const [searchOpen, setSearchOpen] = useState(false);
   return (
-    <div className="min-h-screen bg-background">
+    <div className={cn("min-h-screen bg-background", className)}>
       <FloatingNav onSearch={() => setSearchOpen(true)} />
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
       <main className="pb-24 sm:pb-0">{children}</main>
