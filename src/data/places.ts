@@ -45,6 +45,8 @@ export const categories: {
   { id: "photography", label: "Photography", image: heroImg, blurb: "Golden hour vantage points" },
 ];
 
+import { getDistanceFromChennai } from "@/lib/utils";
+
 export type Place = {
   slug: string;
   name: string;
@@ -53,9 +55,9 @@ export type Place = {
   image: string;
   tagline: string;
   story: string;
-  rating: number;
-  reviews: number;
-  distanceFromChennai: string;
+  rating?: number;
+  reviews?: number;
+  distanceFromChennai?: string;
   difficulty: "Easy" | "Moderate" | "Hard";
   bestSeason: string;
   roadCondition: string;
@@ -78,6 +80,7 @@ export type Place = {
 // Map CANONICAL_PLACES into legacy Place[] format
 export const places: Place[] = CANONICAL_PLACES.map((p, idx) => {
   const cat = p.primaryCategory === "temples" ? "spiritual" : (p.primaryCategory as CategoryId);
+  const calculatedDistance = getDistanceFromChennai(p.latitude, p.longitude) || undefined;
   return {
     slug: p.slug,
     name: p.name,
@@ -86,9 +89,9 @@ export const places: Place[] = CANONICAL_PLACES.map((p, idx) => {
     image: p.image,
     tagline: p.tagline,
     story: p.description,
-    rating: p.rating || 4.7,
-    reviews: p.reviewsCount || 1200,
-    distanceFromChennai: "Variable",
+    rating: p.rating,
+    reviews: p.reviewsCount,
+    distanceFromChennai: calculatedDistance,
     difficulty: "Easy",
     bestSeason: "Year-round",
     roadCondition: "State Highway",

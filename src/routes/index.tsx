@@ -20,6 +20,7 @@ import {
   Map as MapIcon,
   Route as RouteIcon,
   ShieldAlert,
+  Info,
 } from "lucide-react";
 import heroImg from "@/assets/hero-ghats.jpg";
 import { AppShell } from "@/components/site/app-shell";
@@ -51,24 +52,27 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
+import { getCategoryLabel } from "@/lib/categoryLabels";
+import type { Place } from "@/data/places";
+
 // Category Interest Tiles (Popz Design Section 2)
 const INTEREST_CATEGORIES = [
-  { slug: "temples", title: "Heritage & Temples", icon: Landmark, count: "480+ Places", bg: "from-amber-500/20 to-amber-700/10", border: "border-amber-500/30", text: "text-amber-400" },
-  { slug: "hills", title: "Hill Escapes", icon: Mountain, count: "120+ Viewpoints", bg: "from-emerald-500/20 to-emerald-700/10", border: "border-emerald-500/30", text: "text-emerald-400" },
-  { slug: "falls", title: "Waterfalls & Streams", icon: CloudRain, count: "85+ Waterfalls", bg: "from-sky-500/20 to-sky-700/10", border: "border-sky-500/30", text: "text-sky-400" },
-  { slug: "beaches", title: "Coastal Journeys", icon: Waves, count: "140 km Coast", bg: "from-cyan-500/20 to-cyan-700/10", border: "border-cyan-500/30", text: "text-cyan-400" },
-  { slug: "food", title: "Culinary Trails", icon: Utensils, count: "90+ Local Spots", bg: "from-orange-500/20 to-orange-700/10", border: "border-orange-500/30", text: "text-orange-400" },
-  { slug: "trekking", title: "Forest & Wildlife", icon: Trees, count: "32 Trails", bg: "from-green-500/20 to-green-700/10", border: "border-green-500/30", text: "text-green-400" },
+  { slug: "heritage-temples", categoryParam: "heritage-temples", title: "Heritage & Temples", icon: Landmark, count: "480+ Places", bg: "from-amber-500/20 to-amber-700/10", border: "border-amber-500/30", text: "text-amber-400" },
+  { slug: "hill-escapes", categoryParam: "hill-escapes", title: "Hill Escapes", icon: Mountain, count: "120+ Viewpoints", bg: "from-emerald-500/20 to-emerald-700/10", border: "border-emerald-500/30", text: "text-emerald-400" },
+  { slug: "waterfalls", categoryParam: "waterfalls", title: "Waterfalls & Streams", icon: CloudRain, count: "85+ Waterfalls", bg: "from-sky-500/20 to-sky-700/10", border: "border-sky-500/30", text: "text-sky-400" },
+  { slug: "coastal", categoryParam: "coastal", title: "Coastal Journeys", icon: Waves, count: "140 km Coast", bg: "from-cyan-500/20 to-cyan-700/10", border: "border-cyan-500/30", text: "text-cyan-400" },
+  { slug: "culinary", categoryParam: "culinary", title: "Culinary Trails", icon: Utensils, count: "90+ Local Spots", bg: "from-orange-500/20 to-orange-700/10", border: "border-orange-500/30", text: "text-orange-400" },
+  { slug: "wildlife", categoryParam: "wildlife", title: "Forest & Wildlife", icon: Trees, count: "32 Trails", bg: "from-green-500/20 to-green-700/10", border: "border-green-500/30", text: "text-green-400" },
 ];
 
 // District Highlights (Popz Design Section 4)
 const DISTRICT_HIGHLIGHTS = [
-  { name: "Madurai", title: "Cultural Capital & Meenakshi Temple", spots: 42, image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80", route: "/madurai" },
-  { name: "Kodaikanal", title: "Princess of Hill Stations & Lakes", spots: 28, image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=800&q=80", route: "/hills-of-tn" },
-  { name: "Theni", title: "Cardamom Valleys & Cloud Mountain Treks", spots: 24, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80", route: "/theni" },
-  { name: "Nilgiris (Ooty)", title: "Tea Estates & Misty Peak Railways", spots: 36, image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80", route: "/western-ghats" },
-  { name: "Thanjavur", title: "Chola Architecture & Great Temples", spots: 31, image: "https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80", route: "/explore/heritage" },
-  { name: "Kanyakumari", title: "Tricontinental Sunset & Sea Confluence", spots: 19, image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80", route: "/coastal-heritage" },
+  { name: "Madurai", title: "Cultural Capital & Meenakshi Temple", spots: 42, image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80", route: "/districts/madurai" },
+  { name: "Kodaikanal", title: "Princess of Hill Stations & Lakes", spots: 28, image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=800&q=80", route: "/districts/dindigul" },
+  { name: "Theni", title: "Cardamom Valleys & Cloud Mountain Treks", spots: 24, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80", route: "/districts/theni" },
+  { name: "Nilgiris (Ooty)", title: "Tea Estates & Misty Peak Railways", spots: 36, image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80", route: "/districts/the-nilgiris" },
+  { name: "Thanjavur", title: "Chola Architecture & Great Temples", spots: 31, image: "https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80", route: "/districts/thanjavur" },
+  { name: "Kanyakumari", title: "Tricontinental Sunset & Sea Confluence", spots: 19, image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80", route: "/districts/kanniyakumari" },
 ];
 
 // Signature Editorial Trails (Popz Design Section 5)
@@ -79,6 +83,9 @@ const SIGNATURE_TRAILS = [
     distance: "1,240 km",
     duration: "5 Days",
     stops: 6,
+    difficulty: "Moderate",
+    bestSeason: "Oct – Mar",
+    icon: "🛕",
     bg: "from-amber-950/60 to-zinc-950",
     badge: "Heritage Pilgrimage",
     link: "/trails/arupadai-veedu",
@@ -89,9 +96,12 @@ const SIGNATURE_TRAILS = [
     distance: "460 km",
     duration: "2 Days",
     stops: 14,
+    difficulty: "Challenging",
+    bestSeason: "Jul – Feb",
+    icon: "🏍️",
     bg: "from-emerald-950/60 to-zinc-950",
     badge: "Ghat Highway",
-    link: "/routes",
+    link: "/trails/western-ghats-70-hairpin",
   },
   {
     title: "Coromandel Coastal & Temple Ocean Highway",
@@ -99,10 +109,22 @@ const SIGNATURE_TRAILS = [
     distance: "580 km",
     duration: "3 Days",
     stops: 18,
+    difficulty: "Easy",
+    bestSeason: "Nov – Feb",
+    icon: "🌊",
     bg: "from-cyan-950/60 to-zinc-950",
     badge: "Coastal Drive",
-    link: "/routes",
+    link: "/trails/coromandel-coastal",
   },
+];
+
+const FEATURED_SLUGS = [
+  "meenakshi-amman-temple",
+  "kodaikanal",
+  "mahabalipuram",
+  "theni",
+  "famous-jigarthanda",
+  "thanjavur-city",
 ];
 
 function Index() {
@@ -115,7 +137,9 @@ function Index() {
     setAddedTrips((prev) => ({ ...prev, [slug]: true }));
   };
 
-  const featuredPlaces = places.slice(0, 6);
+  const featuredPlaces = FEATURED_SLUGS.map(
+    (slug) => places.find((p) => p.slug === slug)
+  ).filter(Boolean) as Place[];
 
   return (
     <AppShell>
@@ -148,10 +172,16 @@ function Index() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold text-amber-300 backdrop-blur-md"
+              className="group relative inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold text-amber-300 backdrop-blur-md cursor-help"
             >
               <Compass className="size-3.5 text-amber-400" />
-              <span>Verified Travel Intelligence · 1,240 Places · 38 Districts</span>
+              <span>1,240 places · 38 districts · checked by locals</span>
+              <Info className="size-3 text-amber-400/80 hover:text-amber-300 transition" />
+              {/* Interactive Info Tooltip */}
+              <div className="absolute top-full left-0 mt-2 hidden w-80 rounded-2xl border border-zinc-700 bg-zinc-900/98 p-3 text-[11px] text-zinc-300 shadow-2xl group-hover:block z-30">
+                <p className="font-bold text-amber-300 mb-1">Local Verification Protocol</p>
+                Coordinates, parking locations, entry fees, and opening hours are verified against local contributor reports and official district records.
+              </div>
             </motion.div>
 
             {/* Popz Design Hero Headline */}
@@ -191,6 +221,9 @@ function Index() {
                 placeholder="Search places, districts, or trails..."
                 className="w-full bg-transparent px-2 text-sm text-zinc-100 placeholder:text-zinc-400 focus:outline-none cursor-pointer"
               />
+              <kbd className="hidden md:inline-flex items-center rounded bg-zinc-800 px-2 py-0.5 text-[10px] font-mono text-zinc-400 border border-zinc-700 shrink-0">
+                {typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "") ? "⌘K" : "Ctrl K"}
+              </kbd>
               <Button
                 onClick={() => setSearchOpen(true)}
                 className="rounded-full bg-emerald-500 px-6 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
@@ -207,19 +240,19 @@ function Index() {
               className="mt-8 flex flex-wrap items-center gap-4"
             >
               <Link
-                to="/explore"
+                to="/planner"
                 className="flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-sm font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
               >
-                <span>Explore Places</span>
+                <Sparkles className="size-4 text-zinc-950 fill-zinc-950" />
+                <span>Plan My Trip</span>
                 <ArrowRight className="size-4" />
               </Link>
 
               <Link
-                to="/planner"
+                to="/explore"
                 className="flex items-center gap-2 rounded-full border border-zinc-700 bg-zinc-900/90 px-7 py-3 text-sm font-bold text-zinc-100 hover:border-zinc-500 hover:bg-zinc-800 transition"
               >
-                <Sparkles className="size-4 text-emerald-400" />
-                <span>Plan My Trip</span>
+                <span>Browse places</span>
               </Link>
             </motion.div>
           </div>
@@ -242,6 +275,7 @@ function Index() {
               <Link
                 key={cat.slug}
                 to="/explore"
+                search={{ category: cat.categoryParam }}
                 className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
               >
                 <span className={`grid size-10 place-items-center rounded-xl bg-zinc-950/80 border ${cat.border} ${cat.text}`}>
@@ -279,7 +313,7 @@ function Index() {
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
           {featuredPlaces.map((place) => (
             <PlaceCard
-              key={place.id}
+              key={place.id || place.slug}
               place={place}
               onAddToTrip={handleAddToTrip}
               isAdded={addedTrips[place.slug]}
@@ -298,7 +332,7 @@ function Index() {
             <p className="mt-1 text-sm text-zinc-400">Explore places grouped by district region and culture</p>
           </div>
           <Link
-            to="/madurai"
+            to="/districts"
             className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300"
           >
             <span>Explore Districts</span>
@@ -347,24 +381,43 @@ function Index() {
           {SIGNATURE_TRAILS.map((trail) => (
             <div
               key={trail.title}
-              className={`flex flex-col justify-between rounded-3xl border border-zinc-800 bg-gradient-to-b ${trail.bg} p-6 shadow-xl`}
+              className={`flex flex-col justify-between rounded-3xl border border-zinc-800 bg-gradient-to-b ${trail.bg} p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all`}
             >
               <div>
-                <span className="inline-block rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                  {trail.badge}
-                </span>
-                <h3 className="mt-4 font-display text-lg font-bold text-white leading-snug">{trail.title}</h3>
+                <div className="flex items-center justify-between gap-2">
+                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
+                    <span>{trail.icon}</span>
+                    <span>{trail.badge}</span>
+                  </span>
+                  <span className="rounded-full bg-zinc-900/90 border border-zinc-700/80 px-2.5 py-0.5 text-[10px] font-mono text-emerald-400 font-bold">
+                    {trail.difficulty}
+                  </span>
+                </div>
+
+                <h3 className="mt-4 font-display text-lg font-bold text-white leading-snug group-hover:text-emerald-300 transition-colors">
+                  {trail.title}
+                </h3>
                 <p className="mt-2 text-xs text-zinc-300 leading-relaxed">{trail.subtitle}</p>
+
+                {/* Additional Metadata Pills */}
+                <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono text-zinc-400">
+                  <span className="rounded-lg bg-zinc-900/80 px-2 py-1 border border-zinc-800">
+                    🗓️ {trail.bestSeason}
+                  </span>
+                  <span className="rounded-lg bg-zinc-900/80 px-2 py-1 border border-zinc-800">
+                    📍 {trail.stops} Stops
+                  </span>
+                </div>
               </div>
 
-              <div className="mt-8 pt-4 border-t border-zinc-800 flex items-center justify-between text-xs">
+              <div className="mt-6 pt-4 border-t border-zinc-800/80 flex items-center justify-between text-xs">
                 <div className="flex items-center gap-3 font-mono text-zinc-400">
                   <span>🛣️ {trail.distance}</span>
                   <span>⏱️ {trail.duration}</span>
                 </div>
                 <Link
                   to={trail.link}
-                  className="flex items-center gap-1 font-bold text-emerald-400 hover:text-emerald-300"
+                  className="flex items-center gap-1 font-bold text-emerald-400 hover:text-emerald-300 transition-colors min-h-[36px] items-center"
                 >
                   <span>View Trail</span>
                   <ArrowRight className="size-3.5" />
@@ -402,24 +455,70 @@ function Index() {
 
       {/* SECTION 7: TRIP PLANNER SPOTLIGHT (Popz Design Spec) */}
       <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-        <div className="rounded-3xl border border-zinc-800 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 p-8 md:p-12 shadow-2xl flex flex-col md:flex-row items-center justify-between gap-8">
-          <div className="max-w-xl">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 text-xs font-bold text-emerald-400">
-              <Sparkles className="size-3.5" /> AI Trip Copilot
-            </span>
-            <h2 className="mt-4 font-display text-3xl font-bold text-white sm:text-4xl">Plan your custom trip in seconds</h2>
-            <p className="mt-3 text-sm text-zinc-300 leading-relaxed">
-              Tell us your starting point, interests, and budget. Our planner builds an itinerary with real road distances, fuel estimates, elevation profiles, and day-by-day schedules.
-            </p>
+        <div className="rounded-3xl border border-zinc-800 bg-gradient-to-r from-emerald-950/40 via-zinc-900 to-zinc-950 p-8 md:p-12 shadow-2xl flex flex-col lg:flex-row items-stretch justify-between gap-8">
+          <div className="max-w-xl flex flex-col justify-between">
+            <div>
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3.5 py-1 text-xs font-bold text-emerald-400">
+                <Sparkles className="size-3.5" /> AI Trip Copilot
+              </span>
+              <h2 className="mt-4 font-display text-3xl font-bold text-white sm:text-4xl">Plan your custom trip in seconds</h2>
+              <p className="mt-3 text-sm text-zinc-300 leading-relaxed">
+                Tell us your starting point, interests, and budget. Our planner builds an itinerary with real road distances, fuel estimates, elevation profiles, and day-by-day schedules.
+              </p>
+
+              {/* Required Inputs List */}
+              <div className="mt-6 rounded-2xl bg-zinc-900/80 border border-zinc-800 p-3.5 text-xs text-zinc-400 flex flex-wrap items-center gap-2">
+                <span className="font-bold text-emerald-400 uppercase text-[10px] tracking-wider">Required Inputs:</span>
+                <span>Starting Point</span> · <span>Travel Interests</span> · <span>Budget Level</span> · <span>Trip Duration & Dates</span>
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <Link
+                to="/planner"
+                className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-8 py-3.5 text-sm font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-xl shadow-emerald-500/20"
+              >
+                <span>Try the trip planner</span>
+                <ArrowRight className="size-4" />
+              </Link>
+            </div>
           </div>
 
-          <Link
-            to="/planner"
-            className="shrink-0 flex items-center gap-2 rounded-full bg-emerald-500 px-8 py-4 text-sm font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-xl shadow-emerald-500/20"
-          >
-            <span>Launch Trip Planner</span>
-            <ArrowRight className="size-4" />
-          </Link>
+          {/* Static Sample Itinerary Output Card */}
+          <div className="w-full lg:w-96 rounded-2xl border border-emerald-500/30 bg-zinc-950/90 p-5 shadow-xl flex flex-col justify-between space-y-4 shrink-0">
+            <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-mono font-bold">
+                SAMPLE ITINERARY PREVIEW
+              </span>
+              <span className="text-xs font-bold text-amber-400">3 Days</span>
+            </div>
+
+            <div>
+              <h4 className="font-display font-bold text-base text-white">Chennai → Madurai Heritage Loop</h4>
+              <p className="text-xs text-zinc-400 mt-0.5">Optimized for history, local cuisine & scenic stops</p>
+            </div>
+
+            <div className="space-y-2.5 text-xs text-zinc-300 border-y border-zinc-800/80 py-3">
+              <div className="flex items-start gap-2">
+                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-[10px] font-bold text-emerald-400">D1</span>
+                <div><p className="font-bold text-white">Shore Temple & Pondicherry</p><p className="text-[11px] text-zinc-400">French Quarter walk & beach promenade</p></div>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-[10px] font-bold text-emerald-400">D2</span>
+                <div><p className="font-bold text-white">Chola Big Temple, Thanjavur</p><p className="text-[11px] text-zinc-400">Great Living Chola architecture & palace</p></div>
+              </div>
+              <div className="flex items-start gap-2">
+                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-[10px] font-bold text-emerald-400">D3</span>
+                <div><p className="font-bold text-white">Meenakshi Temple & Jigarthanda</p><p className="text-[11px] text-zinc-400">Nayak heritage walk & legendary street food</p></div>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-1">
+              <span>🛣️ 480 km</span>
+              <span>⛽ ~₹3,400 fuel</span>
+              <span>🏛️ 12 Spots</span>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -435,7 +534,7 @@ function Index() {
         <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-xs">
           <div className="flex items-center gap-2">
             <span className="font-display font-bold text-white text-base">Explore<span className="text-emerald-400">TN</span></span>
-            <span>· Tamil Nadu Travel Discovery & Intelligence Platform</span>
+            <span>· Your guide to Tamil Nadu, beyond the usual.</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-6 text-zinc-400">
@@ -444,7 +543,6 @@ function Index() {
             <Link to="/community" className="hover:text-white transition">Guides</Link>
             <Link to="/legal/privacy" className="hover:text-white transition">Privacy</Link>
             <Link to="/legal/terms" className="hover:text-white transition">Terms</Link>
-            <Link to="/admin" className="hover:text-emerald-400 text-zinc-400 transition font-mono">Admin Portal</Link>
           </div>
         </div>
       </footer>

@@ -5,6 +5,13 @@ import { motion, AnimatePresence } from "motion/react";
 import { places, categories } from "@/data/places";
 import { fetchAutocompleteSuggestions, BackendSearchSuggestion } from "@/lib/api";
 
+const quickSuggestions = [
+  { label: "Ooty", queryText: "Ooty", icon: "🏔️" },
+  { label: "Rameswaram", queryText: "Rameswaram", icon: "🌊" },
+  { label: "Waterfalls", queryText: "Waterfalls", icon: "💧" },
+  { label: "Temples", queryText: "Temples", icon: "🛕" },
+];
+
 const trendingSpots = [
   { label: "Kolli Hills 70 Hairpins", type: "offroad", icon: "📍" },
   { label: "Hogenakkal Falls", type: "waterfalls", icon: "🌊" },
@@ -25,6 +32,18 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
   const [backendSuggestions, setBackendSuggestions] = useState<BackendSearchSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
 
+  // Global Cmd+K / Ctrl+K listener
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        onOpenChange(!open);
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [open, onOpenChange]);
+
   useEffect(() => {
     if (!query.trim()) {
       setBackendSuggestions([]);
@@ -44,6 +63,8 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
   }, [query]);
 
   if (!open) return null;
+
+  const isMac = typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "");
 
   return (
     <AnimatePresence>
@@ -70,6 +91,9 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
               className="w-full bg-transparent text-base font-medium text-white placeholder-[#A1A8B3] focus:outline-none"
               autoFocus
             />
+            <kbd className="hidden md:inline-flex items-center rounded bg-white/10 px-2 py-0.5 text-[10px] font-mono text-slate-300 border border-white/10">
+              {isMac ? "⌘K" : "Ctrl K"}
+            </kbd>
             <div className="flex items-center gap-2">
               <Mic className="size-5 text-[#A1A8B3] hover:text-emerald-400 cursor-pointer transition-colors" />
               <button
@@ -83,6 +107,26 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
 
           {/* Spotlight Content Body */}
           <div className="max-h-[65vh] overflow-y-auto p-5 space-y-6">
+            {/* Quick Suggestions before typing */}
+            {!query.trim() && (
+              <div>
+                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2.5 flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-emerald-400" /> Quick Suggestions
+                </p>
+                <div className="flex flex-wrap gap-2">
+                  {quickSuggestions.map((qs) => (
+                    <button
+                      key={qs.label}
+                      onClick={() => setQuery(qs.queryText)}
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition cursor-pointer"
+                    >
+                      <span>{qs.icon}</span>
+                      <span>{qs.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {/* Live Backend Search Results if Query Present */}
             {query.trim() && (
               <div>

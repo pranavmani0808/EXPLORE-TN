@@ -48,6 +48,8 @@ export function SafeImage({ src, category, fallbackSrc, alt = "", className, ...
     <img
       src={imgSrc}
       alt={alt}
+      loading={props.loading || "lazy"}
+      decoding={props.decoding || "async"}
       className={className}
       onError={handleError}
       {...props}

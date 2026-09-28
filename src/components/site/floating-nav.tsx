@@ -380,7 +380,9 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           >
             <Search className="size-3.5 text-zinc-400" />
             <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search places or trails..."}</span>
-            <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">⌘K</kbd>
+            <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">
+              {typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "") ? "⌘K" : "Ctrl K"}
+            </kbd>
           </button>
 
           {/* Language Switcher Toggle (தமிழ் / English) */}
@@ -403,12 +405,12 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <Bookmark className="size-4 text-zinc-300" />
           </Link>
 
-          {/* Primary CTA Button: Plan My Trip */}
+          {/* Visually Lighter Nav CTA Button: Plan My Trip */}
           <Link
             to="/planner"
-            className="flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-xs font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
+            className="flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md"
           >
-            <Sparkles className="size-3.5 text-zinc-950 fill-zinc-950" />
+            <Sparkles className="size-3.5 text-emerald-400" />
             <span>{lang === "ta" ? "பயணம் திட்டமிடுக" : "Plan My Trip"}</span>
           </Link>
 

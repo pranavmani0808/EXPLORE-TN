@@ -33,6 +33,11 @@ import { DEFAULT_ARUPADAI_VEEDU_TEMPLES } from "@/data/places";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/explore")({
+  validateSearch: (search: Record<string, unknown>) => {
+    return {
+      category: (search.category as string) || "",
+    };
+  },
   head: () => ({
     meta: [
       { title: "Explore Tamil Nadu by Experience — ExplorerTN" },
@@ -241,10 +246,14 @@ function ExploreByExperiencePage() {
       } else if (cat) {
         const normalized = cat.toLowerCase();
         if (normalized === "arupadai" || normalized === "murugan" || normalized === "arupadaiveedu") setSelectedCategory("arupadai");
-        else if (normalized === "mountain" || normalized === "hills") setSelectedCategory("hills");
+        else if (normalized === "mountain" || normalized === "hills" || normalized === "hill-escapes") setSelectedCategory("hills");
         else if (normalized === "coastal" || normalized === "beaches") setSelectedCategory("beaches");
+        else if (normalized === "heritage-temples" || normalized === "temples" || normalized === "temple") setSelectedCategory("temple");
+        else if (normalized === "waterfalls" || normalized === "falls" || normalized === "waterfall") setSelectedCategory("waterfall");
+        else if (normalized === "culinary" || normalized === "food") setSelectedCategory("food");
+        else if (normalized === "wildlife" || normalized === "nature" || normalized === "forest") setSelectedCategory("nature");
         else if (validCategoryIds.includes(normalized)) setSelectedCategory(normalized);
-        else setSelectedCategory("arupadai");
+        else setSelectedCategory("all");
       } else if (tag && validCategoryIds.includes(tag.toLowerCase())) {
         setSelectedCategory(tag.toLowerCase());
       }
@@ -478,9 +487,19 @@ function ExploreByExperiencePage() {
                     </span>
                     <h2 className="text-sm font-bold text-white">Left Side Navbar</h2>
                   </div>
-                  <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-                    {places.length + 6} Places Live
-                  </span>
+                  <div className="flex items-center gap-2">
+                    {selectedCategory && selectedCategory !== "all" && (
+                      <button
+                        onClick={() => setSelectedCategory("all")}
+                        className="text-[11px] text-amber-400 hover:text-amber-300 font-mono font-bold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20"
+                      >
+                        Clear filter ✕
+                      </button>
+                    )}
+                    <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
+                      {places.length + 6} Places Live
+                    </span>
+                  </div>
                 </div>
 
                 {/* Category List Items */}

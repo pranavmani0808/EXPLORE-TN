@@ -34,6 +34,7 @@ import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TheniRouteImport } from './routes/theni'
 import { Route as WesternGhatsRouteImport } from './routes/western-ghats'
+import { Route as DistrictsIndexRouteImport } from './routes/districts.index'
 import { Route as DistrictsDistrictSlugRouteImport } from './routes/districts.$districtSlug'
 import { Route as ExploreCategoryRouteImport } from './routes/explore.$category'
 import { Route as LegalCommunityGuidelinesRouteImport } from './routes/legal.community-guidelines'
@@ -47,6 +48,7 @@ import { Route as PaymentFailedRouteImport } from './routes/payment.failed'
 import { Route as PaymentPendingRouteImport } from './routes/payment.pending'
 import { Route as PaymentSuccessRouteImport } from './routes/payment.success'
 import { Route as PlaceSlugRouteImport } from './routes/place.$slug'
+import { Route as TrailsSlugRouteImport } from './routes/trails.$slug'
 import { Route as TrailsArupadaiVeeduRouteImport } from './routes/trails.arupadai-veedu'
 
 const IndexRoute = IndexRouteImport.update({
@@ -174,6 +176,11 @@ const WesternGhatsRoute = WesternGhatsRouteImport.update({
   path: '/western-ghats',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DistrictsIndexRoute = DistrictsIndexRouteImport.update({
+  id: '/districts/',
+  path: '/districts/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const DistrictsDistrictSlugRoute = DistrictsDistrictSlugRouteImport.update({
   id: '/districts/$districtSlug',
   path: '/districts/$districtSlug',
@@ -240,6 +247,11 @@ const PlaceSlugRoute = PlaceSlugRouteImport.update({
   path: '/place/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrailsSlugRoute = TrailsSlugRouteImport.update({
+  id: '/trails/$slug',
+  path: '/trails/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TrailsArupadaiVeeduRoute = TrailsArupadaiVeeduRouteImport.update({
   id: '/trails/arupadai-veedu',
   path: '/trails/arupadai-veedu',
@@ -285,7 +297,9 @@ export interface FileRoutesByFullPath {
   '/payment/pending': typeof PaymentPendingRoute
   '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
+  '/districts/': typeof DistrictsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -326,7 +340,9 @@ export interface FileRoutesByTo {
   '/payment/pending': typeof PaymentPendingRoute
   '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
+  '/districts': typeof DistrictsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -368,7 +384,9 @@ export interface FileRoutesById {
   '/payment/pending': typeof PaymentPendingRoute
   '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
+  '/districts/': typeof DistrictsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -411,7 +429,9 @@ export interface FileRouteTypes {
     | '/payment/pending'
     | '/payment/success'
     | '/place/$slug'
+    | '/trails/$slug'
     | '/trails/arupadai-veedu'
+    | '/districts/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -452,7 +472,9 @@ export interface FileRouteTypes {
     | '/payment/pending'
     | '/payment/success'
     | '/place/$slug'
+    | '/trails/$slug'
     | '/trails/arupadai-veedu'
+    | '/districts'
   id:
     | '__root__'
     | '/'
@@ -493,7 +515,9 @@ export interface FileRouteTypes {
     | '/payment/pending'
     | '/payment/success'
     | '/place/$slug'
+    | '/trails/$slug'
     | '/trails/arupadai-veedu'
+    | '/districts/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -534,7 +558,9 @@ export interface RootRouteChildren {
   PaymentPendingRoute: typeof PaymentPendingRoute
   PaymentSuccessRoute: typeof PaymentSuccessRoute
   PlaceSlugRoute: typeof PlaceSlugRoute
+  TrailsSlugRoute: typeof TrailsSlugRoute
   TrailsArupadaiVeeduRoute: typeof TrailsArupadaiVeeduRoute
+  DistrictsIndexRoute: typeof DistrictsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -714,6 +740,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WesternGhatsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/districts/': {
+      id: '/districts/'
+      path: '/districts'
+      fullPath: '/districts/'
+      preLoaderRoute: typeof DistrictsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/districts/$districtSlug': {
       id: '/districts/$districtSlug'
       path: '/districts/$districtSlug'
@@ -805,6 +838,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaceSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trails/$slug': {
+      id: '/trails/$slug'
+      path: '/trails/$slug'
+      fullPath: '/trails/$slug'
+      preLoaderRoute: typeof TrailsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/trails/arupadai-veedu': {
       id: '/trails/arupadai-veedu'
       path: '/trails/arupadai-veedu'
@@ -864,7 +904,9 @@ const rootRouteChildren: RootRouteChildren = {
   PaymentPendingRoute: PaymentPendingRoute,
   PaymentSuccessRoute: PaymentSuccessRoute,
   PlaceSlugRoute: PlaceSlugRoute,
+  TrailsSlugRoute: TrailsSlugRoute,
   TrailsArupadaiVeeduRoute: TrailsArupadaiVeeduRoute,
+  DistrictsIndexRoute: DistrictsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
