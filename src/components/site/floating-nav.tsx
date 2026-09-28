@@ -371,15 +371,15 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
         </div>
 
         {/* Right Utility Section & Primary Action CTA */}
-        <div className="flex items-center gap-2.5 ml-auto shrink-0">
+        <div className="flex items-center gap-2 ml-auto shrink-0">
           {/* Search Trigger Button */}
           <button
             type="button"
             onClick={onSearch}
-            className="hidden md:flex h-[42px] items-center gap-2.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-4 text-xs text-zinc-400 hover:border-zinc-700 hover:text-white transition cursor-pointer"
+            className="hidden xl:flex h-[40px] items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/80 px-3.5 text-xs text-zinc-400 hover:border-zinc-700 hover:text-white transition cursor-pointer shrink-0"
           >
             <Search className="size-3.5 text-zinc-400" />
-            <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search places or trails..."}</span>
+            <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search places..."}</span>
             <kbd className="rounded bg-zinc-800 px-1.5 py-0.5 text-[10px] font-mono text-zinc-400">
               {typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "") ? "⌘K" : "Ctrl K"}
             </kbd>
@@ -389,7 +389,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs font-bold text-amber-300 hover:border-amber-500/50 hover:bg-zinc-800 transition"
+            className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs font-bold text-amber-300 hover:border-amber-500/50 hover:bg-zinc-800 transition shrink-0"
             title="Switch Language / மொழியை மாற்றுக"
           >
             <Languages className="size-3.5 text-amber-400" />
@@ -399,7 +399,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* Saved Places */}
           <Link
             to="/profile"
-            className="hidden sm:flex items-center justify-center size-10 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:border-zinc-700 transition"
+            className="hidden sm:flex items-center justify-center size-10 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:border-zinc-700 transition shrink-0"
             title={lang === "ta" ? "சேமித்த இடங்கள்" : "Saved Places"}
           >
             <Bookmark className="size-4 text-zinc-300" />
@@ -408,7 +408,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* Visually Lighter Nav CTA Button: Plan My Trip */}
           <Link
             to="/planner"
-            className="flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md"
+            className="flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md shrink-0"
           >
             <Sparkles className="size-3.5 text-emerald-400" />
             <span>{lang === "ta" ? "பயணம் திட்டமிடுக" : "Plan My Trip"}</span>

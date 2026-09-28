@@ -217,15 +217,15 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
       <motion.button
         type="button"
         onClick={toggleMobile}
-        whileHover={{ scale: 1.05, rotate: 5 }}
+        whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 350, damping: 20 }}
-        className="relative grid size-11 place-items-center rounded-full bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-black text-sm shadow-md shadow-emerald-500/25 ring-2 ring-emerald-500/40 cursor-pointer focus:outline-none"
+        className="relative grid size-10 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-black text-xs shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/30 cursor-pointer focus:outline-none shrink-0"
         aria-label="User Profile Menu"
         aria-expanded={isOpen}
       >
         <span>{initials}</span>
-        <span className="absolute bottom-0 right-0 size-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#10141A]" />
+        <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-400 ring-2 ring-zinc-950" />
       </motion.button>
 
       {/* Floating Glass Profile Menu */}
