@@ -4,6 +4,7 @@ import { renderErrorPage } from "./lib/error-page";
 import { resolvePlace } from "./lib/data/canonical-places";
 import { SupabaseDatabaseRepository } from "./lib/supabase-database";
 import { generateItineraryTimeline, getDestinationProfile } from "./lib/planner-timeline";
+import { getAllDistrictsList } from "./lib/data/districts";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -35,6 +36,15 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
         service: "ExplorerTN Core API",
         timestamp: new Date().toISOString(),
       }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // 1a. Geo Districts API Endpoint
+  if (path === "/api/v1/geo/districts" && method === "GET") {
+    const districts = getAllDistrictsList();
+    return new Response(
+      JSON.stringify({ status: "success", count: districts.length, data: districts }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
   }

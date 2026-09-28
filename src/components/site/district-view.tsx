@@ -1,4 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from "react";
+import { useGSAP } from "@gsap/react";
 import { DistrictData, DistrictCategoryKey, DistrictSpot } from "@/lib/data/districts";
 import { DistrictExplorerMap } from "@/components/site/district-explorer-map";
 import MaskedHeading from "@/components/ui/masked-heading";
