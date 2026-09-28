@@ -169,10 +169,7 @@ function Index() {
       <div className="relative z-10">
         {/* SECTION 1: HERO & SEARCH (Popz Design Spec) */}
         <section className="relative min-h-[82vh] overflow-hidden bg-transparent pt-24 sm:pt-32">
-          {/* Natural Dark Vignette (Solid Surface Overlay) */}
-          <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/30 via-transparent to-[#09090b]/80" />
-
-        <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+          <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="max-w-3xl">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
