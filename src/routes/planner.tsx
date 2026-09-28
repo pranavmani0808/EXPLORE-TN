@@ -101,6 +101,11 @@ function PlannerPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const initializedRef = useRef(false);
   const activeRequestIdRef = useRef<string | null>(null);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, loading]);
 
   // Dynamic Route & Planner Response State
   const [plannerData, setPlannerData] = useState<PlannerChatResponseDTO | null>(null);
@@ -325,8 +330,9 @@ function PlannerPage() {
   return (
     <AppShell>
       <PageHeader
+        eyebrow="AI Travel Intelligence"
         title="AI Trip Copilot"
-        subtitle="Conversational route & feasibility engine powered by PostGIS spatial database, OSRM highway routing, and OpenSERP web evidence."
+        description="Conversational route & feasibility engine powered by PostGIS spatial database, OSRM highway routing, and OpenSERP web evidence."
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-6">
@@ -419,30 +425,37 @@ function PlannerPage() {
         <div className="grid gap-8 lg:grid-cols-12">
 
           {/* Left Column: Chat Conversation Stream */}
-          <div className="flex flex-col rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/80 backdrop-blur-[16px] shadow-sm lg:col-span-6 overflow-hidden">
-            <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 px-6 py-4">
-              <div className="flex items-center gap-2">
-                <div className="size-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                <h3 className="font-bold text-slate-900 dark:text-white">Live Planner Chat</h3>
+          <div className="flex flex-col h-[640px] lg:h-[760px] rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/90 backdrop-blur-[16px] shadow-2xl lg:col-span-6 overflow-hidden">
+            {/* Header */}
+            <div className="shrink-0 flex items-center justify-between border-b border-slate-100 dark:border-white/10 px-6 py-4 bg-slate-50 dark:bg-white/5">
+              <div className="flex items-center gap-2.5">
+                <span className="grid size-7 place-items-center rounded-xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                  <Sparkles className="size-4" />
+                </span>
+                <div>
+                  <h3 className="font-bold text-sm text-slate-900 dark:text-white leading-tight">Live Planner Copilot</h3>
+                  <p className="text-[10px] text-slate-500 dark:text-slate-400">Ask anything or customize route</p>
+                </div>
               </div>
-              <span className="text-xs font-mono font-medium text-slate-400">
-                {conversationId ? `Session: ${conversationId}` : "New Session"}
+              <span className="text-[11px] font-mono text-emerald-400 font-semibold bg-emerald-500/10 border border-emerald-500/20 px-2.5 py-0.5 rounded-full">
+                {conversationId ? `Session: ${conversationId.slice(0, 8)}...` : "Active"}
               </span>
             </div>
 
-            <div className="flex-1 space-y-4 overflow-y-auto p-6 max-h-[520px] custom-scrollbar">
+            {/* Scrollable Message Stream */}
+            <div className="flex-1 min-h-0 overflow-y-auto p-5 space-y-4 custom-scrollbar">
               {messages.map((m, i) => (
                 <motion.div
                   key={i}
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 8 }}
                   animate={{ opacity: 1, y: 0 }}
                   className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}
                 >
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
                       m.role === "user"
-                        ? "bg-emerald-600 text-white font-medium shadow-md shadow-emerald-600/20"
-                        : "bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-800 dark:text-slate-200"
+                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-md shadow-emerald-500/20"
+                        : "bg-slate-100 dark:bg-zinc-900/90 border border-slate-200 dark:border-zinc-800 text-slate-800 dark:text-slate-200"
                     }`}
                   >
                     {m.text}
@@ -508,31 +521,35 @@ function PlannerPage() {
                   </div>
                 </div>
               )}
+
+              {/* Scroll Anchor */}
+              <div ref={messagesEndRef} />
             </div>
 
             {errorMsg && (
-              <div className="mx-6 mb-3 flex items-center gap-2 rounded-2xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 font-medium">
+              <div className="shrink-0 mx-5 mb-2 flex items-center gap-2 rounded-2xl bg-rose-500/10 border border-rose-500/20 p-3 text-xs text-rose-600 dark:text-rose-400 font-medium">
                 <AlertCircle className="size-4 shrink-0" />
                 <span>{errorMsg}</span>
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="border-t border-slate-100 dark:border-white/10 p-4">
+            {/* Fixed Bottom Input Bar */}
+            <form onSubmit={handleSubmit} className="shrink-0 border-t border-slate-100 dark:border-white/10 p-3.5 bg-slate-50 dark:bg-[#121821]/95">
               <div className="relative flex items-center">
                 <input
                   type="text"
-                  placeholder="Ask copilot... (e.g. 'Plan a trip inside Madurai', 'viewpoints and waterfalls', 'make it 2 days')"
+                  placeholder="Ask copilot... (e.g. 'Plan a trip to Kodaikanal', 'viewpoints and waterfalls', 'make it 2 days')"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  className="w-full rounded-2xl border border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-white/5 py-3.5 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-slate-200 dark:border-white/15 bg-white dark:bg-zinc-900/90 py-3.5 pl-4 pr-12 text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 focus:outline-none"
                 />
                 <Button
                   type="submit"
                   disabled={loading || !input.trim()}
                   size="icon"
-                  className="absolute right-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white size-9"
+                  className="absolute right-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold size-9"
                 >
-                  <Send className="size-4" />
+                  <Send className="size-4 text-zinc-950" />
                 </Button>
               </div>
             </form>
