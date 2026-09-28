@@ -143,6 +143,22 @@ function Index() {
 
   return (
     <AppShell>
+      {/* Fixed Background Image Backdrop */}
+      <div className="fixed inset-0 -z-10 pointer-events-none overflow-hidden">
+        <motion.img
+          src={heroImg}
+          alt="Misty Western Ghats fixed background backdrop"
+          width={1920}
+          height={1200}
+          initial={{ scale: 1.05, opacity: 0 }}
+          animate={{ scale: 1, opacity: 0.35 }}
+          transition={{ duration: 1.8, ease: "easeOut" }}
+          className="size-full object-cover filter brightness-75"
+        />
+        {/* Dark Vignette Gradient Overlay for readability across all scroll sections */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/75 via-[#09090b]/85 to-[#09090b]/95" />
+      </div>
+
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
 
       <DedicatedMapModal
@@ -151,20 +167,9 @@ function Index() {
       />
 
       {/* SECTION 1: HERO & SEARCH (Popz Design Spec) */}
-      <section className="relative min-h-[82vh] overflow-hidden bg-[#09090b] pt-24 sm:pt-32">
-        <motion.img
-          src={heroImg}
-          alt="Misty Western Ghats at sunrise in Tamil Nadu"
-          width={1920}
-          height={1200}
-          initial={{ scale: 1.08 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 2.2, ease: "easeOut" }}
-          className="absolute inset-0 size-full object-cover opacity-50 filter brightness-90"
-        />
-        
+      <section className="relative min-h-[82vh] overflow-hidden bg-transparent pt-24 sm:pt-32">
         {/* Natural Dark Vignette (Solid Surface Overlay) */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/85 via-[#09090b]/40 to-[#09090b]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-[#09090b]/60 via-transparent to-[#09090b]" />
 
         <div className="relative mx-auto max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
           <div className="max-w-3xl">
