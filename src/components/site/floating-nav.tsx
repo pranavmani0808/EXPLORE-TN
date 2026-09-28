@@ -218,7 +218,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-5 font-sans">
         <nav
           className={cn(
-            "mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-5 rounded-full px-6 transition-all duration-300 backdrop-blur-[24px]",
+            "mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-3 sm:gap-4 rounded-full pl-5 pr-7 sm:pl-6 sm:pr-8 transition-all duration-300 backdrop-blur-[24px]",
             scrolled
               ? "bg-[#09090b]/90 border border-zinc-800 shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
               : "bg-[#09090b]/75 border border-zinc-800/80 shadow-[0_8px_32px_rgba(0,0,0,0.3)]",

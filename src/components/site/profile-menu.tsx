@@ -220,7 +220,7 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 350, damping: 20 }}
-        className="relative grid size-10 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-black text-xs shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/30 cursor-pointer focus:outline-none shrink-0"
+        className="relative grid size-10 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-black text-xs shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/30 cursor-pointer focus:outline-none shrink-0 mr-1 sm:mr-1.5"
         aria-label="User Profile Menu"
         aria-expanded={isOpen}
       >
