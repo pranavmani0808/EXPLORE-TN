@@ -3,6 +3,7 @@ import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { resolvePlace } from "./lib/data/canonical-places";
 import { SupabaseDatabaseRepository } from "./lib/supabase-database";
+import { generateItineraryTimeline, getDestinationProfile } from "./lib/planner-timeline";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -147,14 +148,8 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
         session.discoveryPhase = "DISCOVER_INTERESTS";
         sessionsMemory.set(cid, session);
 
+        const profile = getDestinationProfile(detectedDest);
         const discoveryMsg = `I can build the ${detectedDest} trip. What would you like to explore?`;
-        const suggestedChips = [
-          { id: "temples", label: "Temples & Gopurams", icon: "🛕", categoryKey: "temple" },
-          { id: "food", label: "Local Food & Eateries", icon: "🍛", categoryKey: "food" },
-          { id: "heritage", label: "Forts & Palaces", icon: "🏛️", categoryKey: "heritage" },
-          { id: "markets", label: "Markets & Handicrafts", icon: "🛍️", categoryKey: "shopping" },
-          { id: "nature", label: "Hills & Viewpoints", icon: "🏔️", categoryKey: "mountain" }
-        ];
 
         return new Response(
           JSON.stringify({
@@ -168,15 +163,9 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
                 interests: session.interests,
                 discoveryPhase: "DISCOVER_INTERESTS"
               },
-              destinationProfile: {
-                destination: detectedDest,
-                region: "Tamil Nadu",
-                destinationTypes: ["Heritage", "Temple", "Food", "Culture"],
-                primaryTagline: `Cultural sights in ${detectedDest}`,
-                interests: suggestedChips
-              },
-              suggestedCategories: suggestedChips,
-              recommendations: suggestedChips.map((i: any) => i.label),
+              destinationProfile: profile,
+              suggestedCategories: profile.interests,
+              recommendations: profile.interests.map((i: any) => i.label),
               route: { distanceKm: 0, durationMinutes: 0, geometry: { type: "LineString", coordinates: [] }, provider: "OSRM Routing Engine", profile: "motorcycle" },
               elevation: { gainMeters: 0, highestMeters: 0, lowestMeters: 0 },
               costEstimate: { fuelCost: "₹0", total: 0, budget: 5000, withinBudget: true, assumptions: "N/A" },
@@ -246,39 +235,12 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
       const assistantMsg = `Planned your ${days}-day trip to ${detectedDest} & nearby places within 4-5 hours from ${session.origin} focused on ${interestsStr}. Real road distance across all stops is ${Math.round(totalDist)} km round-trip (ETA: ${Math.floor(totalDuration / 60)}h ${Math.round(totalDuration % 60)}m). Estimated fuel cost is ₹${calcFuelCost} (${Math.round(totalDist)} km @ 32.0 km/L, ₹100/L). Total estimated cost: ₹${calcTotalCost} (Within Budget for ₹${10000 * days}).`;
 
-      let timeline: Array<{ time: string; name: string; description: string }> = [];
-
-      if (days >= 2 && detectedDest.toLowerCase() === "madurai") {
-        timeline = [
-          { time: "Day 1 - 06:00 AM", name: `Depart ${session.origin} for Madurai`, description: `Scenic morning ride/drive towards Madurai.` },
-          { time: "Day 1 - 10:00 AM", name: "Meenakshi Amman Temple & Heritage Circuit", description: "Explore iconic 14 gopurams, Thousand Pillar Hall, and Golden Lotus Tank." },
-          { time: "Day 1 - 01:30 PM", name: "Authentic Madurai Feast", description: "Taste authentic Kari Dosa, Jigarthanda & traditional thali." },
-          { time: "Day 1 - 03:30 PM", name: "Thirumalai Nayakkar Mahal", description: "17th-century Indo-Saracenic palace with grand celestial pavilion." },
-          { time: "Day 1 - 06:30 PM", name: "Pudhumandapam & Local Handicraft Bazaars", description: "Shop brass lamps, Sungudi sarees & local brassware." },
-          { time: "Day 2 - 07:30 AM", name: "Alagar Koyil & Pazhamudircholai (21 km / 45 mins)", description: "Visit Kallazhagar temple in Solaimalai hills and 6th Abode of Lord Murugan." },
-          { time: "Day 2 - 11:30 AM", name: "Samanar Hills & Rock-Cut Inscriptions (15 km)", description: "Explore 2nd century BCE Jain monk rock-cut caves with panoramic valley view." },
-          { time: "Day 2 - 02:30 PM", name: "Thiruparankundram Murugan Temple (8 km)", description: "Monolithic rock-cut temple carved directly into the hill." },
-          { time: "Day 2 - 06:00 PM", name: `Return Journey to ${session.origin}`, description: `Complete ${days}-day multi-district Madurai & nearby expedition.` }
-        ];
-      } else if (days >= 2) {
-        timeline = [
-          { time: "Day 1 - 06:00 AM", name: `Depart ${session.origin} for ${detectedDest}`, description: `Morning ride towards ${detectedDest}.` },
-          { time: "Day 1 - 10:30 AM", name: `${detectedDest} Main Sightseeing Circuit`, description: `Explore primary landmarks and heritage spots in ${detectedDest}.` },
-          { time: "Day 1 - 02:00 PM", name: "Local Dining & Specialty Food", description: `Enjoy local food specialties.` },
-          { time: "Day 1 - 04:30 PM", name: "Viewpoints & Sunset Spot", description: `Experience scenic sunset views.` },
-          { time: "Day 2 - 08:00 AM", name: `Nearby Sights & Waterfalls Circuit (Within 4-5 hours / 40 km)`, description: `Explore surrounding natural waterfalls and viewpoint spots.` },
-          { time: "Day 2 - 01:00 PM", name: "Local Handicrafts & Souvenir Bazaars", description: `Pick up local crafts and items.` },
-          { time: "Day 2 - 05:00 PM", name: `Return Journey to ${session.origin}`, description: `Complete ${days}-day multi-day travel circuit.` }
-        ];
-      } else {
-        timeline = [
-          { time: "06:00 AM", name: `Depart ${session.origin}`, description: `Begin ride towards ${detectedDest}.` },
-          { time: "09:30 AM", name: "En-route Breakfast Stop", description: "Piping hot South Indian breakfast and coffee on highway." },
-          { time: "01:30 PM", name: `Arrive at ${detectedDest}`, description: `Explore top ${interestsStr} sights in ${detectedDest}.` },
-          { time: "04:30 PM", name: "Local Food & Refreshments", description: `Sample famous local delicacies in ${detectedDest}.` },
-          { time: "09:00 PM", name: `Return to ${session.origin}`, description: `Complete ${distKm} km round-trip journey.` }
-        ];
-      }
+      let timeline = generateItineraryTimeline({
+        origin: session.origin,
+        destination: detectedDest,
+        interestsStr,
+        days
+      });
 
       return new Response(
         JSON.stringify({
