@@ -24,6 +24,11 @@ import {
   Dot,
   ChevronLeft,
   ChevronRight,
+  Building2,
+  Users,
+  Layers,
+  Vote,
+  FileText,
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -327,6 +332,124 @@ export function DistrictView({ district }: DistrictViewProps) {
                 </div>
               </div>
             </div>
+
+            {/* Administrative & Demographics Profile Card */}
+            {district.adminDetails && (
+              <div className="bg-zinc-900/90 border border-sky-500/30 rounded-3xl p-6 shadow-2xl backdrop-blur-md space-y-5">
+                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="grid size-9 place-items-center rounded-xl bg-sky-500/20 text-sky-400 font-extrabold text-xs border border-sky-500/30">
+                      {district.adminDetails.code}
+                    </span>
+                    <div>
+                      <h4 className="font-extrabold text-base text-white flex items-center gap-2">
+                        Administrative & Demographics
+                      </h4>
+                      <p className="text-xs text-zinc-400">Official Government Statistics & Civic Divisions</p>
+                    </div>
+                  </div>
+                  <Badge variant="outline" className="border-sky-500/40 bg-sky-500/10 text-sky-300 text-xs font-bold px-3 py-1">
+                    HQ: {district.adminDetails.headquarters}
+                  </Badge>
+                </div>
+
+                {/* Key Admin Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Total Area</div>
+                    <div className="text-sm sm:text-base font-black text-amber-300">
+                      {district.adminDetails.areaKm2.toLocaleString()} <span className="text-xs font-medium text-zinc-400">km²</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Population</div>
+                    <div className="text-sm sm:text-base font-black text-sky-300">
+                      {district.adminDetails.population.toLocaleString()}
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Pop. Density</div>
+                    <div className="text-sm sm:text-base font-black text-emerald-400">
+                      {district.adminDetails.popDensityPerKm2.toLocaleString()} <span className="text-[10px] font-normal text-zinc-400">/km²</span>
+                    </div>
+                  </div>
+
+                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Established</div>
+                    <div className="text-xs sm:text-sm font-bold text-zinc-200">
+                      {district.adminDetails.established}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Predecessor & Divisions */}
+                <div className="space-y-3 pt-2">
+                  {district.adminDetails.predecessor !== "None" && (
+                    <div className="text-xs text-zinc-300 flex items-center gap-2">
+                      <span className="font-bold text-zinc-400">Formed From:</span>
+                      <Badge variant="outline" className="border-zinc-700 bg-zinc-800/80 text-zinc-200 text-xs">
+                        {district.adminDetails.predecessor} District
+                      </Badge>
+                    </div>
+                  )}
+
+                  {/* Revenue Divisions */}
+                  <div className="space-y-1.5">
+                    <div className="text-xs font-bold text-sky-300 flex items-center gap-1.5">
+                      <Layers className="size-3.5 text-sky-400" />
+                      <span>Revenue Divisions ({district.adminDetails.revenueDivisions.length})</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {district.adminDetails.revenueDivisions.map((div, dIdx) => (
+                        <span key={dIdx} className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                          {div}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Taluks */}
+                  <div className="space-y-1.5 pt-1">
+                    <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                      <Building2 className="size-3.5 text-emerald-400" />
+                      <span>Taluks ({district.adminDetails.taluks.length})</span>
+                    </div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {district.adminDetails.taluks.map((taluk, tIdx) => (
+                        <span key={tIdx} className="px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-200 border border-zinc-700">
+                          {taluk}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Lok Sabha & Assembly Constituencies */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+                    <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
+                      <div className="text-[11px] font-bold text-purple-300 flex items-center gap-1">
+                        <Vote className="size-3 text-purple-400" />
+                        <span>Lok Sabha Constituencies ({district.adminDetails.lokSabhaConstituencies.length})</span>
+                      </div>
+                      <div className="text-xs text-zinc-300">
+                        {district.adminDetails.lokSabhaConstituencies.join(", ")}
+                      </div>
+                    </div>
+
+                    <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
+                      <div className="text-[11px] font-bold text-amber-300 flex items-center gap-1">
+                        <FileText className="size-3 text-amber-400" />
+                        <span>Assembly Constituencies ({district.adminDetails.assemblyConstituencies.length})</span>
+                      </div>
+                      <div className="text-xs text-zinc-300 line-clamp-2" title={district.adminDetails.assemblyConstituencies.join(", ")}>
+                        {district.adminDetails.assemblyConstituencies.join(", ")}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* RIGHT COLUMN (5 COLS): STICKY BOUNDARY-LOCKED MAP */}

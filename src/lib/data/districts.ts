@@ -1,3 +1,5 @@
+import { DistrictAdminDetails, getDistrictAdminDetails } from "./district-admin-details";
+
 export type DistrictCategoryKey = "all" | "temples" | "tourist-spots" | "food-spots" | "thrift-streets";
 
 export interface DistrictSpot {
@@ -35,6 +37,7 @@ export interface DistrictData {
     bestTimeToVisit: string;
     famousFor: string[];
   };
+  adminDetails?: DistrictAdminDetails;
   spots: DistrictSpot[];
 }
 
@@ -1835,20 +1838,29 @@ export const TAMIL_NADU_DISTRICTS: Record<string, DistrictData> = {
 
 export function getDistrictBySlug(slug: string): DistrictData | undefined {
   const normalized = slug.toLowerCase().trim();
-  if (normalized === "ooty" || normalized === "coonoor" || normalized === "nilgiris" || normalized === "the nilgiris" || normalized === "the-nilgiris") return TAMIL_NADU_DISTRICTS["the-nilgiris"];
-  if (normalized === "kodai" || normalized === "dindigul" || normalized === "kodaikanal") return TAMIL_NADU_DISTRICTS["dindigul"];
-  if (normalized === "rameswaram" || normalized === "ramanathapuram") return TAMIL_NADU_DISTRICTS["ramanathapuram"];
-  if (normalized === "tenkasi" || normalized === "courtallam") return TAMIL_NADU_DISTRICTS["tenkasi"];
-  if (normalized === "tanjore" || normalized === "thanjavur") return TAMIL_NADU_DISTRICTS["thanjavur"];
-  if (normalized === "trichy" || normalized === "tiruchirappalli") return TAMIL_NADU_DISTRICTS["tiruchirappalli"];
-  if (normalized === "kanchi" || normalized === "kancheepuram" || normalized === "kanchipuram") return TAMIL_NADU_DISTRICTS["kancheepuram"];
-  if (normalized === "kanyakumari" || normalized === "kanniyakumari") return TAMIL_NADU_DISTRICTS["kanniyakumari"];
-  if (normalized === "karaikudi" || normalized === "sivaganga") return TAMIL_NADU_DISTRICTS["sivaganga"];
-  if (normalized === "yelagiri" || normalized === "tirupathur") return TAMIL_NADU_DISTRICTS["tirupathur"];
-  if (normalized === "tuticorin" || normalized === "thoothukudi") return TAMIL_NADU_DISTRICTS["thoothukudi"];
-  if (normalized === "gingee" || normalized === "auroville" || normalized === "viluppuram") return TAMIL_NADU_DISTRICTS["viluppuram"];
+  let base: DistrictData | undefined;
 
-  return TAMIL_NADU_DISTRICTS[normalized] || TAMIL_NADU_DISTRICTS["madurai"];
+  if (normalized === "ooty" || normalized === "coonoor" || normalized === "nilgiris" || normalized === "the nilgiris" || normalized === "the-nilgiris") base = TAMIL_NADU_DISTRICTS["the-nilgiris"];
+  else if (normalized === "kodai" || normalized === "dindigul" || normalized === "kodaikanal") base = TAMIL_NADU_DISTRICTS["dindigul"];
+  else if (normalized === "rameswaram" || normalized === "ramanathapuram") base = TAMIL_NADU_DISTRICTS["ramanathapuram"];
+  else if (normalized === "tenkasi" || normalized === "courtallam") base = TAMIL_NADU_DISTRICTS["tenkasi"];
+  else if (normalized === "tanjore" || normalized === "thanjavur") base = TAMIL_NADU_DISTRICTS["thanjavur"];
+  else if (normalized === "trichy" || normalized === "tiruchirappalli") base = TAMIL_NADU_DISTRICTS["tiruchirappalli"];
+  else if (normalized === "kanchi" || normalized === "kancheepuram" || normalized === "kanchipuram") base = TAMIL_NADU_DISTRICTS["kancheepuram"];
+  else if (normalized === "kanyakumari" || normalized === "kanniyakumari") base = TAMIL_NADU_DISTRICTS["kanniyakumari"];
+  else if (normalized === "karaikudi" || normalized === "sivaganga") base = TAMIL_NADU_DISTRICTS["sivaganga"];
+  else if (normalized === "yelagiri" || normalized === "tirupathur") base = TAMIL_NADU_DISTRICTS["tirupathur"];
+  else if (normalized === "tuticorin" || normalized === "thoothukudi") base = TAMIL_NADU_DISTRICTS["thoothukudi"];
+  else if (normalized === "gingee" || normalized === "auroville" || normalized === "viluppuram") base = TAMIL_NADU_DISTRICTS["viluppuram"];
+  else base = TAMIL_NADU_DISTRICTS[normalized] || TAMIL_NADU_DISTRICTS["madurai"];
+
+  if (base) {
+    return {
+      ...base,
+      adminDetails: getDistrictAdminDetails(base.slug)
+    };
+  }
+  return base;
 }
 
 export function getAllDistrictsList(): { slug: string; name: string; region: string; spotsCount: number }[] {
@@ -1861,6 +1873,9 @@ export function getAllDistrictsList(): { slug: string; name: string; region: str
 }
 
 export function getAllDistrictsDetailed(): DistrictData[] {
-  return Object.values(TAMIL_NADU_DISTRICTS);
+  return Object.values(TAMIL_NADU_DISTRICTS).map((d) => ({
+    ...d,
+    adminDetails: getDistrictAdminDetails(d.slug),
+  }));
 }
 
