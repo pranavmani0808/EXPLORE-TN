@@ -326,7 +326,7 @@ export function DistrictExplorerMap({
         <button
           onClick={() => setMapStyle("google-roadmap")}
           className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "google-roadmap" ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+            mapStyle === "google-roadmap" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
           }`}
         >
           🗺️ Google Map
@@ -334,7 +334,7 @@ export function DistrictExplorerMap({
         <button
           onClick={() => setMapStyle("google-satellite")}
           className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "google-satellite" ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+            mapStyle === "google-satellite" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
           }`}
         >
           🛰️ Satellite
@@ -342,7 +342,7 @@ export function DistrictExplorerMap({
         <button
           onClick={() => setMapStyle("google-terrain")}
           className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "google-terrain" ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+            mapStyle === "google-terrain" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
           }`}
         >
           ⛰️ Topo Terrain
@@ -350,7 +350,7 @@ export function DistrictExplorerMap({
         <button
           onClick={() => setMapStyle("osm")}
           className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "osm" ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+            mapStyle === "osm" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
           }`}
         >
           🌙 Dark Mapcn

@@ -103,11 +103,13 @@ export function PeakTravelGuide() {
             </p>
           </div>
 
-          <Button asChild size="sm" className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold shrink-0">
-            <Link to="/explore">
-              Explore All Seasonal Destinations <ArrowRight className="ml-1.5 size-4" />
-            </Link>
-          </Button>
+          <Link
+            to="/explore"
+            className="flex items-center gap-1 text-xs font-bold text-emerald-400 hover:text-emerald-300 transition-colors shrink-0"
+          >
+            <span>Explore All Seasonal Destinations</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
         </div>
 
         {/* 3 Seasonal Peak Cards */}
@@ -130,7 +132,7 @@ export function PeakTravelGuide() {
               >
                 <div>
                   <div className="flex items-center justify-between gap-2 mb-3">
-                    <span className={`text-[11px] font-mono font-bold px-3 py-1 rounded-full border ${season.badgeColor}`}>
+                    <span className={`text-xs font-mono font-bold px-3 py-1 rounded-full border ${season.badgeColor}`}>
                       {badgeText}
                     </span>
                     <span className="text-xs font-mono font-bold text-muted-foreground flex items-center gap-1">
@@ -144,7 +146,7 @@ export function PeakTravelGuide() {
 
                   {/* Highlights List */}
                   <div className="mt-4 space-y-1.5 pt-3 border-t border-border/40">
-                    <p className="text-[10px] uppercase font-mono font-bold text-muted-foreground">Seasonal Highlights:</p>
+                    <p className="text-xs font-mono font-bold text-muted-foreground">Seasonal Highlights:</p>
                     {season.highlights.map((h) => (
                       <div key={h} className="flex items-center gap-2 text-xs text-foreground font-medium">
                         <Sparkles className="size-3 text-amber-400 shrink-0" />
@@ -156,18 +158,18 @@ export function PeakTravelGuide() {
 
                 {/* Recommended Spots */}
                 <div className="pt-4 border-t border-border/40 space-y-2">
-                  <p className="text-[10px] uppercase font-mono font-bold text-muted-foreground">Top Destinations:</p>
-                  <div className="space-y-1.5">
+                  <p className="text-xs font-mono font-bold text-muted-foreground">Top Destinations:</p>
+                  <div className="space-y-1">
                     {season.destinations.map((spot) => (
                       <Link
                         key={spot.name}
                         to="/place/$slug"
                         params={{ slug: spot.slug }}
-                        className="flex items-center justify-between text-xs font-semibold hover:text-emerald-500 transition py-0.5"
+                        className="flex items-center justify-between text-xs font-semibold hover:text-emerald-400 transition py-2 px-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/50"
                       >
                         <span className="truncate">{spot.name}</span>
-                        <span className="text-[10px] text-muted-foreground font-normal shrink-0 flex items-center gap-0.5">
-                          <MapPin className="size-2.5 text-emerald-500" /> {spot.district}
+                        <span className="text-xs text-muted-foreground font-normal shrink-0 flex items-center gap-1 ml-2">
+                          <MapPin className="size-3 text-emerald-500" /> {spot.district}
                         </span>
                       </Link>
                     ))}

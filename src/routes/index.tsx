@@ -226,7 +226,7 @@ function Index() {
               </kbd>
               <Button
                 onClick={() => setSearchOpen(true)}
-                className="rounded-full bg-emerald-500 px-6 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
+                className="rounded-full bg-emerald-500 px-6 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition self-stretch h-auto py-2.5"
               >
                 Search
               </Button>
@@ -268,7 +268,7 @@ function Index() {
           <p className="mt-1 text-sm text-zinc-400">Curated collections based on travel themes across Tamil Nadu</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {INTEREST_CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -276,14 +276,14 @@ function Index() {
                 key={cat.slug}
                 to="/explore"
                 search={{ category: cat.categoryParam }}
-                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl`}
+                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl min-h-[140px]`}
               >
-                <span className={`grid size-10 place-items-center rounded-xl bg-zinc-950/80 border ${cat.border} ${cat.text}`}>
-                  <Icon className="size-5" />
+                <span className={`grid size-12 place-items-center rounded-xl bg-zinc-950/80 border ${cat.border} ${cat.text} shrink-0`}>
+                  <Icon className="size-6" />
                 </span>
-                <div className="mt-6">
-                  <h3 className="text-sm font-bold text-zinc-100 group-hover:text-emerald-400 transition">{cat.title}</h3>
-                  <p className="mt-0.5 text-[11px] text-zinc-400">{cat.count}</p>
+                <div className="mt-4">
+                  <h3 className="text-sm font-bold text-zinc-100 group-hover:text-emerald-400 transition leading-tight">{cat.title}</h3>
+                  <p className="mt-1 text-xs text-zinc-400">{cat.count}</p>
                 </div>
               </Link>
             );
@@ -345,7 +345,7 @@ function Index() {
             <Link
               key={dist.name}
               to={dist.route}
-              className="group relative overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-xl transition-all duration-300 hover:border-emerald-500/50 hover:shadow-2xl"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-zinc-800 bg-zinc-900 shadow-xl transition-all duration-300 hover:border-emerald-500/50 hover:shadow-2xl"
             >
               <div className="h-48 w-full overflow-hidden">
                 <img
@@ -354,14 +354,16 @@ function Index() {
                   className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
-              <div className="p-5">
-                <div className="flex items-center justify-between">
-                  <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition">{dist.name}</h3>
-                  <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-[10px] font-mono text-emerald-400 border border-zinc-700">
-                    {dist.spots} Spots
-                  </span>
+              <div className="p-5 flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-lg font-bold text-white group-hover:text-emerald-400 transition">{dist.name}</h3>
+                    <span className="rounded-full bg-zinc-800 px-2.5 py-0.5 text-xs font-mono text-emerald-400 border border-zinc-700">
+                      {dist.spots} Spots
+                    </span>
+                  </div>
+                  <p className="mt-1 text-xs text-zinc-400 line-clamp-2">{dist.title}</p>
                 </div>
-                <p className="mt-1 text-xs text-zinc-400 line-clamp-2">{dist.title}</p>
               </div>
             </Link>
           ))}
@@ -381,30 +383,32 @@ function Index() {
           {SIGNATURE_TRAILS.map((trail) => (
             <div
               key={trail.title}
-              className={`flex flex-col justify-between rounded-3xl border border-zinc-800 bg-gradient-to-b ${trail.bg} p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all`}
+              className={`flex flex-col justify-between rounded-3xl border border-zinc-800 bg-gradient-to-b ${trail.bg} p-6 shadow-xl relative overflow-hidden group hover:border-emerald-500/40 transition-all h-full`}
             >
-              <div>
-                <div className="flex items-center justify-between gap-2">
-                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-[10px] font-bold text-amber-300 uppercase tracking-wider">
-                    <span>{trail.icon}</span>
-                    <span>{trail.badge}</span>
-                  </span>
-                  <span className="rounded-full bg-zinc-900/90 border border-zinc-700/80 px-2.5 py-0.5 text-[10px] font-mono text-emerald-400 font-bold">
-                    {trail.difficulty}
-                  </span>
+              <div className="flex-1 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between gap-2">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/10 border border-amber-500/30 px-3 py-1 text-xs font-bold text-amber-300">
+                      <span>{trail.icon}</span>
+                      <span>{trail.badge}</span>
+                    </span>
+                    <span className="rounded-full bg-zinc-900/90 border border-zinc-700/80 px-2.5 py-0.5 text-xs font-mono text-emerald-400 font-bold">
+                      {trail.difficulty}
+                    </span>
+                  </div>
+
+                  <h3 className="mt-4 font-display text-lg font-bold text-white leading-snug group-hover:text-emerald-300 transition-colors">
+                    {trail.title}
+                  </h3>
+                  <p className="mt-2 text-xs text-zinc-300 leading-relaxed">{trail.subtitle}</p>
                 </div>
 
-                <h3 className="mt-4 font-display text-lg font-bold text-white leading-snug group-hover:text-emerald-300 transition-colors">
-                  {trail.title}
-                </h3>
-                <p className="mt-2 text-xs text-zinc-300 leading-relaxed">{trail.subtitle}</p>
-
                 {/* Additional Metadata Pills */}
-                <div className="mt-4 flex flex-wrap gap-2 text-[11px] font-mono text-zinc-400">
-                  <span className="rounded-lg bg-zinc-900/80 px-2 py-1 border border-zinc-800">
+                <div className="mt-4 flex flex-wrap gap-2 text-xs font-mono text-zinc-400">
+                  <span className="rounded-lg bg-zinc-900/80 px-2.5 py-1 border border-zinc-800">
                     🗓️ {trail.bestSeason}
                   </span>
-                  <span className="rounded-lg bg-zinc-900/80 px-2 py-1 border border-zinc-800">
+                  <span className="rounded-lg bg-zinc-900/80 px-2.5 py-1 border border-zinc-800">
                     📍 {trail.stops} Stops
                   </span>
                 </div>
@@ -468,7 +472,7 @@ function Index() {
 
               {/* Required Inputs List */}
               <div className="mt-6 rounded-2xl bg-zinc-900/80 border border-zinc-800 p-3.5 text-xs text-zinc-400 flex flex-wrap items-center gap-2">
-                <span className="font-bold text-emerald-400 uppercase text-[10px] tracking-wider">Required Inputs:</span>
+                <span className="font-bold text-emerald-400 uppercase text-xs tracking-wider">Required Inputs:</span>
                 <span>Starting Point</span> · <span>Travel Interests</span> · <span>Budget Level</span> · <span>Trip Duration & Dates</span>
               </div>
             </div>
@@ -487,33 +491,33 @@ function Index() {
           {/* Static Sample Itinerary Output Card */}
           <div className="w-full lg:w-96 rounded-2xl border border-emerald-500/30 bg-zinc-950/90 p-5 shadow-xl flex flex-col justify-between space-y-4 shrink-0">
             <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
-              <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-0.5 text-[10px] font-mono font-bold">
+              <span className="rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-2.5 py-1 text-xs font-mono font-bold">
                 SAMPLE ITINERARY PREVIEW
               </span>
               <span className="text-xs font-bold text-amber-400">3 Days</span>
             </div>
 
             <div>
-              <h4 className="font-display font-bold text-base text-white">Chennai → Madurai Heritage Loop</h4>
+              <h3 className="font-display font-bold text-base text-white">Chennai → Madurai Heritage Loop</h3>
               <p className="text-xs text-zinc-400 mt-0.5">Optimized for history, local cuisine & scenic stops</p>
             </div>
 
             <div className="space-y-2.5 text-xs text-zinc-300 border-y border-zinc-800/80 py-3">
               <div className="flex items-start gap-2">
-                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-[10px] font-bold text-emerald-400">D1</span>
-                <div><p className="font-bold text-white">Shore Temple & Pondicherry</p><p className="text-[11px] text-zinc-400">French Quarter walk & beach promenade</p></div>
+                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-xs font-bold text-emerald-400">D1</span>
+                <div><p className="font-bold text-white">Shore Temple & Pondicherry</p><p className="text-xs text-zinc-400">French Quarter walk & beach promenade</p></div>
               </div>
               <div className="flex items-start gap-2">
-                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-[10px] font-bold text-emerald-400">D2</span>
-                <div><p className="font-bold text-white">Chola Big Temple, Thanjavur</p><p className="text-[11px] text-zinc-400">Great Living Chola architecture & palace</p></div>
+                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-xs font-bold text-emerald-400">D2</span>
+                <div><p className="font-bold text-white">Chola Big Temple, Thanjavur</p><p className="text-xs text-zinc-400">Great Living Chola architecture & palace</p></div>
               </div>
               <div className="flex items-start gap-2">
-                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-[10px] font-bold text-emerald-400">D3</span>
-                <div><p className="font-bold text-white">Meenakshi Temple & Jigarthanda</p><p className="text-[11px] text-zinc-400">Nayak heritage walk & legendary street food</p></div>
+                <span className="grid size-5 shrink-0 place-items-center rounded bg-emerald-500/20 text-xs font-bold text-emerald-400">D3</span>
+                <div><p className="font-bold text-white">Meenakshi Temple & Jigarthanda</p><p className="text-xs text-zinc-400">Nayak heritage walk & legendary street food</p></div>
               </div>
             </div>
 
-            <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 pt-1">
+            <div className="flex items-center justify-between text-xs font-mono text-zinc-400 pt-1">
               <span>🛣️ 480 km</span>
               <span>⛽ ~₹3,400 fuel</span>
               <span>🏛️ 12 Spots</span>

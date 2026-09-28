@@ -678,8 +678,8 @@ export function DistrictView({ district }: DistrictViewProps) {
                           className={cn(
                             "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition shrink-0",
                             isSelected
-                              ? "bg-emerald-500 text-zinc-950"
-                              : "bg-zinc-800 text-emerald-400 hover:bg-emerald-500 hover:text-zinc-950",
+                              ? "bg-emerald-400 text-zinc-950 font-extrabold"
+                              : "bg-zinc-800 text-emerald-400 hover:bg-emerald-400 hover:text-zinc-950 font-bold",
                           )}
                         >
                           <span>Focus on Map</span>

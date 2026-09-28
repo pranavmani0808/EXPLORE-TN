@@ -135,26 +135,30 @@ export function GoogleMapHero({ apiKey }: { apiKey?: string }) {
             TN
           </span>
           <div>
-            <h3 className="font-display text-sm font-bold text-white leading-none">Tamil Nadu Live Spatial Map</h3>
-            <p className="text-[10px] text-emerald-400 font-mono mt-0.5">Real Geographic Map Tiles • CartoDB Dark Engine</p>
+            <h3 className="font-display text-base font-extrabold text-white tracking-tight leading-none">Tamil Nadu Live Spatial Map</h3>
+            <p className="text-xs text-emerald-400 font-mono mt-0.5">Real Geographic Map Tiles • CartoDB Dark Engine</p>
           </div>
         </div>
 
         {/* Category Pills */}
         <div className="flex flex-wrap gap-1.5 text-xs">
-          {["all", "waterfalls", "temples", "hills", "food", "beaches", "offroad"].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActiveCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-semibold capitalize transition ${
-                activeCategory === cat
-                  ? "bg-emerald-500 text-black shadow-md"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/10"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+          {["all", "waterfalls", "temples", "hills", "food", "beaches", "offroad"].map((cat) => {
+            const isActive = activeCategory === cat;
+            return (
+              <button
+                key={cat}
+                onClick={() => setActiveCategory(cat)}
+                aria-pressed={isActive}
+                className={`px-3 py-1 rounded-full text-xs font-bold capitalize transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                  isActive
+                    ? "bg-emerald-500 text-black shadow-md ring-2 ring-emerald-400/80"
+                    : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white border border-white/10"
+                }`}
+              >
+                {cat}
+              </button>
+            );
+          })}
         </div>
       </div>
 
