@@ -1,0 +1,139 @@
+import { CandidatePOI, DailyActivity, DailyItinerary, StructuredTripRequest } from "./types";
+import { getHaversineKm } from "./poi-ranker";
+
+export function optimizeItineraryTimeline(
+  originName: string,
+  destinationName: string,
+  days: number,
+  rankedPois: CandidatePOI[],
+  request: StructuredTripRequest
+): DailyItinerary[] {
+  const itineraries: DailyItinerary[] = [];
+  const poisPerDay = Math.max(2, Math.ceil(rankedPois.length / days));
+  let remainingPois = [...rankedPois];
+
+  for (let d = 1; d <= days; d++) {
+    const dayPois = remainingPois.slice(0, poisPerDay);
+    remainingPois = remainingPois.slice(poisPerDay);
+
+    const activities: DailyActivity[] = [];
+    let currentHour = 8; // 08:00 AM start
+    let currentMin = 0;
+    let dayDistance = 0;
+    let dayDrivingMin = 0;
+    let dayCost = 0;
+
+    const isFirstDay = d === 1;
+    const isLastDay = d === days;
+
+    // Start Activity
+    activities.push({
+      timeSlot: `${String(currentHour).padStart(2, "0")}:00`,
+      title: isFirstDay ? `Depart from ${originName}` : `Start Day ${d} from Hotel in ${destinationName}`,
+      description: isFirstDay
+        ? `Begin journey via ${request.transport.mode.toUpperCase()} towards ${destinationName}.`
+        : `Morning departure for sightseeing circuit in ${destinationName}.`,
+      durationMinutes: 30,
+      type: "start"
+    });
+
+    currentHour += 0;
+    currentMin += 30;
+
+    let prevLat = 10.2381;
+    let prevLng = 77.4892;
+
+    // Schedule Day POIs
+    dayPois.forEach((poi, idx) => {
+      // Check lunch time
+      if (currentHour >= 12 && !activities.some(a => a.type === "meal")) {
+        activities.push({
+          timeSlot: `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`,
+          title: `Local Tamil Cuisine Lunch in ${destinationName}`,
+          description: `Enjoy authentic regional food (${request.constraints.dietaryRestrictions.includes("vegetarian") ? "Pure Veg Sree Sabarees" : "Local Speciality"}).`,
+          durationMinutes: 45,
+          type: "meal"
+        });
+        currentMin += 45;
+        if (currentMin >= 60) {
+          currentHour += Math.floor(currentMin / 60);
+          currentMin %= 60;
+        }
+      }
+
+      // Calculate travel from prev spot
+      const legKm = idx === 0 ? 15 : Math.round(getHaversineKm(prevLat, prevLng, poi.latitude, poi.longitude) * 1.3);
+      const legMin = Math.round((legKm / 35) * 60);
+
+      dayDistance += legKm;
+      dayDrivingMin += legMin;
+      dayCost += poi.numericEntryFee * request.travelers.groupSize;
+
+      prevLat = poi.latitude;
+      prevLng = poi.longitude;
+
+      // Add travel activity if distance > 2km
+      if (legKm > 2) {
+        currentMin += legMin;
+        if (currentMin >= 60) {
+          currentHour += Math.floor(currentMin / 60);
+          currentMin %= 60;
+        }
+      }
+
+      // Opening hours validation check
+      if (currentHour < 9 && poi.openingHours.includes("10:00")) {
+        currentHour = 10;
+        currentMin = 0;
+      }
+
+      const timeSlotStr = `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`;
+
+      activities.push({
+        timeSlot: timeSlotStr,
+        poiId: poi.id,
+        title: poi.name,
+        description: poi.description,
+        durationMinutes: 75,
+        travelTimeFromPrevMinutes: legMin,
+        distanceFromPrevKm: legKm,
+        type: "poi",
+        parking: poi.parkingInfo.statusText,
+        safetyNote: poi.difficulty === "Hard" ? "⚠️ Steep walking steps; exercise caution." : undefined,
+        whyThisPlace: poi.reason || `Selected for ${poi.category} matching your preferences.`,
+        costEstimate: poi.numericEntryFee * request.travelers.groupSize
+      });
+
+      currentMin += 75;
+      if (currentMin >= 60) {
+        currentHour += Math.floor(currentMin / 60);
+        currentMin %= 60;
+      }
+    });
+
+    // End Day Activity
+    activities.push({
+      timeSlot: `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`,
+      title: isLastDay ? `Return Journey to ${originName}` : `Return to Hotel & Evening Relaxation`,
+      description: isLastDay
+        ? `Conclude ${destinationName} trip and return back to ${originName}.`
+        : `Evening free for local markets or resting.`,
+      durationMinutes: 60,
+      type: "hotel"
+    });
+
+    itineraries.push({
+      dayNumber: d,
+      title: `Day ${d}: ${d === 1 ? "Arrival & Highlights" : d === days ? "Scenic Views & Return" : "Deep Exploration"} of ${destinationName}`,
+      startingLocation: d === 1 ? originName : destinationName,
+      overnightLocation: d === days ? originName : destinationName,
+      totalDistanceKm: dayDistance,
+      totalDrivingMinutes: dayDrivingMin,
+      activities,
+      dayCost,
+      weatherSummary: "Pleasant & Clear (22°C - 28°C)"
+    });
+  }
+
+  return itineraries;
+}

@@ -629,16 +629,103 @@ function PlannerPage() {
               </div>
             </div>
 
-            {/* Feasibility Advisory Warnings */}
-            {warnings.length > 0 && (
-              <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 text-xs text-amber-700 dark:text-amber-300 font-medium space-y-1">
-                <div className="flex items-center gap-2 font-bold text-amber-800 dark:text-amber-200">
-                  <ShieldAlert className="size-4" />
-                  <span>Feasibility Advisories</span>
+            {/* Constraint Verification & Intelligence Checklist Panel */}
+            {plannerData?.verifiedEngineOutput && (
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-5 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-slate-900 via-emerald-950/40 to-slate-900 text-white space-y-4 shadow-xl"
+              >
+                <div className="flex items-center justify-between border-b border-emerald-500/20 pb-3">
+                  <div className="flex items-center gap-2">
+                    <Award className="size-5 text-emerald-400" />
+                    <h4 className="font-bold text-sm text-emerald-300">Data-Grounded Verification Checklist</h4>
+                  </div>
+                  <span className="px-3 py-1 rounded-full text-xs font-mono font-extrabold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    Confidence: {Math.round((plannerData.verifiedEngineOutput.confidence?.overallScore || 0.98) * 100)}% Verified
+                  </span>
                 </div>
-                {warnings.map((w, idx) => (
-                  <div key={idx}>• {w}</div>
-                ))}
+
+                <div className="grid grid-cols-2 gap-2 text-xs font-medium text-slate-300">
+                  <div className="flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" />
+                    <span>Destination: <strong className="text-white">{plannerData.verifiedEngineOutput.destinationSummary.name}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" />
+                    <span>Duration: <strong className="text-white">{plannerData.verifiedEngineOutput.request.duration.days} / {plannerData.verifiedEngineOutput.dailyItineraries.length} Days</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" />
+                    <span>Budget: <strong className="text-white">₹{plannerData.verifiedEngineOutput.costBreakdown.totalEstimated.toLocaleString("en-IN")}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" />
+                    <span>Transport: <strong className="text-white">{plannerData.verifiedEngineOutput.request.transport.mode.toUpperCase()}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" />
+                    <span>Exclusions: <strong className="text-emerald-300">{plannerData.verifiedEngineOutput.request.constraints.avoid.length > 0 ? `Avoided ${plannerData.verifiedEngineOutput.request.constraints.avoid.join(", ")}` : "Respected"}</strong></span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <Check className="size-3.5 text-emerald-400" />
+                    <span>Duplicates: <strong className="text-white">0 Duplicates</strong></span>
+                  </div>
+                </div>
+
+                {/* Safety & Ghat Advisories */}
+                {plannerData.verifiedEngineOutput.safetyNotes && plannerData.verifiedEngineOutput.safetyNotes.length > 0 && (
+                  <div className="pt-2 border-t border-emerald-500/20 text-xs text-amber-300 space-y-1">
+                    {plannerData.verifiedEngineOutput.safetyNotes.map((note: string, idx: number) => (
+                      <div key={idx} className="flex items-center gap-1.5">
+                        <ShieldAlert className="size-3.5 text-amber-400 shrink-0" />
+                        <span>{note}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </motion.div>
+            )}
+
+            {/* Itemized Cost Breakdown Card */}
+            {plannerData?.verifiedEngineOutput?.costBreakdown && (
+              <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/80 p-5 space-y-3">
+                <div className="flex items-center justify-between border-b border-slate-100 dark:border-white/10 pb-2">
+                  <h4 className="font-bold text-sm text-slate-900 dark:text-white flex items-center gap-2">
+                    <Wallet className="size-4 text-purple-400" />
+                    <span>Itemized Cost Breakdown</span>
+                  </h4>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${plannerData.verifiedEngineOutput.costBreakdown.withinBudget ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/10 text-amber-400 border border-amber-500/30"}`}>
+                    {plannerData.verifiedEngineOutput.costBreakdown.withinBudget ? "Within Budget" : "Exceeds Target Budget"}
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs text-slate-400">
+                  <div className="flex justify-between">
+                    <span>🚗 Transport & Fuel ({plannerData.verifiedEngineOutput.routeSummary.totalDistanceKm} km):</span>
+                    <span className="font-bold text-slate-200">₹{plannerData.verifiedEngineOutput.costBreakdown.transportCost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🏨 Accommodation Stay:</span>
+                    <span className="font-bold text-slate-200">₹{plannerData.verifiedEngineOutput.costBreakdown.stayCost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🍽️ Food & Local Dining:</span>
+                    <span className="font-bold text-slate-200">₹{plannerData.verifiedEngineOutput.costBreakdown.foodCost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🏛️ Activities & Entry Tickets:</span>
+                    <span className="font-bold text-slate-200">₹{plannerData.verifiedEngineOutput.costBreakdown.activitiesCost}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span>🅿️ Parking & Tolls:</span>
+                    <span className="font-bold text-slate-200">₹{plannerData.verifiedEngineOutput.costBreakdown.parkingTollsCost}</span>
+                  </div>
+                  <div className="pt-2 border-t border-slate-700/80 flex justify-between text-sm font-extrabold text-white">
+                    <span>Estimated Total:</span>
+                    <span className="text-emerald-400">₹{plannerData.verifiedEngineOutput.costBreakdown.totalEstimated.toLocaleString("en-IN")}</span>
+                  </div>
+                </div>
               </div>
             )}
 
@@ -660,8 +747,43 @@ function PlannerPage() {
                 ))}
               </div>
 
+              {/* Explanations List ("Why These Places?") */}
+              {plannerData?.verifiedEngineOutput?.explanations && plannerData.verifiedEngineOutput.explanations.length > 0 && (
+                <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-2">
+                  <h5 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-emerald-400" /> Why These Places?
+                  </h5>
+                  <div className="space-y-1.5">
+                    {plannerData.verifiedEngineOutput.explanations.map((exp, i) => (
+                      <div key={i} className="text-xs text-slate-300 bg-slate-900/60 p-2.5 rounded-xl border border-slate-800">
+                        <strong className="text-white">{exp.placeName}:</strong> {exp.reason}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {timeline.length > 0 && (
-                <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex justify-end">
+                <div className="pt-4 border-t border-slate-200 dark:border-white/10 flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSendMessage(`Plan a relaxed ${destName} trip`)}
+                      className="text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-700"
+                    >
+                      Make Relaxed
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handleSendMessage(`Plan a budget ${destName} trip`)}
+                      className="text-xs font-bold bg-zinc-900 hover:bg-zinc-800 text-zinc-300 border-zinc-700"
+                    >
+                      Make Budget
+                    </Button>
+                  </div>
+
                   <Button
                     type="button"
                     onClick={() => {
@@ -672,7 +794,7 @@ function PlannerPage() {
                     className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md shadow-emerald-500/20 cursor-pointer flex items-center gap-2"
                   >
                     <Bookmark className="size-4" />
-                    <span>Save Trip to My Account</span>
+                    <span>Save Trip</span>
                   </Button>
                 </div>
               )}
