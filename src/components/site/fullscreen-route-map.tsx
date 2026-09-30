@@ -102,6 +102,7 @@ export function FullscreenRouteMap({
   };
 
   const [isDirectionsFocusMode, setIsDirectionsFocusMode] = useState(false);
+  const [focusOriginQuery, setFocusOriginQuery] = useState("");
 
   const handleGetDirections = (place: ExplorerPlace) => {
     setSelectedDestination(place);
@@ -150,8 +151,16 @@ export function FullscreenRouteMap({
     return initialDestinationPlaceId ? resolvePlaceById(initialDestinationPlaceId) : null;
   });
   const [waypoints, setWaypoints] = useState<ExplorerPlace[]>([]);
+  const [waypointQuery, setWaypointQuery] = useState("");
   const [excludedStopIds, setExcludedStopIds] = useState<Set<string>>(new Set());
   const [travelMode, setTravelMode] = useState<"driving" | "motorcycle" | "walking" | "cycling">(initialTravelMode);
+
+  // Auto-close Focus Mode Origin Prompt once both Origin & Destination are selected
+  useEffect(() => {
+    if (selectedOrigin && selectedDestination) {
+      setIsDirectionsFocusMode(false);
+    }
+  }, [selectedOrigin, selectedDestination]);
 
   // Alternative Routes State
   const [availableRoutes, setAvailableRoutes] = useState<RouteOption[]>([]);
@@ -963,6 +972,80 @@ export function FullscreenRouteMap({
 
             <p className="text-xs font-semibold text-slate-200">Where are you starting your trip from?</p>
 
+            {/* Live Search Input for Starting Origin */}
+            <div className="relative space-y-1.5">
+              <div className="flex items-center gap-2 bg-white/5 border border-white/20 focus-within:border-emerald-400 px-3 py-2 rounded-xl transition">
+                <Search className="w-4 h-4 text-emerald-400 shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Type starting city, district or POI..."
+                  value={focusOriginQuery}
+                  onChange={(e) => setFocusOriginQuery(e.target.value)}
+                  className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium"
+                  autoFocus
+                />
+                {focusOriginQuery && (
+                  <button
+                    type="button"
+                    onClick={() => setFocusOriginQuery("")}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Live Search Suggestions Dropdown */}
+              {focusOriginQuery.trim() && (
+                <div className="bg-[#121821] border border-white/20 rounded-2xl max-h-48 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar">
+                  {searchEntities(focusOriginQuery).length === 0 ? (
+                    <div className="p-2.5 text-xs text-slate-400 text-center">No origin matching '{focusOriginQuery}'</div>
+                  ) : (
+                    searchEntities(focusOriginQuery).map((item) => {
+                      const targetPlace: ExplorerPlace | null = item.place || (item.area ? {
+                        id: item.area.id,
+                        canonicalName: item.area.name,
+                        name: item.area.name,
+                        slug: item.area.slug,
+                        district: item.area.district,
+                        state: "Tamil Nadu",
+                        country: "India",
+                        latitude: item.area.latitude,
+                        longitude: item.area.longitude,
+                        categories: ["all"],
+                        primaryCategory: "all",
+                        verified: true,
+                      } : null);
+
+                      if (!targetPlace) return null;
+
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => {
+                            setSelectedOrigin(targetPlace);
+                            setFocusOriginQuery("");
+                            setIsDirectionsFocusMode(false);
+                            toast.success(`Set ${targetPlace.canonicalName || targetPlace.name} as Starting Origin 🚗`);
+                          }}
+                          className="p-2 rounded-xl hover:bg-emerald-500/20 text-xs text-white flex items-center justify-between gap-2 transition cursor-pointer border border-transparent hover:border-emerald-500/40"
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="text-sm">{item.icon}</span>
+                            <div className="truncate">
+                              <span className="font-bold text-white block truncate">{item.name}</span>
+                              <span className="text-[10px] text-slate-400 block">{item.sublabel}</span>
+                            </div>
+                          </div>
+                          <span className="text-[10px] text-emerald-400 font-bold shrink-0">+ Set Origin</span>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+
             {/* GPS Auto-Detect Option */}
             <button
               type="button"
@@ -981,7 +1064,7 @@ export function FullscreenRouteMap({
 
             {/* Popular Origin Presets */}
             <div className="space-y-2 pt-1">
-              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Or select starting city:</span>
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Or select quick starting city:</span>
               <div className="flex flex-wrap gap-1.5">
                 {[
                   { name: "Chennai", lat: 13.0827, lng: 80.2707 },
@@ -1111,23 +1194,143 @@ export function FullscreenRouteMap({
             ))}
           </div>
 
-          {/* Optional Origin / Destination Active Bar */}
+          {/* Active Route Calculation Metrics & Intermediate Waypoint Addition */}
           {(selectedOrigin || selectedDestination) && (
-            <div className="py-2.5 px-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl my-2 shrink-0 space-y-1">
-              <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-between">
-                <span>Active Route Corridor</span>
-                {totalDistanceKm > 0 && <span>{totalDistanceKm} km · {durationString}</span>}
-              </div>
-              <div className="text-xs font-bold text-white flex items-center justify-between">
-                <span>{selectedOrigin ? selectedOrigin.name : "Origin"} → {selectedDestination ? selectedDestination.name : "Destination"}</span>
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl my-2 shrink-0 space-y-3 shadow-lg">
+              <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                <div>
+                  <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                    <Navigation className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                    <span>Active Route Corridor</span>
+                  </div>
+                  <h4 className="text-xs font-extrabold text-white truncate max-w-[200px] mt-0.5">
+                    {selectedOrigin ? selectedOrigin.name : "Select Origin"} → {selectedDestination ? selectedDestination.name : "Select Destination"}
+                  </h4>
+                </div>
                 <button
                   type="button"
-                  onClick={() => { setSelectedOrigin(null); setSelectedDestination(null); setWaypoints([]); }}
-                  className="text-[10px] text-rose-400 hover:underline font-normal"
+                  onClick={() => {
+                    setSelectedOrigin(null);
+                    setSelectedDestination(null);
+                    setWaypoints([]);
+                    setIsDirectionsFocusMode(false);
+                  }}
+                  className="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[9px] font-bold transition active:scale-95 cursor-pointer"
                 >
                   Clear Route
                 </button>
               </div>
+
+              {/* Calculated Stats (Distance, Time, Stops) */}
+              <div className="grid grid-cols-3 gap-1.5 bg-black/40 border border-white/10 rounded-xl p-2 text-center">
+                <div>
+                  <span className="text-[9px] font-mono text-slate-400 uppercase block">Distance</span>
+                  <span className="text-xs font-black text-emerald-400">{totalDistanceKm > 0 ? `${totalDistanceKm} km` : "..."}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-mono text-slate-400 uppercase block">Est. Time</span>
+                  <span className="text-xs font-black text-sky-400">{totalDurationMins > 0 ? durationString : "..."}</span>
+                </div>
+                <div>
+                  <span className="text-[9px] font-mono text-slate-400 uppercase block">Total Stops</span>
+                  <span className="text-xs font-black text-amber-400">{stops.length} Stops</span>
+                </div>
+              </div>
+
+              {/* Waypoint Addition Input */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 uppercase font-bold">
+                  <span>+ Add Extra Place In-Between:</span>
+                  {waypoints.length > 0 && <span className="text-emerald-400">{waypoints.length} Waypoints</span>}
+                </div>
+
+                <div className="relative">
+                  <Search className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 top-2" />
+                  <input
+                    type="text"
+                    placeholder="Search place to add as waypoint stop..."
+                    value={waypointQuery}
+                    onChange={(e) => setWaypointQuery(e.target.value)}
+                    className="w-full bg-white/5 border border-white/15 focus:border-emerald-400 rounded-xl pl-7 pr-3 py-1 text-[11px] text-white placeholder-slate-400 focus:outline-none"
+                  />
+
+                  {waypointQuery.trim() && (
+                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#121821] border border-white/20 rounded-2xl max-h-40 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar">
+                      {searchEntities(waypointQuery).map((item) => {
+                        const placeObj = item.place || (item.area ? {
+                          id: item.area.id,
+                          canonicalName: item.area.name,
+                          name: item.area.name,
+                          slug: item.area.slug,
+                          district: item.area.district,
+                          state: "Tamil Nadu",
+                          country: "India",
+                          latitude: item.area.latitude,
+                          longitude: item.area.longitude,
+                          categories: ["all"],
+                          primaryCategory: "all",
+                          verified: true,
+                        } : null);
+
+                        if (!placeObj || stops.some(s => s.id === placeObj.id)) return null;
+
+                        return (
+                          <div
+                            key={item.id}
+                            onClick={() => {
+                              setWaypoints(prev => [...prev, placeObj as ExplorerPlace]);
+                              setWaypointQuery("");
+                              toast.success(`Added ${placeObj.name} as waypoint stop 📍`);
+                            }}
+                            className="p-1.5 rounded-xl hover:bg-emerald-500/20 text-xs text-white flex items-center justify-between gap-2 cursor-pointer"
+                          >
+                            <span className="font-bold truncate text-[11px]">{item.name}</span>
+                            <span className="text-[9px] text-emerald-400 font-bold shrink-0">+ Add Stop</span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Stops Summary Timeline */}
+              {stops.length > 0 && (
+                <div className="space-y-1">
+                  {stops.map((stop, idx) => {
+                    const isStart = idx === 0;
+                    const isEnd = idx === stops.length - 1;
+                    const isWaypoint = !isStart && !isEnd;
+
+                    return (
+                      <div
+                        key={stop.id}
+                        className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between gap-2 text-[11px]"
+                      >
+                        <div className="flex items-center gap-1.5 truncate">
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center font-bold text-[9px] shrink-0 ${
+                            isStart ? "bg-emerald-500 text-black" : isEnd ? "bg-sky-500 text-black" : "bg-amber-500 text-black"
+                          }`}>
+                            {isStart ? "S" : isEnd ? "E" : idx}
+                          </span>
+                          <span className="font-bold text-white truncate">{stop.canonicalName || stop.name}</span>
+                        </div>
+
+                        {isWaypoint && (
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveRecommendedStop(stop.id)}
+                            className="text-slate-400 hover:text-rose-400 p-0.5"
+                            title="Remove stop"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           )}
 
