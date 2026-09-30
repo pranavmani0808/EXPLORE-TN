@@ -184,6 +184,17 @@ function PlacePage() {
             >
               <ArrowLeft className="size-3.5" aria-hidden /> Back to All Places
             </Link>
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-xs font-mono font-bold uppercase px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                {travelIntel.canonicalEntityType || "TOURIST_ATTRACTION"}
+              </span>
+              {travelIntel.confidenceAndProvenance && (
+                <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                  🛡️ {travelIntel.confidenceAndProvenance.confidenceScore}% Data Confidence Score
+                </span>
+              )}
+            </div>
+
             <p className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
               <MapPin className="size-4 text-emerald-500" aria-hidden /> {place.district} District · {place.distanceFromChennai} from Chennai
             </p>

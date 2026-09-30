@@ -271,7 +271,7 @@ function Index() {
           <p className="mt-1 text-sm text-zinc-400">Curated collections based on travel themes across Tamil Nadu</p>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+        <div className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6">
           {INTEREST_CATEGORIES.map((cat) => {
             const Icon = cat.icon;
             return (
@@ -279,14 +279,14 @@ function Index() {
                 key={cat.slug}
                 to="/explore"
                 search={{ category: cat.categoryParam }}
-                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl min-h-[140px]`}
+                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl min-h-[140px]`}
               >
-                <span className={`grid size-12 place-items-center rounded-xl bg-zinc-950/80 border ${cat.border} ${cat.text} shrink-0`}>
-                  <Icon className="size-6" />
+                <span className={`grid size-11 place-items-center rounded-xl bg-zinc-950/80 border ${cat.border} ${cat.text} shrink-0`}>
+                  <Icon className="size-5" />
                 </span>
-                <div className="mt-4">
-                  <h3 className="text-sm font-bold text-zinc-100 group-hover:text-emerald-400 transition leading-tight">{cat.title}</h3>
-                  <p className="mt-1 text-xs text-zinc-400">{cat.count}</p>
+                <div className="mt-3">
+                  <h3 className="text-xs sm:text-sm font-bold text-zinc-100 group-hover:text-emerald-400 transition leading-snug">{cat.title}</h3>
+                  <p className="mt-1 text-[11px] text-zinc-400 font-mono">{cat.count}</p>
                 </div>
               </Link>
             );
@@ -475,7 +475,7 @@ function Index() {
 
               {/* Required Inputs List */}
               <div className="mt-6 rounded-2xl bg-zinc-900/80 border border-zinc-800 p-3.5 text-xs text-zinc-400 flex flex-wrap items-center gap-2">
-                <span className="font-bold text-emerald-400 uppercase text-xs tracking-wider">Required Inputs:</span>
+                <span className="font-bold text-emerald-400 text-xs tracking-wider">Required inputs:</span>
                 <span>Starting Point</span> · <span>Travel Interests</span> · <span>Budget Level</span> · <span>Trip Duration & Dates</span>
               </div>
             </div>

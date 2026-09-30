@@ -20,8 +20,22 @@ import {
   Check,
   Plus,
   Bookmark,
+  Layers,
+  Search,
+  SlidersHorizontal,
 } from "lucide-react";
-import { CANONICAL_PLACES, resolvePlaceById, searchLocations, ExplorerPlace } from "@/lib/data/canonical-places";
+import {
+  CANONICAL_PLACES,
+  GEOGRAPHIC_AREAS,
+  GeographicArea,
+  getPlacesWithinArea,
+  searchEntities,
+  resolvePlaceById,
+  searchLocations,
+  ExplorerPlace,
+  PlaceCategory,
+  CategorizedSearchResult,
+} from "@/lib/data/canonical-places";
 import { RouteApiRepository, IsolatedRouteResultDTO, RouteOption } from "@/lib/api-client/routes";
 import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
 import { useAuthGuard } from "@/lib/auth-guard-context";
@@ -33,6 +47,8 @@ export interface FullscreenRouteMapProps {
   initialOriginPlaceId?: string;
   initialDestinationPlaceId?: string;
   initialTravelMode?: "driving" | "motorcycle" | "walking" | "cycling";
+  initialArea?: string;
+  initialPlaceId?: string;
 }
 
 const ROUTE_LEG_CACHE = new Map<string, { distanceKm: number; durationMins: number; polyline: [number, number][] }>();
@@ -43,9 +59,36 @@ export function FullscreenRouteMap({
   initialOriginPlaceId,
   initialDestinationPlaceId,
   initialTravelMode = "driving",
+  initialArea,
+  initialPlaceId,
 }: FullscreenRouteMapProps) {
   const { requireAuth } = useAuthGuard();
-  // Origin & Destination State
+
+  // Map Explorer Scope State (GEOGRAPHIC SEARCH vs POI SEARCH)
+  const [mapScope, setMapScope] = useState<{
+    type: "ALL_TAMIL_NADU" | "CITY" | "DISTRICT" | "DESTINATION_AREA" | "POI";
+    areaName: string;
+    selectedArea?: GeographicArea | null;
+    selectedPOI?: ExplorerPlace | null;
+  }>(() => {
+    if (initialPlaceId) {
+      const p = resolvePlaceById(initialPlaceId);
+      return { type: "POI", areaName: p.district || "Tamil Nadu", selectedPOI: p };
+    }
+    if (initialArea && GEOGRAPHIC_AREAS[initialArea.toLowerCase()]) {
+      const area = GEOGRAPHIC_AREAS[initialArea.toLowerCase()];
+      return { type: area.entityType, areaName: area.name, selectedArea: area };
+    }
+    if (initialArea) {
+      return { type: "CITY", areaName: initialArea, selectedArea: null };
+    }
+    return { type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] };
+  });
+
+  const [activeCategoryFilter, setActiveCategoryFilter] = useState<PlaceCategory>("all");
+  const [globalQuery, setGlobalQuery] = useState("");
+
+  // Origin & Destination Routing State
   const [originQuery, setOriginQuery] = useState("");
   const [destinationQuery, setDestinationQuery] = useState("");
   const [selectedOrigin, setSelectedOrigin] = useState<ExplorerPlace | null>(() => {
@@ -62,11 +105,11 @@ export function FullscreenRouteMap({
   const [availableRoutes, setAvailableRoutes] = useState<RouteOption[]>([]);
   const [selectedRouteId, setSelectedRouteId] = useState<string>("fastest");
 
-  // Panel State & Phase 2 Recommendations Tab
+  // Panel State & Recommendations Tab
   const [panelState, setPanelState] = useState<"expanded" | "compact" | "hidden">("expanded");
-  const [activePanelTab, setActivePanelTab] = useState<"timeline" | "suggestions">("timeline");
+  const [activePanelTab, setActivePanelTab] = useState<"explore" | "timeline" | "suggestions">("explore");
   const [departureTime, setDepartureTime] = useState<string>("06:00 AM");
-  const [searchFocused, setSearchFocused] = useState<"origin" | "destination" | null>(null);
+  const [searchFocused, setSearchFocused] = useState<"global" | "origin" | "destination" | null>(null);
 
   // Route Engine Calculation State
   const [routeLoading, setRouteLoading] = useState(false);
@@ -84,6 +127,15 @@ export function FullscreenRouteMap({
   const markersRef = useRef<any[]>([]);
   const polylineGroupRef = useRef<any>(null);
   const activeRequestIdRef = useRef<string>("");
+
+  // Derived list of places in current scope & category filter
+  const placesInScope = useMemo(() => {
+    let list = getPlacesWithinArea(mapScope.areaName);
+    if (activeCategoryFilter !== "all") {
+      list = list.filter((p) => p.categories?.includes(activeCategoryFilter) || p.primaryCategory === activeCategoryFilter);
+    }
+    return list;
+  }, [mapScope.areaName, activeCategoryFilter]);
 
   // Sync initial props when passed
   useEffect(() => {
@@ -126,7 +178,7 @@ export function FullscreenRouteMap({
     });
   }, [selectedOrigin, selectedDestination, travelMode]);
 
-  // Click-Away Listener to Close Search Dropdown when clicking outside
+  // Click-Away Listener to Close Search Dropdowns
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -157,21 +209,23 @@ export function FullscreenRouteMap({
           name: "My Current Location",
           slug: "current-location",
           district: "GPS Location",
-          state: "Current State",
+          state: "Tamil Nadu",
           country: "India",
           latitude,
           longitude,
-          categories: ["gps"],
-          primaryCategory: "gps",
+          categories: ["all"],
+          primaryCategory: "all",
           tagline: "User Live GPS Location",
           description: "Live GPS coordinates detected from browser location API.",
           rating: 5.0,
           reviewsCount: 1,
           verified: true,
           source: "Device GPS",
+          tags: ["gps"],
         };
         setSelectedOrigin(currentLocPlace);
         setGeoLocating(false);
+        toast.success("Live GPS origin set ✓");
       },
       (err) => {
         setGeoLocating(false);
@@ -210,7 +264,7 @@ export function FullscreenRouteMap({
     return `${hrs} hr ${mins} min`;
   }, [totalDurationMins]);
 
-  // Phase 2: Calculate Intelligent Rest, Meal & Overnight Recommendations along the Selected Route Corridor
+  // Rest & Meals Stop Recommendation Engine
   const recommendationResult = useMemo(() => {
     if (!selectedOrigin || !selectedDestination || segmentData.length === 0) return null;
     const combinedPolyline = segmentData.flatMap((seg) => seg.polyline || []);
@@ -225,7 +279,6 @@ export function FullscreenRouteMap({
     });
   }, [selectedOrigin, selectedDestination, segmentData, totalDistanceKm, totalDurationMins, departureTime]);
 
-  // User-Controlled Stop Management: Add Recommended Stop
   const handleAddRecommendedStop = (candidate: RouteStopCandidate) => {
     const placeObj: ExplorerPlace = candidate.placeObject || {
       id: candidate.placeId,
@@ -259,7 +312,6 @@ export function FullscreenRouteMap({
     }
   };
 
-  // User-Controlled Stop Management: Remove Stop
   const handleRemoveRecommendedStop = (placeId: string) => {
     setWaypoints((prev) => prev.filter((w) => w.id !== placeId));
     setExcludedStopIds((prev) => {
@@ -282,8 +334,6 @@ export function FullscreenRouteMap({
     setRouteLoading(true);
     setRouteError(null);
 
-    // If an alternative route (e.g. ECR Scenic) is selected and no custom waypoints are added yet,
-    // use that route option's geometry directly!
     const activeRouteOpt = availableRoutes.find((r) => r.id === selectedRouteId);
 
     if (activeRouteOpt && waypoints.length === 0 && activeRouteOpt.geometry.length > 0) {
@@ -346,7 +396,7 @@ export function FullscreenRouteMap({
     calculateAllSegments();
   }, [selectedOrigin, selectedDestination, waypoints, travelMode, selectedRouteId, availableRoutes]);
 
-  // Leaflet Map Initialization & Lifecycle Management
+  // Leaflet Map Initialization & Scope Lifecycle
   useEffect(() => {
     if (typeof window === "undefined" || !mapContainerRef.current) return;
 
@@ -366,11 +416,9 @@ export function FullscreenRouteMap({
       });
 
       if (!leafletMapRef.current) {
-        const initialCenter: [number, number] = stops.length > 0 ? [stops[0].latitude, stops[0].longitude] : [10.8, 78.2];
-
         const map = L.map(mapContainerRef.current, {
-          center: initialCenter,
-          zoom: 8,
+          center: [10.8, 78.7],
+          zoom: 7,
           zoomControl: false,
           attributionControl: false,
         });
@@ -388,7 +436,7 @@ export function FullscreenRouteMap({
         });
       }
 
-      renderRouteOnMap();
+      renderMapElements();
     }
 
     initMap();
@@ -402,7 +450,7 @@ export function FullscreenRouteMap({
     };
   }, []);
 
-  // ResizeObserver for Container Sizing & Viewport Layout Safety
+  // ResizeObserver for Container Sizing
   useEffect(() => {
     if (typeof window === "undefined" || !mapContainerRef.current) return;
 
@@ -420,26 +468,15 @@ export function FullscreenRouteMap({
 
     resizeObserver.observe(mapContainerRef.current);
     window.addEventListener("resize", invalidate);
-    window.addEventListener("orientationchange", invalidate);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener("resize", invalidate);
-      window.removeEventListener("orientationchange", invalidate);
     };
   }, []);
 
-  // Invalidate Size when panelState changes
-  useEffect(() => {
-    if (leafletMapRef.current) {
-      setTimeout(() => {
-        leafletMapRef.current?.invalidateSize();
-      }, 300);
-    }
-  }, [panelState]);
-
-  // Render Numbered Markers & Real Road Network Polylines
-  const renderRouteOnMap = () => {
+  // Render Map Markers & Geometry based on Scope / Active Route
+  const renderMapElements = () => {
     const map = leafletMapRef.current;
     const L = leafletModuleRef.current;
     const polylineGroup = polylineGroupRef.current;
@@ -452,24 +489,106 @@ export function FullscreenRouteMap({
 
     const bounds = L.latLngBounds([]);
 
-    // 1. Render Numbered Stop Markers (①, ②, ③...) on true WGS84 GPS points
-    stops.forEach((place, idx) => {
+    // CASE A: Active Route Engine Mode (Origin & Destination selected)
+    if (selectedOrigin && selectedDestination && stops.length > 1) {
+      stops.forEach((place, idx) => {
+        bounds.extend([place.latitude, place.longitude]);
+
+        const numberLabel = idx === 0 ? "START" : idx === stops.length - 1 ? "END" : `${idx}`;
+        const isSelected = idx === selectedStopIndex;
+        const pinBg = isSelected ? "#2563eb" : idx === 0 ? "#0284c7" : "#0f172a";
+
+        const customIcon = L.divIcon({
+          className: `custom-route-pin-${place.id}`,
+          html: `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              ${isSelected ? '<span style="position: absolute; width: 42px; height: 42px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
+              <div style="
+                background: ${pinBg};
+                color: #ffffff;
+                border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
+                font-weight: 800;
+                font-size: 11px;
+                padding: 4px 10px;
+                border-radius: 9999px;
+                box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+                white-space: nowrap;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+              ">
+                <span style="width: 7px; height: 7px; border-radius: 50%; background: ${isSelected ? '#000000' : '#10b981'};"></span>
+                ${numberLabel} · ${place.canonicalName || place.name}
+              </div>
+            </div>
+          `,
+          iconSize: [140, 28],
+          iconAnchor: [70, 14],
+        });
+
+        const marker = L.marker([place.latitude, place.longitude], { icon: customIcon }).addTo(map);
+
+        marker.bindPopup(`
+          <div style="font-family: system-ui, sans-serif; width: 220px; color: #fff;">
+            <strong style="font-size: 14px; display: block; color: #34d399;">${place.canonicalName || place.name}</strong>
+            <span style="font-size: 11px; color: #a1a1aa;">${place.district} District</span>
+            <p style="font-size: 12px; margin: 4px 0; color: #e4e4e7;">${place.tagline || place.description}</p>
+          </div>
+        `, { className: "custom-mapcn-popup-window" });
+
+        marker.on("click", () => {
+          setSelectedStopIndex(idx);
+          map.flyTo([place.latitude, place.longitude], 12, { animate: true });
+        });
+
+        markersRef.current.push(marker);
+      });
+
+      segmentData.forEach((seg, idx) => {
+        if (seg.polyline && seg.polyline.length > 0) {
+          const isSelectedLeg = idx === selectedStopIndex;
+
+          L.polyline(seg.polyline, {
+            color: "#0f172a",
+            weight: isSelectedLeg ? 10 : 7,
+            opacity: 0.85,
+            lineJoin: "round",
+          }).addTo(polylineGroup);
+
+          L.polyline(seg.polyline, {
+            color: isSelectedLeg ? "#3b82f6" : "#2563eb",
+            weight: isSelectedLeg ? 8 : 6,
+            opacity: 0.95,
+            lineJoin: "round",
+          }).addTo(polylineGroup);
+
+          seg.polyline.forEach((pt) => bounds.extend(pt));
+        }
+      });
+
+      if (bounds.isValid()) {
+        map.fitBounds(bounds, { paddingTopLeft: [420, 100], paddingBottomRight: [80, 80], maxZoom: 14 });
+      }
+      return;
+    }
+
+    // CASE B: Geographic Scope / POI Area Exploration Mode
+    placesInScope.forEach((place) => {
       bounds.extend([place.latitude, place.longitude]);
 
-      const numberLabel = idx === 0 ? "START" : idx === stops.length - 1 ? "END" : `${idx}`;
-      const isSelected = idx === selectedStopIndex;
-      const pinBg = isSelected ? "#2563eb" : idx === 0 ? "#0284c7" : "#0f172a";
+      const isSelectedPOI = mapScope.type === "POI" && mapScope.selectedPOI?.id === place.id;
+      const categoryIcon = place.primaryCategory === "temples" ? "🛕" : place.primaryCategory === "heritage" ? "🏛️" : place.primaryCategory === "waterfalls" ? "💧" : "📍";
 
       const customIcon = L.divIcon({
-        className: `custom-route-pin-${place.id}`,
+        className: `custom-area-pin-${place.id}`,
         html: `
           <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-            ${isSelected ? '<span style="position: absolute; width: 42px; height: 42px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
+            ${isSelectedPOI ? '<span style="position: absolute; width: 44px; height: 44px; border-radius: 50%; background: rgba(16,185,129,0.4); animation: ping 1.5s infinite;"></span>' : ''}
             <div style="
-              background: ${pinBg};
-              color: #ffffff;
-              border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
-              font-weight: 800;
+              background: ${isSelectedPOI ? '#10b981' : '#1e293b'};
+              color: ${isSelectedPOI ? '#000000' : '#ffffff'};
+              border: 2px solid ${isSelectedPOI ? '#6ee7b7' : 'rgba(255,255,255,0.2)'};
+              font-weight: 700;
               font-size: 11px;
               padding: 4px 10px;
               border-radius: 9999px;
@@ -478,10 +597,9 @@ export function FullscreenRouteMap({
               display: flex;
               align-items: center;
               gap: 4px;
-              transition: all 0.2s ease;
             ">
-              <span style="width: 7px; height: 7px; border-radius: 50%; background: ${isSelected ? '#000000' : '#10b981'};"></span>
-              ${numberLabel} · ${place.canonicalName || place.name}
+              <span>${categoryIcon}</span>
+              ${place.canonicalName || place.name}
             </div>
           </div>
         `,
@@ -491,155 +609,113 @@ export function FullscreenRouteMap({
 
       const marker = L.marker([place.latitude, place.longitude], {
         icon: customIcon,
-        zIndexOffset: isSelected ? 2000 : 1000 - idx,
+        zIndexOffset: isSelectedPOI ? 2000 : 1000,
       }).addTo(map);
 
-      // Mapcn Exact Dark Popup Window on Hover / Click (matching user spec)
-      const popupHtml = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; width: 260px; text-align: left; box-sizing: border-box; padding: 2px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <h3 style="font-weight: 700; font-size: 15px; color: #ffffff; margin: 0; letter-spacing: -0.01em;">
-              ${place.canonicalName || place.name}
-            </h3>
+      marker.bindPopup(`
+        <div style="font-family: system-ui, sans-serif; width: 240px; color: #ffffff; padding: 2px;">
+          <strong style="font-size: 15px; color: #34d399; display: block; margin-bottom: 2px;">${place.canonicalName || place.name}</strong>
+          <span style="font-size: 11px; color: #a1a1aa;">${place.primaryCategory?.toUpperCase()} · ${place.district} District</span>
+          <p style="font-size: 12px; margin: 6px 0; color: #d4d4d8; line-height: 1.4;">${place.tagline || place.description}</p>
+          <div style="display: flex; gap: 6px; margin-top: 10px;">
+            <button
+              onclick="window.dispatchEvent(new CustomEvent('set-origin-event', { detail: '${place.id}' }))"
+              style="flex: 1; padding: 6px; border-radius: 8px; background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; font-size: 10px; font-weight: 700; cursor: pointer;"
+            >
+              Set as Origin
+            </button>
+            <button
+              onclick="window.dispatchEvent(new CustomEvent('set-dest-event', { detail: '${place.id}' }))"
+              style="flex: 1; padding: 6px; border-radius: 8px; background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; font-size: 10px; font-weight: 700; cursor: pointer;"
+            >
+              Set as Dest
+            </button>
           </div>
-          <p style="font-size: 13px; color: #a1a1aa; margin: 0 0 4px 0; line-height: 1.5;">
-            ${place.tagline || place.description || "Famous destination in Tamil Nadu."}
-          </p>
-          <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5;">
-            District: ${place.district || "Tamil Nadu"} · Rating: ${place.rating || 4.8} ★
-          </p>
-          <button 
-            onclick="this.closest('.leaflet-popup')?.querySelector('.leaflet-popup-close-button')?.click()"
-            style="margin-top: 14px; width: 100%; padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #ffffff; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; text-align: center;"
-            onmouseover="this.style.background='rgba(255,255,255,0.18)'"
-            onmouseout="this.style.background='rgba(255,255,255,0.08)'"
-          >
-            Close
-          </button>
         </div>
-      `;
+      `, { className: "custom-mapcn-popup-window" });
 
-      marker.bindPopup(popupHtml, {
-        className: "custom-mapcn-popup-window",
-        closeButton: true,
-        autoPan: true,
-      });
-
-      marker.on("mouseover", () => marker.openPopup());
       marker.on("click", () => {
-        setSelectedStopIndex(idx);
-        marker.openPopup();
-        map.flyTo([place.latitude, place.longitude], 11, { animate: true, duration: 1.2 });
+        setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
+        map.flyTo([place.latitude, place.longitude], 14, { animate: true, duration: 1 });
       });
 
       markersRef.current.push(marker);
     });
 
-    // Render surrounding Tamil Nadu places as interactive mapcn markers with Hover Popup
-    CANONICAL_PLACES.forEach((canonicalPlace) => {
-      if (stops.some((s) => s.id === canonicalPlace.id || Math.abs(s.latitude - canonicalPlace.latitude) < 0.01)) return;
-
-      const placeIcon = L.divIcon({
-        className: `tn-place-pin-${canonicalPlace.id}`,
-        html: `
-          <div style="width: 14px; height: 14px; border-radius: 50%; background: #3b82f6; border: 2px solid #ffffff; box-shadow: 0 2px 6px rgba(0,0,0,0.5); cursor: pointer; transition: transform 0.2s ease;" onmouseover="this.style.transform='scale(1.4)'" onmouseout="this.style.transform='scale(1)'"></div>
-        `,
-        iconSize: [14, 14],
-        iconAnchor: [7, 7],
-      });
-
-      const canonicalMarker = L.marker([canonicalPlace.latitude, canonicalPlace.longitude], {
-        icon: placeIcon,
-        zIndexOffset: 500,
-      }).addTo(map);
-
-      const placePopupHtml = `
-        <div style="font-family: system-ui, -apple-system, sans-serif; width: 260px; text-align: left; box-sizing: border-box; padding: 2px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px;">
-            <h3 style="font-weight: 700; font-size: 15px; color: #ffffff; margin: 0; letter-spacing: -0.01em;">
-              ${canonicalPlace.canonicalName || canonicalPlace.name}
-            </h3>
-          </div>
-          <p style="font-size: 13px; color: #a1a1aa; margin: 0 0 4px 0; line-height: 1.5;">
-            ${canonicalPlace.tagline || canonicalPlace.description || "Famous landmark in Tamil Nadu."}
-          </p>
-          <p style="font-size: 13px; color: #a1a1aa; margin: 0; line-height: 1.5;">
-            District: ${canonicalPlace.district} District · Rating: ${canonicalPlace.rating || 4.8} ★
-          </p>
-          <button 
-            onclick="this.closest('.leaflet-popup')?.querySelector('.leaflet-popup-close-button')?.click()"
-            style="margin-top: 14px; width: 100%; padding: 8px 14px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.2); background: rgba(255, 255, 255, 0.08); color: #ffffff; font-weight: 600; font-size: 13px; cursor: pointer; transition: all 0.2s ease; text-align: center;"
-            onmouseover="this.style.background='rgba(255,255,255,0.18)'"
-            onmouseout="this.style.background='rgba(255,255,255,0.08)'"
-          >
-            Close
-          </button>
-        </div>
-      `;
-
-      canonicalMarker.bindPopup(placePopupHtml, {
-        className: "custom-mapcn-popup-window",
-        closeButton: true,
-        autoPan: true,
-      });
-
-      canonicalMarker.on("mouseover", () => canonicalMarker.openPopup());
-
-      markersRef.current.push(canonicalMarker);
-    });
-
-    // 2. Draw Solid Road Polyline Segments with Google Maps Casing
-    segmentData.forEach((seg, idx) => {
-      if (seg.polyline && seg.polyline.length > 0) {
-        const isSelectedLeg = idx === selectedStopIndex;
-
-        // Outer casing border (Google Maps road outline)
-        L.polyline(seg.polyline, {
-          color: "#0f172a",
-          weight: isSelectedLeg ? 10 : 7,
-          opacity: 0.85,
-          lineJoin: "round",
-          lineCap: "round",
-        }).addTo(polylineGroup);
-
-        // Inner navigation core line (ELECTRIC BLUE)
-        L.polyline(seg.polyline, {
-          color: isSelectedLeg ? "#3b82f6" : "#2563eb",
-          weight: isSelectedLeg ? 8 : 6,
-          opacity: 0.95,
-          lineJoin: "round",
-          lineCap: "round",
-        }).addTo(polylineGroup);
-
-        seg.polyline.forEach((pt) => bounds.extend(pt));
-      }
-    });
-
-    // 3. Auto-fit Map Viewport to Encompass Full Road Geometry + Stop Markers
-    if (bounds.isValid()) {
-      map.invalidateSize();
-      map.fitBounds(bounds, {
-        paddingTopLeft: [420, 100],
-        paddingBottomRight: [80, 80],
-        maxZoom: 14,
-      });
+    if (mapScope.type === "POI" && mapScope.selectedPOI) {
+      map.flyTo([mapScope.selectedPOI.latitude, mapScope.selectedPOI.longitude], 14, { animate: true });
+    } else if (bounds.isValid() && placesInScope.length > 0) {
+      map.fitBounds(bounds, { paddingTopLeft: [400, 80], paddingBottomRight: [60, 60], maxZoom: 13 });
     }
   };
 
-  // Re-render route on map whenever stops or segment data updates
+  // Listen for popup event dispatches
   useEffect(() => {
-    renderRouteOnMap();
-  }, [stops, segmentData, selectedStopIndex]);
+    const handleSetOrigin = (e: any) => {
+      const placeId = e.detail;
+      const place = resolvePlaceById(placeId);
+      if (place) {
+        setSelectedOrigin(place);
+        toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
+      }
+    };
+    const handleSetDest = (e: any) => {
+      const placeId = e.detail;
+      const place = resolvePlaceById(placeId);
+      if (place) {
+        setSelectedDestination(place);
+        toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
+      }
+    };
+
+    window.addEventListener("set-origin-event", handleSetOrigin);
+    window.addEventListener("set-dest-event", handleSetDest);
+    return () => {
+      window.removeEventListener("set-origin-event", handleSetOrigin);
+      window.removeEventListener("set-dest-event", handleSetDest);
+    };
+  }, []);
+
+  // Re-render elements whenever scope, stops, or route updates
+  useEffect(() => {
+    renderMapElements();
+  }, [mapScope, placesInScope, stops, segmentData, selectedStopIndex]);
+
+  // Handle Geographic Area selection from search
+  const handleSelectArea = (area: GeographicArea) => {
+    setMapScope({
+      type: area.entityType,
+      areaName: area.name,
+      selectedArea: area,
+      selectedPOI: null,
+    });
+    setGlobalQuery("");
+    setSearchFocused(null);
+    toast.info(`Loaded ${area.name} Area Destinations ✓`);
+  };
+
+  // Handle POI selection from search
+  const handleSelectPOI = (place: ExplorerPlace) => {
+    setMapScope({
+      type: "POI",
+      areaName: place.district,
+      selectedPOI: place,
+    });
+    setGlobalQuery("");
+    setSearchFocused(null);
+  };
 
   if (!isOpen) return null;
 
+  const categorizedResults = searchEntities(globalQuery);
+
   return (
     <div className="fixed inset-0 z-50 w-full h-full h-[100vh] h-[100dvh] min-h-[100vh] overflow-hidden bg-[#0B0F14] font-sans text-white relative">
-      {/* 100% Fullscreen Leaflet Map Container */}
+      {/* 100% Fullscreen Map Container */}
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
 
-      {/* Compact Top Navigation Bar (z-index: 30 / 100) */}
-      <header className="absolute top-4 left-4 right-4 z-30 flex items-center justify-between pointer-events-none gap-3">
+      {/* Top Header Bar */}
+      <header className="absolute top-4 left-4 right-4 z-30 flex flex-wrap items-center justify-between pointer-events-none gap-3">
         <div className="flex items-center gap-2 pointer-events-auto">
           <button
             type="button"
@@ -650,19 +726,96 @@ export function FullscreenRouteMap({
           </button>
         </div>
 
-        {/* Compact Top Route Search Bar */}
-        <div className="relative pointer-events-auto flex items-center gap-2 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 px-4 py-2 rounded-full shadow-2xl">
-          <div className="flex items-center gap-2 text-xs">
-            <span className="w-2 h-2 rounded-full bg-emerald-400"></span>
-            <span className="font-bold text-emerald-400">{selectedOrigin ? selectedOrigin.name : "Select Origin"}</span>
-            <ArrowRight className="w-3.5 h-3.5 text-slate-400" />
-            <span className="font-bold text-sky-400">{selectedDestination ? selectedDestination.name : "Select Destination"}</span>
+        {/* Global Area & POI Search Bar */}
+        <div ref={searchContainerRef} className="relative pointer-events-auto flex-1 max-w-md">
+          <div className="flex items-center gap-2 bg-[#121821]/95 backdrop-blur-2xl border border-white/20 px-3.5 py-2 rounded-full shadow-2xl">
+            <Search className="w-4 h-4 text-emerald-400 shrink-0" />
+            <input
+              type="text"
+              placeholder="Search City (Madurai, Chennai), District or POI..."
+              value={globalQuery}
+              onChange={(e) => {
+                setGlobalQuery(e.target.value);
+                setSearchFocused("global");
+              }}
+              onFocus={() => setSearchFocused("global")}
+              className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium"
+            />
           </div>
 
-          {totalDistanceKm > 0 && (
-            <span className="ml-2 px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-[10px] font-mono font-bold">
-              {totalDistanceKm} km · {durationString}
-            </span>
+          {/* Categorized Search Results Dropdown */}
+          {searchFocused === "global" && (
+            <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-80 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1">
+              {categorizedResults.length === 0 ? (
+                <div className="p-3 text-xs text-slate-400 text-center">No locations or POIs found matching '{globalQuery}'</div>
+              ) : (
+                categorizedResults.map((item) => (
+                  <div
+                    key={item.id}
+                    className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-white/10"
+                  >
+                    <div
+                      onClick={() => {
+                        if (item.area) handleSelectArea(item.area);
+                        else if (item.place) handleSelectPOI(item.place);
+                      }}
+                      className="flex items-center gap-2.5 cursor-pointer flex-1 min-w-0"
+                    >
+                      <span className="text-base">{item.icon}</span>
+                      <div className="truncate">
+                        <span className="font-bold text-white block truncate">{item.name}</span>
+                        <span className="text-[10px] text-slate-400 block">{item.sublabel}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-1 shrink-0">
+                      {item.area && (
+                        <button
+                          type="button"
+                          onClick={() => handleSelectArea(item.area!)}
+                          className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold cursor-pointer"
+                        >
+                          Explore Area
+                        </button>
+                      )}
+                      {item.place && (
+                        <>
+                          <button
+                            type="button"
+                            onClick={() => handleSelectPOI(item.place!)}
+                            className="px-2 py-1 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold cursor-pointer"
+                          >
+                            View
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedOrigin(item.place!);
+                              setSearchFocused(null);
+                              toast.success(`Set ${item.name} as Origin ✓`);
+                            }}
+                            className="px-1.5 py-1 rounded bg-white/10 hover:bg-white/20 text-slate-200 text-[10px] font-bold cursor-pointer"
+                          >
+                            + Origin
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDestination(item.place!);
+                              setSearchFocused(null);
+                              toast.success(`Set ${item.name} as Destination ✓`);
+                            }}
+                            className="px-1.5 py-1 rounded bg-white/10 hover:bg-white/20 text-slate-200 text-[10px] font-bold cursor-pointer"
+                          >
+                            + Dest
+                          </button>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
 
@@ -681,9 +834,7 @@ export function FullscreenRouteMap({
                 type="button"
                 onClick={() => setTravelMode(mode.id as any)}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  isActive
-                    ? "bg-emerald-500 text-black shadow-lg"
-                    : "text-slate-300 hover:text-white hover:bg-white/5"
+                  isActive ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white hover:bg-white/5"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -694,7 +845,7 @@ export function FullscreenRouteMap({
         </div>
       </header>
 
-      {/* Floating Directions Panel: Desktop TOP-LEFT (top-20 left-4), Mobile Bottom Sheet (z-index: 40 / 200) */}
+      {/* Main Left Explorer Panel */}
       <aside
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
@@ -707,591 +858,187 @@ export function FullscreenRouteMap({
         }`}
       >
         <div className="w-full h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white overscroll-contain">
-          {/* Drag Handle Bar */}
+          {/* Drag Handle */}
           <div
             onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
             className="w-full flex flex-col items-center cursor-pointer py-1 group shrink-0"
           >
             <div className="w-12 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition" />
             <span className="text-[9px] text-slate-400 uppercase tracking-widest mt-1 font-mono">
-              {panelState === "expanded" ? "Click/Drag to Collapse" : "Click/Drag to Expand"}
+              {panelState === "expanded" ? "Click to Collapse" : "Click to Expand"}
             </span>
           </div>
 
-          {/* Panel Header */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-2 shrink-0">
-            <div className="flex items-center gap-2">
-              <Compass className="w-4 h-4 text-emerald-400" />
-              <h2 className="text-sm font-extrabold text-white uppercase tracking-wider">Directions & Itinerary</h2>
+          {/* Panel Header & Breadcrumbs */}
+          <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-1 shrink-0">
+            <div>
+              <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                <span
+                  onClick={() => setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] })}
+                  className="cursor-pointer hover:underline"
+                >
+                  Tamil Nadu
+                </span>
+                {mapScope.areaName !== "Tamil Nadu" && (
+                  <>
+                    <span>/</span>
+                    <span className="text-white font-extrabold">{mapScope.areaName}</span>
+                  </>
+                )}
+                {mapScope.selectedPOI && (
+                  <>
+                    <span>/</span>
+                    <span className="text-sky-300 font-extrabold truncate max-w-[120px] inline-block">{mapScope.selectedPOI.canonicalName || mapScope.selectedPOI.name}</span>
+                  </>
+                )}
+              </div>
+              <h2 className="text-sm font-extrabold text-white uppercase tracking-wider mt-0.5">
+                {mapScope.areaName.toUpperCase()} DESTINATIONS ({placesInScope.length})
+              </h2>
             </div>
-            <div className="flex items-center gap-1">
-              <button
-                type="button"
-                onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
-                className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
-              >
-                {panelState === "expanded" ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
+              className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
+            >
+              {panelState === "expanded" ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+            </button>
           </div>
 
-          {/* Location Origin & Destination Search Inputs */}
-          <div ref={searchContainerRef} className="py-3 space-y-2 border-b border-white/10 shrink-0 relative">
-            {/* Origin Input */}
-            <div className="relative">
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 shrink-0"></span>
-                <input
-                  type="text"
-                  placeholder="Select Origin..."
-                  value={searchFocused === "origin" ? originQuery : (selectedOrigin ? selectedOrigin.canonicalName || selectedOrigin.name : originQuery)}
-                  onChange={(e) => {
-                    setOriginQuery(e.target.value);
-                    setSearchFocused("origin");
-                  }}
-                  onFocus={() => {
-                    setSearchFocused("origin");
-                    if (selectedOrigin && !originQuery) {
-                      setOriginQuery(selectedOrigin.canonicalName || selectedOrigin.name);
-                    }
-                  }}
-                  className="w-full bg-transparent text-white placeholder-slate-400 focus:outline-none"
-                />
+          {/* Category Filter Pills Bar */}
+          <div className="flex items-center gap-1.5 overflow-x-auto py-2.5 shrink-0 border-b border-white/10 custom-scrollbar">
+            {[
+              { id: "all", label: "All" },
+              { id: "temples", label: "Temples" },
+              { id: "heritage", label: "Heritage" },
+              { id: "waterfalls", label: "Waterfalls" },
+              { id: "hills", label: "Hills" },
+              { id: "beaches", label: "Beaches" },
+              { id: "food", label: "Food" },
+              { id: "museums", label: "Museums" },
+              { id: "trekking", label: "Trekking" },
+            ].map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => setActiveCategoryFilter(cat.id as any)}
+                className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${
+                  activeCategoryFilter === cat.id
+                    ? "bg-emerald-500 text-black shadow-md"
+                    : "bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
+                }`}
+              >
+                {cat.label}
+              </button>
+            ))}
+          </div>
+
+          {/* Optional Origin / Destination Active Bar */}
+          {(selectedOrigin || selectedDestination) && (
+            <div className="py-2.5 px-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl my-2 shrink-0 space-y-1">
+              <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center justify-between">
+                <span>Active Route Corridor</span>
+                {totalDistanceKm > 0 && <span>{totalDistanceKm} km · {durationString}</span>}
+              </div>
+              <div className="text-xs font-bold text-white flex items-center justify-between">
+                <span>{selectedOrigin ? selectedOrigin.name : "Origin"} → {selectedDestination ? selectedDestination.name : "Destination"}</span>
                 <button
                   type="button"
-                  onClick={handleUseCurrentLocation}
-                  disabled={geoLocating}
-                  title="Use My Current GPS Location"
-                  className="p-1 text-emerald-400 hover:text-emerald-300 transition cursor-pointer"
+                  onClick={() => { setSelectedOrigin(null); setSelectedDestination(null); setWaypoints([]); }}
+                  className="text-[10px] text-rose-400 hover:underline font-normal"
                 >
-                  <LocateFixed className={`w-4 h-4 ${geoLocating ? "animate-spin" : ""}`} />
+                  Clear Route
                 </button>
               </div>
+            </div>
+          )}
 
-              {/* Origin Spotlight Dropdown */}
-              {searchFocused === "origin" && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
-                  <div
+          {/* Places List for Selected Scope */}
+          {panelState === "expanded" && (
+            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 custom-scrollbar">
+              {placesInScope.length === 0 ? (
+                <div className="p-6 text-center text-xs text-slate-400 bg-white/5 border border-white/10 rounded-2xl my-2 space-y-2">
+                  <p>No verified tourist places found in {mapScope.areaName} for this category filter.</p>
+                  <button
+                    type="button"
                     onClick={() => {
-                      handleUseCurrentLocation();
-                      setSearchFocused(null);
+                      setActiveCategoryFilter("all");
+                      setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] });
                     }}
-                    className="p-2.5 rounded-xl hover:bg-emerald-500/20 text-xs font-bold text-emerald-400 flex items-center gap-2 cursor-pointer mb-1 border border-emerald-500/30"
+                    className="text-emerald-400 font-bold underline cursor-pointer block mx-auto text-xs"
                   >
-                    <LocateFixed className="w-4 h-4" /> Use My Current GPS Location
-                  </div>
-
-                  {searchLocations(originQuery).map((place) => {
-                    const iconSymbol =
-                      place.placeType === "city"
-                        ? "📍"
-                        : place.primaryCategory === "waterfalls"
-                        ? "💧"
-                        : place.primaryCategory === "trekking"
-                        ? "⛰️"
-                        : place.primaryCategory === "temples"
-                        ? "🛕"
-                        : place.primaryCategory === "heritage"
-                        ? "🏛️"
-                        : place.primaryCategory === "beaches"
-                        ? "🏖️"
-                        : "📍";
-
-                    return (
-                      <div
-                        key={place.id}
-                        onClick={() => {
-                          setSelectedOrigin(place);
-                          setOriginQuery("");
-                          setSearchFocused(null);
-                        }}
-                        className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>{iconSymbol}</span>
-                          <div>
-                            <span className="font-bold text-white block">{place.canonicalName || place.name}</span>
-                            <span className="text-[10px] text-slate-400">{place.district} District</span>
-                          </div>
-                        </div>
-                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-emerald-300 uppercase">
-                          {place.placeType === "city" ? "CITY" : place.primaryCategory}
-                        </span>
-                      </div>
-                    );
-                  })}
+                    Reset to All Tamil Nadu Destinations
+                  </button>
                 </div>
-              )}
-            </div>
+              ) : (
+                placesInScope.map((place) => {
+                  const isSelected = mapScope.selectedPOI?.id === place.id;
+                  const categoryIcon = place.primaryCategory === "temples" ? "🛕" : place.primaryCategory === "heritage" ? "🏛️" : place.primaryCategory === "waterfalls" ? "💧" : "📍";
 
-            {/* Destination Input */}
-            <div className="relative">
-              <div className="flex items-center gap-2 bg-white/5 border border-white/10 rounded-xl px-3 py-2 text-xs">
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 shrink-0"></span>
-                <input
-                  type="text"
-                  placeholder="Search city, waterfall, trek or place..."
-                  value={searchFocused === "destination" ? destinationQuery : (selectedDestination ? selectedDestination.canonicalName || selectedDestination.name : destinationQuery)}
-                  onChange={(e) => {
-                    setDestinationQuery(e.target.value);
-                    setSearchFocused("destination");
-                  }}
-                  onFocus={() => {
-                    setSearchFocused("destination");
-                    if (selectedDestination && !destinationQuery) {
-                      setDestinationQuery(selectedDestination.canonicalName || selectedDestination.name);
-                    }
-                  }}
-                  className="w-full bg-transparent text-white placeholder-slate-400 focus:outline-none"
-                />
-              </div>
-
-              {/* Destination Spotlight Dropdown */}
-              {searchFocused === "destination" && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#161e2b] border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-1.5 backdrop-blur-xl">
-                  {searchLocations(destinationQuery).map((place) => {
-                    const iconSymbol =
-                      place.placeType === "city"
-                        ? "📍"
-                        : place.primaryCategory === "waterfalls"
-                        ? "💧"
-                        : place.primaryCategory === "trekking"
-                        ? "⛰️"
-                        : place.primaryCategory === "temples"
-                        ? "🛕"
-                        : place.primaryCategory === "heritage"
-                        ? "🏛️"
-                        : place.primaryCategory === "beaches"
-                        ? "🏖️"
-                        : "📍";
-
-                    return (
-                      <div
-                        key={place.id}
-                        onClick={() => {
-                          setSelectedDestination(place);
-                          setDestinationQuery("");
-                          setSearchFocused(null);
-                        }}
-                        className="p-2.5 rounded-xl hover:bg-white/10 text-xs text-white flex items-center justify-between cursor-pointer transition"
-                      >
-                        <div className="flex items-center gap-2">
-                          <span>{iconSymbol}</span>
-                          <div>
-                            <span className="font-bold text-white block">{place.canonicalName || place.name}</span>
-                            <span className="text-[10px] text-slate-400">{place.district} District</span>
-                          </div>
-                        </div>
-                        <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded bg-white/10 text-sky-300 uppercase">
-                          {place.placeType === "city" ? "CITY" : place.primaryCategory}
-                        </span>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-
-            {/* ROUTE OPTIONS SELECTOR GRID */}
-            {availableRoutes.length > 1 && (
-              <div className="pt-2 border-t border-white/10 shrink-0 space-y-1.5">
-                <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between">
-                  <span>Route Options ({availableRoutes.length})</span>
-                  <span className="text-emerald-400 text-[9px] font-semibold">Real Road Geometry</span>
-                </div>
-                <div className="grid grid-cols-2 gap-2">
-                  {availableRoutes.map((routeOpt) => {
-                    const isSelected = selectedRouteId === routeOpt.id;
-                    return (
-                      <button
-                        key={routeOpt.id}
-                        type="button"
-                        onClick={() => setSelectedRouteId(routeOpt.id)}
-                        className={`p-2 rounded-xl border text-left transition cursor-pointer flex flex-col justify-between ${
-                          isSelected
-                            ? "bg-emerald-500/15 border-emerald-500/60 text-white shadow-lg"
-                            : "bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:border-white/20"
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <span className={`w-2 h-2 rounded-full ${isSelected ? "bg-emerald-400 animate-pulse" : "bg-slate-500"}`}></span>
-                          <span className="text-[10px] font-mono font-bold text-emerald-400">{routeOpt.distanceKm} km</span>
-                        </div>
-                        <div className="font-bold text-xs mt-1 truncate text-white">{routeOpt.name}</div>
-                        <div className="text-[10px] text-slate-400 truncate mt-0.5">{routeOpt.description}</div>
-                        <div className="text-[10px] font-mono text-slate-300 mt-1 font-semibold">
-                          ETA ~ {Math.floor(routeOpt.durationMins / 60)}h {routeOpt.durationMins % 60}m
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
-
-            {geoError && <p className="text-[10px] text-rose-400 px-1">{geoError}</p>}
-            {routeError && (
-              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-xs text-rose-300 space-y-2">
-                <div className="font-bold flex items-center gap-1.5 text-rose-400">
-                  ⚠️ Road Route Unavailable
-                </div>
-                <p className="text-[11px] leading-snug">{routeError}</p>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRouteError(null);
-                    setRouteLoading(true);
-                  }}
-                  className="px-3 py-1 bg-rose-500 hover:bg-rose-600 text-black font-bold text-[10px] rounded-lg transition"
-                >
-                  Retry Route Calculation
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* TAMIL NADU DATABASE PLACES LIST */}
-          {(!selectedOrigin || !selectedDestination) && (
-            <div className="flex-1 min-h-0 overflow-y-auto py-2 space-y-2 pr-1 custom-scrollbar">
-              <div className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider flex items-center justify-between px-1">
-                <span>Tamil Nadu Destinations ({CANONICAL_PLACES.length} Places)</span>
-                <span className="text-sky-400 text-[9px] font-semibold">Database Live</span>
-              </div>
-              {CANONICAL_PLACES.map((place) => {
-                const iconSymbol =
-                  place.primaryCategory === "waterfalls"
-                    ? "💧"
-                    : place.primaryCategory === "trekking"
-                    ? "⛰️"
-                    : place.primaryCategory === "temples"
-                    ? "🛕"
-                    : place.primaryCategory === "heritage"
-                    ? "🏛️"
-                    : place.primaryCategory === "beaches"
-                    ? "🏖️"
-                    : "📍";
-
-                return (
-                  <div
-                    key={place.id}
-                    className="p-3 rounded-xl bg-white/5 border border-white/10 hover:border-sky-500/40 transition flex items-center justify-between text-xs group"
-                  >
-                    <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                      <span className="text-base shrink-0">{iconSymbol}</span>
-                      <div className="min-w-0">
-                        <div className="font-bold text-white truncate group-hover:text-sky-400 transition">
-                          {place.canonicalName || place.name}
-                        </div>
-                        <div className="text-[10px] text-slate-400 truncate">
-                          {place.district} District · ★ {place.rating || 4.8}
-                        </div>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-1 shrink-0">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedOrigin(place)}
-                        className="px-2 py-1 rounded-lg bg-emerald-500/20 hover:bg-emerald-500 text-emerald-300 hover:text-black font-extrabold text-[10px] transition cursor-pointer"
-                      >
-                        Origin
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDestination(place)}
-                        className="px-2 py-1 rounded-lg bg-sky-500/20 hover:bg-sky-500 text-sky-300 hover:text-black font-extrabold text-[10px] transition cursor-pointer"
-                      >
-                        Dest
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          )}
-
-          {/* PHASE 2: TAB SELECTOR (Timeline vs Rest & Meals Engine) */}
-          {selectedOrigin && selectedDestination && panelState === "expanded" && (
-            <div className="flex items-center gap-1 p-1 bg-white/5 border border-white/10 rounded-xl my-2 shrink-0">
-              <button
-                type="button"
-                onClick={() => setActivePanelTab("timeline")}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  activePanelTab === "timeline" ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white"
-                }`}
-              >
-                <Compass className="w-3.5 h-3.5" /> Timeline ({stops.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setActivePanelTab("suggestions")}
-                className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  activePanelTab === "suggestions" ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white"
-                }`}
-              >
-                <Coffee className="w-3.5 h-3.5" /> Rest & Meals {recommendationResult?.recommendations.length ? `(${recommendationResult.recommendations.length})` : ""}
-              </button>
-            </div>
-          )}
-
-          {/* EXPANDED ROUTE ITINERARY & STOPS SCROLL CONTAINER */}
-          {selectedOrigin && selectedDestination && panelState === "expanded" && (
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-3 pr-1.5 custom-scrollbar">
-              {activePanelTab === "timeline" && (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3 text-xs">
-                    <div>
-                      <div className="font-bold text-emerald-400">Total Journey Distance</div>
-                      <div className="text-lg font-black text-white mt-0.5">{totalDistanceKm} km</div>
-                    </div>
-                    <div className="text-right">
-                      <div className="font-bold text-emerald-400">Driving ETA</div>
-                      <div className="text-lg font-black text-white mt-0.5">{durationString}</div>
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                      Journey Timeline ({stops.length} Stops)
-                    </div>
-                    {stops.map((stop, idx) => {
-                      const isSelected = idx === selectedStopIndex;
-                      const legInfo = idx > 0 && segmentData[idx - 1];
-
-                      return (
-                        <div
-                          key={stop.id}
-                          onClick={() => {
-                            setSelectedStopIndex(idx);
-                            if (leafletMapRef.current) {
-                              leafletMapRef.current.flyTo([stop.latitude, stop.longitude], 11, { animate: true });
-                            }
-                          }}
-                          className={`p-3 rounded-xl border transition cursor-pointer ${
-                            isSelected
-                              ? "bg-emerald-500/20 border-emerald-500/50"
-                              : "bg-white/5 border-white/10 hover:bg-white/10"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                              <span className="grid size-5 place-items-center rounded-full bg-emerald-500 text-black font-extrabold text-[10px]">
-                                {idx === 0 ? "S" : idx}
-                              </span>
-                              <span className="text-xs font-bold text-white">{stop.canonicalName || stop.name}</span>
-                            </div>
-                            <span className="text-[10px] text-slate-400 font-mono">{stop.district}</span>
-                          </div>
-
-                          {legInfo && (
-                            <div className="mt-2 text-[10px] text-emerald-400 font-mono flex items-center justify-between pt-1 border-t border-white/10">
-                              <span>Segment Drive: {legInfo.distanceKm} km</span>
-                              <span>ETA: {legInfo.durationMins} min</span>
-                            </div>
-                          )}
-
-                          <div className="mt-2 flex items-center justify-between gap-2 pt-1 border-t border-white/10">
-                            <a
-                              href={`https://www.google.com/maps/dir/?api=1&destination=${stop.latitude},${stop.longitude}&travelmode=driving`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="px-2.5 py-1 rounded-md bg-emerald-500 text-black font-bold text-[10px] hover:bg-emerald-400 transition"
-                            >
-                              Navigate →
-                            </a>
-                            {idx > 0 && idx < stops.length - 1 && (
-                              <button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRemoveRecommendedStop(stop.id);
-                                }}
-                                className="px-2 py-1 rounded-md bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 font-bold text-[10px] transition cursor-pointer"
-                              >
-                                Remove Stop
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {activePanelTab === "suggestions" && (
-                <div className="space-y-3">
-                  {/* Departure Time Controls */}
-                  <div className="flex items-center justify-between bg-white/5 border border-white/10 rounded-xl p-2.5 text-xs">
-                    <span className="text-slate-300 font-medium flex items-center gap-1.5">
-                      <Clock className="w-3.5 h-3.5 text-emerald-400" /> Departure Time:
-                    </span>
-                    <select
-                      value={departureTime}
-                      onChange={(e) => setDepartureTime(e.target.value)}
-                      className="bg-[#121821] border border-white/20 rounded-lg px-2.5 py-1 text-emerald-400 font-bold focus:outline-none cursor-pointer text-xs"
+                  return (
+                    <div
+                      key={place.id}
+                      onClick={() => {
+                        setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
+                        if (leafletMapRef.current) {
+                          leafletMapRef.current.flyTo([place.latitude, place.longitude], 14, { animate: true });
+                        }
+                      }}
+                      className={`p-3 rounded-2xl border transition cursor-pointer flex items-start justify-between gap-3 ${
+                        isSelected
+                          ? "bg-emerald-500/20 border-emerald-500/60 shadow-lg"
+                          : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                      }`}
                     >
-                      {["05:00 AM", "06:00 AM", "07:00 AM", "08:00 AM", "09:00 AM", "10:00 AM", "12:00 PM", "02:00 PM", "04:00 PM", "06:00 PM"].map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* Long Journey Mode Active Banner */}
-                  {recommendationResult?.isLongJourney && (
-                    <div className="p-3 bg-gradient-to-r from-emerald-500/20 via-sky-500/20 to-purple-500/20 border border-emerald-500/40 rounded-xl text-xs space-y-1">
-                      <div className="font-extrabold text-emerald-300 flex items-center gap-1.5">
-                        <Sparkles className="w-4 h-4 text-emerald-400 shrink-0 animate-pulse" />
-                        LONG JOURNEY MODE ACTIVATED
-                      </div>
-                      <div className="text-[11px] text-slate-300">
-                        Route Distance: <span className="font-mono text-emerald-400 font-bold">{totalDistanceKm} km</span> · Expected Arrival: <span className="font-mono text-sky-300 font-bold">{recommendationResult.expectedArrivalTime}</span>
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Recommendations List */}
-                  {(!recommendationResult || recommendationResult.recommendations.length === 0) ? (
-                    <div className="p-6 text-center text-xs text-slate-400 bg-white/5 border border-white/10 rounded-xl">
-                      {totalDistanceKm < 150 ? (
-                        <p>Short route ({totalDistanceKm} km) — Rest & meal stops are not required for trips under 150 km.</p>
-                      ) : (
-                        <p>No rest stops found within 5 km corridor detour of this route.</p>
-                      )}
-                    </div>
-                  ) : (
-                    <div className="space-y-2.5">
-                      <div className="text-[10px] font-bold text-slate-400 uppercase tracking-wider font-mono">
-                        Suggested Stops Along Route Corridor ({recommendationResult.recommendations.length})
+                      <div className="space-y-1 min-w-0">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm">{categoryIcon}</span>
+                          <h4 className="font-bold text-white text-xs truncate">{place.canonicalName || place.name}</h4>
+                        </div>
+                        <p className="text-[11px] text-slate-300 line-clamp-1">{place.tagline || place.description}</p>
+                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono pt-0.5">
+                          <span className="text-emerald-400 font-bold uppercase">{place.primaryCategory}</span>
+                          <span>•</span>
+                          <span>{place.district} District</span>
+                          <span>•</span>
+                          <span>{place.rating ? `★ ${place.rating}` : "No reviews yet"}</span>
+                        </div>
                       </div>
 
-                      {recommendationResult.recommendations.map((rec) => {
-                        const isAdded = waypoints.some((w) => w.id === rec.placeId);
-                        const isExcluded = excludedStopIds.has(rec.placeId);
-                        const CategoryIcon = rec.category === "tea" ? Coffee : rec.category === "fuel" ? Fuel : rec.category === "hotel" ? Hotel : Utensils;
-                        const catBg = rec.category === "tea" ? "bg-amber-500/20 text-amber-300 border-amber-500/40" : rec.category === "fuel" ? "bg-sky-500/20 text-sky-300 border-sky-500/40" : rec.category === "hotel" ? "bg-purple-500/20 text-purple-300 border-purple-500/40" : "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
-
-                        return (
-                          <div
-                            key={rec.placeId}
-                            className={`p-3 border rounded-xl space-y-2 text-xs transition ${
-                              isAdded
-                                ? "bg-emerald-500/10 border-emerald-500/40"
-                                : isExcluded
-                                ? "bg-white/5 border-white/10 opacity-80"
-                                : "bg-white/5 border-white/10 hover:border-white/20"
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-2">
-                              <div>
-                                <div className="flex items-center gap-2">
-                                  <span className={`px-2 py-0.5 rounded-full border text-[10px] font-mono font-bold flex items-center gap-1 ${catBg}`}>
-                                    <CategoryIcon className="w-3 h-3" />
-                                    {rec.category.toUpperCase()}
-                                  </span>
-                                  <span className="text-[10px] text-emerald-400 font-mono font-bold">
-                                    ETA ~ {rec.estimatedArrivalTime}
-                                  </span>
-                                </div>
-                                <h4 className="font-bold text-white text-xs mt-1">{rec.name}</h4>
-                                <p className="text-[11px] text-slate-300 mt-0.5">{rec.tagline}</p>
-                              </div>
-                            </div>
-
-                            <div className="flex items-center justify-between text-[10px] text-slate-400 font-mono pt-1 border-t border-white/10">
-                              <span>{rec.routeDistanceFromOriginKm} km from start</span>
-                              <span>{rec.detourDistanceKm} km detour</span>
-                              {rec.rating && <span className="text-amber-400 font-bold">★ {rec.rating}</span>}
-                            </div>
-
-                            <p className="text-[10px] text-emerald-300 italic">{rec.reason}</p>
-
-                            <div className="pt-1.5 flex items-center justify-between border-t border-white/10">
-                              <span className="text-[10px] font-mono text-slate-400">
-                                {isAdded ? (
-                                  <span className="text-emerald-400 font-bold flex items-center gap-1">
-                                    <Check className="w-3.5 h-3.5 text-emerald-400" /> Part of Itinerary
-                                  </span>
-                                ) : isExcluded ? (
-                                  <span className="text-slate-400 italic">Removed from Itinerary</span>
-                                ) : (
-                                  <span className="text-slate-400">Suggested Corridor Stop</span>
-                                )}
-                              </span>
-
-                              <div className="flex items-center gap-2">
-                                {isAdded ? (
-                                  <>
-                                    <span className="px-2.5 py-1 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-[10px] font-bold flex items-center gap-1">
-                                      <Check className="w-3.5 h-3.5 text-emerald-400" /> Added
-                                    </span>
-                                    <button
-                                      type="button"
-                                      onClick={() => handleRemoveRecommendedStop(rec.placeId)}
-                                      className="px-3 py-1 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-[10px] font-bold transition flex items-center gap-1 cursor-pointer active:scale-95"
-                                    >
-                                      Remove
-                                    </button>
-                                  </>
-                                ) : (
-                                  <button
-                                    type="button"
-                                    onClick={() => {
-                                      requireAuth(() => {
-                                        handleAddRecommendedStop(rec);
-                                      }, `Sign in to add ${rec.name} to your route itinerary.`);
-                                    }}
-                                    className="px-3 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-400 text-black text-[11px] font-extrabold transition flex items-center gap-1 cursor-pointer active:scale-95 shadow-md"
-                                  >
-                                    <Plus className="w-3.5 h-3.5" /> Add Stop
-                                  </button>
-                                )}
-                              </div>
-                            </div>
-                          </div>
-                        );
-                      })}
+                      <div className="flex flex-col items-end gap-1 shrink-0">
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedOrigin(place);
+                            toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
+                          }}
+                          className="px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[9px] font-bold transition active:scale-95"
+                        >
+                          + Origin
+                        </button>
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedDestination(place);
+                            toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
+                          }}
+                          className="px-2 py-0.5 rounded bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[9px] font-bold transition active:scale-95"
+                        >
+                          + Dest
+                        </button>
+                      </div>
                     </div>
-                  )}
-                </div>
+                  );
+                })
               )}
-            </div>
-          )}
-
-          {/* COMPACT STATE SUMMARY */}
-          {selectedOrigin && selectedDestination && panelState === "compact" && (
-            <div className="py-2 flex items-center justify-between">
-              <div>
-                <div className="text-xs font-bold text-white">
-                  {selectedOrigin.name} → {selectedDestination.name}
-                </div>
-                <div className="text-[11px] text-emerald-400 font-mono mt-0.5">
-                  {totalDistanceKm} km · {durationString}
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setPanelState("expanded")}
-                className="px-3 py-1.5 bg-emerald-500 text-black font-bold text-xs rounded-xl hover:bg-emerald-400 transition"
-              >
-                Expand →
-              </button>
             </div>
           )}
         </div>
       </aside>
 
-      {/* Floating Restore Button when Panel is Hidden */}
-      {panelState === "hidden" && (
-        <button
-          type="button"
-          onClick={() => setPanelState("expanded")}
-          className="absolute left-4 top-20 z-40 px-4 py-2.5 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 text-emerald-400 font-bold text-xs rounded-full shadow-2xl transition flex items-center gap-2 hover:bg-[#121821] cursor-pointer"
-        >
-          <Compass className="w-4 h-4" /> Restore Directions ({totalDistanceKm} km)
-        </button>
-      )}
-
-      {/* Floating Map Zoom & Action Controls (z-index: 50 / 300) */}
+      {/* Floating Controls (Zoom & Location) */}
       <div className="absolute right-4 bottom-6 z-50 flex flex-col gap-2 pointer-events-auto">
         <button
           type="button"

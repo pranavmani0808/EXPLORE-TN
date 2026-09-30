@@ -83,6 +83,7 @@ import { PlaceSuggestionsModule } from "@/components/admin/place-suggestions-mod
 import { WeeklyDigestModule } from "@/components/admin/weekly-digest-module";
 import { GeospatialSafetyModule } from "@/components/admin/geospatial-safety-module";
 import { KodaiPoiManagementModule } from "@/components/admin/kodai-poi-management-module";
+import { SecurityDashboardModule } from "@/components/admin/security-dashboard";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -123,7 +124,8 @@ export type AdminSection =
   | "audit"
   | "notifications"
   | "settings"
-  | "system_health";
+  | "system_health"
+  | "security";
 
 function AdminOperationsCenter() {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
@@ -523,6 +525,7 @@ function AdminOperationsCenter() {
                 </div>
                 <nav className="space-y-0.5">
                   {[
+                    { id: "security", label: "CAIN Security Dashboard", icon: ShieldCheck, badge: "CAIN Layer" },
                     { id: "notifications", label: "Notifications Center", icon: Bell, badge: "12 Alerts" },
                     { id: "audit", label: "Audit Logs", icon: ShieldCheck, count: auditLogs.length },
                     { id: "settings", label: "System Settings", icon: SettingsIcon },
@@ -987,6 +990,9 @@ function AdminOperationsCenter() {
                 </div>
               </div>
             )}
+
+            {/* 23. CAIN SECURITY DASHBOARD */}
+            {activeSection === "security" && <SecurityDashboardModule />}
 
           </div>
         </div>

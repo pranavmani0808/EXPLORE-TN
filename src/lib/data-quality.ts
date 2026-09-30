@@ -1,3 +1,66 @@
+export type CanonicalEntityType =
+  | "DISTRICT"
+  | "CITY"
+  | "TOWN"
+  | "TOURIST_DESTINATION"
+  | "TOURIST_ATTRACTION"
+  | "TEMPLE"
+  | "CHURCH"
+  | "MOSQUE"
+  | "WATERFALL"
+  | "BEACH"
+  | "HILL"
+  | "VIEWPOINT"
+  | "TREKKING_TRAIL"
+  | "FOREST"
+  | "LAKE"
+  | "DAM"
+  | "MUSEUM"
+  | "HISTORICAL_SITE"
+  | "FOOD_SPOT"
+  | "RESTAURANT"
+  | "HOTEL"
+  | "RESORT"
+  | "PARKING_AREA"
+  | "FUEL_STATION"
+  | "EV_CHARGING"
+  | "HOSPITAL"
+  | "POLICE_STATION"
+  | "PHARMACY"
+  | "ROUTE"
+  | "GHAT_ROAD";
+
+export type SourceType =
+  | "OFFICIAL_GOVERNMENT"
+  | "FIELD_GUIDE"
+  | "COMMUNITY_VERIFIED"
+  | "OPEN_DATA"
+  | "ESTIMATED";
+
+export type VerificationStatus =
+  | "VERIFIED"
+  | "ESTIMATED"
+  | "UNVERIFIED"
+  | "NEEDS_REVIEW";
+
+export interface CanonicalEntity {
+  id: string;
+  canonicalName: string;
+  aliases: string[];
+  entityType: CanonicalEntityType;
+  district: string;
+  state: "Tamil Nadu" | string;
+  latitude: number;
+  longitude: number;
+  source: string;
+  sourceType: SourceType;
+  sourceUrl?: string;
+  confidenceScore: number; // 0 - 100
+  lastVerifiedAt: string;
+  verificationStatus: VerificationStatus;
+  dataVersion: number;
+}
+
 export interface TNGeofenceResult {
   isValid: boolean;
   reason?: string;
@@ -100,6 +163,58 @@ export function detectDuplicatePlace(
   }
 
   return { isDuplicate: false };
+}
+
+// DATA QUALITY AUDITOR
+export interface DataQualityAuditReport {
+  entityId: string;
+  canonicalName: string;
+  confidenceScore: number; // 0 to 100
+  geofenceValid: boolean;
+  sourceType: SourceType;
+  verificationStatus: VerificationStatus;
+  flags: string[];
+}
+
+export function auditEntityQuality(entity: Partial<CanonicalEntity> & { id: string; canonicalName?: string; latitude?: number; longitude?: number }): DataQualityAuditReport {
+  const flags: string[] = [];
+  let score = 100;
+
+  const lat = entity.latitude ?? 0;
+  const lng = entity.longitude ?? 0;
+  const geofence = validateTNCoordinates(lat, lng);
+
+  if (!geofence.isValid) {
+    score -= 40;
+    flags.push(geofence.reason || "Coordinates out of bounds");
+  }
+
+  if (!entity.source || entity.source === "Unknown") {
+    score -= 20;
+    flags.push("Missing authoritative source attribution");
+  }
+
+  if (entity.verificationStatus === "UNVERIFIED" || entity.verificationStatus === "NEEDS_REVIEW") {
+    score -= 25;
+    flags.push("Entity status marked UNVERIFIED / NEEDS_REVIEW");
+  } else if (entity.verificationStatus === "ESTIMATED") {
+    score -= 15;
+    flags.push("Data marked as ESTIMATED");
+  }
+
+  if (entity.entityType === "CITY" || entity.entityType === "DISTRICT") {
+    flags.push("Region container entity (not a tourist attraction)");
+  }
+
+  return {
+    entityId: entity.id,
+    canonicalName: entity.canonicalName || entity.id,
+    confidenceScore: Math.max(0, score),
+    geofenceValid: geofence.isValid,
+    sourceType: entity.sourceType || "ESTIMATED",
+    verificationStatus: entity.verificationStatus || "ESTIMATED",
+    flags,
+  };
 }
 
 // SELF-VERIFICATION RESTRICTION CHECKER

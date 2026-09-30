@@ -55,27 +55,23 @@ export function PlaceCard({
           )}
         </div>
         <div className="relative -mt-10 space-y-1.5 p-5">
-          <h3 className="font-display text-lg font-semibold leading-tight text-foreground group-hover:text-primary transition-colors">
+          <h3 className="font-display text-lg font-semibold leading-tight text-foreground group-hover:text-emerald-400 transition-colors">
             {place.name}
           </h3>
-          <p className="flex items-center gap-1 text-xs text-muted-foreground">
-            <MapPin className="size-3 shrink-0" aria-hidden />
+          <p className="flex items-center gap-1 text-xs text-zinc-400">
+            <MapPin className="size-3 shrink-0 text-emerald-400" aria-hidden />
             <span>{place.district}</span>
-            {distanceStr && (
-              <>
-                <span>·</span>
-                <span>{distanceStr} from Chennai</span>
-              </>
-            )}
           </p>
-          <p className="line-clamp-2 pt-1 text-sm text-muted-foreground">{place.tagline}</p>
-          <span className="inline-flex items-center gap-1 pt-2 text-sm font-medium text-primary">
-            Explore{" "}
-            <ArrowUpRight
-              className="size-4 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
-              aria-hidden
-            />
-          </span>
+          <p className="line-clamp-2 pt-0.5 text-xs text-zinc-400 leading-relaxed">{place.tagline}</p>
+          <div className="flex items-center justify-end pt-2">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+              Explore{" "}
+              <ArrowUpRight
+                className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
+                aria-hidden
+              />
+            </span>
+          </div>
         </div>
       </Link>
     </motion.article>

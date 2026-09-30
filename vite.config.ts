@@ -30,7 +30,7 @@ export default defineConfig({
       },
     },
     ssr: {
-      noExternal: true,
+      noExternal: ["@tanstack/react-router", "@tanstack/react-start"],
       target: "node",
     },
   },

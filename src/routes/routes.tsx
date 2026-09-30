@@ -7,20 +7,22 @@ export const Route = createFileRoute("/routes")({
       origin: (search.origin as string) || undefined,
       destination: (search.destination as string) || undefined,
       mode: (search.mode as "driving" | "motorcycle" | "walking" | "cycling") || undefined,
+      area: (search.area as string) || undefined,
+      place: (search.place as string) || undefined,
     };
   },
   head: () => ({
     meta: [
-      { title: "Immersive Fullscreen Route Explorer — ExplorerTN" },
+      { title: "Immersive Fullscreen Route & Map Explorer — ExploreTN" },
       {
         name: "description",
         content:
-          "Map-first spatial route planner for Tamil Nadu: Client-aware origin resolution, live GPS detection, real road network geometry, distance & ETA calculations.",
+          "Geospatial area & route explorer for Tamil Nadu: City & district boundaries, POI discovery, live GPS detection, real road network geometry, distance & ETA calculations.",
       },
-      { property: "og:title", content: "Fullscreen Route Explorer — ExplorerTN" },
+      { property: "og:title", content: "Fullscreen Route & Map Explorer — ExploreTN" },
       {
         property: "og:description",
-        content: "Dynamic road network routing across Tamil Nadu, Karnataka, and South India.",
+        content: "Geospatial area exploration and dynamic road network routing across Tamil Nadu.",
       },
     ],
   }),
@@ -38,6 +40,8 @@ function RoutesPage() {
       initialOriginPlaceId={search.origin}
       initialDestinationPlaceId={search.destination}
       initialTravelMode={search.mode}
+      initialArea={search.area}
+      initialPlaceId={search.place}
     />
   );
 }

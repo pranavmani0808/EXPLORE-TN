@@ -12,6 +12,18 @@ export type UserRole =
   | "super_admin";
 
 export type Permission =
+  | "manage_users"
+  | "manage_places"
+  | "manage_routes"
+  | "manage_hotels"
+  | "manage_reviews"
+  | "manage_crawler"
+  | "approve_crawler_data"
+  | "modify_system_settings"
+  | "view_audit_logs"
+  | "verify_integrity"
+  | "manage_mfa"
+  | "manage_security"
   | "can_create_place"
   | "can_edit_place"
   | "can_delete_place"
@@ -40,14 +52,24 @@ export interface UserProfile {
 export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {
   explorer: [],
   beta_tester: [],
-  place_manager: ["can_create_place", "can_edit_place", "can_verify_place"],
-  route_manager: ["can_publish_route", "can_delete_route"],
-  community_manager: ["can_moderate_community"],
-  content_editor: ["can_create_place", "can_edit_place"],
+  place_manager: ["manage_places", "can_create_place", "can_edit_place", "can_verify_place"],
+  route_manager: ["manage_routes", "can_publish_route", "can_delete_route"],
+  community_manager: ["manage_reviews", "can_moderate_community"],
+  content_editor: ["manage_places", "can_create_place", "can_edit_place"],
   weather_manager: ["can_manage_weather"],
   analytics_manager: ["can_view_analytics"],
   ai_manager: ["can_manage_ai"],
   admin: [
+    "manage_places",
+    "manage_routes",
+    "manage_hotels",
+    "manage_reviews",
+    "manage_crawler",
+    "approve_crawler_data",
+    "view_audit_logs",
+    "verify_integrity",
+    "manage_mfa",
+    "manage_security",
     "can_create_place",
     "can_edit_place",
     "can_verify_place",
@@ -59,6 +81,18 @@ export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {
     "can_view_analytics",
   ],
   super_admin: [
+    "manage_users",
+    "manage_places",
+    "manage_routes",
+    "manage_hotels",
+    "manage_reviews",
+    "manage_crawler",
+    "approve_crawler_data",
+    "modify_system_settings",
+    "view_audit_logs",
+    "verify_integrity",
+    "manage_mfa",
+    "manage_security",
     "can_create_place",
     "can_edit_place",
     "can_delete_place",

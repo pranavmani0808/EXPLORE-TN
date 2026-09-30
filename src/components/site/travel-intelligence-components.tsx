@@ -34,6 +34,7 @@ import {
   ChevronRight,
   Eye,
   SlidersHorizontal,
+  Award,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -363,6 +364,21 @@ export function PlaceTravelInformationSection({ intel }: { intel: PlaceTravelInt
               ))}
             </ul>
           </div>
+        </div>
+      )}
+
+      {/* 🛡️ DATA CONFIDENCE & PROVENANCE FOOTER */}
+      {intel.confidenceAndProvenance && (
+        <div className="pt-4 border-t border-border/50 flex flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+          <div className="flex items-center gap-2">
+            <Award className="size-4 text-emerald-500" />
+            <span>
+              Data Confidence: <strong className="text-foreground">{intel.confidenceAndProvenance.confidenceScore}%</strong> • Source: <strong className="text-foreground">{intel.confidenceAndProvenance.sourceName}</strong>
+            </span>
+          </div>
+          <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            {intel.confidenceAndProvenance.verificationStatus}
+          </span>
         </div>
       )}
     </section>

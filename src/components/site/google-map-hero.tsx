@@ -78,14 +78,14 @@ export function GoogleMapHero({ apiKey }: { apiKey?: string }) {
       const customIcon = L.divIcon({
         className: `custom-hero-pin-${place.slug}`,
         html: `
-          <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+          <div role="button" tabindex="0" aria-label="${place.name} map pin" title="${place.name}" style="position: relative; min-width: 24px; min-height: 24px; display: flex; align-items: center; justify-content: center; cursor: pointer; touch-action: manipulation; padding: 4px;">
             ${isSelected ? '<span style="position: absolute; width: 32px; height: 32px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
             <div style="
               background: ${isSelected ? '#10b981' : '#0f172a'};
               color: ${isSelected ? '#000000' : '#ffffff'};
               border: 2px solid ${isSelected ? '#6ee7b7' : '#38bdf8'};
-              width: ${isSelected ? '24px' : '16px'};
-              height: ${isSelected ? '24px' : '16px'};
+              width: ${isSelected ? '24px' : '20px'};
+              height: ${isSelected ? '24px' : '20px'};
               border-radius: 50%;
               display: flex;
               align-items: center;
@@ -94,11 +94,12 @@ export function GoogleMapHero({ apiKey }: { apiKey?: string }) {
               transition: all 0.2s ease;
             ">
               <span style="width: 6px; height: 6px; border-radius: 50%; background: ${isSelected ? '#000000' : '#38bdf8'};"></span>
+              <span style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0;">${place.name}</span>
             </div>
           </div>
         `,
-        iconSize: [24, 24],
-        iconAnchor: [12, 12],
+        iconSize: [28, 28],
+        iconAnchor: [14, 14],
       });
 
       const marker = L.marker([lat, lng], {
@@ -131,7 +132,7 @@ export function GoogleMapHero({ apiKey }: { apiKey?: string }) {
       {/* Top Header Bar inside Map */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-4 z-20 relative">
         <div className="flex items-center gap-2">
-          <span className="grid size-8 place-items-center rounded-xl bg-emerald-500 text-black font-black text-xs shadow-md">
+          <span className="grid size-8 place-items-center rounded-xl bg-zinc-900 border border-emerald-500/40 text-emerald-400 font-black text-xs shadow-md">
             TN
           </span>
           <div>

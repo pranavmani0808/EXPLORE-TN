@@ -23,14 +23,16 @@ import {
   Camera,
   Layers,
   ChevronRight,
+  Plus,
+  Check,
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
-import { getApiBaseUrl } from "@/lib/api-client/config";
 import { PlaceApiRepository } from "@/lib/api-client/places";
-import { CANONICAL_PLACES } from "@/lib/data/canonical-places";
+import { CANONICAL_PLACES, ExplorerPlace } from "@/lib/data/canonical-places";
 import { DEFAULT_ARUPADAI_VEEDU_TEMPLES } from "@/data/places";
 import { cn } from "@/lib/utils";
+import { TripRouteBuilderPanel } from "@/components/site/trip-route-builder-panel";
 
 export const Route = createFileRoute("/explore")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -225,11 +227,57 @@ const TN_DISTRICTS = [
 ];
 
 function ExploreByExperiencePage() {
-  const [places, setPlaces] = useState<PlaceItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  // Client-side fallback mapping helper
+  const getFallbackPlaces = (): PlaceItem[] =>
+    CANONICAL_PLACES.map((p) => ({
+      id: p.id,
+      slug: p.slug,
+      name: p.name || p.canonicalName,
+      display_name: p.canonicalName,
+      district: p.district,
+      state: p.state,
+      category: p.primaryCategory,
+      subcategory: p.categories[1] || p.primaryCategory,
+      categories: p.categories,
+      tagline: p.tagline,
+      description: p.description,
+      latitude: p.latitude,
+      longitude: p.longitude,
+      image: p.image,
+      rating: p.rating || 4.8,
+      verified: p.verified,
+      is_trekking: p.categories.includes("trekking"),
+      tags: p.tags,
+    }));
+
+  const [places, setPlaces] = useState<PlaceItem[]>(getFallbackPlaces);
+  const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("arupadai");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("All Districts");
+
+  // Persistent Route Builder Stops State
+  const STORAGE_KEY = "explore_tn_user_trip_route";
+
+  const [routeStops, setRouteStops] = useState<ExplorerPlace[]>(() => {
+    if (typeof window === "undefined") return [];
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) return JSON.parse(saved);
+    } catch {}
+    return [];
+  });
+
+  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+
+  // Sync routeStops with localStorage
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(routeStops));
+      } catch {}
+    }
+  }, [routeStops]);
 
   // Read URL query params on mount
   useEffect(() => {
@@ -263,7 +311,6 @@ function ExploreByExperiencePage() {
   useEffect(() => {
     async function loadPlaces() {
       try {
-        setLoading(true);
         const data = await PlaceApiRepository.fetchPlaces();
         if (data && data.length > 0) {
           setPlaces(data.map((p: any) => ({
@@ -285,40 +332,59 @@ function ExploreByExperiencePage() {
             image: p.image_url || p.image || "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
             verified: p.is_verified ?? true,
           })));
-          setLoading(false);
-          return;
         }
       } catch {
-        // Fallback
+        // Retain fallback places
       }
-
-      // Fallback to client-side CANONICAL_PLACES registry
-      const fallbackPlaces: PlaceItem[] = CANONICAL_PLACES.map((p) => ({
-        id: p.id,
-        slug: p.slug,
-        name: p.name || p.canonicalName,
-        display_name: p.canonicalName,
-        district: p.district,
-        state: p.state,
-        category: p.primaryCategory,
-        subcategory: p.categories[1] || p.primaryCategory,
-        categories: p.categories,
-        tagline: p.tagline,
-        description: p.description,
-        latitude: p.latitude,
-        longitude: p.longitude,
-        image: p.image,
-        rating: p.rating || 4.8,
-        verified: p.verified,
-        is_trekking: p.categories.includes("trekking"),
-        tags: p.tags,
-      }));
-
-      setPlaces(fallbackPlaces);
-      setLoading(false);
     }
     loadPlaces();
   }, []);
+
+  // Toggle Add / Remove place to route
+  const handleTogglePlaceToRoute = (place: any) => {
+    const matchedCanonical = CANONICAL_PLACES.find(
+      (cp) => cp.id === place.id || cp.slug === place.slug
+    ) || {
+      id: place.id || place.slug,
+      canonicalName: place.name || place.display_name,
+      name: place.name || place.display_name,
+      slug: place.slug || place.id,
+      district: place.district || "Tamil Nadu",
+      state: "Tamil Nadu",
+      country: "India",
+      latitude: place.latitude || 11.1085,
+      longitude: place.longitude || 78.3379,
+      categories: [place.category || "heritage"],
+      primaryCategory: place.category || "heritage",
+      tagline: place.tagline || "",
+      description: place.description || "",
+      image: place.image || place.imageUrl || "",
+      rating: place.rating || 4.8,
+      verified: true,
+      tags: place.tags || [],
+    };
+
+    const isAlreadyAdded = routeStops.some((s) => s.id === matchedCanonical.id || s.slug === matchedCanonical.slug);
+
+    if (isAlreadyAdded) {
+      setRouteStops((prev) => prev.filter((s) => s.id !== matchedCanonical.id && s.slug !== matchedCanonical.slug));
+    } else {
+      setRouteStops((prev) => [...prev, matchedCanonical as ExplorerPlace]);
+      setIsPanelOpen(true);
+    }
+  };
+
+  const handleRemoveStop = (placeId: string) => {
+    setRouteStops((prev) => prev.filter((s) => s.id !== placeId && s.slug !== placeId));
+  };
+
+  const handleReorderStops = (newStops: ExplorerPlace[]) => {
+    setRouteStops(newStops);
+  };
+
+  const handleClearRoute = () => {
+    setRouteStops([]);
+  };
 
   // Helper: compute category count
   const getCategoryCount = (tileId: string) => {
@@ -453,123 +519,117 @@ function ExploreByExperiencePage() {
     });
   }, [places, selectedCategory, selectedDistrict, searchQuery]);
 
-  const selectedCategoryTile = CATEGORY_TILES.find((t) => t.id === selectedCategory) || CATEGORY_TILES[0];
+  const selectedCategoryTile = useMemo(() => {
+    return CATEGORY_TILES.find((t) => t.id === selectedCategory) || CATEGORY_TILES[0];
+  }, [selectedCategory]);
 
   return (
-    <AppShell>
-      <div className="min-h-screen bg-zinc-950 font-sans text-zinc-100 pb-24">
-        {/* Top Hero Banner */}
-        <div className="relative border-b border-zinc-800/80 bg-gradient-to-b from-amber-500/10 via-zinc-950 to-zinc-950 pt-28 pb-10 px-4 sm:px-8">
-          <div className="max-w-7xl mx-auto text-center space-y-3">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500/10 text-amber-300 font-mono text-xs font-bold border border-amber-500/20">
-              <Compass className="size-4 text-amber-400" /> EXPLORE TAMIL NADU BY EXPERIENCE
+    <AppShell className="bg-[#09090b]">
+      {/* Page Header */}
+      <div className="relative border-b border-zinc-800/80 bg-[#09090b]/80 pt-20 pb-8 backdrop-blur-xl">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
+                <Compass className="size-3.5" /> EXPLORE TAMIL NADU BY EXPERIENCE
+              </span>
+              <h1 className="font-display text-3xl font-extrabold text-white sm:text-4xl tracking-tight">
+                Curated Experiences & Destinations
+              </h1>
+              <p className="mt-1 text-sm text-zinc-400 max-w-2xl">
+                Discover canonical places grouped by theme. Click <strong className="text-emerald-400">+ Add to Map</strong> on any place to build your interactive trip route.
+              </p>
             </div>
-            <h1 className="text-3xl sm:text-5xl font-black tracking-tight text-white font-display">
-              Discover Tamil Nadu Your Way
-            </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 max-w-2xl mx-auto">
-              Explore canonical destinations grouped by experience: Arupadai Veedu, waterfalls, hill treks, coastal beaches, heritage aqueducts & rural villages.
-            </p>
+
+            <div className="flex items-center gap-3">
+              <Link
+                to="/planner"
+                className="px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-2"
+              >
+                <Sparkles className="size-3.5" />
+                <span>AI Trip Copilot</span>
+              </Link>
+            </div>
           </div>
         </div>
+      </div>
 
-        {/* SPLIT LAYOUT: LEFT SIDE NAVBAR & RIGHT WORKSPACE */}
-        <div className="max-w-[1700px] mx-auto px-4 sm:px-6 md:px-8 pt-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-
-            {/* LEFT SIDE NAVBAR (Experience Categories Stepper / Sidebar) */}
-            <aside className="lg:col-span-4 xl:col-span-3 sticky top-24 space-y-4">
-              <div className="transform-gpu rounded-3xl bg-zinc-900/95 border border-zinc-800 p-5 shadow-2xl space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-zinc-800">
-                  <div>
-                    <span className="text-[10px] font-black uppercase tracking-widest text-amber-400">
-                      EXPERIENCE CATEGORIES
-                    </span>
-                    <h2 className="text-sm font-bold text-white">Left Side Navbar</h2>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {selectedCategory && selectedCategory !== "all" && (
-                      <button
-                        onClick={() => setSelectedCategory("all")}
-                        className="text-[11px] text-amber-400 hover:text-amber-300 font-mono font-bold flex items-center gap-1 bg-amber-500/10 px-2 py-0.5 rounded-lg border border-amber-500/20"
-                      >
-                        Clear filter ✕
-                      </button>
-                    )}
-                    <span className="text-xs font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/30">
-                      {places.length + 6} Places Live
-                    </span>
-                  </div>
-                </div>
-
-                {/* Category List Items */}
-                <div className="space-y-2 max-h-[calc(100vh-200px)] overflow-y-auto pr-1">
-                  {CATEGORY_TILES.map((tile) => {
-                    const isSelected = selectedCategory === tile.id;
-                    const count = getCategoryCount(tile.id);
-                    const Icon = tile.icon;
-
-                    return (
-                      <button
-                        key={tile.id}
-                        onClick={() => setSelectedCategory(tile.id)}
-                        className={cn(
-                          "w-full text-left flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border group cursor-pointer",
-                          isSelected
-                            ? "bg-amber-500/15 border-amber-500/50 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
-                            : "bg-zinc-950/40 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800/40 hover:border-zinc-700"
-                        )}
-                      >
-                        <div className="flex items-center gap-3 min-w-0">
-                          <div className={cn(
-                            "size-9 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                            isSelected ? "bg-amber-400 text-zinc-950 font-bold shadow-md shadow-amber-500/20" : "bg-zinc-800 " + tile.color
-                          )}>
-                            <Icon className="size-4" />
-                          </div>
-                          <div className="min-w-0">
-                            <p className={cn("text-xs font-bold truncate", isSelected ? "text-amber-300" : "text-zinc-200 group-hover:text-amber-300")}>
-                              {tile.title}
-                            </p>
-                            <p className="text-[10px] text-zinc-400 truncate">
-                              {tile.subtitle}
-                            </p>
-                          </div>
-                        </div>
-
-                        <span className={cn(
-                          "text-xs font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ml-2",
-                          isSelected
-                            ? "bg-amber-400 text-zinc-950"
-                            : count > 0
-                            ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                            : "bg-zinc-800 text-zinc-500"
-                        )}>
-                          {count}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-
-                {/* Spatial Map Exploration Button */}
-                <div className="pt-3 border-t border-zinc-800">
-                  <Link
-                    to="/trails/arupadai-veedu"
-                    className="w-full py-2.5 px-4 rounded-2xl bg-gradient-to-r from-amber-400 to-amber-500 text-zinc-950 font-extrabold text-xs shadow-lg shadow-amber-500/10 hover:brightness-110 transition flex items-center justify-center gap-2"
-                  >
-                    <Flame className="size-4" />
-                    <span>Open Arupadai Veedu Circuit</span>
-                  </Link>
-                </div>
+      {/* Main Content Layout */}
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+          
+          {/* LEFT SIDEBAR: Experience Categories */}
+          <aside className="lg:col-span-3 space-y-4">
+            <div className="rounded-3xl bg-zinc-900/90 border border-zinc-800 p-4 shadow-xl space-y-3">
+              <div className="flex items-center justify-between px-1">
+                <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+                  Experience Categories
+                </p>
+                <span className="text-[10px] font-mono font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                  {places.length + 6} Places
+                </span>
               </div>
-            </aside>
 
-            {/* RIGHT WORKSPACE (Filtered Results & Search Toolbar) */}
-            <section className="lg:col-span-8 xl:col-span-9 space-y-6">
+              {/* Category List Items */}
+              <div className="space-y-1.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 custom-scrollbar">
+                {CATEGORY_TILES.map((tile) => {
+                  const isSelected = selectedCategory === tile.id;
+                  const count = getCategoryCount(tile.id);
+                  const Icon = tile.icon;
+
+                  return (
+                    <button
+                      key={tile.id}
+                      onClick={() => setSelectedCategory(tile.id)}
+                      className={cn(
+                        "w-full text-left flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border group cursor-pointer",
+                        isSelected
+                          ? "bg-amber-500/15 border-amber-500/50 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
+                          : "bg-zinc-950/40 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800/40 hover:border-zinc-700"
+                      )}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={cn(
+                          "size-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                          isSelected ? "bg-amber-400 text-zinc-950 font-bold shadow-md shadow-amber-500/20" : "bg-zinc-800 " + tile.color
+                        )}>
+                          <Icon className="size-4" />
+                        </div>
+                        <div className="min-w-0">
+                          <p className={cn("text-xs font-bold truncate", isSelected ? "text-amber-300" : "text-zinc-200 group-hover:text-amber-300")}>
+                            {tile.title}
+                          </p>
+                          <p className="text-[10px] text-zinc-400 truncate">
+                            {tile.subtitle}
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className={cn(
+                        "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ml-2",
+                        isSelected
+                          ? "bg-amber-400 text-zinc-950"
+                          : count > 0
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
+                          : "bg-zinc-800 text-zinc-500"
+                      )}>
+                        {count}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </aside>
+
+          {/* MAIN EXPLORE + TRIP ROUTE WORKSPACE */}
+          <div className={cn("transition-all duration-500 grid gap-6", isPanelOpen ? "lg:col-span-9 grid-cols-1 xl:grid-cols-12" : "lg:col-span-9 grid-cols-1")}>
+            
+            {/* Explore Cards Grid Column */}
+            <section className={cn("space-y-6 transition-all duration-300", isPanelOpen ? "xl:col-span-7" : "col-span-1")}>
               {/* Category Header & Filters Toolbar */}
-              <div className="transform-gpu rounded-3xl bg-zinc-900/95 border border-zinc-800 p-6 shadow-2xl space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+              <div className="transform-gpu rounded-3xl bg-zinc-900/95 border border-zinc-800 p-5 sm:p-6 shadow-2xl space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
                   <div>
                     <div className="flex items-center gap-2">
                       <span className={cn("text-xs font-bold px-3 py-1 rounded-full border", selectedCategoryTile.badgeColor)}>
@@ -586,19 +646,17 @@ function ExploreByExperiencePage() {
 
                   {/* Filter Toolbar */}
                   <div className="flex flex-col sm:flex-row items-center gap-3">
-                    {/* Search Box */}
-                    <div className="relative w-full sm:w-64">
+                    <div className="relative w-full sm:w-56">
                       <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
-                        placeholder="Search in this category..."
+                        placeholder="Search category..."
                         className="w-full pl-10 pr-4 py-2 rounded-xl border border-zinc-800 bg-zinc-950 text-xs text-white focus:border-amber-400 focus:outline-none"
                       />
                     </div>
 
-                    {/* District Dropdown */}
                     <select
                       value={selectedDistrict}
                       onChange={(e) => setSelectedDistrict(e.target.value)}
@@ -613,58 +671,35 @@ function ExploreByExperiencePage() {
                   </div>
                 </div>
 
-                {/* Special Banner for Arupadai Veedu */}
-                {selectedCategory === "arupadai" && (
-                  <div className="rounded-2xl border border-amber-500/30 bg-amber-500/10 p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-                    <div className="space-y-1">
-                      <h4 className="text-sm font-extrabold text-amber-300 flex items-center gap-2">
-                        <Flame className="size-4" />
-                        <span>Six Sacred Abodes of Lord Murugan (ஆறுபடை வீடுகள்)</span>
-                      </h4>
-                      <p className="text-xs text-zinc-300">
-                        Complete 1,200 km sacred pilgrimage circuit across Thiruttani, Swamimalai, Palani, Pazhamudircholai, Thirupparankundram & Tiruchendur.
-                      </p>
-                    </div>
-                    <Link
-                      to="/trails/arupadai-veedu"
-                      className="px-4 py-2 rounded-xl bg-amber-400 text-zinc-950 font-extrabold text-xs shrink-0 hover:bg-amber-300 shadow-md shadow-amber-500/20"
-                    >
-                      View 1,200km OSRM Road Map →
-                    </Link>
-                  </div>
-                )}
-
                 {/* Cards Grid */}
-                {loading ? (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {[1, 2, 3, 4, 5, 6].map((n) => (
-                      <div key={n} className="h-64 rounded-2xl bg-zinc-950 border border-zinc-800 animate-pulse" />
-                    ))}
-                  </div>
-                ) : categoryFilteredPlaces.length === 0 ? (
+                {categoryFilteredPlaces.length === 0 ? (
                   <div className="text-center py-12 bg-zinc-950/50 border border-zinc-800 rounded-2xl p-6 max-w-md mx-auto space-y-3">
                     <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-400">
                       <SlidersHorizontal className="size-6" />
                     </div>
                     <h3 className="text-base font-bold text-white">No destinations found</h3>
                     <p className="text-xs text-zinc-400">
-                      No places match your criteria in {selectedCategoryTile.title}. Try resetting your district filter or search query.
+                      No places match your criteria. Reset filters to explore more places.
                     </p>
                     <Button size="sm" onClick={() => { setSearchQuery(""); setSelectedDistrict("All Districts"); }} className="bg-amber-400 text-zinc-950 font-bold text-xs">
                       Reset Filters
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+                  <div className={cn("grid gap-5", isPanelOpen ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")}>
                     {categoryFilteredPlaces.map((p, idx) => {
                       const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
+                      const isAdded = routeStops.some((s) => s.id === p.id || s.slug === p.slug);
 
                       return (
                         <motion.div
-                          key={p.id}
+                          key={p.id || p.slug}
                           initial={{ opacity: 0, y: 8 }}
                           animate={{ opacity: 1, y: 0 }}
-                          className="group transform-gpu rounded-2xl border border-zinc-800 bg-zinc-950/90 overflow-hidden shadow-md hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-between"
+                          className={cn(
+                            "group transform-gpu rounded-2xl border bg-zinc-950/90 overflow-hidden shadow-md transition-all duration-300 flex flex-col justify-between",
+                            isAdded ? "border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.15)]" : "border-zinc-800 hover:border-amber-500/40"
+                          )}
                         >
                           <div>
                             {/* Image Preview */}
@@ -677,10 +712,11 @@ function ExploreByExperiencePage() {
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
                               
-                              {/* Order Badge if Arupadai */}
-                              {selectedCategory === "arupadai" && (
-                                <div className="absolute top-3 left-3 bg-amber-400 text-zinc-950 font-black text-xs px-2.5 py-1 rounded-full shadow-md">
-                                  Abode #{idx + 1}
+                              {/* Sequence Badge if Added */}
+                              {isAdded && (
+                                <div className="absolute top-3 left-3 bg-emerald-400 text-zinc-950 font-black text-xs px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                                  <Check className="size-3.5 stroke-[3]" />
+                                  <span>In Your Trip</span>
                                 </div>
                               )}
 
@@ -705,22 +741,35 @@ function ExploreByExperiencePage() {
                             </div>
                           </div>
 
-                          {/* Footer Actions */}
+                          {/* Footer Action Buttons */}
                           <div className="p-4 pt-0 flex items-center gap-2 border-t border-zinc-800/60 mt-2 pt-2">
+                            <button
+                              onClick={() => handleTogglePlaceToRoute(p)}
+                              className={cn(
+                                "flex-1 py-2 px-3 rounded-xl font-extrabold text-xs transition border flex items-center justify-center gap-1.5 cursor-pointer",
+                                isAdded
+                                  ? "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-md shadow-emerald-500/20 hover:bg-emerald-400"
+                                  : "bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border-zinc-800 hover:border-emerald-500/30"
+                              )}
+                            >
+                              {isAdded ? (
+                                <>
+                                  <Check className="size-3.5 stroke-[3]" />
+                                  <span>✓ Added</span>
+                                </>
+                              ) : (
+                                <>
+                                  <Plus className="size-3.5 stroke-[3]" />
+                                  <span>+ Add to Map</span>
+                                </>
+                              )}
+                            </button>
                             <Link
                               to={`/place/$slug`}
                               params={{ slug: p.slug || p.id }}
-                              className="flex-1 text-center py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-200 transition border border-zinc-800"
+                              className="py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 transition border border-zinc-800"
                             >
-                              Explore Details
-                            </Link>
-                            <Link
-                              to="/trails/arupadai-veedu"
-                              className="p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 transition border border-amber-500/30 flex items-center gap-1 text-xs font-bold"
-                              title="View Trail Map"
-                            >
-                              <Map className="size-3.5" />
-                              <span>Trail</span>
+                              Details
                             </Link>
                           </div>
                         </motion.div>
@@ -731,9 +780,36 @@ function ExploreByExperiencePage() {
               </div>
             </section>
 
+            {/* Right Workspace: Trip Route Builder Panel */}
+            {isPanelOpen && (
+              <aside className="xl:col-span-5 sticky top-24 h-[calc(100vh-120px)] transition-all duration-500">
+                <TripRouteBuilderPanel
+                  stops={routeStops}
+                  onRemoveStop={handleRemoveStop}
+                  onReorderStops={handleReorderStops}
+                  onClearRoute={handleClearRoute}
+                  onClose={() => setIsPanelOpen(false)}
+                />
+              </aside>
+            )}
+
           </div>
+
         </div>
       </div>
+
+      {/* Floating My Route Button (Bottom-Right) when Panel is Closed */}
+      {!isPanelOpen && routeStops.length > 0 && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          onClick={() => setIsPanelOpen(true)}
+          className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950 font-black text-xs shadow-2xl shadow-emerald-500/30 border border-emerald-300 hover:scale-105 transition flex items-center gap-2.5 cursor-pointer"
+        >
+          <Map className="size-4" />
+          <span>🗺 My Route · {routeStops.length} {routeStops.length === 1 ? "stop" : "stops"}</span>
+        </motion.button>
+      )}
     </AppShell>
   );
 }

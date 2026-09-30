@@ -48,6 +48,7 @@ import { Route as PaymentFailedRouteImport } from './routes/payment.failed'
 import { Route as PaymentPendingRouteImport } from './routes/payment.pending'
 import { Route as PaymentSuccessRouteImport } from './routes/payment.success'
 import { Route as PlaceSlugRouteImport } from './routes/place.$slug'
+import { Route as SettingsSecurityRouteImport } from './routes/settings.security'
 import { Route as TrailsSlugRouteImport } from './routes/trails.$slug'
 import { Route as TrailsArupadaiVeeduRouteImport } from './routes/trails.arupadai-veedu'
 
@@ -247,6 +248,11 @@ const PlaceSlugRoute = PlaceSlugRouteImport.update({
   path: '/place/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const SettingsSecurityRoute = SettingsSecurityRouteImport.update({
+  id: '/security',
+  path: '/security',
+  getParentRoute: () => SettingsRoute,
+} as any)
 const TrailsSlugRoute = TrailsSlugRouteImport.update({
   id: '/trails/$slug',
   path: '/trails/$slug',
@@ -280,7 +286,7 @@ export interface FileRoutesByFullPath {
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
@@ -297,6 +303,7 @@ export interface FileRoutesByFullPath {
   '/payment/pending': typeof PaymentPendingRoute
   '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/settings/security': typeof SettingsSecurityRoute
   '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
   '/districts/': typeof DistrictsIndexRoute
@@ -323,7 +330,7 @@ export interface FileRoutesByTo {
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
@@ -340,6 +347,7 @@ export interface FileRoutesByTo {
   '/payment/pending': typeof PaymentPendingRoute
   '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/settings/security': typeof SettingsSecurityRoute
   '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
   '/districts': typeof DistrictsIndexRoute
@@ -367,7 +375,7 @@ export interface FileRoutesById {
   '/planner': typeof PlannerRoute
   '/profile': typeof ProfileRoute
   '/routes': typeof RoutesRoute
-  '/settings': typeof SettingsRoute
+  '/settings': typeof SettingsRouteWithChildren
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
   '/western-ghats': typeof WesternGhatsRoute
@@ -384,6 +392,7 @@ export interface FileRoutesById {
   '/payment/pending': typeof PaymentPendingRoute
   '/payment/success': typeof PaymentSuccessRoute
   '/place/$slug': typeof PlaceSlugRoute
+  '/settings/security': typeof SettingsSecurityRoute
   '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
   '/districts/': typeof DistrictsIndexRoute
@@ -429,6 +438,7 @@ export interface FileRouteTypes {
     | '/payment/pending'
     | '/payment/success'
     | '/place/$slug'
+    | '/settings/security'
     | '/trails/$slug'
     | '/trails/arupadai-veedu'
     | '/districts/'
@@ -472,6 +482,7 @@ export interface FileRouteTypes {
     | '/payment/pending'
     | '/payment/success'
     | '/place/$slug'
+    | '/settings/security'
     | '/trails/$slug'
     | '/trails/arupadai-veedu'
     | '/districts'
@@ -515,6 +526,7 @@ export interface FileRouteTypes {
     | '/payment/pending'
     | '/payment/success'
     | '/place/$slug'
+    | '/settings/security'
     | '/trails/$slug'
     | '/trails/arupadai-veedu'
     | '/districts/'
@@ -542,7 +554,7 @@ export interface RootRouteChildren {
   PlannerRoute: typeof PlannerRoute
   ProfileRoute: typeof ProfileRoute
   RoutesRoute: typeof RoutesRoute
-  SettingsRoute: typeof SettingsRoute
+  SettingsRoute: typeof SettingsRouteWithChildren
   SupportRoute: typeof SupportRoute
   TheniRoute: typeof TheniRoute
   WesternGhatsRoute: typeof WesternGhatsRoute
@@ -838,6 +850,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PlaceSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/settings/security': {
+      id: '/settings/security'
+      path: '/security'
+      fullPath: '/settings/security'
+      preLoaderRoute: typeof SettingsSecurityRouteImport
+      parentRoute: typeof SettingsRoute
+    }
     '/trails/$slug': {
       id: '/trails/$slug'
       path: '/trails/$slug'
@@ -866,6 +885,18 @@ const ExploreRouteChildren: ExploreRouteChildren = {
 const ExploreRouteWithChildren =
   ExploreRoute._addFileChildren(ExploreRouteChildren)
 
+interface SettingsRouteChildren {
+  SettingsSecurityRoute: typeof SettingsSecurityRoute
+}
+
+const SettingsRouteChildren: SettingsRouteChildren = {
+  SettingsSecurityRoute: SettingsSecurityRoute,
+}
+
+const SettingsRouteWithChildren = SettingsRoute._addFileChildren(
+  SettingsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   R403Route: R403Route,
@@ -888,7 +919,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlannerRoute: PlannerRoute,
   ProfileRoute: ProfileRoute,
   RoutesRoute: RoutesRoute,
-  SettingsRoute: SettingsRoute,
+  SettingsRoute: SettingsRouteWithChildren,
   SupportRoute: SupportRoute,
   TheniRoute: TheniRoute,
   WesternGhatsRoute: WesternGhatsRoute,

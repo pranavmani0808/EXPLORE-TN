@@ -1,10 +1,22 @@
-import "./lib/error-capture";
+import { getPlaceTravelIntelligence } from "./lib/data/travel-intelligence";
+import { runDataQualityTestSuite, auditEntityQuality } from "./lib/data-quality";
+import { CANONICAL_PLACES } from "./lib/data/canonical-places";
 import { consumeLastCapturedError } from "./lib/error-capture";
 import { renderErrorPage } from "./lib/error-page";
 import { resolvePlace } from "./lib/data/canonical-places";
 import { SupabaseDatabaseRepository } from "./lib/supabase-database";
 import { generateItineraryTimeline, getDestinationProfile } from "./lib/planner-timeline";
 import { getAllDistrictsList } from "./lib/data/districts";
+import {
+  getCainSecurityStatus,
+  getChainedAuditLogs,
+  verifyAuditChain,
+  checkRecordIntegrity,
+  setupAdminMfa,
+  verifyAdminMfaToken,
+  encryptData,
+  sanitizePiiResponse,
+} from "./lib/security";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -38,6 +50,85 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
       }),
       { status: 200, headers: { "Content-Type": "application/json" } }
     );
+  }
+
+  // 1a. CAIN Security Status Endpoint: GET /api/v1/security/status
+  if (path === "/api/v1/security/status" && method === "GET") {
+    const status = getCainSecurityStatus();
+    return new Response(
+      JSON.stringify({ status: "success", data: status }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // 1b. CAIN Audit Logs Endpoint: GET /api/v1/security/audit-logs
+  if (path === "/api/v1/security/audit-logs" && method === "GET") {
+    const logs = getChainedAuditLogs();
+    const verification = verifyAuditChain();
+    return new Response(
+      JSON.stringify({ status: "success", count: logs.length, verification, data: logs }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // 1c. CAIN Verify Integrity Endpoint: POST /api/v1/security/verify-integrity
+  if (path === "/api/v1/security/verify-integrity" && method === "POST") {
+    try {
+      const body = await request.clone().json().catch(() => ({}));
+      const recordId = body.recordId || "place-madurai-meenakshi";
+      const recordData = body.data || { name: "Meenakshi Amman Temple", district: "Madurai" };
+
+      const check = checkRecordIntegrity(recordId, recordData);
+      return new Response(
+        JSON.stringify({ status: "success", data: check }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err: any) {
+      return new Response(
+        JSON.stringify({ error: { message: err?.message || "Integrity verification failed" } }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  // 1d. CAIN Admin MFA Setup Endpoint: POST /api/v1/security/mfa/setup
+  if (path === "/api/v1/security/mfa/setup" && method === "POST") {
+    try {
+      const body = await request.clone().json().catch(() => ({}));
+      const userId = body.userId || "usr-admin-1";
+      const email = body.email || "pranavviper7@gmail.com";
+
+      const mfaConfig = setupAdminMfa(userId, email);
+      return new Response(
+        JSON.stringify({ status: "success", data: mfaConfig }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err: any) {
+      return new Response(
+        JSON.stringify({ error: { message: err?.message || "MFA setup failed" } }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  }
+
+  // 1e. CAIN Admin MFA Verify Endpoint: POST /api/v1/security/mfa/verify
+  if (path === "/api/v1/security/mfa/verify" && method === "POST") {
+    try {
+      const body = await request.clone().json().catch(() => ({}));
+      const userId = body.userId || "usr-admin-1";
+      const token = body.token || "";
+
+      const result = verifyAdminMfaToken(userId, token);
+      return new Response(
+        JSON.stringify({ status: result.success ? "success" : "error", data: result }),
+        { status: result.success ? 200 : 400, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err: any) {
+      return new Response(
+        JSON.stringify({ error: { message: err?.message || "MFA verification failed" } }),
+        { status: 400, headers: { "Content-Type": "application/json" } }
+      );
+    }
   }
 
   // 1a. Geo Districts API Endpoint
@@ -76,6 +167,38 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
         { status: 400, headers: { "Content-Type": "application/json" } }
       );
     }
+  }
+
+  // 1c. Place Intelligence Endpoint: GET /api/v1/places/:slug/intelligence
+  if (path.startsWith("/api/v1/places/") && path.endsWith("/intelligence") && method === "GET") {
+    const slug = path.replace("/api/v1/places/", "").replace("/intelligence", "");
+    const intel = getPlaceTravelIntelligence(slug);
+    return new Response(
+      JSON.stringify({ status: "success", data: intel }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
+  // 1d. Data Quality Audit Endpoint: GET /api/v1/places/audit/data-quality
+  if (path === "/api/v1/places/audit/data-quality" && method === "GET") {
+    const testSuite = runDataQualityTestSuite();
+    const entityAudits = CANONICAL_PLACES.map(auditEntityQuality);
+    const avgConfidence = Math.round(
+      entityAudits.reduce((acc, curr) => acc + curr.confidenceScore, 0) / (entityAudits.length || 1)
+    );
+
+    return new Response(
+      JSON.stringify({
+        status: "success",
+        summary: {
+          totalEntities: CANONICAL_PLACES.length,
+          avgConfidenceScore: avgConfidence,
+          testSuiteResults: testSuite,
+        },
+        data: entityAudits,
+      }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   // 2. AI Trip Copilot Endpoint: POST /api/v1/planner/chat
@@ -356,21 +479,44 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+function applySecurityHeaders(res: Response): Response {
+  const newHeaders = new Headers(res.headers);
+  newHeaders.set("X-Content-Type-Options", "nosniff");
+  newHeaders.set("X-Frame-Options", "SAMEORIGIN");
+  newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
+  newHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+  newHeaders.set(
+    "Content-Security-Policy",
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:;"
+  );
+  newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self), payment=()");
+  newHeaders.set("X-CAIN-Security-Layer", "Active; SHA256-Chained-Audit");
+
+  return new Response(res.body, {
+    status: res.status,
+    statusText: res.statusText,
+    headers: newHeaders,
+  });
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const apiResponse = await handleApiRequest(request);
-      if (apiResponse) return apiResponse;
+      if (apiResponse) return applySecurityHeaders(apiResponse);
 
       const handler = await getServerEntry();
-      const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      const rawResponse = await handler.fetch(request, env, ctx);
+      const normalized = await normalizeCatastrophicSsrResponse(rawResponse);
+      return applySecurityHeaders(normalized);
     } catch (error) {
       console.error(error);
-      return new Response(renderErrorPage(error), {
-        status: 500,
-        headers: { "content-type": "text/html; charset=utf-8" },
-      });
+      return applySecurityHeaders(
+        new Response(renderErrorPage(error), {
+          status: 500,
+          headers: { "content-type": "text/html; charset=utf-8" },
+        })
+      );
     }
   },
 };

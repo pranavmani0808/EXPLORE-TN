@@ -95,7 +95,7 @@ export function PeakTravelGuide() {
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
               <Calendar className="size-3.5" /> PEAK TRAVEL CALENDAR
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-serif text-foreground">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-foreground">
               Peak Travel Seasons in Tamil Nadu
             </h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-xl">
@@ -140,7 +140,7 @@ export function PeakTravelGuide() {
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold font-serif text-foreground">{season.season}</h3>
+                  <h3 className="text-xl font-bold font-display text-foreground">{season.season}</h3>
                   <p className="text-xs font-semibold text-emerald-500 dark:text-emerald-400 mt-0.5">{season.monthsLabel}</p>
                   <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{season.tagline}</p>
 
@@ -165,11 +165,11 @@ export function PeakTravelGuide() {
                         key={spot.name}
                         to="/place/$slug"
                         params={{ slug: spot.slug }}
-                        className="flex items-center justify-between text-xs font-semibold hover:text-emerald-400 transition py-2 px-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/50"
+                        className="flex items-center justify-between text-xs font-semibold hover:text-emerald-400 transition py-2 px-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/50 min-h-[36px]"
                       >
-                        <span className="truncate">{spot.name}</span>
-                        <span className="text-xs text-muted-foreground font-normal shrink-0 flex items-center gap-1 ml-2">
-                          <MapPin className="size-3 text-emerald-500" /> {spot.district}
+                        <span className="leading-tight flex-1 text-left font-medium">{spot.name}</span>
+                        <span className="text-[11px] text-muted-foreground font-mono shrink-0 ml-2">
+                          {spot.district}
                         </span>
                       </Link>
                     ))}
