@@ -33,12 +33,9 @@ export function getApiBaseUrl(): string {
     return apiUrl.replace(/\/+$/, "");
   }
 
-  // 3. Runtime Browser Environment Guard for Production Deployment
+  // 3. Runtime Browser Environment Guard
   if (typeof window !== "undefined" && window.location) {
-    const hostname = window.location.hostname;
-    if (hostname !== "localhost" && hostname !== "127.0.0.1") {
-      return window.location.origin;
-    }
+    return window.location.origin;
   }
 
   // 4. Production SSR environment guard (always return valid absolute URL)
