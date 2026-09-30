@@ -112,6 +112,30 @@ function PlannerPage() {
   const [aiPlanData, setAiPlanData] = useState<any | null>(null);
   const [selectedChips, setSelectedChips] = useState<string[]>([]);
 
+  // Interactive Trip Customizer State
+  const [customDays, setCustomDays] = useState<number>(1);
+  const [customOrigin, setCustomOrigin] = useState<string>("");
+  const [customInterests, setCustomInterests] = useState<string[]>([
+    "🛕 Temples & Heritage",
+    "🍲 Local Tamil Food"
+  ]);
+  const [customTransport, setCustomTransport] = useState<string>("Car");
+
+  const currentDestination = plannerData?.plannerState?.destination || aiPlanData?.destination?.name || "Madurai";
+  const effectiveOrigin = customOrigin || plannerData?.plannerState?.origin || currentDestination;
+
+  const toggleCustomInterest = (interest: string) => {
+    setCustomInterests((prev) =>
+      prev.includes(interest) ? prev.filter((i) => i !== interest) : [...prev, interest]
+    );
+  };
+
+  const handleGenerateCustomPlan = () => {
+    const interestLabels = customInterests.length > 0 ? customInterests.join(", ") : "Top Attractions & Local Food";
+    const customPrompt = `Plan a ${customDays}-day trip to ${currentDestination} starting from ${effectiveOrigin} focused on ${interestLabels} via ${customTransport}`;
+    handleSendMessage(customPrompt);
+  };
+
   const handleAISearch = async (params: {
     query: string;
     origin?: string;
@@ -507,6 +531,134 @@ function PlannerPage() {
                   )}
                 </motion.div>
               )}
+
+              {/* INTERACTIVE TRIP CUSTOMIZER CARD */}
+              <motion.div
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-4 bg-slate-900/90 border border-emerald-500/30 rounded-2xl space-y-3.5 my-3 text-white shadow-xl"
+              >
+                <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="w-4 h-4 text-emerald-400" />
+                    <span className="text-xs font-bold text-emerald-300 uppercase tracking-wide">
+                      Interactive Trip Customizer ({currentDestination})
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-slate-400 font-medium">Refine parameters</span>
+                </div>
+
+                {/* Duration Row */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">1. Trip Duration (How many days?):</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setCustomDays(d)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          customDays === d
+                            ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
+                            : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        {d} {d === 1 ? "Day" : d === 4 ? "4+ Days" : "Days"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Origin Row */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">2. Starting Origin (Where are you starting from?):</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[currentDestination, "Chennai", "Coimbatore", "Trichy", "Salem"].map((city) => {
+                      const isSelected = effectiveOrigin.toLowerCase() === city.toLowerCase();
+                      return (
+                        <button
+                          key={city}
+                          type="button"
+                          onClick={() => setCustomOrigin(city)}
+                          className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            isSelected
+                              ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
+                              : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                          }`}
+                        >
+                          📍 {city} {city.toLowerCase() === currentDestination.toLowerCase() ? "(Local)" : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Experiences & Interests Row */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">3. Experiences & Places You Want to Explore:</label>
+                  <div className="flex flex-wrap gap-1.5">
+                    {[
+                      "🛕 Temples & Heritage",
+                      "🍲 Local Tamil Food",
+                      "⛰️ Nearby Hills",
+                      "🏛️ Royal History",
+                      "🛍️ Silk & Local Markets",
+                      "🌊 Waterfalls & Streams"
+                    ].map((exp) => {
+                      const isSelected = customInterests.includes(exp);
+                      return (
+                        <button
+                          key={exp}
+                          type="button"
+                          onClick={() => toggleCustomInterest(exp)}
+                          className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer ${
+                            isSelected
+                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/50"
+                              : "bg-slate-800/80 text-slate-400 border border-slate-700/60 hover:text-white"
+                          }`}
+                        >
+                          <span>{exp}</span>
+                          {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Transport Mode Row */}
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-bold text-slate-300 block">4. Mode of Transport:</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Car", "Bike", "Bus", "Train"].map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setCustomTransport(mode)}
+                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          customTransport === mode
+                            ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
+                            : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        {mode === "Car" ? "🚗 Car" : mode === "Bike" ? "🏍️ Bike" : mode === "Bus" ? "🚌 Bus" : "🚆 Train"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Generate Button */}
+                <div className="pt-2 border-t border-emerald-500/20 flex justify-end">
+                  <button
+                    type="button"
+                    onClick={handleGenerateCustomPlan}
+                    disabled={loading}
+                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
+                  >
+                    <Sparkles className="w-3.5 h-3.5" />
+                    <span>✨ Generate Tailored Itinerary →</span>
+                  </button>
+                </div>
+              </motion.div>
 
               {loading && (
                 <div className="flex justify-start">

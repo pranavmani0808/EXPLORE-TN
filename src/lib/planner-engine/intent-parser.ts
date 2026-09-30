@@ -6,12 +6,17 @@ export function parseTripIntent(userPrompt: string): StructuredTripRequest {
   const lower = prompt.toLowerCase();
 
   // 1. Extract Origin
-  let originName = "Chennai";
-  if (lower.includes("from chennai") || lower.includes("starting from chennai")) originName = "Chennai";
-  else if (lower.includes("from madurai") || lower.includes("starting from madurai")) originName = "Madurai";
-  else if (lower.includes("from coimbatore") || lower.includes("starting from coimbatore")) originName = "Coimbatore";
-  else if (lower.includes("from salem") || lower.includes("starting from salem")) originName = "Salem";
-  else if (lower.includes("from trichy") || lower.includes("starting from trichy")) originName = "Tiruchirappalli";
+  let originName = "";
+  let originExplicitlySet = false;
+
+  if (lower.includes("from chennai") || lower.includes("starting from chennai")) { originName = "Chennai"; originExplicitlySet = true; }
+  else if (lower.includes("from madurai") || lower.includes("starting from madurai")) { originName = "Madurai"; originExplicitlySet = true; }
+  else if (lower.includes("from coimbatore") || lower.includes("starting from coimbatore")) { originName = "Coimbatore"; originExplicitlySet = true; }
+  else if (lower.includes("from salem") || lower.includes("starting from salem")) { originName = "Salem"; originExplicitlySet = true; }
+  else if (lower.includes("from trichy") || lower.includes("starting from trichy") || lower.includes("from tiruchirappalli")) { originName = "Tiruchirappalli"; originExplicitlySet = true; }
+  else if (lower.includes("from ooty") || lower.includes("starting from ooty")) { originName = "Ooty"; originExplicitlySet = true; }
+  else if (lower.includes("from kodaikanal") || lower.includes("starting from kodaikanal")) { originName = "Kodaikanal"; originExplicitlySet = true; }
+  else if (lower.includes("from kanyakumari") || lower.includes("starting from kanyakumari")) { originName = "Kanyakumari"; originExplicitlySet = true; }
 
   // 2. Extract Destinations
   const destCandidates: string[] = [];
@@ -51,6 +56,15 @@ export function parseTripIntent(userPrompt: string): StructuredTripRequest {
     else if (lower.includes("asgard")) destCandidates.push("Asgard City");
     else if (lower.includes("atlantis")) destCandidates.push("Atlantis");
     else if (lower.includes("chennai") || lower.includes("சென்னை")) destCandidates.push("Chennai");
+  }
+
+  // Default origin to destination city if no explicit "from [city]" was specified
+  if (!originExplicitlySet) {
+    if (destCandidates.length > 0) {
+      originName = destCandidates[0];
+    } else {
+      originName = "Chennai";
+    }
   }
 
   // 3. Extract Duration (Days)
