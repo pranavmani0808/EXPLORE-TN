@@ -1879,3 +1879,15 @@ export function getAllDistrictsDetailed(): DistrictData[] {
   }));
 }
 
+export const DISTRICT_DETAILS = Object.values(TAMIL_NADU_DISTRICTS).map((d) => {
+  const admin = getDistrictAdminDetails(d.slug);
+  return {
+    slug: d.slug,
+    name: d.name.replace(/\s+District$/i, ""),
+    fullName: d.name,
+    hq: admin?.headquarters || d.slug,
+    coords: d.centerCoords,
+  };
+});
+
+
