@@ -1,33 +1,34 @@
 import { useMemo, useState, useEffect } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { Search, Clock, Flame, Sparkles, MapPin, Server, Mic, X } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { places, categories } from "@/data/places";
 import { fetchAutocompleteSuggestions, BackendSearchSuggestion } from "@/lib/api";
 
 const quickSuggestions = [
-  { label: "Ooty", queryText: "Ooty", icon: "🏔️" },
-  { label: "Rameswaram", queryText: "Rameswaram", icon: "🌊" },
-  { label: "Waterfalls", queryText: "Waterfalls", icon: "💧" },
-  { label: "Temples", queryText: "Temples", icon: "🛕" },
+  { label: "Ooty", queryText: "Ooty", icon: "🏔️", targetArea: "Ooty" },
+  { label: "Rameswaram", queryText: "Rameswaram", icon: "🌊", targetArea: "Rameswaram" },
+  { label: "Waterfalls", queryText: "Waterfalls", icon: "💧", targetArea: "Tamil Nadu" },
+  { label: "Temples", queryText: "Temples", icon: "🛕", targetArea: "Madurai" },
 ];
 
 const trendingSpots = [
-  { label: "Kolli Hills 70 Hairpins", type: "offroad", icon: "📍" },
-  { label: "Hogenakkal Falls", type: "waterfalls", icon: "🌊" },
-  { label: "Valparai Sholayar Ride", type: "offroad", icon: "🏍️" },
-  { label: "Dhanushkodi Ghost Town", type: "beaches", icon: "🏖️" },
+  { label: "Kolli Hills 70 Hairpins", type: "offroad", icon: "📍", targetArea: "Kolli Hills" },
+  { label: "Hogenakkal Falls", type: "waterfalls", icon: "🌊", targetArea: "Dharmapuri" },
+  { label: "Valparai Sholayar Ride", type: "offroad", icon: "🏍️", targetArea: "Valparai" },
+  { label: "Dhanushkodi Ghost Town", type: "beaches", icon: "🏖️", targetArea: "Rameswaram" },
 ];
 
 const recentSearches = ["Chennai", "Ooty", "Kodaikanal"];
 
 const aiSuggestions = [
-  { label: "Weekend Ride", blurb: "Best 2-day loop passes" },
-  { label: "Waterfalls near me", blurb: "Monsoon cascades within 100 km" },
-  { label: "Hidden Tea Estates", blurb: "Offbeat ridge trails in Nilgiris" },
+  { label: "Weekend Ride", blurb: "Best 2-day loop passes", targetArea: "Valparai" },
+  { label: "Waterfalls near me", blurb: "Monsoon cascades within 100 km", targetArea: "Dharmapuri" },
+  { label: "Hidden Tea Estates", blurb: "Offbeat ridge trails in Nilgiris", targetArea: "Nilgiris" },
 ];
 
 export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [backendSuggestions, setBackendSuggestions] = useState<BackendSearchSuggestion[]>([]);
   const [isSearching, setIsSearching] = useState(false);
@@ -117,7 +118,10 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                   {quickSuggestions.map((qs) => (
                     <button
                       key={qs.label}
-                      onClick={() => setQuery(qs.queryText)}
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate({ to: "/routes", search: { area: qs.targetArea } });
+                      }}
                       className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition cursor-pointer"
                     >
                       <span>{qs.icon}</span>
@@ -173,13 +177,15 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                             >
                               View Details
                             </Link>
-                            <Link
-                              to="/discover"
-                              onClick={() => onOpenChange(false)}
-                              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-xs transition"
+                            <button
+                              onClick={() => {
+                                onOpenChange(false);
+                                navigate({ to: "/routes", search: { area: s.district || s.name } });
+                              }}
+                              className="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 font-bold text-xs transition cursor-pointer"
                             >
                               View on Map
-                            </Link>
+                            </button>
                           </div>
                         </div>
                       );
@@ -204,14 +210,18 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                 </p>
                 <div className="grid sm:grid-cols-2 gap-2.5">
                   {trendingSpots.map((spot) => (
-                    <div
+                    <button
                       key={spot.label}
-                      onClick={() => onOpenChange(false)}
-                      className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/40 transition cursor-pointer group"
+                      type="button"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate({ to: "/routes", search: { area: spot.targetArea } });
+                      }}
+                      className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/40 transition cursor-pointer group text-left w-full"
                     >
                       <span className="text-lg">{spot.icon}</span>
                       <span className="font-semibold text-sm text-slate-200 group-hover:text-white">{spot.label}</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -227,8 +237,12 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                   {recentSearches.map((rec) => (
                     <button
                       key={rec}
-                      onClick={() => onOpenChange(false)}
-                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 hover:border-emerald-500/40 transition flex items-center gap-1.5"
+                      type="button"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate({ to: "/routes", search: { area: rec } });
+                      }}
+                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 hover:border-emerald-500/40 transition flex items-center gap-1.5 cursor-pointer"
                     >
                       <Clock className="size-3 text-slate-400" /> {rec}
                     </button>
@@ -245,10 +259,14 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                 </p>
                 <div className="space-y-2">
                   {aiSuggestions.map((sug) => (
-                    <div
+                    <button
                       key={sug.label}
-                      onClick={() => onOpenChange(false)}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition cursor-pointer"
+                      type="button"
+                      onClick={() => {
+                        onOpenChange(false);
+                        navigate({ to: "/routes", search: { area: sug.targetArea } });
+                      }}
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition cursor-pointer text-left w-full"
                     >
                       <div className="flex items-center gap-2.5">
                         <Sparkles className="size-4 text-emerald-400 shrink-0" />
@@ -258,7 +276,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                         </div>
                       </div>
                       <span className="text-xs font-bold text-emerald-400">Explore →</span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>

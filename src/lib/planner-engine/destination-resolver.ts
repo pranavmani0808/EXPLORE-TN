@@ -193,49 +193,49 @@ export function resolveDestination(rawInput: string): ResolvedDestinationResult 
 function buildResolvedResult(canonicalName: string, originalInput: string): ResolvedDestinationResult {
   const targetLower = canonicalName.toLowerCase();
 
-  const canonicalPlace = CANONICAL_PLACES.find(
-    (p) =>
-      p.canonicalName.toLowerCase() === targetLower ||
-      p.name.toLowerCase() === targetLower ||
-      p.slug.toLowerCase() === targetLower ||
-      p.district.toLowerCase() === targetLower ||
-      (targetLower.includes("kanyakumari") && p.district.toLowerCase().includes("kanyakumari"))
-  );
+  // Known Primary Destinations Override Table
+  const KNOWN_DESTINATIONS: Record<string, { name: string; district: string; lat: number; lng: number }> = {
+    ooty: { name: "Ooty", district: "Nilgiris", lat: 11.4102, lng: 76.6950 },
+    nilgiris: { name: "Ooty", district: "Nilgiris", lat: 11.4102, lng: 76.6950 },
+    kodaikanal: { name: "Kodaikanal", district: "Dindigul", lat: 10.2381, lng: 77.4892 },
+    madurai: { name: "Madurai", district: "Madurai", lat: 9.9252, lng: 78.1198 },
+    kanyakumari: { name: "Kanyakumari", district: "Kanyakumari", lat: 8.0883, lng: 77.5385 },
+    kanniyakumari: { name: "Kanyakumari", district: "Kanyakumari", lat: 8.0883, lng: 77.5385 },
+    chennai: { name: "Chennai", district: "Chennai", lat: 13.0827, lng: 80.2707 },
+    pondicherry: { name: "Pondicherry", district: "Pondicherry", lat: 11.9416, lng: 79.8083 },
+    pondy: { name: "Pondicherry", district: "Pondicherry", lat: 11.9416, lng: 79.8083 },
+    coimbatore: { name: "Coimbatore", district: "Coimbatore", lat: 11.0168, lng: 76.9558 },
+    trichy: { name: "Tiruchirappalli", district: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
+    thanjavur: { name: "Thanjavur", district: "Thanjavur", lat: 10.7870, lng: 79.1378 },
+    rameswaram: { name: "Rameswaram", district: "Ramanathapuram", lat: 9.2876, lng: 79.3129 },
+    yercaud: { name: "Yercaud", district: "Salem", lat: 11.7753, lng: 78.2093 },
+    valparai: { name: "Valparai", district: "Coimbatore", lat: 10.3270, lng: 76.9554 },
+  };
 
-  const district = DISTRICT_DETAILS.find(
-    (d) =>
-      d.name.toLowerCase() === targetLower ||
-      d.slug.toLowerCase() === targetLower ||
-      d.hq.toLowerCase() === targetLower ||
-      (targetLower.includes("kanyakumari") && (d.slug === "kanniyakumari" || d.name.toLowerCase().includes("kanniyakumari")))
-  );
+  const knownOverride = KNOWN_DESTINATIONS[targetLower] || KNOWN_DESTINATIONS[originalInput.toLowerCase()];
 
-  let lat = canonicalPlace?.latitude || district?.coords[0];
-  let lng = canonicalPlace?.longitude || district?.coords[1];
+  const canonicalPlace = knownOverride
+    ? undefined
+    : CANONICAL_PLACES.find(
+        (p) =>
+          p.canonicalName.toLowerCase() === targetLower ||
+          p.name.toLowerCase() === targetLower ||
+          p.slug.toLowerCase() === targetLower
+      );
 
-  if (!lat || !lng) {
-    if (targetLower.includes("kanyakumari") || targetLower.includes("kanniyakumari")) {
-      lat = 8.0883;
-      lng = 77.5385;
-    } else if (targetLower.includes("madurai")) {
-      lat = 9.9252;
-      lng = 78.1198;
-    } else if (targetLower.includes("chennai")) {
-      lat = 13.0827;
-      lng = 80.2707;
-    } else if (targetLower.includes("ooty") || targetLower.includes("nilgiri")) {
-      lat = 11.4102;
-      lng = 76.6950;
-    } else if (targetLower.includes("pondicherry")) {
-      lat = 11.9416;
-      lng = 79.8083;
-    } else {
-      lat = 10.2381;
-      lng = 77.4892;
-    }
-  }
+  const district = knownOverride
+    ? undefined
+    : DISTRICT_DETAILS.find(
+        (d) =>
+          d.name.toLowerCase() === targetLower ||
+          d.slug.toLowerCase() === targetLower ||
+          d.hq.toLowerCase() === targetLower
+      );
 
-  const distName = canonicalPlace?.district || district?.name || canonicalName;
+  const finalName = knownOverride?.name || canonicalPlace?.canonicalName || district?.name || canonicalName;
+  const distName = knownOverride?.district || canonicalPlace?.district || district?.name || canonicalName;
+  const lat = knownOverride?.lat || canonicalPlace?.latitude || district?.coords[0] || 10.2381;
+  const lng = knownOverride?.lng || canonicalPlace?.longitude || district?.coords[1] || 77.4892;
 
   // Retrieve all known POIs matching this destination or district
   const knownPois = places.filter(
@@ -249,9 +249,9 @@ function buildResolvedResult(canonicalName: string, originalInput: string): Reso
     success: true,
     requestedName: originalInput,
     destination: {
-      id: canonicalPlace?.id || `dest-${canonicalName.toLowerCase().replace(/\s+/g, "-")}`,
-      canonicalName: canonicalName,
-      displayName: canonicalName,
+      id: canonicalPlace?.id || `dest-${finalName.toLowerCase().replace(/\s+/g, "-")}`,
+      canonicalName: finalName,
+      displayName: finalName,
       district: distName,
       latitude: lat,
       longitude: lng,

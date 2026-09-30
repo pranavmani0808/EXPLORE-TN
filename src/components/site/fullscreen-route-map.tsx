@@ -38,6 +38,7 @@ import {
 } from "@/lib/data/canonical-places";
 import { RouteApiRepository, IsolatedRouteResultDTO, RouteOption } from "@/lib/api-client/routes";
 import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
+import { getSavedPlaces, savePlaceToCollection, removeSavedPlace } from "@/lib/explorer-gamification";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { toast } from "sonner";
 
@@ -63,6 +64,47 @@ export function FullscreenRouteMap({
   initialPlaceId,
 }: FullscreenRouteMapProps) {
   const { requireAuth } = useAuthGuard();
+
+  // Saved Places Collection State & Sync
+  const [savedPlaceIds, setSavedPlaceIds] = useState<Set<string>>(() => {
+    return new Set(getSavedPlaces().map((p) => p.id));
+  });
+
+  useEffect(() => {
+    const handleSavedUpdated = () => {
+      setSavedPlaceIds(new Set(getSavedPlaces().map((p) => p.id)));
+    };
+    window.addEventListener("etn_saved_places_updated", handleSavedUpdated);
+    return () => {
+      window.removeEventListener("etn_saved_places_updated", handleSavedUpdated);
+    };
+  }, []);
+
+  const toggleSavePlace = (place: ExplorerPlace) => {
+    const isSaved = savedPlaceIds.has(place.id);
+    if (isSaved) {
+      removeSavedPlace(place.id);
+      toast.success(`Removed ${place.canonicalName || place.name} from saved places`);
+    } else {
+      savePlaceToCollection({
+        id: place.id,
+        name: place.canonicalName || place.name,
+        category: place.primaryCategory || "all",
+        district: place.district || "Tamil Nadu",
+        imageUrl: place.image,
+        rating: place.rating,
+        savedAt: new Date().toISOString(),
+      });
+      toast.success(`Saved ${place.canonicalName || place.name} to collection ⭐`);
+    }
+  };
+
+  const handleGetDirections = (place: ExplorerPlace) => {
+    setSelectedDestination(place);
+    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}&travelmode=${travelMode}`;
+    window.open(mapsUrl, "_blank", "noopener,noreferrer");
+    toast.success(`Opening directions to ${place.canonicalName || place.name} 🧭`);
+  };
 
   // Map Explorer Scope State (GEOGRAPHIC SEARCH vs POI SEARCH)
   const [mapScope, setMapScope] = useState<{
@@ -612,27 +654,49 @@ export function FullscreenRouteMap({
         zIndexOffset: isSelectedPOI ? 2000 : 1000,
       }).addTo(map);
 
+      const isSaved = savedPlaceIds.has(place.id);
+
       marker.bindPopup(`
-        <div style="font-family: system-ui, sans-serif; width: 240px; color: #ffffff; padding: 2px;">
+        <div style="font-family: system-ui, -apple-system, sans-serif; width: 250px; color: #ffffff; padding: 4px;">
           <strong style="font-size: 15px; color: #34d399; display: block; margin-bottom: 2px;">${place.canonicalName || place.name}</strong>
           <span style="font-size: 11px; color: #a1a1aa;">${place.primaryCategory?.toUpperCase()} · ${place.district} District</span>
           <p style="font-size: 12px; margin: 6px 0; color: #d4d4d8; line-height: 1.4;">${place.tagline || place.description}</p>
+          
           <div style="display: flex; gap: 6px; margin-top: 10px;">
             <button
-              onclick="window.dispatchEvent(new CustomEvent('set-origin-event', { detail: '${place.id}' }))"
-              style="flex: 1; padding: 6px; border-radius: 8px; background: rgba(16,185,129,0.2); border: 1px solid rgba(16,185,129,0.4); color: #6ee7b7; font-size: 10px; font-weight: 700; cursor: pointer;"
+              onclick="window.dispatchEvent(new CustomEvent('directions-place-event', { detail: '${place.id}' }))"
+              style="flex: 1; padding: 6px; border-radius: 8px; background: rgba(59,130,246,0.25); border: 1px solid rgba(59,130,246,0.5); color: #60a5fa; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"
             >
-              Set as Origin
+              🧭 Directions
+            </button>
+            <button
+              onclick="window.dispatchEvent(new CustomEvent('save-place-event', { detail: '${place.id}' }))"
+              style="flex: 1; padding: 6px; border-radius: 8px; background: ${isSaved ? 'rgba(16,185,129,0.3)' : 'rgba(255,255,255,0.1)'}; border: 1px solid ${isSaved ? 'rgba(16,185,129,0.6)' : 'rgba(255,255,255,0.2)'}; color: ${isSaved ? '#34d399' : '#e4e4e7'}; font-size: 11px; font-weight: 700; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"
+            >
+              ${isSaved ? '★ Saved' : '🔖 Save'}
+            </button>
+          </div>
+
+          <div style="display: flex; gap: 6px; margin-top: 6px;">
+            <button
+              onclick="window.dispatchEvent(new CustomEvent('set-origin-event', { detail: '${place.id}' }))"
+              style="flex: 1; padding: 5px; border-radius: 6px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #a7f3d0; font-size: 10px; font-weight: 600; cursor: pointer;"
+            >
+              + Origin
             </button>
             <button
               onclick="window.dispatchEvent(new CustomEvent('set-dest-event', { detail: '${place.id}' }))"
-              style="flex: 1; padding: 6px; border-radius: 8px; background: rgba(56,189,248,0.2); border: 1px solid rgba(56,189,248,0.4); color: #38bdf8; font-size: 10px; font-weight: 700; cursor: pointer;"
+              style="flex: 1; padding: 5px; border-radius: 6px; background: rgba(56,189,248,0.15); border: 1px solid rgba(56,189,248,0.3); color: #bae6fd; font-size: 10px; font-weight: 600; cursor: pointer;"
             >
-              Set as Dest
+              + Dest
             </button>
           </div>
         </div>
       `, { className: "custom-mapcn-popup-window" });
+
+      marker.on("mouseover", () => {
+        marker.openPopup();
+      });
 
       marker.on("click", () => {
         setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
@@ -653,7 +717,7 @@ export function FullscreenRouteMap({
   useEffect(() => {
     const handleSetOrigin = (e: any) => {
       const placeId = e.detail;
-      const place = resolvePlaceById(placeId);
+      const place = resolvePlaceById(placeId) || placesInScope.find((p) => p.id === placeId);
       if (place) {
         setSelectedOrigin(place);
         toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
@@ -661,20 +725,38 @@ export function FullscreenRouteMap({
     };
     const handleSetDest = (e: any) => {
       const placeId = e.detail;
-      const place = resolvePlaceById(placeId);
+      const place = resolvePlaceById(placeId) || placesInScope.find((p) => p.id === placeId);
       if (place) {
         setSelectedDestination(place);
         toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
       }
     };
+    const handleSave = (e: any) => {
+      const placeId = e.detail;
+      const place = resolvePlaceById(placeId) || placesInScope.find((p) => p.id === placeId);
+      if (place) {
+        toggleSavePlace(place);
+      }
+    };
+    const handleDirections = (e: any) => {
+      const placeId = e.detail;
+      const place = resolvePlaceById(placeId) || placesInScope.find((p) => p.id === placeId);
+      if (place) {
+        handleGetDirections(place);
+      }
+    };
 
     window.addEventListener("set-origin-event", handleSetOrigin);
     window.addEventListener("set-dest-event", handleSetDest);
+    window.addEventListener("save-place-event", handleSave);
+    window.addEventListener("directions-place-event", handleDirections);
     return () => {
       window.removeEventListener("set-origin-event", handleSetOrigin);
       window.removeEventListener("set-dest-event", handleSetDest);
+      window.removeEventListener("save-place-event", handleSave);
+      window.removeEventListener("directions-place-event", handleDirections);
     };
-  }, []);
+  }, [placesInScope, savedPlaceIds, travelMode]);
 
   // Re-render elements whenever scope, stops, or route updates
   useEffect(() => {
@@ -973,6 +1055,7 @@ export function FullscreenRouteMap({
               ) : (
                 placesInScope.map((place) => {
                   const isSelected = mapScope.selectedPOI?.id === place.id;
+                  const isSaved = savedPlaceIds.has(place.id);
                   const categoryIcon = place.primaryCategory === "temples" ? "🛕" : place.primaryCategory === "heritage" ? "🏛️" : place.primaryCategory === "waterfalls" ? "💧" : "📍";
 
                   return (
@@ -984,50 +1067,87 @@ export function FullscreenRouteMap({
                           leafletMapRef.current.flyTo([place.latitude, place.longitude], 14, { animate: true });
                         }
                       }}
-                      className={`p-3 rounded-2xl border transition cursor-pointer flex items-start justify-between gap-3 ${
+                      className={`group p-3 rounded-2xl border transition cursor-pointer flex flex-col gap-2.5 ${
                         isSelected
                           ? "bg-emerald-500/20 border-emerald-500/60 shadow-lg"
                           : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                       }`}
                     >
-                      <div className="space-y-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm">{categoryIcon}</span>
-                          <h4 className="font-bold text-white text-xs truncate">{place.canonicalName || place.name}</h4>
-                        </div>
-                        <p className="text-[11px] text-slate-300 line-clamp-1">{place.tagline || place.description}</p>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono pt-0.5">
-                          <span className="text-emerald-400 font-bold uppercase">{place.primaryCategory}</span>
-                          <span>•</span>
-                          <span>{place.district} District</span>
-                          <span>•</span>
-                          <span>{place.rating ? `★ ${place.rating}` : "No reviews yet"}</span>
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1 min-w-0 flex-1">
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-sm">{categoryIcon}</span>
+                            <h4 className="font-bold text-white text-xs truncate">{place.canonicalName || place.name}</h4>
+                          </div>
+                          <p className="text-[11px] text-slate-300 line-clamp-1">{place.tagline || place.description}</p>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono pt-0.5">
+                            <span className="text-emerald-400 font-bold uppercase">{place.primaryCategory}</span>
+                            <span>•</span>
+                            <span>{place.district} District</span>
+                            <span>•</span>
+                            <span>{place.rating ? `★ ${place.rating}` : "No reviews yet"}</span>
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex flex-col items-end gap-1 shrink-0">
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedOrigin(place);
-                            toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
-                          }}
-                          className="px-2 py-0.5 rounded bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-[9px] font-bold transition active:scale-95"
-                        >
-                          + Origin
-                        </button>
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setSelectedDestination(place);
-                            toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
-                          }}
-                          className="px-2 py-0.5 rounded bg-sky-500/20 hover:bg-sky-500/30 text-sky-300 border border-sky-500/40 text-[9px] font-bold transition active:scale-95"
-                        >
-                          + Dest
-                        </button>
+                      {/* Action Buttons Row — Directions, Save, +Origin, +Dest */}
+                      <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
+                        <div className="flex items-center gap-1.5">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleGetDirections(place);
+                            }}
+                            className="px-2.5 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/35 text-blue-300 border border-blue-500/40 text-[10px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer"
+                            title="Get Directions"
+                          >
+                            <Navigation className="w-3 h-3" />
+                            Directions
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              toggleSavePlace(place);
+                            }}
+                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer border ${
+                              isSaved
+                                ? "bg-emerald-500/30 text-emerald-300 border-emerald-500/60"
+                                : "bg-white/10 hover:bg-white/20 text-slate-200 border-white/15"
+                            }`}
+                            title={isSaved ? "Saved to Collection" : "Save Place"}
+                          >
+                            <Bookmark className={`w-3 h-3 ${isSaved ? "fill-emerald-400 text-emerald-400" : ""}`} />
+                            {isSaved ? "Saved" : "Save"}
+                          </button>
+                        </div>
+
+                        <div className="flex items-center gap-1">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedOrigin(place);
+                              toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
+                            }}
+                            className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold transition active:scale-95 cursor-pointer"
+                          >
+                            + Origin
+                          </button>
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setSelectedDestination(place);
+                              toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
+                            }}
+                            className="px-2 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-[9px] font-bold transition active:scale-95 cursor-pointer"
+                          >
+                            + Dest
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );
