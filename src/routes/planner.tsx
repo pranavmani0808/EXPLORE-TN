@@ -167,13 +167,7 @@ function PlannerPage() {
       toast.error("Failed to add hidden place.");
     }
   };
-  const [timeline, setTimeline] = useState<Array<{ time: string; name: string; description: string }>>([
-    {
-      time: "06:00 AM",
-      name: "Start Location",
-      description: "Enter your starting city to generate a verified itinerary and road route.",
-    },
-  ]);
+  const [timeline, setTimeline] = useState<Array<{ time: string; name: string; description: string }>>([]);
 
   // Safe client-only URL search parameter parsing on mount
   useEffect(() => {
@@ -326,6 +320,7 @@ function PlannerPage() {
   const costEstimate = plannerData?.costEstimate;
 
   const isDiscoveryPhase = plannerData?.plannerState?.discoveryPhase === "DISCOVER_INTERESTS" || (plannerData?.suggestedCategories && plannerData.suggestedCategories.length > 0);
+  const hasValidPlan = Boolean(plannerData || aiPlanData);
 
   return (
     <AppShell>
@@ -559,29 +554,33 @@ function PlannerPage() {
           <div className="space-y-6 lg:col-span-6">
             {/* Interactive OSRM Route Map */}
             <div className="overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-slate-900 shadow-sm relative h-[320px]">
-              <Map center={[centerLat, centerLng]} zoom={mapZoom} className="size-full">
+              <Map center={hasValidPlan ? [centerLat, centerLng] : [10.8505, 78.7047]} zoom={hasValidPlan ? mapZoom : 7} className="size-full">
                 <MapControls />
-                {mapRoutePoints.length > 0 && (
+                {hasValidPlan && mapRoutePoints.length > 0 && (
                   <MapRoute coordinates={mapRoutePoints} color="#10b981" weight={4} dashArray="6,8" />
                 )}
 
-                <MapMarker latitude={originPos.lat} longitude={originPos.lng}>
-                  <MarkerContent>
-                    <div className="grid size-7 place-items-center rounded-full bg-emerald-500 text-slate-950 font-black text-xs shadow-lg">
-                      A
-                    </div>
-                  </MarkerContent>
-                  <MarkerTooltip>{originName} (Origin)</MarkerTooltip>
-                </MapMarker>
+                {hasValidPlan && (
+                  <>
+                    <MapMarker latitude={originPos.lat} longitude={originPos.lng}>
+                      <MarkerContent>
+                        <div className="grid size-7 place-items-center rounded-full bg-emerald-500 text-slate-950 font-black text-xs shadow-lg">
+                          A
+                        </div>
+                      </MarkerContent>
+                      <MarkerTooltip>{originName} (Origin)</MarkerTooltip>
+                    </MapMarker>
 
-                <MapMarker latitude={destPos.lat} longitude={destPos.lng}>
-                  <MarkerContent>
-                    <div className="grid size-7 place-items-center rounded-full bg-amber-500 text-slate-950 font-black text-xs shadow-lg">
-                      B
-                    </div>
-                  </MarkerContent>
-                  <MarkerTooltip>{destName} (Destination)</MarkerTooltip>
-                </MapMarker>
+                    <MapMarker latitude={destPos.lat} longitude={destPos.lng}>
+                      <MarkerContent>
+                        <div className="grid size-7 place-items-center rounded-full bg-amber-500 text-slate-950 font-black text-xs shadow-lg">
+                          B
+                        </div>
+                      </MarkerContent>
+                      <MarkerTooltip>{destName} (Destination)</MarkerTooltip>
+                    </MapMarker>
+                  </>
+                )}
               </Map>
 
               {overnightTravel && (
@@ -736,16 +735,26 @@ function PlannerPage() {
                 <span>Generated Itinerary Timeline</span>
               </h4>
 
-              <div className="space-y-3 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/10 pl-6">
-                {timeline.map((item, idx) => (
-                  <div key={idx} className="relative">
-                    <div className="absolute -left-6 top-1 size-2.5 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-[#121821]" />
-                    <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{item.time}</div>
-                    <div className="text-sm font-bold text-slate-900 dark:text-white">{item.name}</div>
-                    <div className="text-xs text-slate-500 dark:text-muted-foreground">{item.description}</div>
-                  </div>
-                ))}
-              </div>
+              {hasValidPlan && timeline.length > 0 ? (
+                <div className="space-y-3 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/10 pl-6">
+                  {timeline.map((item, idx) => (
+                    <div key={idx} className="relative">
+                      <div className="absolute -left-6 top-1 size-2.5 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-[#121821]" />
+                      <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{item.time}</div>
+                      <div className="text-sm font-bold text-slate-900 dark:text-white">{item.name}</div>
+                      <div className="text-xs text-slate-500 dark:text-muted-foreground">{item.description}</div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="py-6 text-center space-y-2 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02]">
+                  <Clock className="size-7 text-slate-400 dark:text-slate-600 mx-auto" />
+                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">No Itinerary Generated Yet</div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
+                    Enter your trip details above or ask Copilot to generate a verified timeline, distance, and road route.
+                  </p>
+                </div>
+              )}
 
               {/* Explanations List ("Why These Places?") */}
               {plannerData?.verifiedEngineOutput?.explanations && plannerData.verifiedEngineOutput.explanations.length > 0 && (

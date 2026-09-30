@@ -26,19 +26,39 @@ export function optimizeItineraryTimeline(
     const isFirstDay = d === 1;
     const isLastDay = d === days;
 
-    // Start Activity
-    activities.push({
-      timeSlot: `${String(currentHour).padStart(2, "0")}:00`,
-      title: isFirstDay ? `Depart from ${originName}` : `Start Day ${d} from Hotel in ${destinationName}`,
-      description: isFirstDay
-        ? `Begin journey via ${request.transport.mode.toUpperCase()} towards ${destinationName}.`
-        : `Morning departure for sightseeing circuit in ${destinationName}.`,
-      durationMinutes: 30,
-      type: "start"
-    });
+    const isOvernightJourney = isFirstDay && originName.toLowerCase() !== destinationName.toLowerCase() && (
+      rankedPois.length > 0
+    );
 
-    currentHour += 0;
-    currentMin += 30;
+    if (isFirstDay && isOvernightJourney) {
+      activities.push({
+        timeSlot: "10:00 PM (Night Prior)",
+        title: `Overnight Journey from ${originName}`,
+        description: `Depart ${originName} for smooth overnight travel to ${destinationName}. Avoid daytime highway traffic and arrive by early morning.`,
+        durationMinutes: 420,
+        type: "start"
+      });
+      activities.push({
+        timeSlot: "06:30 AM",
+        title: `Arrive in ${destinationName} & Hotel Fresh-up`,
+        description: `Early morning arrival, hotel check-in, breakfast & fresh-up before starting sightseeing circuit.`,
+        durationMinutes: 60,
+        type: "start"
+      });
+      currentHour = 8;
+      currentMin = 0;
+    } else {
+      activities.push({
+        timeSlot: `${String(currentHour).padStart(2, "0")}:00 AM`,
+        title: isFirstDay ? `Depart from ${originName}` : `Start Day ${d} from Hotel in ${destinationName}`,
+        description: isFirstDay
+          ? `Begin morning journey via ${request.transport.mode.toUpperCase()} towards ${destinationName}.`
+          : `Morning departure for sightseeing circuit in ${destinationName}.`,
+        durationMinutes: 30,
+        type: "start"
+      });
+      currentMin += 30;
+    }
 
     let prevLat = 10.2381;
     let prevLng = 77.4892;
