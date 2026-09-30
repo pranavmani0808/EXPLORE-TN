@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import { motion, AnimatePresence } from "motion/react";
 import { getGoogleTileUrl } from "@/lib/google-maps-loader";
 import {
   MapPin,
@@ -23,6 +24,7 @@ import {
   Layers,
   Search,
   SlidersHorizontal,
+  X,
 } from "lucide-react";
 import {
   CANONICAL_PLACES,
@@ -99,11 +101,16 @@ export function FullscreenRouteMap({
     }
   };
 
+  const [isDirectionsFocusMode, setIsDirectionsFocusMode] = useState(false);
+
   const handleGetDirections = (place: ExplorerPlace) => {
     setSelectedDestination(place);
-    const mapsUrl = `https://www.google.com/maps/dir/?api=1&destination=${place.latitude},${place.longitude}&travelmode=${travelMode}`;
-    window.open(mapsUrl, "_blank", "noopener,noreferrer");
-    toast.success(`Opening directions to ${place.canonicalName || place.name} 🧭`);
+    setIsDirectionsFocusMode(true);
+    setPanelState("compact");
+    if (leafletMapRef.current) {
+      leafletMapRef.current.flyTo([place.latitude, place.longitude], 13, { animate: true, duration: 1.2 });
+    }
+    toast.info(`Please select your starting origin for directions to ${place.canonicalName || place.name} 🧭`);
   };
 
   // Map Explorer Scope State (GEOGRAPHIC SEARCH vs POI SEARCH)
@@ -117,12 +124,15 @@ export function FullscreenRouteMap({
       const p = resolvePlaceById(initialPlaceId);
       return { type: "POI", areaName: p.district || "Tamil Nadu", selectedPOI: p };
     }
-    if (initialArea && GEOGRAPHIC_AREAS[initialArea.toLowerCase()]) {
-      const area = GEOGRAPHIC_AREAS[initialArea.toLowerCase()];
-      return { type: area.entityType, areaName: area.name, selectedArea: area };
-    }
     if (initialArea) {
-      return { type: "CITY", areaName: initialArea, selectedArea: null };
+      const cleanAreaKey = initialArea.toLowerCase().replace(/[-+]/g, " ").trim();
+      const areaKey = Object.keys(GEOGRAPHIC_AREAS).find(k => k.toLowerCase() === cleanAreaKey || k.toLowerCase().replace(/[-+]/g, " ") === cleanAreaKey);
+      if (areaKey) {
+        const area = GEOGRAPHIC_AREAS[areaKey];
+        return { type: area.entityType, areaName: area.name, selectedArea: area };
+      }
+      const displayName = initialArea.replace(/\+/g, " ");
+      return { type: "DESTINATION_AREA", areaName: displayName, selectedArea: null };
     }
     return { type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] };
   });
@@ -926,6 +936,92 @@ export function FullscreenRouteMap({
           })}
         </div>
       </header>
+
+      {/* Animated Focus Mode Origin Prompt Overlay */}
+      <AnimatePresence>
+        {isDirectionsFocusMode && selectedDestination && (
+          <motion.div
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 350, damping: 25 }}
+            className="absolute top-20 left-4 z-50 w-80 sm:w-96 bg-[#121821]/95 backdrop-blur-2xl border border-emerald-500/50 rounded-3xl p-5 shadow-[0_20px_60px_rgba(0,0,0,0.85)] text-white space-y-4 pointer-events-auto"
+          >
+            <div className="flex items-center justify-between border-b border-white/10 pb-3">
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-widest min-w-0">
+                <Navigation className="w-4 h-4 animate-pulse shrink-0" />
+                <span className="truncate">Directions: {selectedDestination.canonicalName || selectedDestination.name}</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsDirectionsFocusMode(false)}
+                className="size-7 grid place-items-center rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 transition cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <p className="text-xs font-semibold text-slate-200">Where are you starting your trip from?</p>
+
+            {/* GPS Auto-Detect Option */}
+            <button
+              type="button"
+              onClick={() => {
+                handleUseCurrentLocation();
+                setIsDirectionsFocusMode(false);
+              }}
+              className="w-full flex items-center justify-between p-3 rounded-2xl bg-emerald-500/15 border border-emerald-500/40 hover:bg-emerald-500/25 text-emerald-300 font-bold text-xs transition cursor-pointer active:scale-95"
+            >
+              <div className="flex items-center gap-2.5">
+                <LocateFixed className="w-4 h-4 text-emerald-400 shrink-0" />
+                <span>Use My Live GPS Location</span>
+              </div>
+              <span className="text-[10px] bg-emerald-500/30 text-emerald-200 px-2 py-0.5 rounded-full font-mono">GPS</span>
+            </button>
+
+            {/* Popular Origin Presets */}
+            <div className="space-y-2 pt-1">
+              <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider block">Or select starting city:</span>
+              <div className="flex flex-wrap gap-1.5">
+                {[
+                  { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+                  { name: "Madurai", lat: 9.9252, lng: 78.1198 },
+                  { name: "Coimbatore", lat: 11.0168, lng: 76.9558 },
+                  { name: "Salem", lat: 11.6643, lng: 78.1460 },
+                  { name: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
+                ].map((city) => (
+                  <button
+                    key={city.name}
+                    type="button"
+                    onClick={() => {
+                      const placeObj: ExplorerPlace = {
+                        id: `geo-${city.name.toLowerCase()}`,
+                        canonicalName: city.name,
+                        name: city.name,
+                        slug: city.name.toLowerCase(),
+                        district: city.name,
+                        state: "Tamil Nadu",
+                        country: "India",
+                        latitude: city.lat,
+                        longitude: city.lng,
+                        categories: ["all"],
+                        primaryCategory: "all",
+                        verified: true,
+                      };
+                      setSelectedOrigin(placeObj);
+                      setIsDirectionsFocusMode(false);
+                      toast.success(`Calculated route from ${city.name} to ${selectedDestination.canonicalName || selectedDestination.name} 🚗`);
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-white/5 hover:bg-emerald-500/20 hover:border-emerald-500/40 border border-white/10 text-xs font-semibold text-slate-200 transition cursor-pointer active:scale-95"
+                  >
+                    + {city.name}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Main Left Explorer Panel */}
       <aside

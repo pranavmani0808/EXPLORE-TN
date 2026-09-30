@@ -1067,6 +1067,111 @@ export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     minZoom: 1,
     aliases: ["tenkasi", "kasi viswanathar"],
     tags: ["tenkasi", "courtallam", "waterfalls"]
+  },
+  "kolli-hills": {
+    id: "p-kolli-hills",
+    canonicalName: "Kolli Hills 70 Hairpin Pass",
+    name: "Kolli Hills",
+    slug: "kolli-hills",
+    district: "Namakkal",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 11.2483,
+    longitude: 78.3381,
+    categories: ["hills", "offroad", "waterfalls", "tourist-places"],
+    primaryCategory: "hills",
+    tagline: "70 Continuous Hairpin Curves & Agaya Gangai Falls",
+    description: "Famous mountain pass in Eastern Ghats featuring 70 thrilling continuous hairpin curves, ancient Arapaleeswarar temple, and 300ft Agaya Gangai waterfall.",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    rating: 4.8,
+    reviewsCount: 342,
+    aliases: ["kolli hills", "kolli-hills", "namakkal kolli hills", "kolli hills 70 hairpins"],
+    tags: ["kolli", "kolli hills", "namakkal", "hairpins", "agaya gangai"]
+  },
+  "agaya-gangai-falls": {
+    id: "p-agaya-gangai-falls",
+    canonicalName: "Agaya Gangai Waterfalls",
+    name: "Agaya Gangai Waterfalls",
+    slug: "agaya-gangai-falls",
+    district: "Namakkal",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 11.2667,
+    longitude: 78.3417,
+    categories: ["waterfalls", "hills"],
+    primaryCategory: "waterfalls",
+    tagline: "300ft Cascading Waterfall in Kolli Hills",
+    description: "Stunning 300-foot waterfall situated in a deep valley of Kolli Hills near Arapaleeswarar Temple.",
+    image: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    rating: 4.7,
+    reviewsCount: 215,
+    aliases: ["agaya gangai", "agayagangai", "kolli falls"],
+    tags: ["kolli", "waterfalls", "namakkal"]
+  },
+  "hogenakkal-falls": {
+    id: "p-hogenakkal-falls",
+    canonicalName: "Hogenakkal Waterfalls & Coracle Rides",
+    name: "Hogenakkal Falls",
+    slug: "hogenakkal-falls",
+    district: "Dharmapuri",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 12.1182,
+    longitude: 77.7761,
+    categories: ["waterfalls", "nature", "tourist-places"],
+    primaryCategory: "waterfalls",
+    tagline: "Niagara of South India & Coracle Rides",
+    description: "Spectacular series of Kaveri river waterfalls on the Karnataka border famous for traditional coracle boat rides and fresh river fish fry.",
+    image: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    rating: 4.8,
+    reviewsCount: 520,
+    aliases: ["hogenakkal", "hogenakkal falls", "dharmapuri falls"],
+    tags: ["hogenakkal", "dharmapuri", "waterfalls", "coracle"]
+  },
+  dhanushkodi: {
+    id: "p-dhanushkodi",
+    canonicalName: "Dhanushkodi Ghost Town & Beach Point",
+    name: "Dhanushkodi",
+    slug: "dhanushkodi",
+    district: "Ramanathapuram",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 9.1770,
+    longitude: 79.4140,
+    categories: ["beaches", "heritage", "tourist-places"],
+    primaryCategory: "beaches",
+    tagline: "Submerged Ghost Town at Tip of Pamban Island",
+    description: "Historic abandoned town at the southern tip of Pamban Island where the Bay of Bengal meets the Indian Ocean.",
+    image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    rating: 4.9,
+    reviewsCount: 610,
+    aliases: ["dhanushkodi", "dhanushkodi ghost town", "dhanushkodi beach"],
+    tags: ["dhanushkodi", "rameswaram", "ghost town", "beach"]
+  },
+  yercaud: {
+    id: "p-yercaud",
+    canonicalName: "Yercaud Hill Station & Emerald Lake",
+    name: "Yercaud",
+    slug: "yercaud",
+    district: "Salem",
+    state: "Tamil Nadu",
+    country: "India",
+    latitude: 11.7753,
+    longitude: 78.2093,
+    categories: ["hills", "nature"],
+    primaryCategory: "hills",
+    tagline: "Jewel of the Shevaroy Hills & Coffee Plantations",
+    description: "Charming hill station in Salem district featuring Yercaud Lake, Lady's Seat, and coffee estates.",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+    verified: true,
+    rating: 4.6,
+    reviewsCount: 390,
+    aliases: ["yercaud", "yercaud lake", "salem hill station"],
+    tags: ["yercaud", "salem", "hills"]
   }
 };
 
@@ -1162,6 +1267,94 @@ export const GEOGRAPHIC_AREAS: Record<string, GeographicArea> = {
     longitude: 76.9554,
     boundingBox: { minLat: 10.2000, maxLat: 10.4500, minLng: 76.8000, maxLng: 77.1000 },
   },
+  "kolli-hills": {
+    id: "geo-kolli-hills",
+    name: "Kolli Hills",
+    canonicalName: "Kolli Hills Mountain Range",
+    slug: "kolli-hills",
+    entityType: "DESTINATION_AREA",
+    district: "Namakkal",
+    state: "Tamil Nadu",
+    latitude: 11.2483,
+    longitude: 78.3381,
+  },
+  "kolli hills": {
+    id: "geo-kolli-hills-space",
+    name: "Kolli Hills",
+    canonicalName: "Kolli Hills Mountain Range",
+    slug: "kolli-hills",
+    entityType: "DESTINATION_AREA",
+    district: "Namakkal",
+    state: "Tamil Nadu",
+    latitude: 11.2483,
+    longitude: 78.3381,
+  },
+  dharmapuri: {
+    id: "geo-dharmapuri",
+    name: "Dharmapuri",
+    canonicalName: "Dharmapuri District & Hogenakkal",
+    slug: "dharmapuri",
+    entityType: "DISTRICT",
+    district: "Dharmapuri",
+    state: "Tamil Nadu",
+    latitude: 12.1182,
+    longitude: 77.7761,
+  },
+  hogenakkal: {
+    id: "geo-hogenakkal",
+    name: "Hogenakkal",
+    canonicalName: "Hogenakkal Waterfalls Region",
+    slug: "hogenakkal",
+    entityType: "DESTINATION_AREA",
+    district: "Dharmapuri",
+    state: "Tamil Nadu",
+    latitude: 12.1182,
+    longitude: 77.7761,
+  },
+  rameswaram: {
+    id: "geo-rameswaram",
+    name: "Rameswaram",
+    canonicalName: "Rameswaram Island & Dhanushkodi",
+    slug: "rameswaram",
+    entityType: "DESTINATION_AREA",
+    district: "Ramanathapuram",
+    state: "Tamil Nadu",
+    latitude: 9.2876,
+    longitude: 79.3129,
+  },
+  dhanushkodi: {
+    id: "geo-dhanushkodi",
+    name: "Dhanushkodi",
+    canonicalName: "Dhanushkodi Ghost Town & Beach",
+    slug: "dhanushkodi",
+    entityType: "DESTINATION_AREA",
+    district: "Ramanathapuram",
+    state: "Tamil Nadu",
+    latitude: 9.1770,
+    longitude: 79.4140,
+  },
+  salem: {
+    id: "geo-salem",
+    name: "Salem",
+    canonicalName: "Salem District & Yercaud",
+    slug: "salem",
+    entityType: "DISTRICT",
+    district: "Salem",
+    state: "Tamil Nadu",
+    latitude: 11.6643,
+    longitude: 78.1460,
+  },
+  yercaud: {
+    id: "geo-yercaud",
+    name: "Yercaud",
+    canonicalName: "Yercaud Shevaroy Hills",
+    slug: "yercaud",
+    entityType: "DESTINATION_AREA",
+    district: "Salem",
+    state: "Tamil Nadu",
+    latitude: 11.7753,
+    longitude: 78.2093,
+  },
   coimbatore: {
     id: "geo-coimbatore",
     name: "Coimbatore",
@@ -1201,25 +1394,38 @@ export function getPlacesWithinArea(areaQuery: string): ExplorerPlace[] {
   if (!areaQuery || areaQuery.toLowerCase() === "tamil nadu" || areaQuery.toLowerCase() === "all") {
     return CANONICAL_PLACES.filter((p) => p.placeType !== "city");
   }
-  const q = areaQuery.toLowerCase().trim();
+  const rawQ = areaQuery.toLowerCase().trim();
+  const q = rawQ.replace(/[-+]/g, " ").trim();
 
   return CANONICAL_PLACES.filter((p) => {
     if (p.placeType === "city" && p.slug === q) return false;
 
-    if (q === "madurai") {
+    if (q.includes("madurai")) {
       return p.district.toLowerCase() === "madurai" || p.name.toLowerCase().includes("madurai") || (p.tags || []).includes("madurai");
     }
-    if (q === "chennai") {
+    if (q.includes("chennai")) {
       return p.district.toLowerCase() === "chennai" || p.name.toLowerCase().includes("chennai") || (p.tags || []).includes("chennai");
     }
-    if (q === "kodaikanal") {
+    if (q.includes("kodaikanal")) {
       return p.district.toLowerCase() === "dindigul" || p.name.toLowerCase().includes("kodaikanal") || (p.tags || []).includes("kodaikanal");
     }
-    if (q === "ooty" || q === "nilgiris") {
+    if (q.includes("ooty") || q.includes("nilgiri")) {
       return p.district.toLowerCase().includes("nilgiri") || p.name.toLowerCase().includes("ooty") || (p.tags || []).includes("ooty");
     }
-    if (q === "valparai") {
+    if (q.includes("valparai")) {
       return p.district.toLowerCase() === "coimbatore" || p.name.toLowerCase().includes("valparai") || (p.tags || []).includes("valparai");
+    }
+    if (q.includes("kolli")) {
+      return p.district.toLowerCase().includes("namakkal") || p.name.toLowerCase().includes("kolli") || p.canonicalName.toLowerCase().includes("kolli") || (p.tags || []).includes("kolli");
+    }
+    if (q.includes("dharmapuri") || q.includes("hogenakkal")) {
+      return p.district.toLowerCase().includes("dharmapuri") || p.name.toLowerCase().includes("hogenakkal") || (p.tags || []).includes("hogenakkal");
+    }
+    if (q.includes("rameswaram") || q.includes("dhanushkodi") || q.includes("ramanathapuram")) {
+      return p.district.toLowerCase().includes("ramanathapuram") || p.name.toLowerCase().includes("rameswaram") || p.name.toLowerCase().includes("dhanushkodi") || (p.tags || []).includes("rameswaram");
+    }
+    if (q.includes("salem") || q.includes("yercaud")) {
+      return p.district.toLowerCase().includes("salem") || p.name.toLowerCase().includes("yercaud") || (p.tags || []).includes("yercaud");
     }
 
     const distMatch = p.district.toLowerCase().includes(q) || q.includes(p.district.toLowerCase());
