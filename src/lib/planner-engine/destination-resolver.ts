@@ -191,16 +191,50 @@ export function resolveDestination(rawInput: string): ResolvedDestinationResult 
 }
 
 function buildResolvedResult(canonicalName: string, originalInput: string): ResolvedDestinationResult {
+  const targetLower = canonicalName.toLowerCase();
+
   const canonicalPlace = CANONICAL_PLACES.find(
-    (p) => p.canonicalName.toLowerCase() === canonicalName.toLowerCase() || p.name.toLowerCase() === canonicalName.toLowerCase()
+    (p) =>
+      p.canonicalName.toLowerCase() === targetLower ||
+      p.name.toLowerCase() === targetLower ||
+      p.slug.toLowerCase() === targetLower ||
+      p.district.toLowerCase() === targetLower ||
+      (targetLower.includes("kanyakumari") && p.district.toLowerCase().includes("kanyakumari"))
   );
 
   const district = DISTRICT_DETAILS.find(
-    (d) => d.name.toLowerCase() === canonicalName.toLowerCase() || d.hq.toLowerCase() === canonicalName.toLowerCase()
+    (d) =>
+      d.name.toLowerCase() === targetLower ||
+      d.slug.toLowerCase() === targetLower ||
+      d.hq.toLowerCase() === targetLower ||
+      (targetLower.includes("kanyakumari") && (d.slug === "kanniyakumari" || d.name.toLowerCase().includes("kanniyakumari")))
   );
 
-  const lat = canonicalPlace?.latitude || district?.coords[0] || 10.2381;
-  const lng = canonicalPlace?.longitude || district?.coords[1] || 77.4892;
+  let lat = canonicalPlace?.latitude || district?.coords[0];
+  let lng = canonicalPlace?.longitude || district?.coords[1];
+
+  if (!lat || !lng) {
+    if (targetLower.includes("kanyakumari") || targetLower.includes("kanniyakumari")) {
+      lat = 8.0883;
+      lng = 77.5385;
+    } else if (targetLower.includes("madurai")) {
+      lat = 9.9252;
+      lng = 78.1198;
+    } else if (targetLower.includes("chennai")) {
+      lat = 13.0827;
+      lng = 80.2707;
+    } else if (targetLower.includes("ooty") || targetLower.includes("nilgiri")) {
+      lat = 11.4102;
+      lng = 76.6950;
+    } else if (targetLower.includes("pondicherry")) {
+      lat = 11.9416;
+      lng = 79.8083;
+    } else {
+      lat = 10.2381;
+      lng = 77.4892;
+    }
+  }
+
   const distName = canonicalPlace?.district || district?.name || canonicalName;
 
   // Retrieve all known POIs matching this destination or district

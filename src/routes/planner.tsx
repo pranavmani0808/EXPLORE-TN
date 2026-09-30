@@ -747,11 +747,15 @@ function PlannerPage() {
                   ))}
                 </div>
               ) : (
-                <div className="py-6 text-center space-y-2 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02]">
-                  <Clock className="size-7 text-slate-400 dark:text-slate-600 mx-auto" />
-                  <div className="text-sm font-bold text-slate-700 dark:text-slate-300">No Itinerary Generated Yet</div>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto">
-                    Enter your trip details above or ask Copilot to generate a verified timeline, distance, and road route.
+                <div className="py-6 text-center space-y-2.5 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] p-5">
+                  <div className="size-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+                    <Sparkles className="size-5" />
+                  </div>
+                  <div className="text-base font-extrabold text-slate-900 dark:text-white">
+                    Hello, Explorer! 👋
+                  </div>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 max-w-sm mx-auto leading-relaxed">
+                    Where would you like to travel next? Enter your destination, starting city, or budget above to generate a verified timeline, distance, and road route.
                   </p>
                 </div>
               )}

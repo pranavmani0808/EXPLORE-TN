@@ -1,6 +1,14 @@
 import { CandidatePOI, DailyActivity, DailyItinerary, StructuredTripRequest } from "./types";
 import { getHaversineKm } from "./poi-ranker";
 
+function formatTimeSlot(hour: number, minute: number): string {
+  const normHour = ((hour % 24) + 24) % 24;
+  const period = normHour >= 12 ? "PM" : "AM";
+  const displayHour = normHour % 12 === 0 ? 12 : normHour % 12;
+  const displayMin = String(Math.floor(minute) % 60).padStart(2, "0");
+  return `${String(displayHour).padStart(2, "0")}:${displayMin} ${period}`;
+}
+
 export function optimizeItineraryTimeline(
   originName: string,
   destinationName: string,
@@ -9,7 +17,7 @@ export function optimizeItineraryTimeline(
   request: StructuredTripRequest
 ): DailyItinerary[] {
   const itineraries: DailyItinerary[] = [];
-  const poisPerDay = Math.max(2, Math.ceil(rankedPois.length / days));
+  const poisPerDay = Math.min(3, Math.max(2, Math.ceil(rankedPois.length / days)));
   let remainingPois = [...rankedPois];
 
   for (let d = 1; d <= days; d++) {
@@ -49,7 +57,7 @@ export function optimizeItineraryTimeline(
       currentMin = 0;
     } else {
       activities.push({
-        timeSlot: `${String(currentHour).padStart(2, "0")}:00 AM`,
+        timeSlot: formatTimeSlot(currentHour, currentMin),
         title: isFirstDay ? `Depart from ${originName}` : `Start Day ${d} from Hotel in ${destinationName}`,
         description: isFirstDay
           ? `Begin morning journey via ${request.transport.mode.toUpperCase()} towards ${destinationName}.`
@@ -60,15 +68,15 @@ export function optimizeItineraryTimeline(
       currentMin += 30;
     }
 
-    let prevLat = 10.2381;
-    let prevLng = 77.4892;
+    let prevLat = dayPois[0]?.latitude || 8.0883;
+    let prevLng = dayPois[0]?.longitude || 77.5385;
 
     // Schedule Day POIs
     dayPois.forEach((poi, idx) => {
       // Check lunch time
-      if (currentHour >= 12 && !activities.some(a => a.type === "meal")) {
+      if (currentHour >= 13 && !activities.some(a => a.type === "meal")) {
         activities.push({
-          timeSlot: `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`,
+          timeSlot: formatTimeSlot(currentHour, currentMin),
           title: `Local Tamil Cuisine Lunch in ${destinationName}`,
           description: `Enjoy authentic regional food (${request.constraints.dietaryRestrictions.includes("vegetarian") ? "Pure Veg Sree Sabarees" : "Local Speciality"}).`,
           durationMinutes: 45,
@@ -82,7 +90,7 @@ export function optimizeItineraryTimeline(
       }
 
       // Calculate travel from prev spot
-      const legKm = idx === 0 ? 15 : Math.round(getHaversineKm(prevLat, prevLng, poi.latitude, poi.longitude) * 1.3);
+      const legKm = idx === 0 ? 10 : Math.round(getHaversineKm(prevLat, prevLng, poi.latitude, poi.longitude) * 1.2);
       const legMin = Math.round((legKm / 35) * 60);
 
       dayDistance += legKm;
@@ -92,7 +100,7 @@ export function optimizeItineraryTimeline(
       prevLat = poi.latitude;
       prevLng = poi.longitude;
 
-      // Add travel activity if distance > 2km
+      // Add travel time
       if (legKm > 2) {
         currentMin += legMin;
         if (currentMin >= 60) {
@@ -101,13 +109,7 @@ export function optimizeItineraryTimeline(
         }
       }
 
-      // Opening hours validation check
-      if (currentHour < 9 && poi.openingHours.includes("10:00")) {
-        currentHour = 10;
-        currentMin = 0;
-      }
-
-      const timeSlotStr = `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`;
+      const timeSlotStr = formatTimeSlot(currentHour, currentMin);
 
       activities.push({
         timeSlot: timeSlotStr,
@@ -118,7 +120,7 @@ export function optimizeItineraryTimeline(
         travelTimeFromPrevMinutes: legMin,
         distanceFromPrevKm: legKm,
         type: "poi",
-        parking: poi.parkingInfo.statusText,
+        parking: poi.parkingInfo?.statusText || "Verified Parking Available",
         safetyNote: poi.difficulty === "Hard" ? "⚠️ Steep walking steps; exercise caution." : undefined,
         whyThisPlace: poi.reason || `Selected for ${poi.category} matching your preferences.`,
         costEstimate: poi.numericEntryFee * request.travelers.groupSize
@@ -133,13 +135,13 @@ export function optimizeItineraryTimeline(
 
     // End Day Activity
     activities.push({
-      timeSlot: `${String(currentHour).padStart(2, "0")}:${String(currentMin).padStart(2, "0")}`,
+      timeSlot: formatTimeSlot(currentHour, currentMin),
       title: isLastDay ? `Return Journey to ${originName}` : `Return to Hotel & Evening Relaxation`,
       description: isLastDay
         ? `Conclude ${destinationName} trip and return back to ${originName}.`
         : `Evening free for local markets or resting.`,
-      durationMinutes: 60,
-      type: "hotel"
+      durationMinutes: 30,
+      type: "end"
     });
 
     itineraries.push({

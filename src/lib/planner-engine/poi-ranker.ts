@@ -25,11 +25,23 @@ export function rankAndFilterPOIs(
   const { interests, constraints, travelers } = request;
   const avoidCategories = constraints.avoid || [];
 
-  // Filter raw places matching Tamil Nadu location or proximity (< 120km from destination)
-  const candidatePlaces = places.filter((p) => {
+  const targetDestName = (request.destinations[0]?.name || "").toLowerCase();
+
+  // Filter raw places matching destination proximity or district name
+  let candidatePlaces = places.filter((p) => {
     const dist = getHaversineKm(destinationLat, destinationLng, p.latitude, p.longitude);
-    return dist <= 120; // Include POIs within 120km radius of target destination
+    const isDistrictMatch = p.district.toLowerCase().includes(targetDestName) ||
+      (targetDestName.includes("kanyakumari") && (p.district.toLowerCase().includes("kanyakumari") || p.district.toLowerCase().includes("kanniyakumari")));
+    return dist <= 80 || isDistrictMatch;
   });
+
+  // Fallback if strict radius returns few candidates
+  if (candidatePlaces.length < 3) {
+    candidatePlaces = places.filter((p) => {
+      const dist = getHaversineKm(destinationLat, destinationLng, p.latitude, p.longitude);
+      return dist <= 180;
+    });
+  }
 
   const scoredPOIs: CandidatePOI[] = candidatePlaces.map((p) => {
     let score = 50; // Base score
@@ -48,7 +60,16 @@ export function rankAndFilterPOIs(
       reasons.push(`Excluded by user constraint: no ${avoidCategories.join(", ")}`);
     }
 
-    // 2. Interest Match Bonus
+    // 2. District Match Bonus
+    const isDistrictMatch = p.district.toLowerCase().includes(targetDestName) ||
+      (targetDestName.includes("kanyakumari") && (p.district.toLowerCase().includes("kanyakumari") || p.district.toLowerCase().includes("kanniyakumari")));
+
+    if (isDistrictMatch) {
+      score += 100;
+      reasons.push(`Located directly in ${p.district}`);
+    }
+
+    // 3. Interest Match Bonus
     if (interests.length > 0) {
       const isInterestMatch = interests.some(
         (interest) =>
@@ -62,13 +83,15 @@ export function rankAndFilterPOIs(
       }
     }
 
-    // 3. Distance & Accessibility Scoring
+    // 4. Distance & Accessibility Scoring
     const distFromDest = getHaversineKm(destinationLat, destinationLng, p.latitude, p.longitude);
-    if (distFromDest < 15) {
-      score += 20;
+    if (distFromDest < 20) {
+      score += 40;
       reasons.push("Located close to central destination");
-    } else if (distFromDest < 45) {
-      score += 10;
+    } else if (distFromDest < 50) {
+      score += 20;
+    } else if (distFromDest > 100 && !isDistrictMatch) {
+      score -= 50; // Penalize distant POIs from neighboring districts
     }
 
     // 4. Traveler Demographics Tuning
