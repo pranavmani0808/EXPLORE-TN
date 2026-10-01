@@ -87,13 +87,24 @@ const CITY_COORDINATES: Record<string, { lat: number; lng: number; desc: string 
   "elephant beach": { lat: 11.9961, lng: 92.9515, desc: "Elephant Beach Sea Walk" },
 };
 
+const POPULAR_DESTINATIONS = [
+  { name: "Madurai", tagline: "Meenakshi Temple & Heritage", icon: "🛕", category: "Heritage" },
+  { name: "Kodaikanal", tagline: "Princess of Hill Stations", icon: "⛰️", category: "Hills & Nature" },
+  { name: "Ooty", tagline: "Queen of Nilgiri Mountains", icon: "🌿", category: "Hills & Tea" },
+  { name: "Kanyakumari", tagline: "Coastal Triveni Sangam", icon: "🌅", category: "Coastal & Sunset" },
+  { name: "Thanjavur", tagline: "Great Living Chola Temples", icon: "🏛️", category: "Architecture" },
+  { name: "Rishikesh", tagline: "Ganges Rafting & Adventure", icon: "🌊", category: "Adventure Sports" },
+  { name: "Valparai", tagline: "70 Hairpin Pass & Wildlife", icon: "🛣️", category: "Scenic Pass" },
+  { name: "Pondicherry", tagline: "French Quarter Promenade", icon: "🏖️", category: "Coastal & Cafes" },
+];
+
 function PlannerPage() {
   const { requireAuth } = useAuthGuard();
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
   const [messages, setMessages] = useState<Array<{ role: "user" | "assistant"; text: string }>>([
     {
       role: "assistant",
-      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests (e.g. 'Plan a trip inside Madurai', 'Plan a trip to Kodaikanal', or 'Plan a River Rafting trip to Rishikesh').",
+      text: "Hi! I am your ExplorerTN Trip Copilot. Tell me where you want to start, your budget, or interests.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -106,6 +117,10 @@ function PlannerPage() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, loading]);
+
+  // Conditional Flow & Step State
+  const [selectedDestination, setSelectedDestination] = useState<string>("");
+  const [showCustomizer, setShowCustomizer] = useState<boolean>(false);
 
   // Dynamic Route & Planner Response State
   const [plannerData, setPlannerData] = useState<PlannerChatResponseDTO | null>(null);
@@ -121,8 +136,8 @@ function PlannerPage() {
   ]);
   const [customTransport, setCustomTransport] = useState<string>("Car");
 
-  const currentDestination = plannerData?.plannerState?.destination || aiPlanData?.destination?.name || "Madurai";
-  const effectiveOrigin = customOrigin || plannerData?.plannerState?.origin || currentDestination;
+  const currentDestination = selectedDestination || plannerData?.plannerState?.destination || aiPlanData?.destination?.name || "";
+  const effectiveOrigin = customOrigin || plannerData?.plannerState?.origin || currentDestination || "Local City";
 
   const toggleCustomInterest = (interest: string) => {
     setCustomInterests((prev) =>
@@ -130,9 +145,31 @@ function PlannerPage() {
     );
   };
 
+  const handleSelectDestination = (destName: string) => {
+    setSelectedDestination(destName);
+    setCustomOrigin(destName);
+    setShowCustomizer(true);
+  };
+
+  const handleStartPlanning = (targetDest?: string) => {
+    const destToUse = targetDest || selectedDestination || input.trim();
+    if (!destToUse) {
+      toast.error("Please select or enter a destination to start planning!");
+      return;
+    }
+    setSelectedDestination(destToUse);
+    if (!customOrigin) {
+      setCustomOrigin(destToUse);
+    }
+    setShowCustomizer(true);
+  };
+
   const handleGenerateCustomPlan = () => {
+    const destToUse = selectedDestination || currentDestination || "Madurai";
+    const originToUse = customOrigin || destToUse;
     const interestLabels = customInterests.length > 0 ? customInterests.join(", ") : "Top Attractions & Local Food";
-    const customPrompt = `Plan a ${customDays}-day trip to ${currentDestination} starting from ${effectiveOrigin} focused on ${interestLabels} via ${customTransport}`;
+    const customPrompt = `Plan a ${customDays}-day trip to ${destToUse} starting from ${originToUse} focused on ${interestLabels} via ${customTransport}`;
+    setShowCustomizer(false);
     handleSendMessage(customPrompt);
   };
 
@@ -198,10 +235,24 @@ function PlannerPage() {
     if (typeof window === "undefined" || initializedRef.current) return;
     const searchParams = new URLSearchParams(window.location.search);
     const urlPrompt = searchParams.get("prompt");
+    const urlDest = searchParams.get("destination");
 
-    if (urlPrompt) {
+    if (urlDest && !urlPrompt) {
       initializedRef.current = true;
+      setSelectedDestination(urlDest);
+      setCustomOrigin(urlDest);
+      setShowCustomizer(true);
+    } else if (urlPrompt) {
+      initializedRef.current = true;
+      setShowCustomizer(true);
       setErrorMsg(null);
+
+      const destMatch = urlPrompt.match(/(?:to|in|around)\s+([a-zA-Z\s]+)/i);
+      if (destMatch) {
+        const d = destMatch[1].trim();
+        setSelectedDestination(d);
+        setCustomOrigin(d);
+      }
       
       const requestId = crypto.randomUUID();
       activeRequestIdRef.current = requestId;
@@ -355,91 +406,391 @@ function PlannerPage() {
       />
 
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6 space-y-6">
-        {/* Prominent AI Travel Intelligence Engine Input Bar */}
-        <AITravelPlannerInput onSearch={handleAISearch} isLoading={loading} />
-
-        {/* AI Travel Plan Summary & Controls Banner */}
-        {aiPlanData && (
+        {/* VIEW 1: INITIAL LANDING STATE (No trip initiated yet & no plan generated) */}
+        {!showCustomizer && !hasValidPlan && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="p-5 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-lg text-white space-y-3"
+            className="space-y-8 py-2"
           >
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-500/20 pb-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
-                    {aiPlanData.intent_type || "AI PLAN"}
-                  </span>
-                  <h3 className="font-bold text-lg text-emerald-300">{aiPlanData.title}</h3>
-                </div>
-                <p className="text-xs text-slate-300 mt-1">{aiPlanData.summary}</p>
+            {/* Landing Hero Card */}
+            <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-slate-900 via-zinc-900 to-emerald-950 p-8 sm:p-12 border border-white/10 shadow-2xl text-center space-y-5">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs font-extrabold uppercase tracking-wider">
+                <Sparkles className="w-3.5 h-3.5" /> AI Trip Intelligence & Route Optimization
               </div>
 
-              <div className="flex items-center gap-2">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white tracking-tight">
+                Where do you want to explore?
+              </h1>
+
+              <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-300 font-medium leading-relaxed">
+                Discover Tamil Nadu destinations and create a personalized travel itinerary with PostGIS spatial evidence, OSRM highway routing, and AI route feasibility.
+              </p>
+
+              {/* Destination Search & Quick Start Bar */}
+              <div className="max-w-xl mx-auto flex flex-col sm:flex-row items-center gap-2 p-2 bg-slate-800/90 border border-slate-700/90 rounded-2xl shadow-2xl backdrop-blur-md">
+                <div className="flex items-center gap-2 w-full px-2">
+                  <MapPin className="w-5 h-5 text-emerald-400 shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Enter a destination (e.g. Madurai, Kodaikanal, Ooty)..."
+                    value={selectedDestination || input}
+                    onChange={(e) => {
+                      setSelectedDestination(e.target.value);
+                      setInput(e.target.value);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") handleStartPlanning();
+                    }}
+                    className="w-full bg-transparent text-sm text-white placeholder:text-slate-400 focus:outline-none py-2 font-medium"
+                  />
+                </div>
                 <Button
-                  size="sm"
-                  onClick={handleAddHiddenPlaces}
-                  className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold"
+                  onClick={() => handleStartPlanning()}
+                  className="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs px-6 py-3 rounded-xl transition flex items-center justify-center gap-1.5 shrink-0 cursor-pointer shadow-lg shadow-emerald-500/20"
                 >
-                  <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Hidden Places
+                  <span>Plan a Trip</span>
+                  <ArrowRight className="w-4 h-4" />
                 </Button>
               </div>
             </div>
 
-            {/* AI Ordered Stops Cards List */}
-            <div className="space-y-3 pt-2">
-              <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                <Compass className="w-4 h-4 text-emerald-400" /> Ranked Itinerary Stops ({aiPlanData.ordered_stops?.length || 0})
-              </h4>
+            {/* Popular Suggested Destinations */}
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                    <Compass className="w-5 h-5 text-emerald-500" />
+                    Popular Destinations to Explore
+                  </h2>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">Select any location to open the customizer & configure your trip preferences</p>
+                </div>
+              </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                {aiPlanData.ordered_stops?.map((stop: any, idx: number) => (
-                  <div
-                    key={stop.place_id || idx}
-                    className="p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/80 flex items-start justify-between gap-3 text-xs"
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {POPULAR_DESTINATIONS.map((dest) => (
+                  <motion.div
+                    key={dest.name}
+                    whileHover={{ y: -4, scale: 1.02 }}
+                    onClick={() => handleSelectDestination(dest.name)}
+                    className="group cursor-pointer rounded-2xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-5 shadow-sm hover:shadow-xl hover:border-emerald-500/40 transition-all flex flex-col justify-between"
                   >
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-[10px]">
-                          {stop.order || idx + 1}
+                    <div className="space-y-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-2xl">{dest.icon}</span>
+                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                          {dest.category}
                         </span>
-                        <span className="font-bold text-white text-sm">{stop.name}</span>
                       </div>
 
-                      <div className="flex items-center gap-2 text-[11px] text-slate-300">
-                        <span className="text-emerald-400 font-medium">{stop.category}</span>
-                        <span>•</span>
-                        <span>{stop.district}</span>
-                      </div>
-
-                      <p className="text-[11px] text-slate-400 line-clamp-2">{stop.rationale}</p>
-
-                      <div className="flex items-center gap-2 pt-1">
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[10px] font-semibold border border-emerald-500/20 flex items-center gap-1">
-                          <Award className="w-3 h-3 text-emerald-400" />
-                          {stop.provenance?.source || "ExploreTN Verified"}
-                        </span>
-                        <span className="text-[10px] text-slate-400">
-                          {stop.recommended_visit_mins} mins visit
-                        </span>
+                      <div>
+                        <h3 className="font-bold text-base text-slate-900 dark:text-white group-hover:text-emerald-500 transition-colors">
+                          {dest.name}
+                        </h3>
+                        <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                          {dest.tagline}
+                        </p>
                       </div>
                     </div>
 
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveStop(stop.place_id || stop.slug)}
-                      className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
-                      title="Remove stop and recalculate route"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                    <div className="pt-4 mt-4 border-t border-slate-100 dark:border-white/5 flex items-center justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                      <span>Plan Trip</span>
+                      <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                    </div>
+                  </motion.div>
                 ))}
               </div>
             </div>
           </motion.div>
         )}
+
+        {/* VIEW 2: TRIP CUSTOMIZER PHASE (Revealed when user selects a destination or clicks "Plan a Trip") */}
+        {showCustomizer && !hasValidPlan && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            className="p-6 sm:p-8 bg-slate-900 border border-emerald-500/30 rounded-3xl space-y-6 text-white shadow-2xl max-w-4xl mx-auto"
+          >
+            {/* Customizer Header */}
+            <div className="flex flex-wrap items-center justify-between gap-4 border-b border-emerald-500/20 pb-5">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-black uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/30 flex items-center gap-1.5">
+                    <Sparkles className="w-3.5 h-3.5 text-emerald-400" /> Trip Customizer
+                  </span>
+                  <h2 className="text-xl sm:text-2xl font-bold text-white">
+                    Plan Trip to <span className="text-emerald-400">{selectedDestination || "Target Destination"}</span>
+                  </h2>
+                </div>
+                <p className="text-xs text-slate-300 mt-1">
+                  Configure duration, origin, interests, and transport mode before generating your AI itinerary.
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomizer(false);
+                  setSelectedDestination("");
+                }}
+                className="px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-semibold border border-slate-700 transition cursor-pointer"
+              >
+                ← Change Destination
+              </button>
+            </div>
+
+            {/* Form Rows */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Destination & Origin */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1.5">1. Target Destination:</label>
+                  <div className="flex items-center gap-2 p-3 bg-slate-800/90 rounded-xl border border-slate-700">
+                    <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <input
+                      type="text"
+                      value={selectedDestination}
+                      onChange={(e) => setSelectedDestination(e.target.value)}
+                      placeholder="Enter destination..."
+                      className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none font-semibold"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1.5">2. Starting Origin (Departure):</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[selectedDestination || "Local", "Chennai", "Coimbatore", "Trichy", "Salem"].map((city) => {
+                      const isSelected = effectiveOrigin.toLowerCase() === city.toLowerCase();
+                      return (
+                        <button
+                          key={city}
+                          type="button"
+                          onClick={() => setCustomOrigin(city)}
+                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                            isSelected
+                              ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
+                              : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                          }`}
+                        >
+                          📍 {city} {city === selectedDestination ? "(Local)" : ""}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
+
+              {/* Duration & Transport */}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1.5">3. Trip Duration:</label>
+                  <div className="flex flex-wrap gap-2">
+                    {[1, 2, 3, 4].map((d) => (
+                      <button
+                        key={d}
+                        type="button"
+                        onClick={() => setCustomDays(d)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          customDays === d
+                            ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
+                            : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        {d} {d === 1 ? "Day" : d === 4 ? "4+ Days" : "Days"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-xs font-bold text-slate-300 block mb-1.5">4. Mode of Transport:</label>
+                  <div className="flex flex-wrap gap-2">
+                    {["Car", "Bike", "Bus", "Train"].map((mode) => (
+                      <button
+                        key={mode}
+                        type="button"
+                        onClick={() => setCustomTransport(mode)}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          customTransport === mode
+                            ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
+                            : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                        }`}
+                      >
+                        {mode === "Car" ? "🚗 Car" : mode === "Bike" ? "🏍️ Bike" : mode === "Bus" ? "🚌 Bus" : "🚆 Train"}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Experiences / Interests */}
+            <div className="space-y-2 pt-2 border-t border-slate-800">
+              <label className="text-xs font-bold text-slate-300 block">5. Experiences & Places You Want to Explore:</label>
+              <div className="flex flex-wrap gap-2">
+                {[
+                  "🛕 Temples & Heritage",
+                  "🍲 Local Tamil Food",
+                  "⛰️ Nearby Hills",
+                  "🏛️ Royal History",
+                  "🛍️ Silk & Local Markets",
+                  "🌊 Waterfalls & Streams"
+                ].map((exp) => {
+                  const isSelected = customInterests.includes(exp);
+                  return (
+                    <button
+                      key={exp}
+                      type="button"
+                      onClick={() => toggleCustomInterest(exp)}
+                      className={`px-3 py-1.5 rounded-xl text-xs font-semibold transition flex items-center gap-1.5 cursor-pointer ${
+                        isSelected
+                          ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/50"
+                          : "bg-slate-800/80 text-slate-400 border border-slate-700/60 hover:text-white"
+                      }`}
+                    >
+                      <span>{exp}</span>
+                      {isSelected && <Check className="w-3.5 h-3.5 text-emerald-400" />}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Action Footer */}
+            <div className="pt-4 border-t border-emerald-500/20 flex flex-wrap items-center justify-between gap-3">
+              <span className="text-xs text-slate-400 font-medium">
+                Ready to build itinerary for {selectedDestination || "Destination"} ({customDays} {customDays === 1 ? "day" : "days"} from {effectiveOrigin})
+              </span>
+
+              <Button
+                onClick={handleGenerateCustomPlan}
+                disabled={loading || !selectedDestination}
+                className="bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-sm px-6 py-3 rounded-xl shadow-lg shadow-emerald-500/20 transition flex items-center gap-2 cursor-pointer disabled:opacity-50"
+              >
+                {loading ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin text-slate-950" />
+                    <span>Calculating Route & Itinerary...</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="w-4 h-4 text-slate-950" />
+                    <span>✨ Generate Tailored Itinerary →</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        )}
+
+        {/* VIEW 3: GENERATED ITINERARY VIEW (hasValidPlan is true) */}
+        {hasValidPlan && (
+          <div className="space-y-6">
+            {/* Reconfigure Preferences Bar */}
+            <div className="flex items-center justify-between p-4 bg-slate-900 border border-emerald-500/20 rounded-2xl text-white">
+              <div className="flex items-center gap-2.5">
+                <Sparkles className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-bold text-emerald-300">
+                  Active Plan: {currentDestination} ({plannerData?.plannerState?.durationDays || customDays} Days from {effectiveOrigin})
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowCustomizer(true);
+                }}
+                className="px-3.5 py-1.5 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5" /> Reconfigure Trip Preferences
+              </button>
+            </div>
+
+            {/* Prominent AI Travel Intelligence Engine Input Bar */}
+            <AITravelPlannerInput onSearch={handleAISearch} isLoading={loading} />
+
+            {/* AI Travel Plan Summary & Controls Banner */}
+            {aiPlanData && (
+              <motion.div
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-5 bg-gradient-to-r from-slate-900 via-emerald-950 to-slate-900 border border-emerald-500/30 rounded-2xl shadow-lg text-white space-y-3"
+              >
+                <div className="flex flex-wrap items-center justify-between gap-3 border-b border-emerald-500/20 pb-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
+                        {aiPlanData.intent_type || "AI PLAN"}
+                      </span>
+                      <h3 className="font-bold text-lg text-emerald-300">{aiPlanData.title}</h3>
+                    </div>
+                    <p className="text-xs text-slate-300 mt-1">{aiPlanData.summary}</p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <Button
+                      size="sm"
+                      onClick={handleAddHiddenPlaces}
+                      className="bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 text-xs font-semibold"
+                    >
+                      <PlusCircle className="w-3.5 h-3.5 mr-1" /> Add Hidden Places
+                    </Button>
+                  </div>
+                </div>
+
+                {/* AI Ordered Stops Cards List */}
+                <div className="space-y-3 pt-2">
+                  <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Compass className="w-4 h-4 text-emerald-400" /> Ranked Itinerary Stops ({aiPlanData.ordered_stops?.length || 0})
+                  </h4>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {aiPlanData.ordered_stops?.map((stop: any, idx: number) => (
+                      <div
+                        key={stop.place_id || idx}
+                        className="p-3.5 bg-slate-800/80 rounded-xl border border-slate-700/80 flex items-start justify-between gap-3 text-xs"
+                      >
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="w-5 h-5 rounded-full bg-emerald-500 text-slate-950 font-black flex items-center justify-center text-[10px]">
+                              {stop.order || idx + 1}
+                            </span>
+                            <span className="font-bold text-white text-sm">{stop.name}</span>
+                          </div>
+
+                          <div className="flex items-center gap-2 text-[11px] text-slate-300">
+                            <span className="text-emerald-400 font-medium">{stop.category}</span>
+                            <span>•</span>
+                            <span>{stop.district}</span>
+                          </div>
+
+                          <p className="text-[11px] text-slate-400 line-clamp-2">{stop.rationale}</p>
+
+                          <div className="flex items-center gap-2 pt-1">
+                            <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-300 text-[10px] font-semibold border border-emerald-500/20 flex items-center gap-1">
+                              <Award className="w-3 h-3 text-emerald-400" />
+                              {stop.provenance?.source || "ExploreTN Verified"}
+                            </span>
+                            <span className="text-[10px] text-slate-400">
+                              {stop.recommended_visit_mins} mins visit
+                            </span>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveStop(stop.place_id || stop.slug)}
+                          className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-lg transition-all"
+                          title="Remove stop and recalculate route"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
         <div className="grid gap-8 lg:grid-cols-12">
 
@@ -531,134 +882,6 @@ function PlannerPage() {
                   )}
                 </motion.div>
               )}
-
-              {/* INTERACTIVE TRIP CUSTOMIZER CARD */}
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="p-4 bg-slate-900/90 border border-emerald-500/30 rounded-2xl space-y-3.5 my-3 text-white shadow-xl"
-              >
-                <div className="flex items-center justify-between border-b border-emerald-500/20 pb-2">
-                  <div className="flex items-center gap-2">
-                    <Sparkles className="w-4 h-4 text-emerald-400" />
-                    <span className="text-xs font-bold text-emerald-300 uppercase tracking-wide">
-                      Interactive Trip Customizer ({currentDestination})
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-400 font-medium">Refine parameters</span>
-                </div>
-
-                {/* Duration Row */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 block">1. Trip Duration (How many days?):</label>
-                  <div className="flex flex-wrap gap-2">
-                    {[1, 2, 3, 4].map((d) => (
-                      <button
-                        key={d}
-                        type="button"
-                        onClick={() => setCustomDays(d)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                          customDays === d
-                            ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
-                            : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
-                        }`}
-                      >
-                        {d} {d === 1 ? "Day" : d === 4 ? "4+ Days" : "Days"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Origin Row */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 block">2. Starting Origin (Where are you starting from?):</label>
-                  <div className="flex flex-wrap gap-2">
-                    {[currentDestination, "Chennai", "Coimbatore", "Trichy", "Salem"].map((city) => {
-                      const isSelected = effectiveOrigin.toLowerCase() === city.toLowerCase();
-                      return (
-                        <button
-                          key={city}
-                          type="button"
-                          onClick={() => setCustomOrigin(city)}
-                          className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                            isSelected
-                              ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
-                              : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
-                          }`}
-                        >
-                          📍 {city} {city.toLowerCase() === currentDestination.toLowerCase() ? "(Local)" : ""}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Experiences & Interests Row */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 block">3. Experiences & Places You Want to Explore:</label>
-                  <div className="flex flex-wrap gap-1.5">
-                    {[
-                      "🛕 Temples & Heritage",
-                      "🍲 Local Tamil Food",
-                      "⛰️ Nearby Hills",
-                      "🏛️ Royal History",
-                      "🛍️ Silk & Local Markets",
-                      "🌊 Waterfalls & Streams"
-                    ].map((exp) => {
-                      const isSelected = customInterests.includes(exp);
-                      return (
-                        <button
-                          key={exp}
-                          type="button"
-                          onClick={() => toggleCustomInterest(exp)}
-                          className={`px-2.5 py-1 rounded-xl text-[11px] font-semibold transition flex items-center gap-1 cursor-pointer ${
-                            isSelected
-                              ? "bg-emerald-500/20 text-emerald-300 border border-emerald-400/50"
-                              : "bg-slate-800/80 text-slate-400 border border-slate-700/60 hover:text-white"
-                          }`}
-                        >
-                          <span>{exp}</span>
-                          {isSelected && <Check className="w-3 h-3 text-emerald-400" />}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                {/* Transport Mode Row */}
-                <div className="space-y-1.5">
-                  <label className="text-[11px] font-bold text-slate-300 block">4. Mode of Transport:</label>
-                  <div className="flex flex-wrap gap-2">
-                    {["Car", "Bike", "Bus", "Train"].map((mode) => (
-                      <button
-                        key={mode}
-                        type="button"
-                        onClick={() => setCustomTransport(mode)}
-                        className={`px-3 py-1 rounded-xl text-xs font-bold transition cursor-pointer ${
-                          customTransport === mode
-                            ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
-                            : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
-                        }`}
-                      >
-                        {mode === "Car" ? "🚗 Car" : mode === "Bike" ? "🏍️ Bike" : mode === "Bus" ? "🚌 Bus" : "🚆 Train"}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Generate Button */}
-                <div className="pt-2 border-t border-emerald-500/20 flex justify-end">
-                  <button
-                    type="button"
-                    onClick={handleGenerateCustomPlan}
-                    disabled={loading}
-                    className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-extrabold text-xs rounded-xl transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/20 cursor-pointer disabled:opacity-50"
-                  >
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>✨ Generate Tailored Itinerary →</span>
-                  </button>
-                </div>
-              </motion.div>
 
               {loading && (
                 <div className="flex justify-start">
@@ -965,8 +1188,9 @@ function PlannerPage() {
               )}
             </div>
           </div>
-
         </div>
+      </div>
+      )}
       </div>
     </AppShell>
   );
