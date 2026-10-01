@@ -359,6 +359,30 @@ function CategoryExplorePage() {
     });
   }, [places, catKey, selectedDistrict, selectedDifficulty, searchQuery]);
 
+  const groupedDistricts = useMemo(() => {
+    const map = new Map<string, PlaceItem[]>();
+    for (const p of filteredPlaces) {
+      const dist = p.district || "Tamil Nadu";
+      if (!map.has(dist)) {
+        map.set(dist, []);
+      }
+      map.get(dist)!.push(p);
+    }
+
+    // Sort so "Chennai" comes FIRST if present, then alphabetically
+    const sortedKeys = Array.from(map.keys()).sort((a, b) => {
+      if (a.toLowerCase() === "chennai") return -1;
+      if (b.toLowerCase() === "chennai") return 1;
+      return a.localeCompare(b);
+    });
+
+    return sortedKeys.map((distKey) => ({
+      districtName: distKey,
+      districtSlug: distKey.toLowerCase().replace(/[^a-z0-9]+/g, "-"),
+      places: map.get(distKey)!,
+    }));
+  }, [filteredPlaces]);
+
   const IconComponent = catMeta.icon;
 
   return (
@@ -401,7 +425,7 @@ function CategoryExplorePage() {
         </div>
 
         {/* Filter Controls Row */}
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 space-y-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 pt-8 space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-card border border-border p-4 rounded-3xl shadow-sm">
             {/* Search Input */}
             <div className="relative w-full md:w-80">
@@ -455,14 +479,14 @@ function CategoryExplorePage() {
             </div>
           </div>
 
-          {/* Cards Grid */}
+          {/* District-Wise Grouped Cards List */}
           {loading ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
               {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                 <div key={n} className="h-72 rounded-3xl bg-card border border-border animate-pulse" />
               ))}
             </div>
-          ) : filteredPlaces.length === 0 ? (
+          ) : groupedDistricts.length === 0 ? (
             <div className="text-center py-16 bg-card border border-border rounded-3xl p-8 max-w-md mx-auto space-y-4">
               <div className="inline-flex p-4 rounded-full bg-amber-500/10 text-amber-500">
                 <SlidersHorizontal className="size-8" />
@@ -476,100 +500,133 @@ function CategoryExplorePage() {
               </Button>
             </div>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredPlaces.map((p) => {
-                const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
-
-                return (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, y: 12 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.2 }}
-                    className="group rounded-3xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
-                  >
-                    <div>
-                      {/* Image Header */}
-                      <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
-                        <img
-                          src={img}
-                          alt={p.name}
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-
-                        {/* Top Primary Badge */}
-                        <div className="absolute top-3 left-3">
-                          <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md ${catMeta.badgeColor}`}>
-                            {p.category ? p.category.toUpperCase() : "DESTINATION"}
-                          </span>
-                        </div>
-
-                        {/* Rating Overlay */}
-                        <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold text-amber-400 border border-white/10">
-                          <Star className="size-3.5 fill-amber-400 text-amber-400" />
-                          <span>{p.rating || 4.8}</span>
-                        </div>
+            <div className="space-y-12">
+              {groupedDistricts.map(({ districtName, districtSlug, places: distPlaces }) => (
+                <div key={districtName} className="space-y-5 pt-6 border-t border-border/80 first:border-none first:pt-0">
+                  {/* District Header Banner */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-card/80 backdrop-blur-md p-4 sm:px-6 sm:py-3.5 rounded-2xl border border-border/80 shadow-sm">
+                    <div className="flex items-center gap-3">
+                      <div className="grid size-9 place-items-center rounded-xl bg-emerald-500/15 text-emerald-500 border border-emerald-500/30">
+                        <MapPin className="size-5" />
                       </div>
-
-                      {/* Content Body */}
-                      <div className="p-5 space-y-2">
-                        <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
-                          <div className="flex items-center gap-1.5">
-                            <MapPin className="size-3.5 text-emerald-500 shrink-0" />
-                            <span>{p.district} District</span>
-                          </div>
-                          {p.difficulty && (
-                            <span className="text-[10px] px-2 py-0.5 rounded bg-accent font-bold text-foreground">
-                              {p.difficulty}
-                            </span>
-                          )}
-                        </div>
-
-                        <h3 className="text-lg font-bold font-serif text-foreground line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
-                          {p.name}
-                        </h3>
-
-                        <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
-                          {p.tagline || p.description}
+                      <div>
+                        <h2 className="font-serif font-extrabold text-xl sm:text-2xl text-foreground">
+                          {districtName} District
+                        </h2>
+                        <p className="text-xs text-muted-foreground">
+                          {distPlaces.length} Mapped {catMeta.title}
                         </p>
-
-                        {/* Multi-category tags badge row */}
-                        <div className="flex flex-wrap gap-1.5 pt-2">
-                          {p.categories?.slice(0, 3).map((catTag) => (
-                            <span
-                              key={catTag}
-                              className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-accent/60 text-muted-foreground border border-border/50 uppercase"
-                            >
-                              {catTag}
-                            </span>
-                          ))}
-                        </div>
                       </div>
                     </div>
 
-                    {/* Card Actions */}
-                    <div className="p-5 pt-0 flex items-center gap-2 border-t border-border/50 mt-3 pt-3">
-                      <Link
-                        to={`/place/$slug`}
-                        params={{ slug: p.slug || p.id }}
-                        className="flex-1 text-center py-2 px-3 rounded-xl bg-accent/50 hover:bg-accent text-xs font-bold text-foreground transition"
-                      >
-                        Explore Details
-                      </Link>
-                      <Link
-                        to="/discover"
-                        className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition border border-emerald-500/30 flex items-center gap-1 text-xs font-bold"
-                        title="View on Interactive Map"
-                      >
-                        <Map className="size-4" />
-                        <span className="hidden sm:inline">Map</span>
-                      </Link>
-                    </div>
-                  </motion.div>
-                );
-              })}
+                    <Link
+                      to="/districts/$districtSlug"
+                      params={{ districtSlug: districtSlug === "chennai" ? "chennai" : districtSlug }}
+                      className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-accent/60 hover:bg-accent text-xs font-bold text-emerald-600 dark:text-emerald-400 transition border border-border shrink-0 self-start sm:self-auto"
+                    >
+                      <span>Explore {districtName} District Guide</span>
+                      <ArrowRight className="size-3.5" />
+                    </Link>
+                  </div>
+
+                  {/* District Items Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    {distPlaces.map((p) => {
+                      const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
+
+                      return (
+                        <motion.div
+                          key={p.id}
+                          initial={{ opacity: 0, y: 10 }}
+                          animate={{ opacity: 1, y: 0 }}
+                          transition={{ duration: 0.2 }}
+                          className="group rounded-3xl border border-border bg-card overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col justify-between"
+                        >
+                          <div>
+                            {/* Image Header */}
+                            <div className="relative aspect-[16/10] overflow-hidden bg-slate-900">
+                              <img
+                                src={img}
+                                alt={p.name}
+                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                loading="lazy"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+
+                              {/* Top Primary Badge */}
+                              <div className="absolute top-3 left-3">
+                                <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md ${catMeta.badgeColor}`}>
+                                  {p.category ? p.category.toUpperCase() : "DESTINATION"}
+                                </span>
+                              </div>
+
+                              {/* Rating Overlay */}
+                              <div className="absolute bottom-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-md px-2.5 py-1 rounded-full text-xs font-bold text-amber-400 border border-white/10">
+                                <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                                <span>{p.rating || 4.8}</span>
+                              </div>
+                            </div>
+
+                            {/* Content Body */}
+                            <div className="p-5 space-y-2">
+                              <div className="flex items-center justify-between text-xs text-muted-foreground font-semibold">
+                                <div className="flex items-center gap-1.5">
+                                  <MapPin className="size-3.5 text-emerald-500 shrink-0" />
+                                  <span>{p.district} District</span>
+                                </div>
+                                {p.difficulty && (
+                                  <span className="text-[10px] px-2 py-0.5 rounded bg-accent font-bold text-foreground">
+                                    {p.difficulty}
+                                  </span>
+                                )}
+                              </div>
+
+                              <h3 className="text-lg font-bold font-serif text-foreground line-clamp-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+                                {p.name}
+                              </h3>
+
+                              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">
+                                {p.tagline || p.description}
+                              </p>
+
+                              {/* Multi-category tags badge row */}
+                              <div className="flex flex-wrap gap-1.5 pt-2">
+                                {p.categories?.slice(0, 3).map((catTag) => (
+                                  <span
+                                    key={catTag}
+                                    className="text-[10px] font-mono font-bold px-2 py-0.5 rounded-md bg-accent/60 text-muted-foreground border border-border/50 uppercase"
+                                  >
+                                    {catTag}
+                                  </span>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Card Actions */}
+                          <div className="p-5 pt-0 flex items-center gap-2 border-t border-border/50 mt-3 pt-3">
+                            <Link
+                              to="/districts/$districtSlug"
+                              params={{ districtSlug: (p.district || "chennai").toLowerCase().replace(/[^a-z0-9]+/g, "-") }}
+                              className="flex-1 text-center py-2 px-3 rounded-xl bg-accent/50 hover:bg-accent text-xs font-bold text-foreground transition"
+                            >
+                              View in {p.district} Guide
+                            </Link>
+                            <Link
+                              to="/discover"
+                              className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition border border-emerald-500/30 flex items-center gap-1 text-xs font-bold"
+                              title="View on Interactive Map"
+                            >
+                              <Map className="size-4" />
+                              <span className="hidden sm:inline">Map</span>
+                            </Link>
+                          </div>
+                        </motion.div>
+                      );
+                    })}
+                  </div>
+                </div>
+              ))}
             </div>
           )}
         </div>

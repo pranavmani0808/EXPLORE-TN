@@ -1,11 +1,11 @@
 import { DistrictAdminDetails, getDistrictAdminDetails } from "./district-admin-details";
 
-export type DistrictCategoryKey = "all" | "temples" | "tourist-spots" | "food-spots" | "thrift-streets";
+export type DistrictCategoryKey = "all" | "beaches" | "temples" | "tourist-spots" | "food-spots" | "thrift-streets";
 
 export interface DistrictSpot {
   id: string;
   name: string;
-  category: "temples" | "tourist-spots" | "food-spots" | "thrift-streets";
+  category: "beaches" | "temples" | "tourist-spots" | "food-spots" | "thrift-streets";
   categoryLabel: string;
   tagline: string;
   description: string;
@@ -19,6 +19,7 @@ export interface DistrictSpot {
   highlights: string[];
   mustTry?: string[]; // for food spots & thrift markets
   verified: boolean;
+  regionGroup?: string;
 }
 
 export interface DistrictData {
@@ -177,10 +178,12 @@ export const TAMIL_NADU_DISTRICTS: Record<string, DistrictData> = {
       ],
     },
     spots: [
+      // --- ALL 19 CHENNAI & COASTAL CORRIDOR BEACHES ---
+      // 1. Core City Beaches
       {
         id: "chennai-marina-beach",
         name: "Marina Beach Promenade",
-        category: "tourist-spots",
+        category: "beaches",
         categoryLabel: "World's 2nd Longest Urban Beach",
         tagline: "13km natural sandy urban beach with lighthouse, memorials & street food stalls",
         description: "Stretching 13 kilometers along the Coromandel Coast. Features historic statues, Madras Lighthouse, ice house, and lively evening bazaars.",
@@ -193,11 +196,30 @@ export const TAMIL_NADU_DISTRICTS: Record<string, DistrictData> = {
         timings: "Open 24/7 (Lighthouse 10 AM – 5:30 PM)",
         highlights: ["13km Coastal Promenade", "Madras Lighthouse View", "Sundal & Fried Fish Street Stalls"],
         verified: true,
+        regionGroup: "🌊 Core City Beaches"
+      },
+      {
+        id: "chennai-santhome-beach",
+        name: "Santhome Beach",
+        category: "beaches",
+        categoryLabel: "Cathedral Coastal Promenade",
+        tagline: "Quieter, reflective coastal extension of Marina located directly behind historic Santhome Cathedral",
+        description: "Santhome Beach is a peaceful, uncrowded sandy stretch tucked directly behind the historic neo-Gothic Santhome Cathedral Basilica. Offers serene ocean views.",
+        latitude: 13.0330,
+        longitude: 80.2780,
+        image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=800&q=80",
+        rating: 4.6,
+        reviewsCount: 4100,
+        address: "Santhome High Road, Mylapore, Chennai 600004",
+        timings: "Open 24/7 (Best 5:30 AM – 8:00 AM & 4:30 PM – 7:30 PM)",
+        highlights: ["Behind Historic Santhome Cathedral Basilica", "Tranquil Sandy Shoreline", "Quiet Evening Walkway"],
+        verified: true,
+        regionGroup: "🌊 Core City Beaches"
       },
       {
         id: "chennai-besant-nagar-beach",
-        name: "Besant Nagar Beach (Elliot's Beach)",
-        category: "tourist-spots",
+        name: "Besant Nagar Beach (Elliot's Beach / Bessie)",
+        category: "beaches",
         categoryLabel: "Coastal Promenade & Karl Schmidt Memorial",
         tagline: "Tranquil coastal beach home to Karl Schmidt Memorial & vibrant beachside cafes",
         description: "Elliot's Beach in Besant Nagar forms the southern endpoint of the Marina shore. Known for its relaxed vibe, historical Dutch sailor memorial, and popular beachside food joints.",
@@ -206,11 +228,308 @@ export const TAMIL_NADU_DISTRICTS: Record<string, DistrictData> = {
         image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
         rating: 4.8,
         reviewsCount: 42100,
-        address: "Besant Nagar, Chennai 600090",
+        address: "6th Avenue, Besant Nagar, Chennai 600090",
         timings: "Open 24/7 (Best early morning & evening)",
         highlights: ["Karl Schmidt Memorial", "Bessie Beach Cafes", "Ashtalakshmi Temple nearby"],
         verified: true,
+        regionGroup: "🌊 Core City Beaches"
       },
+
+      // 2. North Chennai Beaches
+      {
+        id: "chennai-ennore-nettukuppam-beach",
+        name: "Ennore Beach (Nettukuppam Broken Pier)",
+        category: "beaches",
+        categoryLabel: "Northernmost Estuary & Broken Pier",
+        tagline: "Northernmost tip of Chennai with iconic broken concrete pier where Ennore Creek meets the sea",
+        description: "Situated at the northern apex of Chennai in Ennore, Nettukuppam Beach is famous for its historic broken pier extending into crashing ocean waves and dramatic estuary panoramas.",
+        latitude: 13.2268,
+        longitude: 80.3340,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.6,
+        reviewsCount: 5200,
+        address: "Nettukuppam, Ennore, Chennai 600057",
+        timings: "Open 24/7 (Best 4:00 PM – 6:30 PM for sunset)",
+        highlights: ["Historic Broken Concrete Pier", "Ennore Creek Estuary View", "Secluded Photography Spot"],
+        verified: true,
+        regionGroup: "⚓ North Chennai Beaches"
+      },
+      {
+        id: "chennai-n8-beach",
+        name: "N8 Beach (Tiruvottiyur Coast)",
+        category: "beaches",
+        categoryLabel: "North Coast Breakwater Walk",
+        tagline: "Offbeat, quiet rocky coastal stretch in Tiruvottiyur popular for peaceful morning walks & sea wall views",
+        description: "N8 Beach is a tranquil, offbeat coastal stretch in North Chennai near the Kasimedu-Tiruvottiyur express highway. Favored by local morning walkers for dramatic sunrise panoramas.",
+        latitude: 13.1180,
+        longitude: 80.2980,
+        image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=800&q=80",
+        rating: 4.5,
+        reviewsCount: 2100,
+        address: "Tiruvottiyur High Road, Tiruvottiyur, Chennai 600019",
+        timings: "Open 24/7 (Best early morning 5:30 AM – 8:00 AM)",
+        highlights: ["Granite Breakwater Sea Wall", "Uncrowded Sunrise Walk", "Catamaran Marine View"],
+        verified: true,
+        regionGroup: "⚓ North Chennai Beaches"
+      },
+      {
+        id: "chennai-n4-beach",
+        name: "N4 Beach (Tondiarpet Pier)",
+        category: "beaches",
+        categoryLabel: "Tondiarpet Groyne Breakwater",
+        tagline: "Scenic concrete breakwater pier next to Kasimedu fishing harbour lined with colorful catamarans",
+        description: "Located in Tondiarpet right next to Kasimedu harbour, N4 Beach features long concrete groynes stretching into the ocean, colorful fishing boats, crashing waves, and coastal breeze.",
+        latitude: 13.1210,
+        longitude: 80.2985,
+        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+        rating: 4.6,
+        reviewsCount: 3400,
+        address: "Kasimedu Coastal Road, Tondiarpet, Chennai 600081",
+        timings: "Open 24/7 (Best early morning & late afternoon)",
+        highlights: ["Long Concrete Groyne Breakwaters", "Colorfully Painted Fishing Catamarans", "Crashing Wave Foam Views"],
+        verified: true,
+        regionGroup: "⚓ North Chennai Beaches"
+      },
+      {
+        id: "chennai-kasimedu-beach",
+        name: "Kasimedu Beach & Fishing Harbour",
+        category: "beaches",
+        categoryLabel: "Active Fishing Community Pier",
+        tagline: "Bustling fishing harbour beach deeply integrated with Chennai's largest active marine fishing community",
+        description: "Kasimedu Fishing Harbour Beach is the pulsing heart of Chennai's sea fishing culture. Visitors gather at dawn for live boat landings, fresh seafood auctions, and walks along the 1 km granite pier.",
+        latitude: 13.1245,
+        longitude: 80.2995,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.7,
+        reviewsCount: 12800,
+        address: "Royapuram Harbour Access Road, Royapuram, Chennai 600013",
+        timings: "5:00 AM – 9:00 AM (Dawn fish auctions) & 4 PM – 7 PM",
+        highlights: ["Live Catamaran Dawn Arrivals", "Historic Seafood Auction Yard", "1km Granite Breakwater Pier"],
+        verified: true,
+        regionGroup: "⚓ North Chennai Beaches"
+      },
+
+      // 3. South Chennai Beaches (ECR Line)
+      {
+        id: "chennai-thiruvanmiyur-beach",
+        name: "Thiruvanmiyur Beach",
+        category: "beaches",
+        categoryLabel: "Tranquil Fitness & Yoga Shore",
+        tagline: "Tranquil, wide golden sand shore favored by morning walkers, fitness enthusiasts & yoga practitioners",
+        description: "Thiruvanmiyur Beach is a spacious, uncrowded residential shoreline south of Besant Nagar. Known for its pristine morning air, gentle tide, and calm atmosphere.",
+        latitude: 12.9845,
+        longitude: 80.2640,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.7,
+        reviewsCount: 9200,
+        address: "Beach Road, Thiruvanmiyur, Chennai 600041",
+        timings: "Open 24/7 (Best 5:00 AM – 8:30 AM & 4:30 PM – 8:00 PM)",
+        highlights: ["Spacious Golden Sand Shore", "Morning Jogging & Yoga Haven", "Calm Residential Atmosphere"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-breezy-beach",
+        name: "Breezy Beach (Valmiki Nagar)",
+        category: "beaches",
+        categoryLabel: "Secluded Pocket Beach",
+        tagline: "Small, hidden, uncrowded coastal pocket in Valmiki Nagar known for serene & peaceful environment",
+        description: "Tucked quietly in Valmiki Nagar, Thiruvanmiyur, Breezy Beach is a clean, tranquil hideaway. Away from commercial street vendors, it offers a peaceful haven for reading and quiet walks.",
+        latitude: 12.9810,
+        longitude: 80.2635,
+        image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=800&q=80",
+        rating: 4.8,
+        reviewsCount: 3800,
+        address: "Valmiki Nagar, Thiruvanmiyur, Chennai 600041",
+        timings: "Open 24/7 (Best early morning & quiet sunset)",
+        highlights: ["Hidden Residential Beach Pocket", "Quiet Ocean Solitude", "Pristine Uncluttered Sand"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-kottivakkam-beach",
+        name: "Kottivakkam Beach",
+        category: "beaches",
+        categoryLabel: "Wide Open Family Shore",
+        tagline: "Wide, open expanse of clean sand serving as a calm, relaxed alternative for families along ECR",
+        description: "Kottivakkam Beach features a broad shoreline with soft sand and open ocean vistas. Situated right off the East Coast Road, it provides a quiet setting for family weekend evening walks.",
+        latitude: 12.9680,
+        longitude: 80.2615,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.6,
+        reviewsCount: 4500,
+        address: "Clanjung Road, Kottivakkam, Chennai 600041",
+        timings: "Open 24/7 (Best 4:30 PM – 7:30 PM)",
+        highlights: ["Wide Open Sand Expanse", "Calm Family Gathering Spot", "Clean Sea Breeze Promenade"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-palavakkam-beach",
+        name: "Palavakkam Beach",
+        category: "beaches",
+        categoryLabel: "Paved Promenade Beach",
+        tagline: "Well-maintained coastal beach with paved walkways, offering great open views for sunrise & sunset",
+        description: "Palavakkam Beach is popular for its neat paved walking track, manicured seating benches, and wide open horizon views. Ideal for evening family strolls and watching sunrise.",
+        latitude: 12.9554,
+        longitude: 80.2592,
+        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+        rating: 4.7,
+        reviewsCount: 6200,
+        address: "Palavakkam Beach Road, Palavakkam, Chennai 600041",
+        timings: "Open 24/7 (Best 5:30 AM – 8:00 AM & 4:30 PM – 8:00 PM)",
+        highlights: ["Paved Promenade Walkway", "Panoramas for Sunrise & Sunset", "Family Recreation Benches"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-neelankarai-beach",
+        name: "Neelankarai Beach",
+        category: "beaches",
+        categoryLabel: "Olive Ridley Turtle Sanctuary Shore",
+        tagline: "Peaceful, secluded beach that serves as an active nesting ground for endangered Olive Ridley sea turtles",
+        description: "Neelankarai Beach is a pristine, peaceful coastal strip along ECR. Famous among nature lovers and marine conservationists as a key annual nesting ground for Olive Ridley sea turtles.",
+        latitude: 12.9440,
+        longitude: 80.2580,
+        image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=800&q=80",
+        rating: 4.7,
+        reviewsCount: 5100,
+        address: "Kapaleeswarar Nagar, Neelankarai, Chennai 600115",
+        timings: "Open 24/7 (Best early morning & quiet evening)",
+        highlights: ["Olive Ridley Sea Turtle Nesting Site", "Secluded Clean Sand Stretch", "Eco-Nature Conservation Shore"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-akkarai-beach",
+        name: "Akkarai Beach",
+        category: "beaches",
+        categoryLabel: "Green Pathway Coastal Avenue",
+        tagline: "Clean sands, minimal noise & manicured green approach pathways along the southern ECR shore",
+        description: "Situated near the Akkarai junction on ECR, Akkarai Beach is renowned for its clean shoreline, landscaped lawn approaches, and quiet coastal air away from urban traffic.",
+        latitude: 12.9280,
+        longitude: 80.2560,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.6,
+        reviewsCount: 3900,
+        address: "Akkarai Beach Road, Injambakkam / Akkarai, Chennai 600119",
+        timings: "Open 24/7 (Best 4:30 PM – 7:30 PM)",
+        highlights: ["Manicured Green Approach Paths", "Low Noise & Traffic Atmosphere", "Clean Soft Golden Sands"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-injambakkam-beach",
+        name: "Injambakkam Beach",
+        category: "beaches",
+        categoryLabel: "Quiet Coastal Solitude Trail",
+        tagline: "Spacious, quiet beach ideal for solitary walks, located close to local seaside shrines & private estates",
+        description: "Injambakkam Beach is a secluded coastal stretch featuring wide sandy shores, coastal palm trees, and gentle surf. Ideal for peaceful evening walks.",
+        latitude: 12.9100,
+        longitude: 80.2550,
+        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+        rating: 4.7,
+        reviewsCount: 4800,
+        address: "Prarthana Drive, Injambakkam, Chennai 600119",
+        timings: "Open 24/7 (Best 5:30 AM – 8:00 AM & 4:30 PM – 7:00 PM)",
+        highlights: ["Quiet Solitary Walk Trail", "Granite Pebble & Sand Shoreline", "Secluded ECR Coastal Retreat"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+      {
+        id: "chennai-uthandi-beach",
+        name: "Uthandi Beach",
+        category: "beaches",
+        categoryLabel: "Pristine Private Residential Beach",
+        tagline: "Pristine & private beach lane accessed primarily through a quiet residential neighborhood on ECR",
+        description: "Located at the southern limit of Chennai district along ECR, Uthandi Beach is a pristine, hidden coastal avenue surrounded by quiet residential enclaves.",
+        latitude: 12.8720,
+        longitude: 80.2460,
+        image: "https://images.unsplash.com/photo-1519046904884-53103b34b206?auto=format&fit=crop&w=800&q=80",
+        rating: 4.8,
+        reviewsCount: 2900,
+        address: "Uthandi Toll / Beach Road, Uthandi, Chennai 600119",
+        timings: "Open 24/7 (Best early morning & evening)",
+        highlights: ["Pristine Residential Shoreline", "Ultra-Clean Uncrowded Sands", "Peaceful Sea Breeze Lane"],
+        verified: true,
+        regionGroup: "🍃 South Chennai Beaches (ECR Line)"
+      },
+
+      // 4. Adventure & Outskirts (Greater Chennai & ECR)
+      {
+        id: "chennai-vgp-golden-beach",
+        name: "VGP Golden Beach",
+        category: "beaches",
+        categoryLabel: "Managed Amusement Park Beach",
+        tagline: "Private, well-maintained beach integrated with VGP amusement park, safe & popular for family outings",
+        description: "VGP Golden Beach in Injambakkam is one of Chennai's oldest managed beach park destinations. Integrated with VGP Universal Kingdom, featuring clean sands, sculptures, and safe family beach access.",
+        latitude: 12.9145,
+        longitude: 80.2522,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.7,
+        reviewsCount: 18900,
+        address: "East Coast Road, Injambakkam, Chennai 600119",
+        timings: "9:30 AM – 6:30 PM (Park ticket access)",
+        highlights: ["Managed Family Safe Beach", "Amusement & Water Park Access", "Statue & Fountain Gardens"],
+        verified: true,
+        regionGroup: "🏄‍♂️ Adventure & Outskirts"
+      },
+      {
+        id: "chennai-muttukadu-beach",
+        name: "Muttukadu Beach & Backwaters",
+        category: "beaches",
+        categoryLabel: "Estuary Boating & Watersports Beach",
+        tagline: "Picturesque estuary where backwaters meet the sea, known for boating, windsurfing & watersports",
+        description: "Situated 30 km south of Chennai on ECR, Muttukadu Beach sits where the Kovalam backwaters meet the Bay of Bengal. Features TTDC boat house with pedal boating, speedboats, and windsurfing.",
+        latitude: 12.8250,
+        longitude: 80.2440,
+        image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+        rating: 4.6,
+        reviewsCount: 14200,
+        address: "East Coast Road, Muttukadu, Tamil Nadu 603112",
+        timings: "9:00 AM – 6:00 PM (Boating sessions)",
+        highlights: ["TTDC Backwater Boating House", "Estuary Confluence View", "Kayaking & Speedboat Rides"],
+        verified: true,
+        regionGroup: "🏄‍♂️ Adventure & Outskirts"
+      },
+      {
+        id: "chennai-kovalam-beach",
+        name: "Kovalam Beach (Covelong Surfing Hub)",
+        category: "beaches",
+        categoryLabel: "Premier Surfing & Watersports Hub",
+        tagline: "South India's premier surfing & watersports destination with surf academies, stand-up paddleboarding & catamarans",
+        description: "Located 35 km south of Chennai, Kovalam (Covelong) is Tamil Nadu's premier surfing village. Home to Covelong Point Surf School, clear waters, kayaking, and annual international surf festivals.",
+        latitude: 12.7915,
+        longitude: 80.2505,
+        image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80",
+        rating: 4.8,
+        reviewsCount: 22400,
+        address: "Kovalam Village, ECR, Chengalpattu / Greater Chennai Corridor 603112",
+        timings: "Open 24/7 (Surfing sessions 6:00 AM – 10:00 AM & 4:00 PM – 6:30 PM)",
+        highlights: ["Covelong Point Surfing School", "Stand-Up Paddleboarding & Kayaking", "Dutch Fort Wall Heritage Views"],
+        verified: true,
+        regionGroup: "🏄‍♂️ Adventure & Outskirts"
+      },
+      {
+        id: "chennai-mahabalipuram-beach",
+        name: "Mahabalipuram Beach (Mamallapuram)",
+        category: "beaches",
+        categoryLabel: "UNESCO Shore Temple Heritage Coast",
+        tagline: "Historic coastal getaway combining golden beach sands with UNESCO World Heritage 7th-century Shore Temple",
+        description: "Located 55 km south of Chennai, Mahabalipuram Beach offers a unique blend of coastal beauty and ancient Pallava rock-cut architecture. Backgrounded by the iconic 7th-century Shore Temple.",
+        latitude: 12.6180,
+        longitude: 80.1980,
+        image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+        rating: 4.9,
+        reviewsCount: 58000,
+        address: "Beach Road, Mamallapuram (Mahabalipuram), Tamil Nadu 603104",
+        timings: "Open 24/7 (Monuments 6:00 AM – 6:00 PM)",
+        highlights: ["UNESCO Shore Temple Backdrop", "Fresh Coastal Seafood Restaurants", "Handicrafts & Stone Carving Shops"],
+        verified: true,
+        regionGroup: "🏄‍♂️ Adventure & Outskirts"
+      },
+
+      // --- CHENNAI LANDMARKS, HERITAGE & SHOPPING ---
       {
         id: "chennai-kapaleeshwarar-temple",
         name: "Kapaleeshwarar Temple (Mylapore)",

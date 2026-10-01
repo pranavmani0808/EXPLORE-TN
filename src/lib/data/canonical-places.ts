@@ -137,31 +137,6 @@ export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     tags: ["city", "madurai", "culture"],
     placeType: "city"
   },
-  "madurai-city": {
-    id: "p-madurai-city",
-    canonicalName: "Madurai City",
-    name: "Madurai City",
-    slug: "madurai-city",
-    entityType: "CITY",
-    district: "Madurai",
-    state: "Tamil Nadu",
-    country: "India",
-    latitude: 9.9252,
-    longitude: 78.1198,
-    categories: ["heritage", "food"],
-    primaryCategory: "heritage",
-    tagline: "The Lotus City of South India and cultural capital of Tamil Nadu",
-    description: "Ancient city built on the banks of the Vaigai River in the shape of a blooming lotus.",
-    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
-    verified: true,
-    source: "Madurai Municipal Corporation & TN Tourism",
-    sourceType: "OFFICIAL_GOVERNMENT",
-    confidenceScore: 95,
-    lastVerifiedAt: "2026-09-30T10:00:00Z",
-    verificationStatus: "VERIFIED",
-    dataVersion: 1,
-    tags: ["city", "madurai", "culture"]
-  },
   "meenakshi-amman-temple": {
     id: "p-meenakshi-amman-temple",
     canonicalName: "Meenakshi Sundareswarar Temple",
@@ -1295,7 +1270,9 @@ export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
   ...TREKKING_NATURE_PLACES
 };
 
-export const CANONICAL_PLACES: ExplorerPlace[] = Object.values(KNOWN_DESTINATIONS);
+export const CANONICAL_PLACES: ExplorerPlace[] = Array.from(
+  new Map(Object.values(KNOWN_DESTINATIONS).map((p) => [p.id || p.slug, p])).values()
+);
 
 export interface GeographicArea {
   id: string;
