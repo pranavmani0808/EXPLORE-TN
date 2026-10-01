@@ -26,6 +26,8 @@ import { Button } from "@/components/ui/button";
 import { getApiBaseUrl } from "@/lib/api-client/config";
 import { PlaceApiRepository } from "@/lib/api-client/places";
 import { CANONICAL_PLACES } from "@/lib/data/canonical-places";
+import { getPlace, type Place } from "@/data/places";
+import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
 
 export const Route = createFileRoute("/explore/$category")({
   head: ({ params }) => {
@@ -233,6 +235,7 @@ function CategoryExplorePage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("All Districts");
   const [selectedDifficulty, setSelectedDifficulty] = useState("All Difficulties");
+  const [selectedModalPlace, setSelectedModalPlace] = useState<Place | null>(null);
 
   useEffect(() => {
     async function loadPlaces() {
@@ -605,20 +608,48 @@ function CategoryExplorePage() {
 
                           {/* Card Actions */}
                           <div className="p-5 pt-0 flex items-center gap-2 border-t border-border/50 mt-3 pt-3">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const legacyPlace = getPlace(p.slug || p.id) || {
+                                  slug: p.slug || p.id,
+                                  name: p.name || p.display_name || p.id,
+                                  district: p.district || "Tamil Nadu",
+                                  category: p.category || "hills",
+                                  image: img,
+                                  tagline: p.tagline || "",
+                                  story: p.description || "",
+                                  rating: p.rating || 4.8,
+                                  reviews: p.reviewsCount || 120,
+                                  difficulty: "Easy",
+                                  bestSeason: "Year-round",
+                                  roadCondition: "State Highway",
+                                  parking: "Available",
+                                  entryFee: "Free",
+                                  timings: "Open daily",
+                                  safety: "Safe",
+                                  weather: "24°C",
+                                  tips: [],
+                                  nearbyFood: [],
+                                  nearbyFuel: [],
+                                  x: 0,
+                                  y: 0,
+                                  coords: [p.latitude || 10.1, p.longitude || 77.5],
+                                  latitude: p.latitude || 10.1,
+                                  longitude: p.longitude || 77.5,
+                                };
+                                setSelectedModalPlace(legacyPlace as Place);
+                              }}
+                              className="flex-1 py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 font-extrabold text-xs transition border border-emerald-500/30 cursor-pointer"
+                            >
+                              Details
+                            </button>
                             <Link
                               to="/districts/$districtSlug"
                               params={{ districtSlug: (p.district || "chennai").toLowerCase().replace(/[^a-z0-9]+/g, "-") }}
-                              className="flex-1 text-center py-2 px-3 rounded-xl bg-accent/50 hover:bg-accent text-xs font-bold text-foreground transition"
+                              className="py-2 px-3 rounded-xl bg-accent/50 hover:bg-accent text-xs font-bold text-foreground transition"
                             >
-                              View in {p.district} Guide
-                            </Link>
-                            <Link
-                              to="/discover"
-                              className="p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 transition border border-emerald-500/30 flex items-center gap-1 text-xs font-bold"
-                              title="View on Interactive Map"
-                            >
-                              <Map className="size-4" />
-                              <span className="hidden sm:inline">Map</span>
+                              {p.district} Guide
                             </Link>
                           </div>
                         </motion.div>
@@ -631,6 +662,12 @@ function CategoryExplorePage() {
           )}
         </div>
       </div>
+
+      <PlaceQuickDetailsModal
+        place={selectedModalPlace}
+        isOpen={!!selectedModalPlace}
+        onClose={() => setSelectedModalPlace(null)}
+      />
     </AppShell>
   );
 }

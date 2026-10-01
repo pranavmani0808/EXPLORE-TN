@@ -30,9 +30,10 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { PlaceApiRepository } from "@/lib/api-client/places";
 import { CANONICAL_PLACES, ExplorerPlace } from "@/lib/data/canonical-places";
-import { DEFAULT_ARUPADAI_VEEDU_TEMPLES } from "@/data/places";
+import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, getPlace, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 import { TripRouteBuilderPanel } from "@/components/site/trip-route-builder-panel";
+import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
 
 export const Route = createFileRoute("/explore")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -269,6 +270,7 @@ function ExploreByExperiencePage() {
   });
 
   const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [selectedModalPlace, setSelectedModalPlace] = useState<Place | null>(null);
 
   // Sync routeStops with localStorage
   useEffect(() => {
@@ -764,52 +766,90 @@ function ExploreByExperiencePage() {
                                 </>
                               )}
                             </button>
-                            <Link
-                              to={`/place/$slug`}
-                              params={{ slug: p.slug || p.id }}
-                              className="py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 transition border border-zinc-800"
-                            >
-                              Details
-                            </Link>
-                          </div>
-                        </motion.div>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            </section>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  const legacyPlace = getPlace(p.slug || p.id) || {
+                                    slug: p.slug || p.id,
+                                    name: p.name || p.display_name || p.id,
+                                    district: p.district || "Tamil Nadu",
+                                    category: p.category || "hills",
+                                    image: img,
+                                    tagline: p.tagline || "",
+                                    story: p.description || "",
+                                    rating: p.rating || 4.8,
+                                    reviews: p.reviewsCount || 120,
+                                    difficulty: "Easy",
+                                    bestSeason: "Year-round",
+                                    roadCondition: "State Highway",
+                                    parking: "Available",
+                                    entryFee: "Free",
+                                    timings: "Open daily",
+                                    safety: "Safe",
+                                    weather: "24°C",
+                                    tips: [],
+                                    nearbyFood: [],
+                                    nearbyFuel: [],
+                                    x: 0,
+                                    y: 0,
+                                    coords: [p.latitude || 10.1, p.longitude || 77.5],
+                                    latitude: p.latitude || 10.1,
+                                    longitude: p.longitude || 77.5,
+                                  };
+                                  setSelectedModalPlace(legacyPlace as Place);
+                                }}
+                                className="py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 transition border border-zinc-800 cursor-pointer"
+                              >
+                                Details
+                              </button>
+                            </div>
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+              </section>
 
-            {/* Right Workspace: Trip Route Builder Panel */}
-            {isPanelOpen && (
-              <aside className="xl:col-span-5 sticky top-24 h-[calc(100vh-120px)] transition-all duration-500">
-                <TripRouteBuilderPanel
-                  stops={routeStops}
-                  onRemoveStop={handleRemoveStop}
-                  onReorderStops={handleReorderStops}
-                  onClearRoute={handleClearRoute}
-                  onClose={() => setIsPanelOpen(false)}
-                />
-              </aside>
-            )}
+              {/* Right Workspace: Trip Route Builder Panel */}
+              {isPanelOpen && (
+                <aside className="xl:col-span-5 sticky top-24 h-[calc(100vh-120px)] transition-all duration-500">
+                  <TripRouteBuilderPanel
+                    stops={routeStops}
+                    onRemoveStop={handleRemoveStop}
+                    onReorderStops={handleReorderStops}
+                    onClearRoute={handleClearRoute}
+                    onClose={() => setIsPanelOpen(false)}
+                  />
+                </aside>
+              )}
+
+            </div>
 
           </div>
-
         </div>
-      </div>
 
-      {/* Floating My Route Button (Bottom-Right) when Panel is Closed */}
-      {!isPanelOpen && routeStops.length > 0 && (
-        <motion.button
-          initial={{ opacity: 0, scale: 0.9, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          onClick={() => setIsPanelOpen(true)}
-          className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950 font-black text-xs shadow-2xl shadow-emerald-500/30 border border-emerald-300 hover:scale-105 transition flex items-center gap-2.5 cursor-pointer"
-        >
-          <Map className="size-4" />
-          <span>🗺 My Route · {routeStops.length} {routeStops.length === 1 ? "stop" : "stops"}</span>
-        </motion.button>
-      )}
-    </AppShell>
-  );
-}
+        {/* Floating My Route Button (Bottom-Right) when Panel is Closed */}
+        {!isPanelOpen && routeStops.length > 0 && (
+          <motion.button
+            initial={{ opacity: 0, scale: 0.9, y: 20 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            onClick={() => setIsPanelOpen(true)}
+            className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950 font-black text-xs shadow-2xl shadow-emerald-500/30 border border-emerald-300 hover:scale-105 transition flex items-center gap-2.5 cursor-pointer"
+          >
+            <Map className="size-4" />
+            <span>🗺 My Route · {routeStops.length} {routeStops.length === 1 ? "stop" : "stops"}</span>
+          </motion.button>
+        )}
+
+        {/* Place Quick Details Modal */}
+        <PlaceQuickDetailsModal
+          place={selectedModalPlace}
+          isOpen={!!selectedModalPlace}
+          onClose={() => setSelectedModalPlace(null)}
+          onToggleTrip={(targetP) => handleTogglePlaceToRoute(targetP)}
+          isAddedToTrip={selectedModalPlace ? routeStops.some((s) => s.slug === selectedModalPlace.slug || s.id === selectedModalPlace.slug) : false}
+        />
+      </AppShell>
+    );
+  }

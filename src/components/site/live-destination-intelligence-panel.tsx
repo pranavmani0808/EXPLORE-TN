@@ -150,23 +150,23 @@ export function LiveDestinationIntelligencePanel({
               <CloudSun className="size-8 text-amber-400" />
               <div>
                 <p className="text-2xl font-extrabold font-serif text-foreground">
-                  {intel?.weather.temperatureC ?? 28.4}°C
+                  {intel?.weather?.temperatureC ?? 28.4}°C
                 </p>
-                <p className="text-xs font-semibold text-muted-foreground">{intel?.weather.condition ?? "Partly Cloudy"}</p>
+                <p className="text-xs font-semibold text-muted-foreground">{intel?.weather?.condition ?? "Partly Cloudy"}</p>
               </div>
             </div>
 
             <div className="text-right text-xs font-medium space-y-0.5">
               <p className="text-muted-foreground flex items-center justify-end gap-1">
-                <Droplets className="size-3 text-cyan-400" /> Humidity: <span className="font-bold text-foreground">{intel?.weather.humidityPercent ?? 68}%</span>
+                <Droplets className="size-3 text-cyan-400" /> Humidity: <span className="font-bold text-foreground">{intel?.weather?.humidityPercent ?? 68}%</span>
               </p>
               <p className="text-muted-foreground flex items-center justify-end gap-1">
-                <Wind className="size-3 text-blue-400" /> Wind: <span className="font-bold text-foreground">{intel?.weather.windSpeedKmh ?? 12} km/h</span>
+                <Wind className="size-3 text-blue-400" /> Wind: <span className="font-bold text-foreground">{intel?.weather?.windSpeedKmh ?? 12} km/h</span>
               </p>
             </div>
           </div>
 
-          {intel?.weather.ghatAdvisory && (
+          {intel?.weather?.ghatAdvisory && (
             <div className="p-2.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-[11px] text-amber-300 flex items-start gap-2">
               <AlertTriangle className="size-3.5 text-amber-400 shrink-0 mt-0.5" />
               <span>{intel.weather.ghatAdvisory}</span>
@@ -182,17 +182,17 @@ export function LiveDestinationIntelligencePanel({
           <div className="p-3 rounded-2xl bg-accent/40 border border-border/40">
             <Footprints className="size-4 text-emerald-500 mx-auto mb-1" />
             <p className="text-[10px] font-mono text-muted-foreground uppercase">Terrain</p>
-            <p className="text-xs font-bold text-foreground mt-0.5">{intel?.conditions.trail || "Paved / Accessible"}</p>
+            <p className="text-xs font-bold text-foreground mt-0.5">{intel?.conditions?.trail || "Paved / Accessible"}</p>
           </div>
           <div className="p-3 rounded-2xl bg-accent/40 border border-border/40">
             <Droplets className="size-4 text-cyan-500 mx-auto mb-1" />
             <p className="text-[10px] font-mono text-muted-foreground uppercase">Ground</p>
-            <p className="text-xs font-bold text-foreground mt-0.5">{intel?.conditions.ground || "Good / Dry"}</p>
+            <p className="text-xs font-bold text-foreground mt-0.5">{intel?.conditions?.ground || "Good / Dry"}</p>
           </div>
           <div className="p-3 rounded-2xl bg-accent/40 border border-border/40">
             <Eye className="size-4 text-amber-500 mx-auto mb-1" />
             <p className="text-[10px] font-mono text-muted-foreground uppercase">Visibility</p>
-            <p className="text-xs font-bold text-foreground mt-0.5">{intel?.conditions.visibility || "Good"}</p>
+            <p className="text-xs font-bold text-foreground mt-0.5">{intel?.conditions?.visibility || "Good"}</p>
           </div>
         </div>
       </div>

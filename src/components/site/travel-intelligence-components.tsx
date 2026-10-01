@@ -120,7 +120,7 @@ export function PlaceTravelInformationSection({ intel }: { intel: PlaceTravelInt
       {/* 🅿️ PARKING TAB CONTENT */}
       {activeTab === "parking" && (
         <div className="space-y-4">
-          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-3 grid-cols-2 lg:grid-cols-4">
             <div className="p-4 rounded-2xl bg-accent/30 border border-border/40 space-y-1">
               <p className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
                 <Car className="size-3.5 text-blue-500" /> Car Parking
@@ -151,24 +151,25 @@ export function PlaceTravelInformationSection({ intel }: { intel: PlaceTravelInt
 
             <div className="p-4 rounded-2xl bg-accent/30 border border-border/40 space-y-1">
               <p className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                <Coins className="size-3.5 text-amber-500" /> Parking Type
+                <Bus className="size-3.5 text-purple-500" /> Van / Traveller
               </p>
               <p className="text-sm font-bold text-foreground">
-                {intel.parking.parkingType}
-                {intel.parking.parkingFeeDetails && (
-                  <span className="block text-[11px] font-medium text-muted-foreground mt-0.5">
-                    {intel.parking.parkingFeeDetails}
-                  </span>
-                )}
+                {intel.parking.vanParking || "Available"}
+                <span className="text-xs font-normal text-muted-foreground ml-1 font-mono">
+                  ({intel.parking.capacityVans || "Tourist Van Bay"})
+                </span>
               </p>
             </div>
 
             <div className="p-4 rounded-2xl bg-accent/30 border border-border/40 space-y-1">
               <p className="flex items-center gap-1.5 text-[11px] font-mono font-bold uppercase tracking-wider text-muted-foreground">
-                <MapPin className="size-3.5 text-rose-500" /> Parking Distance
+                <Bus className="size-3.5 text-amber-500" /> Tourist Bus
               </p>
-              <p className="text-xs font-bold text-foreground leading-snug">
-                {intel.parking.parkingDistance}
+              <p className="text-sm font-bold text-foreground">
+                {intel.parking.busParking || "Available"}
+                <span className="text-xs font-normal text-muted-foreground ml-1 font-mono">
+                  ({intel.parking.capacityBuses || "Bus Parking Stand"})
+                </span>
               </p>
             </div>
           </div>

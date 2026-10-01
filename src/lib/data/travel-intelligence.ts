@@ -3,9 +3,13 @@ import { CANONICAL_PLACES, ExplorerPlace } from "./canonical-places";
 export interface ParkingInformation {
   carParking: "Available" | "Limited" | "Not Available" | "Unknown";
   bikeParking: "Available" | "Limited" | "Not Available" | "Unknown";
+  vanParking?: "Available" | "Limited" | "Not Available" | "Unknown";
+  busParking?: "Available" | "Limited" | "Not Available" | "Unknown";
   parkingType: "Free" | "Paid" | "Both" | "Unknown";
   capacityCars?: string;
   capacityBikes?: string;
+  capacityVans?: string;
+  capacityBuses?: string;
   parkingDistance: string;
   parkingCoordinates: { latitude: number; longitude: number };
   parkingNotes: string;
@@ -56,6 +60,22 @@ export interface SoloTravelerIntelligence {
   bestSoloTime: string;
 }
 
+export interface PlaceFacilityInformation {
+  restrooms: {
+    available: boolean | "Limited" | "Nearby";
+    changingRoomsAvailable: boolean;
+    details: string;
+  };
+  foodShops: {
+    available: boolean | "Limited" | "Nearby";
+    details: string;
+  };
+  drinkingWater: {
+    available: boolean;
+    details: string;
+  };
+}
+
 export interface ConfidenceAndProvenance {
   confidenceScore: number; // 0 to 100
   lastVerifiedAt: string;
@@ -76,6 +96,7 @@ export interface PlaceTravelIntelligence {
   hillGhatSafety: HillGhatSafety;
   beforeYouGo: BeforeYouGoIntelligence;
   soloTraveler: SoloTravelerIntelligence;
+  facilities: PlaceFacilityInformation;
   confidenceAndProvenance?: ConfidenceAndProvenance;
 }
 
@@ -350,9 +371,11 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
 
   // General Fallback for all other places in Tamil Nadu
   const isHillPlace = foundPlace?.categories.some((c) => c === "hills" || c === "mountains" || c === "trekking" || c === "offroad") || false;
-  const isTemplePlace = foundPlace?.categories.some((c) => c === "temples" || c === "heritage") || false;
+  const isTemplePlace = foundPlace?.categories.some((c) => c === "temples" || c === "heritage" || c === "spiritual") || false;
   const isWaterfall = foundPlace?.categories.some((c) => c === "waterfalls" || c === "rivers") || false;
   const isBeach = foundPlace?.categories.some((c) => c === "beaches" || c === "coastal") || false;
+  const isLake = foundPlace?.categories.some((c) => c === "lakes" || c === "dams") || false;
+  const isViewpoint = foundPlace?.categories.some((c) => c === "hills" || c === "photography" || c === "sunrise" || c === "sunset") || false;
 
   return {
     slug: normalizedSlug,
@@ -361,13 +384,17 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
     parking: {
       carParking: isHillPlace || isWaterfall ? "Limited" : "Available",
       bikeParking: "Available",
+      vanParking: isWaterfall ? "Limited" : "Available",
+      busParking: isWaterfall ? "Limited" : "Available",
       parkingType: isTemplePlace ? "Paid" : "Free",
       capacityCars: isTemplePlace ? "100+ Cars" : "30+ Cars",
       capacityBikes: "150+ Bikes",
+      capacityVans: "20+ Vans / Travellers",
+      capacityBuses: "10+ Tourist Buses",
       parkingDistance: isWaterfall ? "400m walk along paved trail" : "On-site parking area",
       parkingCoordinates: { latitude: lat + 0.0005, longitude: lng + 0.0005 },
-      parkingFeeDetails: isTemplePlace ? "₹30 Cars · ₹10 Bikes" : "Free Public Parking",
-      parkingNotes: `Designated parking space available near ${placeName} entrance complex.`,
+      parkingFeeDetails: isTemplePlace ? "₹50 Cars · ₹20 Bikes · ₹100 Buses" : "Free Public Parking",
+      parkingNotes: `Designated vehicle parking space available near ${placeName} entrance complex.`,
     },
     roadCondition: {
       condition: isHillPlace ? "Good" : "Excellent",
@@ -411,6 +438,37 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
       punctureRepairNearby: `Local mechanic shops available in nearest town junction.`,
       soloCrowdLevel: "Moderate footfall, peaceful morning atmosphere",
       bestSoloTime: "07:30 AM for quiet exploration and optimal photos.",
+    },
+    facilities: {
+      restrooms: {
+        available: isWaterfall || isBeach || isLake || isTemplePlace ? true : "Limited",
+        changingRoomsAvailable: isWaterfall || isBeach || isLake,
+        details: isWaterfall
+          ? "🚽 Restrooms & Changing Rooms: Clean pay-and-use toilets & dedicated changing stalls near waterfall pool entrance."
+          : isBeach
+          ? "🚽 Restrooms & Changing Rooms: Public pay-and-use restrooms & fresh water shower stalls along beach promenade."
+          : isLake
+          ? "🚽 Restrooms & Changing Rooms: Clean public restrooms & changing rooms inside boat house complex."
+          : isTemplePlace
+          ? "🚽 Restrooms: Pay-and-use clean restrooms available inside temple outer complex."
+          : "🚽 Restrooms: Public pay-and-use restrooms available near main entrance.",
+      },
+      foodShops: {
+        available: true,
+        details: isViewpoint || isHillPlace
+          ? "🍿 Food & Snack Shops: Hot tea/coffee stalls, fresh roasted corn, maggi, snacks & fruit stalls at summit viewpoint."
+          : isBeach
+          ? "🍿 Food & Snack Stalls: Fresh fried fish, sundal, beach cafes, tender coconut & ice cream stalls."
+          : isWaterfall
+          ? "🍿 Food & Snacks: Tender coconut, tea stalls & hot fried snacks near entrance area."
+          : isTemplePlace
+          ? "🍿 Food & Dining: Traditional South Indian vegetarian messes, prasad counters & juice stalls."
+          : "🍿 Food & Refreshments: Local snack stalls, tea shops & eateries within walking distance.",
+      },
+      drinkingWater: {
+        available: true,
+        details: "Purified water kiosks and bottled drinking water stalls available nearby.",
+      },
     },
     confidenceAndProvenance: {
       confidenceScore: foundPlace?.confidenceScore ?? 88,

@@ -171,6 +171,9 @@ function PlacePage() {
           <motion.img
             src={place.image}
             alt={place.name}
+            onError={(e) => {
+              e.currentTarget.src = "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80";
+            }}
             initial={{ scale: 1.1 }}
             animate={{ scale: 1 }}
             transition={{ duration: 1.8, ease: "easeOut" }}
@@ -178,12 +181,22 @@ function PlacePage() {
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/60" />
           <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-10 sm:px-6">
-            <Link
-              to="/explore"
-              className="glass mb-6 inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-foreground border border-border hover:bg-card transition"
-            >
-              <ArrowLeft className="size-3.5" aria-hidden /> Back to All Places
-            </Link>
+            <div className="flex flex-wrap items-center gap-3 mb-6">
+              <Link
+                to="/explore"
+                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-foreground border border-border hover:bg-card transition"
+              >
+                <ArrowLeft className="size-3.5" aria-hidden /> Back to All Places
+              </Link>
+
+              <Link
+                to="/districts/$districtSlug"
+                params={{ districtSlug: (place.district || "chennai").toLowerCase().replace(/[^a-z0-9]+/g, "-") }}
+                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-amber-300 border border-amber-500/30 hover:bg-amber-500/10 transition"
+              >
+                <MapPin className="size-3.5 text-amber-400" /> Explore {place.district} District Guide →
+              </Link>
+            </div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
               <span className="text-xs font-mono font-bold uppercase px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
                 {travelIntel.canonicalEntityType || "TOURIST_ATTRACTION"}
