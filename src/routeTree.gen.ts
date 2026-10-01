@@ -33,6 +33,7 @@ import { Route as RoutesRouteImport } from './routes/routes'
 import { Route as SettingsRouteImport } from './routes/settings'
 import { Route as SupportRouteImport } from './routes/support'
 import { Route as TheniRouteImport } from './routes/theni'
+import { Route as TripPlannerRouteImport } from './routes/trip-planner'
 import { Route as WesternGhatsRouteImport } from './routes/western-ghats'
 import { Route as DistrictsIndexRouteImport } from './routes/districts.index'
 import { Route as DistrictsDistrictSlugRouteImport } from './routes/districts.$districtSlug'
@@ -172,6 +173,11 @@ const TheniRoute = TheniRouteImport.update({
   path: '/theni',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TripPlannerRoute = TripPlannerRouteImport.update({
+  id: '/trip-planner',
+  path: '/trip-planner',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const WesternGhatsRoute = WesternGhatsRouteImport.update({
   id: '/western-ghats',
   path: '/western-ghats',
@@ -289,6 +295,7 @@ export interface FileRoutesByFullPath {
   '/settings': typeof SettingsRouteWithChildren
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
+  '/trip-planner': typeof TripPlannerRoute
   '/western-ghats': typeof WesternGhatsRoute
   '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
@@ -333,6 +340,7 @@ export interface FileRoutesByTo {
   '/settings': typeof SettingsRouteWithChildren
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
+  '/trip-planner': typeof TripPlannerRoute
   '/western-ghats': typeof WesternGhatsRoute
   '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
@@ -378,6 +386,7 @@ export interface FileRoutesById {
   '/settings': typeof SettingsRouteWithChildren
   '/support': typeof SupportRoute
   '/theni': typeof TheniRoute
+  '/trip-planner': typeof TripPlannerRoute
   '/western-ghats': typeof WesternGhatsRoute
   '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
@@ -424,6 +433,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/theni'
+    | '/trip-planner'
     | '/western-ghats'
     | '/districts/$districtSlug'
     | '/explore/$category'
@@ -468,6 +478,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/theni'
+    | '/trip-planner'
     | '/western-ghats'
     | '/districts/$districtSlug'
     | '/explore/$category'
@@ -512,6 +523,7 @@ export interface FileRouteTypes {
     | '/settings'
     | '/support'
     | '/theni'
+    | '/trip-planner'
     | '/western-ghats'
     | '/districts/$districtSlug'
     | '/explore/$category'
@@ -557,6 +569,7 @@ export interface RootRouteChildren {
   SettingsRoute: typeof SettingsRouteWithChildren
   SupportRoute: typeof SupportRoute
   TheniRoute: typeof TheniRoute
+  TripPlannerRoute: typeof TripPlannerRoute
   WesternGhatsRoute: typeof WesternGhatsRoute
   DistrictsDistrictSlugRoute: typeof DistrictsDistrictSlugRoute
   LegalCommunityGuidelinesRoute: typeof LegalCommunityGuidelinesRoute
@@ -745,6 +758,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TheniRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trip-planner': {
+      id: '/trip-planner'
+      path: '/trip-planner'
+      fullPath: '/trip-planner'
+      preLoaderRoute: typeof TripPlannerRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/western-ghats': {
       id: '/western-ghats'
       path: '/western-ghats'
@@ -922,6 +942,7 @@ const rootRouteChildren: RootRouteChildren = {
   SettingsRoute: SettingsRouteWithChildren,
   SupportRoute: SupportRoute,
   TheniRoute: TheniRoute,
+  TripPlannerRoute: TripPlannerRoute,
   WesternGhatsRoute: WesternGhatsRoute,
   DistrictsDistrictSlugRoute: DistrictsDistrictSlugRoute,
   LegalCommunityGuidelinesRoute: LegalCommunityGuidelinesRoute,

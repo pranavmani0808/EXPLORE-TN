@@ -218,7 +218,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-5 font-sans">
         <nav
           className={cn(
-            "mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-3 sm:gap-4 rounded-full pl-5 pr-7 sm:pl-6 sm:pr-8 transition-all duration-300 backdrop-blur-[24px]",
+            "mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-2 sm:gap-4 rounded-full px-4 sm:pl-6 sm:pr-8 transition-all duration-300 backdrop-blur-[24px]",
             scrolled
               ? "bg-[#09090b]/90 border border-zinc-800 shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
               : "bg-[#09090b]/75 border border-zinc-800/80 shadow-[0_8px_32px_rgba(0,0,0,0.3)]",
@@ -453,7 +453,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs font-bold text-amber-300 hover:border-amber-500/50 hover:bg-zinc-800 transition shrink-0"
+            className="hidden sm:flex items-center gap-1.5 rounded-full border border-zinc-800 bg-zinc-900/80 px-3 py-1.5 text-xs font-bold text-amber-300 hover:border-amber-500/50 hover:bg-zinc-800 transition shrink-0"
             title="Switch Language / மொழியை மாற்றுக"
           >
             <Languages className="size-3.5 text-amber-400" />
@@ -472,7 +472,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* Visually Lighter Nav CTA Button: Plan My Trip */}
           <Link
             to="/planner"
-            className="flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md shrink-0"
+            className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md shrink-0"
           >
             <Sparkles className="size-3.5 text-emerald-400" />
             <span>{lang === "ta" ? "பயணம் திட்டமிடுக" : "Plan My Trip"}</span>
