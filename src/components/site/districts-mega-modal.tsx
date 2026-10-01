@@ -52,106 +52,78 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
     { scope: modalRef, dependencies: [isOpen, activeCategory, searchQuery] }
   );
 
-  const filteredDistricts = useMemo(() => {
-    return allDistricts.filter((d) => {
+  const allSpots = useMemo(() => {
+    return CANONICAL_PLACES.map((p) => ({
+      id: p.id || p.slug,
+      name: p.canonicalName || p.name,
+      district: p.district,
+      category: (p.primaryCategory || "attraction").toUpperCase(),
+      primaryCategory: (p.primaryCategory || "attraction").toLowerCase(),
+      tagline: p.tagline || `Famous destination spot in ${p.district}`,
+      image: p.image || "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+      rating: p.rating || 4.7,
+      tags: p.tags || [],
+      slug: p.slug,
+    }));
+  }, []);
+
+  const filteredSpots = useMemo(() => {
+    return allSpots.filter((s) => {
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
         !q ||
-        d.name.toLowerCase().includes(q) ||
-        d.slug.toLowerCase().includes(q) ||
-        d.region.toLowerCase().includes(q) ||
-        d.tagline.toLowerCase().includes(q) ||
-        d.overview.famousFor.some((f) => f.toLowerCase().includes(q));
+        s.name.toLowerCase().includes(q) ||
+        s.district.toLowerCase().includes(q) ||
+        s.tagline.toLowerCase().includes(q) ||
+        s.tags.some((t) => t.toLowerCase().includes(q));
 
       if (!matchesSearch) return false;
 
       if (activeCategory === "trending") {
         return (
-          d.slug === "the-nilgiris" ||
-          d.slug === "dindigul" ||
-          d.slug === "madurai" ||
-          d.slug === "dharmapuri" ||
-          d.slug === "tenkasi" ||
-          d.slug === "coimbatore" ||
-          d.slug === "ramanathapuram" ||
-          d.slug === "thanjavur"
+          s.slug.includes("falls") ||
+          s.slug.includes("ooty") ||
+          s.slug.includes("kodai") ||
+          s.slug.includes("meenakshi") ||
+          s.slug.includes("hogenakkal") ||
+          s.rating >= 4.7
         );
       }
 
       if (activeCategory === "october") {
         return (
-          d.slug === "the-nilgiris" ||
-          d.slug === "dindigul" ||
-          d.slug === "dharmapuri" ||
-          d.slug === "salem" ||
-          d.slug === "theni" ||
-          d.slug === "tenkasi" ||
-          d.slug === "namakkal"
+          s.primaryCategory.includes("waterfall") ||
+          s.primaryCategory.includes("hill") ||
+          s.slug.includes("falls") ||
+          s.slug.includes("ooty") ||
+          s.slug.includes("kodai") ||
+          s.slug.includes("pykara")
         );
       }
 
       if (activeCategory === "hills") {
-        return (
-          d.slug === "the-nilgiris" ||
-          d.slug === "dindigul" ||
-          d.slug === "theni" ||
-          d.slug === "salem" ||
-          d.slug === "tirupathur" ||
-          d.slug === "namakkal" ||
-          d.slug === "kallakurichi"
-        );
+        return s.primaryCategory.includes("hill") || s.primaryCategory.includes("mountain") || s.tags.includes("peak") || s.slug.includes("ooty") || s.slug.includes("kodai");
       }
 
       if (activeCategory === "temples") {
-        return (
-          d.slug === "madurai" ||
-          d.slug === "thanjavur" ||
-          d.slug === "ramanathapuram" ||
-          d.slug === "tiruvannamalai" ||
-          d.slug === "kancheepuram" ||
-          d.slug === "tiruchirappalli" ||
-          d.slug === "tiruvarur" ||
-          d.slug === "virudhunagar"
-        );
+        return s.primaryCategory.includes("temple") || s.primaryCategory.includes("heritage") || s.tags.includes("temple");
       }
 
       if (activeCategory === "beaches") {
-        return (
-          d.slug === "chennai" ||
-          d.slug === "chengalpattu" ||
-          d.slug === "kanniyakumari" ||
-          d.slug === "ramanathapuram" ||
-          d.slug === "thoothukudi" ||
-          d.slug === "nagapattinam" ||
-          d.slug === "cuddalore"
-        );
+        return s.primaryCategory.includes("beach") || s.primaryCategory.includes("coastal") || s.tags.includes("beach");
       }
 
       if (activeCategory === "ghats") {
-        return (
-          d.region.toLowerCase().includes("ghats") ||
-          d.slug === "the-nilgiris" ||
-          d.slug === "dindigul" ||
-          d.slug === "theni" ||
-          d.slug === "tenkasi" ||
-          d.slug === "coimbatore"
-        );
+        return s.district.toLowerCase().includes("nilgiris") || s.district.toLowerCase().includes("dindigul") || s.district.toLowerCase().includes("coimbatore") || s.district.toLowerCase().includes("tenkasi") || s.district.toLowerCase().includes("theni");
       }
 
       if (activeCategory === "heritage") {
-        return (
-          d.slug === "sivaganga" ||
-          d.slug === "thanjavur" ||
-          d.slug === "pudukkottai" ||
-          d.slug === "ariyalur" ||
-          d.slug === "viluppuram" ||
-          d.slug === "vellore"
-        );
+        return s.primaryCategory.includes("heritage") || s.slug.includes("fort") || s.slug.includes("palace");
       }
 
       return true;
     });
-  }, [allDistricts, searchQuery, activeCategory]);
+  }, [allSpots, searchQuery, activeCategory]);
 
   if (!isOpen) return null;
 
@@ -175,16 +147,16 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="font-display text-2xl font-extrabold text-white tracking-tight">
-                    {lang === "ta" ? "தமிழ்நாட்டின் 38 மாவட்டங்கள்" : "All 38 Districts of Tamil Nadu"}
+                    {lang === "ta" ? "தமிழ்நாடு சுற்றுலா இடங்கள்" : "Explore Places & Famous Spots"}
                   </h2>
                   <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-3 py-0.5 text-xs font-mono font-bold text-amber-400">
-                    38 {lang === "ta" ? "மாவட்டங்கள்" : "Districts"}
+                    {filteredSpots.length} {lang === "ta" ? "இடங்கள்" : "Spots"}
                   </span>
                 </div>
                 <p className="text-xs text-zinc-400 mt-0.5">
                   {lang === "ta"
-                    ? "கோவில்கள், மலைவாசஸ்தலங்கள், கடற்கரைகள் மற்றும் பாரம்பரிய இடங்கள் கொண்ட தமிழ்நாட்டின் மாவட்ட உலா."
-                    : "Search or browse complete spot catalogs across every district in Tamil Nadu."}
+                    ? "குற்றாலம் அருவி, சுருளி அருவி, மீனாட்சி அம்மன் கோவில் போன்ற தமிழ்நாட்டின் சிறந்த தலங்கள்."
+                    : "Individual tourist spots, waterfalls, hill peaks, and heritage places across Tamil Nadu."}
                 </p>
               </div>
             </div>
@@ -196,7 +168,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                 <Search className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-zinc-400" />
                 <input
                   type="text"
-                  placeholder={lang === "ta" ? "மாவட்டங்களைத் தேடுக..." : "Search district, region or spot..."}
+                  placeholder={lang === "ta" ? "இடங்களைத் தேடுக (எ.கா: குற்றாலம் அருவி)..." : "Search spot name (e.g. Courtallam, Suruli Falls, Ooty)..."}
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   className="w-full rounded-2xl border border-zinc-800 bg-zinc-900/90 pl-10 pr-4 py-2.5 text-xs text-white placeholder-zinc-500 focus:border-amber-400 focus:outline-none focus:ring-1 focus:ring-amber-400 transition"
@@ -216,7 +188,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                 type="button"
                 onClick={onClose}
                 className="grid size-10 place-items-center rounded-2xl border border-zinc-800 bg-zinc-900 text-zinc-300 hover:border-zinc-700 hover:bg-zinc-800 hover:text-white transition cursor-pointer"
-                aria-label="Close districts modal"
+                aria-label="Close spots modal"
               >
                 <X className="size-5" />
               </button>
@@ -228,7 +200,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
             {[
               { key: "trending", label: lang === "ta" ? "🔥 பிரபலமான இடங்கள்" : "🔥 Trending Spots", icon: Sparkles },
               { key: "october", label: lang === "ta" ? "📅 அக்டோபர் மாத உலா" : "📅 Best for October", icon: Sparkles },
-              { key: "all", label: lang === "ta" ? "அனைத்து 38" : "All 38 Districts & Culture", icon: Compass },
+              { key: "all", label: lang === "ta" ? "அனைத்து இடங்கள்" : "All Famous Spots", icon: Compass },
               { key: "hills", label: lang === "ta" ? "மலைவாசல் ⛰️" : "Hill Stations ⛰️", icon: Mountain },
               { key: "temples", label: lang === "ta" ? "கோவில்கள் 🛕" : "Heritage Temples 🛕", icon: Landmark },
               { key: "beaches", label: lang === "ta" ? "கடற்கரைகள் 🏖️" : "Beaches & Coast 🏖️", icon: Waves },
@@ -258,12 +230,12 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
 
         {/* Modal Main Body - Clean 4-Column Grid */}
         <div className="relative flex-1 overflow-hidden p-6 sm:p-8">
-          {filteredDistricts.length === 0 ? (
+          {filteredSpots.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center p-12">
               <Search className="size-12 text-zinc-600 mb-4" />
-              <h3 className="text-lg font-bold text-white mb-1">No districts found</h3>
+              <h3 className="text-lg font-bold text-white mb-1">No spots found</h3>
               <p className="text-xs text-zinc-400 max-w-sm">
-                We couldn't find any district matching "{searchQuery}". Try searching for "Madurai", "Ooty", "Temple", or "Waterfall".
+                We couldn't find any spot matching "{searchQuery}". Try searching for "Courtallam", "Suruli", "Ooty", "Temple", or "Waterfall".
               </p>
               <button
                 onClick={() => {
@@ -276,11 +248,11 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
               </button>
             </div>
           ) : (
-            /* Structured 4-Column Static Grid View */
+            /* Structured 4-Column Spot Grid View */
             <div className="districts-scroll-container h-full overflow-y-auto pr-2">
               <div className="mx-auto max-w-[1500px] grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 pb-12">
-                {filteredDistricts.map((district) => (
-                  <DistrictGridCard key={district.slug} district={district} onClose={onClose} />
+                {filteredSpots.map((spot) => (
+                  <SpotGridCard key={spot.id} spot={spot} onClose={onClose} />
                 ))}
               </div>
             </div>
@@ -292,12 +264,12 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
           <div className="flex items-center gap-2">
             <span className="inline-block size-2 rounded-full bg-emerald-400 animate-pulse" />
             <span className="font-medium text-zinc-300">
-              Click any district card to open its full spot explorer catalog
+              Click any spot card to open its trip planning & route details
             </span>
           </div>
           <div className="hidden sm:flex items-center gap-4 font-mono text-[11px] text-zinc-400">
-            <span>ExploreTN Heritage Spatial GIS</span>
-            <span>38 Districts Live</span>
+            <span>ExploreTN Spatial GIS</span>
+            <span>{filteredSpots.length} Spots Active</span>
           </div>
         </div>
       </motion.div>
@@ -305,55 +277,57 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
   );
 }
 
-// Single District Card for Grid View
-function DistrictGridCard({ district, onClose }: { district: DistrictData; onClose: () => void }) {
+import { CANONICAL_PLACES } from "@/lib/data/canonical-places";
+
+// Single Individual Spot Card
+function SpotGridCard({ spot, onClose }: { spot: any; onClose: () => void }) {
   return (
     <Link
-      to="/districts/$districtSlug"
-      params={{ districtSlug: district.slug }}
+      to="/planner"
+      search={{ destination: spot.name }}
       onClick={onClose}
-      className="gsap-district-card group relative flex flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-[#18181b] p-4 transition-all duration-300 hover:border-amber-400/60 hover:shadow-xl hover:-translate-y-1"
+      className="gsap-district-card group relative flex flex-col overflow-hidden rounded-3xl border border-zinc-800 bg-[#18181b] p-4 transition-all duration-300 hover:border-emerald-400/60 hover:shadow-xl hover:-translate-y-1 cursor-pointer"
     >
       <div className="relative h-48 w-full overflow-hidden rounded-2xl bg-zinc-900">
         <img
-          src={district.heroImage}
-          alt={district.name}
+          src={spot.image}
+          alt={spot.name}
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-[#18181b] via-transparent to-transparent" />
-        
-        {/* Region Tag */}
-        <span className="absolute top-3 left-3 rounded-full bg-zinc-950/85 backdrop-blur-md border border-zinc-800 px-3 py-1 text-[10px] font-extrabold text-amber-400">
-          {district.region}
+
+        {/* Category Tag */}
+        <span className="absolute top-3 left-3 rounded-full bg-zinc-950/85 backdrop-blur-md border border-zinc-800 px-3 py-1 text-[10px] font-extrabold text-emerald-400 uppercase">
+          {spot.category || "ATTRACTION"}
         </span>
 
-        {/* Spots Count Badge */}
+        {/* District Tag */}
         <span className="absolute top-3 right-3 flex items-center gap-1 rounded-full bg-amber-400 font-black px-2.5 py-1 text-[10px] text-zinc-950 shadow-md">
-          <Sparkles className="size-3 fill-zinc-950" />
-          {district.spots.length} Spots
+          <MapPin className="size-3 fill-zinc-950" />
+          {spot.district}
         </span>
       </div>
 
       <div className="mt-3.5 flex flex-1 flex-col justify-between">
         <div>
-          <h3 className="font-display text-lg font-black text-white group-hover:text-amber-300 transition-colors tracking-tight">
-            {district.name}
+          <h3 className="font-display text-base font-black text-white group-hover:text-emerald-300 transition-colors tracking-tight">
+            {spot.name}
           </h3>
-          <p className="text-xs text-zinc-400 line-clamp-2 mt-1 leading-relaxed">{district.tagline}</p>
+          <p className="text-xs text-zinc-400 line-clamp-2 mt-1 leading-relaxed">{spot.tagline}</p>
 
-          {/* Famous Spots Highlights Pills */}
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {district.overview.famousFor.slice(0, 2).map((item, i) => (
-              <span key={i} className="rounded-lg bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
-                {item}
-              </span>
-            ))}
+          <div className="mt-2.5 flex flex-wrap gap-1.5">
+            <span className="rounded-lg bg-zinc-900 border border-zinc-800 px-2 py-0.5 text-[10px] font-semibold text-zinc-300">
+              📍 {spot.district} District
+            </span>
+            <span className="rounded-lg bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 text-[10px] font-semibold text-emerald-400">
+              ★ {spot.rating}
+            </span>
           </div>
         </div>
 
-        <div className="mt-4 flex items-center justify-between text-xs font-bold text-amber-400 pt-3 border-t border-zinc-800/80 group-hover:text-amber-300">
-          <span>View District Page</span>
+        <div className="mt-4 flex items-center justify-between text-xs font-bold text-emerald-400 pt-3 border-t border-zinc-800/80 group-hover:text-emerald-300">
+          <span>Plan Trip to Spot</span>
           <ArrowRight className="size-4 group-hover:translate-x-1 transition-transform" />
         </div>
       </div>

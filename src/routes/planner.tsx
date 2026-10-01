@@ -28,6 +28,9 @@ import {
 } from "lucide-react";
 import { AppShell, PageHeader } from "@/components/site/app-shell";
 import { AITravelPlannerInput } from "@/components/site/ai-travel-planner-input";
+import { ExploreMoreWorkspace } from "@/components/site/explore-more-workspace";
+import { GeofenceManager } from "@/lib/trip-intelligence/arrival/geofence-manager";
+import { DynamicItineraryManager } from "@/lib/trip-intelligence/itinerary/dynamic-itinerary";
 import { Button } from "@/components/ui/button";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { toast } from "sonner";
@@ -162,6 +165,57 @@ function PlannerPage() {
 
   const currentDestination = selectedDestination || plannerData?.plannerState?.destination || aiPlanData?.destination?.name || "";
   const effectiveOrigin = customOrigin || plannerData?.plannerState?.origin || currentDestination || "Local City";
+
+  // Geofence & Dynamic Itinerary Manager Refs
+  const geofenceManagerRef = useRef<GeofenceManager | null>(null);
+  const itineraryManagerRef = useRef<DynamicItineraryManager | null>(null);
+
+  if (!geofenceManagerRef.current) {
+    geofenceManagerRef.current = new GeofenceManager("trip-active-session");
+    geofenceManagerRef.current.registerGeofences([
+      {
+        id: "dest-main",
+        name: currentDestination || "Ooty",
+        latitude: 11.4102,
+        longitude: 76.6950,
+        district: currentDestination || "Nilgiris",
+        category: "hills",
+      },
+    ]);
+  }
+
+  if (!itineraryManagerRef.current) {
+    itineraryManagerRef.current = new DynamicItineraryManager({
+      tripId: "trip-active-session",
+      destinationName: currentDestination || "Ooty",
+      originName: effectiveOrigin || "Madurai",
+      durationDays: customDays || 1,
+      stops: [
+        {
+          id: "stop-1",
+          name: `${currentDestination || "Ooty"} Main Viewpoint`,
+          district: currentDestination || "Nilgiris",
+          latitude: 11.4005,
+          longitude: 76.7352,
+          type: "poi",
+          durationMinutes: 60,
+          timeSlot: "09:00 AM",
+          description: `Iconic viewpoint and attraction in ${currentDestination || "Ooty"}`,
+        },
+        {
+          id: "stop-2",
+          name: `${currentDestination || "Ooty"} Lake & Boathouse`,
+          district: currentDestination || "Nilgiris",
+          latitude: 11.4098,
+          longitude: 76.6908,
+          type: "poi",
+          durationMinutes: 90,
+          timeSlot: "11:00 AM",
+          description: `Scenic lake and boating spot in ${currentDestination || "Ooty"}`,
+        },
+      ],
+    });
+  }
 
   const toggleCustomInterest = (interest: string) => {
     setCustomInterests((prev) =>
@@ -839,6 +893,20 @@ function PlannerPage() {
                 <RefreshCw className="w-3.5 h-3.5" /> Reconfigure Trip Preferences
               </button>
             </div>
+
+            {/* ExplorerTN Explore More: Location-Aware Smart Arrival & Spontaneous Trip Planner */}
+            {geofenceManagerRef.current && itineraryManagerRef.current && (
+              <ExploreMoreWorkspace
+                tripId="trip-active-session"
+                destinationName={currentDestination || "Ooty"}
+                originName={effectiveOrigin || "Madurai"}
+                durationDays={customDays}
+                userLat={originPos.lat}
+                userLng={originPos.lng}
+                geofenceManager={geofenceManagerRef.current}
+                itineraryManager={itineraryManagerRef.current}
+              />
+            )}
 
             {/* Prominent AI Travel Intelligence Engine Input Bar */}
             <AITravelPlannerInput onSearch={handleAISearch} isLoading={loading} />
