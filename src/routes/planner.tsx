@@ -32,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { toast } from "sonner";
 import { PlannerApiRepository, PlannerChatResponseDTO, SuggestedCategoryItem } from "@/lib/api-client/planner";
-import { resolvePlace } from "@/lib/data/canonical-places";
+import { resolvePlace, searchEntities, CategorizedSearchResult } from "@/lib/data/canonical-places";
 import {
   Map,
   MapMarker,
@@ -135,6 +135,30 @@ function PlannerPage() {
     "🍲 Local Tamil Food"
   ]);
   const [customTransport, setCustomTransport] = useState<string>("Car");
+
+  // Autocomplete Suggestions State & Outside Click Refs
+  const [showDestDropdown, setShowDestDropdown] = useState(false);
+  const [destSuggestions, setDestSuggestions] = useState<CategorizedSearchResult[]>([]);
+  const [showOriginDropdown, setShowOriginDropdown] = useState(false);
+  const [originSuggestions, setOriginSuggestions] = useState<CategorizedSearchResult[]>([]);
+
+  const destContainerRef = useRef<HTMLDivElement>(null);
+  const originContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (destContainerRef.current && !destContainerRef.current.contains(event.target as Node)) {
+        setShowDestDropdown(false);
+      }
+      if (originContainerRef.current && !originContainerRef.current.contains(event.target as Node)) {
+        setShowOriginDropdown(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   const currentDestination = selectedDestination || plannerData?.plannerState?.destination || aiPlanData?.destination?.name || "";
   const effectiveOrigin = customOrigin || plannerData?.plannerState?.origin || currentDestination || "Local City";
@@ -543,37 +567,147 @@ function PlannerPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Destination & Origin */}
               <div className="space-y-4">
-                <div>
+                <div className="relative" ref={destContainerRef}>
                   <label className="text-xs font-bold text-slate-300 block mb-1.5">1. Target Destination:</label>
-                  <div className="flex items-center gap-2 p-3 bg-slate-800/90 rounded-xl border border-slate-700">
+                  <div className="flex items-center gap-2 p-3 bg-slate-800/90 rounded-xl border border-slate-700 focus-within:border-emerald-500/50 transition">
                     <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
                     <input
                       type="text"
                       value={selectedDestination}
-                      onChange={(e) => setSelectedDestination(e.target.value)}
-                      placeholder="Enter destination..."
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setSelectedDestination(val);
+                        if (val.trim()) {
+                          setDestSuggestions(searchEntities(val).slice(0, 6));
+                          setShowDestDropdown(true);
+                        } else {
+                          setDestSuggestions([]);
+                          setShowDestDropdown(false);
+                        }
+                      }}
+                      onFocus={() => {
+                        if (selectedDestination.trim()) {
+                          setDestSuggestions(searchEntities(selectedDestination).slice(0, 6));
+                          setShowDestDropdown(true);
+                        }
+                      }}
+                      placeholder="Enter destination (e.g. Madurai, Ooty, Kolli Hills)..."
                       className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none font-semibold"
                     />
                   </div>
+
+                  {/* Suggestions Dropdown for Target Destination */}
+                  {showDestDropdown && destSuggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-800">
+                      {destSuggestions.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedDestination(item.name);
+                            setShowDestDropdown(false);
+                          }}
+                          className="w-full px-3.5 py-2.5 text-left hover:bg-slate-800 flex items-center justify-between transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{item.icon}</span>
+                            <div>
+                              <p className="text-xs font-bold text-white">{item.name}</p>
+                              <p className="text-[10px] text-slate-400">{item.sublabel}</p>
+                            </div>
+                          </div>
+                          <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                            {item.entityType}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
                 </div>
 
-                <div>
+                <div className="relative" ref={originContainerRef}>
                   <label className="text-xs font-bold text-slate-300 block mb-1.5">2. Starting Origin (Departure):</label>
-                  <div className="flex flex-wrap gap-2">
-                    {[selectedDestination || "Local", "Chennai", "Coimbatore", "Trichy", "Salem"].map((city) => {
-                      const isSelected = effectiveOrigin.toLowerCase() === city.toLowerCase();
+                  <div className="flex items-center gap-2 p-3 bg-slate-800/90 rounded-xl border border-slate-700 focus-within:border-emerald-500/50 transition">
+                    <Navigation className="w-4 h-4 text-emerald-400 shrink-0" />
+                    <input
+                      type="text"
+                      value={customOrigin}
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setCustomOrigin(val);
+                        if (val.trim()) {
+                          setOriginSuggestions(searchEntities(val).slice(0, 6));
+                          setShowOriginDropdown(true);
+                        } else {
+                          setOriginSuggestions([]);
+                          setShowOriginDropdown(false);
+                        }
+                      }}
+                      onFocus={() => {
+                        if (customOrigin.trim()) {
+                          setOriginSuggestions(searchEntities(customOrigin).slice(0, 6));
+                          setShowOriginDropdown(true);
+                        }
+                      }}
+                      placeholder="Enter starting origin (e.g. Chennai, Coimbatore, Madurai)..."
+                      className="w-full bg-transparent text-xs text-white placeholder:text-slate-500 focus:outline-none font-semibold"
+                    />
+                  </div>
+
+                  {/* Suggestions Dropdown for Starting Origin */}
+                  {showOriginDropdown && originSuggestions.length > 0 && (
+                    <div className="absolute left-0 right-0 top-full mt-1 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl z-50 overflow-hidden max-h-56 overflow-y-auto divide-y divide-slate-800">
+                      {originSuggestions.map((item) => (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => {
+                            setCustomOrigin(item.name);
+                            setShowOriginDropdown(false);
+                          }}
+                          className="w-full px-3.5 py-2.5 text-left hover:bg-slate-800 flex items-center justify-between transition cursor-pointer"
+                        >
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm">{item.icon}</span>
+                            <div>
+                              <p className="text-xs font-bold text-white">{item.name}</p>
+                              <p className="text-[10px] text-slate-400">{item.sublabel}</p>
+                            </div>
+                          </div>
+                          <span className="text-[9px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                            {item.entityType}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Preset Pills */}
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <span className="text-[10px] font-medium text-slate-400 self-center mr-1">Quick select:</span>
+                    {[
+                      { label: `${selectedDestination || "Local"} (Local)`, value: selectedDestination || "Local" },
+                      { label: "Chennai", value: "Chennai" },
+                      { label: "Coimbatore", value: "Coimbatore" },
+                      { label: "Trichy", value: "Trichy" },
+                      { label: "Salem", value: "Salem" },
+                    ].map((preset) => {
+                      const isSelected = effectiveOrigin.toLowerCase() === preset.value.toLowerCase();
                       return (
                         <button
-                          key={city}
+                          key={preset.value}
                           type="button"
-                          onClick={() => setCustomOrigin(city)}
-                          className={`px-3 py-1.5 rounded-xl text-xs font-bold transition cursor-pointer ${
+                          onClick={() => {
+                            setCustomOrigin(preset.value);
+                            setShowOriginDropdown(false);
+                          }}
+                          className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition cursor-pointer ${
                             isSelected
                               ? "bg-emerald-500 text-slate-950 shadow-md border border-emerald-400"
-                              : "bg-slate-800 text-slate-300 border border-slate-700 hover:bg-slate-700"
+                              : "bg-slate-800/80 text-slate-300 border border-slate-700/80 hover:bg-slate-700 hover:text-white"
                           }`}
                         >
-                          📍 {city} {city === selectedDestination ? "(Local)" : ""}
+                          📍 {preset.label}
                         </button>
                       );
                     })}
