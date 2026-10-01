@@ -145,7 +145,9 @@ export function FullscreenRouteMap({
     }
   };
 
-  const [isDirectionsFocusMode, setIsDirectionsFocusMode] = useState(false);
+  const [isDirectionsFocusMode, setIsDirectionsFocusMode] = useState<boolean>(() => {
+    return Boolean(initialDestinationPlaceId && !initialOriginPlaceId);
+  });
   const [focusOriginQuery, setFocusOriginQuery] = useState("");
 
   const handleGetDirections = (place: ExplorerPlace) => {
@@ -257,7 +259,12 @@ export function FullscreenRouteMap({
     }
     if (initialDestinationPlaceId) {
       const p = resolvePlaceById(initialDestinationPlaceId);
-      if (p) setSelectedDestination(p);
+      if (p) {
+        setSelectedDestination(p);
+        if (!initialOriginPlaceId) {
+          setIsDirectionsFocusMode(true);
+        }
+      }
     }
   }, [initialOriginPlaceId, initialDestinationPlaceId]);
 

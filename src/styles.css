@@ -267,19 +267,17 @@
   animation: float-slow 7s ease-in-out infinite;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+/* Hide scrollbar indicators while preserving scrolling functionality */
+.custom-scrollbar::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+  width: 0px;
+  height: 0px;
 }
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(16, 185, 129, 0.4);
-  border-radius: 9999px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(16, 185, 129, 0.8);
+.custom-scrollbar,
+.no-scrollbar {
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
 }
 
 /* 21st.dev Exact Leaflet Popup Dark Container Override */
