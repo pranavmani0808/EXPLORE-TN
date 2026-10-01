@@ -87,11 +87,27 @@ const TYPO_DICTIONARY: Record<string, string> = {
   "theosophical society": "Theosophical Society",
   "adyar": "Adyar",
   "crocodile bank": "Madras Crocodile Bank",
-  "croc bank": "Madras Crocodile Bank",
-  "ecr": "ECR (East Coast Road)",
   "vgp": "VGP Universal Kingdom",
   "ecr beach": "ECR Beach",
-  "anna nagar": "Anna Nagar"
+  "anna nagar": "Anna Nagar",
+  "manjolai": "Manjolai Tea Estates & KMTR",
+  "pachamalai": "Pachamalai Hills & Top Sengattupatti",
+  "pachaimalai": "Pachamalai Hills & Top Sengattupatti",
+  "bargur": "Bargur Hills (Anthiyur Range)",
+  "bargur hills": "Bargur Hills (Anthiyur Range)",
+  "meghamalai": "Megamalai (High Wavy Mountains)",
+  "megamalai": "Megamalai (High Wavy Mountains)",
+  "pandrimalai": "Pandrimalai Hills",
+  "t nagar": "T. Nagar Shopping District",
+  "t.nagar": "T. Nagar Shopping District",
+  "sowcarpet": "Sowcarpet Wholesale & Ethnic Bazaar",
+  "pondy bazaar": "Pondy Bazaar Street & Pedestrian Plaza",
+  "ranganathan street": "Ranganathan Street Budget Market",
+  "purasawalkam": "Purasawalkam Family Textile & Jewelry Belt",
+  "nettukuppam": "Nettukuppam Beach & Broken Pier",
+  "sadras": "Sadras Beach & 17th-Century Dutch Fort",
+  "covelong": "Covelong Beach (Kovalam Surfing Hub)",
+  "kovalam": "Covelong Beach (Kovalam Surfing Hub)"
 };
 
 export interface ResolvedDestinationResult {

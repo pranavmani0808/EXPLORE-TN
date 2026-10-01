@@ -33,7 +33,7 @@ interface DistrictsMegaModalProps {
 
 import { RegionalTravelDiscovery } from "./regional-travel-discovery";
 
-type CategoryFilter = "all" | "trending" | "october" | "hills" | "temples" | "beaches" | "ghats" | "heritage";
+type CategoryFilter = "all" | "trending" | "october" | "hills" | "temples" | "beaches" | "shopping" | "ghats" | "heritage";
 type ViewMode = "spots" | "regional";
 
 export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMegaModalProps) {
@@ -115,6 +115,10 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
 
       if (activeCategory === "beaches") {
         return s.primaryCategory.includes("beach") || s.primaryCategory.includes("coastal") || s.tags.includes("beach");
+      }
+
+      if (activeCategory === "shopping") {
+        return s.primaryCategory.includes("shopping") || s.tags.includes("shopping") || s.tags.includes("street-shopping");
       }
 
       if (activeCategory === "ghats") {
@@ -241,6 +245,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                 { key: "hills", label: lang === "ta" ? "மலைவாசல் ⛰️" : "Hill Stations ⛰️", icon: Mountain },
                 { key: "temples", label: lang === "ta" ? "கோவில்கள் 🛕" : "Heritage Temples 🛕", icon: Landmark },
                 { key: "beaches", label: lang === "ta" ? "கடற்கரைகள் 🏖️" : "Beaches & Coast 🏖️", icon: Waves },
+                { key: "shopping", label: lang === "ta" ? "வாங்குமிடம் 🛍️" : "Shopping & Bazaars 🛍️", icon: Sparkles },
                 { key: "ghats", label: lang === "ta" ? "மேற்குத் தொடர்ச்சி 🌲" : "Western Ghats 🌲", icon: Trees },
                 { key: "heritage", label: lang === "ta" ? "பாரம்பரியம் 🏰" : "Palaces & Forts 🏰", icon: Sparkles },
               ].map((cat) => {

@@ -15,11 +15,15 @@ export type PlaceCategory =
   | "dams"
   | "rivers"
   | "wildlife"
-  | "coastal";
+  | "coastal"
+  | "shopping"
+  | "street-shopping"
+  | "fashion-textiles";
 
 import { CanonicalEntityType, SourceType, VerificationStatus } from "../data-quality";
 import { COIMBATORE_REGIONAL_PLACES } from "./coimbatore-places";
 import { CHENNAI_EXPANDED_PLACES } from "./chennai-places";
+import { VERIFIED_TN_HILL_PLACES } from "./hill-places";
 
 export interface ExplorerPlace {
   id: string;
@@ -1285,7 +1289,8 @@ export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     tags: ["yercaud", "salem", "hills"]
   },
   ...COIMBATORE_REGIONAL_PLACES,
-  ...CHENNAI_EXPANDED_PLACES
+  ...CHENNAI_EXPANDED_PLACES,
+  ...VERIFIED_TN_HILL_PLACES
 };
 
 export const CANONICAL_PLACES: ExplorerPlace[] = Object.values(KNOWN_DESTINATIONS);

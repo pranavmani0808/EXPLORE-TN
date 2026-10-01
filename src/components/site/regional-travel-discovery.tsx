@@ -248,6 +248,7 @@ export const RegionalTravelDiscovery: React.FC<RegionalTravelDiscoveryProps> = (
               <option value="temples">🛕 Temples & Cultural</option>
               <option value="heritage">🏛️ Heritage & Museums</option>
               <option value="beaches">🏖️ Beaches & Coastal</option>
+              <option value="shopping">🛍️ Shopping & Bazaars</option>
               <option value="food">🍽️ Food & Experiences</option>
             </select>
           </div>
