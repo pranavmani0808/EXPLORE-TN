@@ -31,7 +31,7 @@ interface DistrictsMegaModalProps {
   lang?: "en" | "ta";
 }
 
-type CategoryFilter = "all" | "hills" | "temples" | "beaches" | "ghats" | "heritage";
+type CategoryFilter = "all" | "trending" | "october" | "hills" | "temples" | "beaches" | "ghats" | "heritage";
 
 export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMegaModalProps) {
   const modalRef = useRef<HTMLDivElement>(null);
@@ -64,6 +64,31 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
         d.overview.famousFor.some((f) => f.toLowerCase().includes(q));
 
       if (!matchesSearch) return false;
+
+      if (activeCategory === "trending") {
+        return (
+          d.slug === "the-nilgiris" ||
+          d.slug === "dindigul" ||
+          d.slug === "madurai" ||
+          d.slug === "dharmapuri" ||
+          d.slug === "tenkasi" ||
+          d.slug === "coimbatore" ||
+          d.slug === "ramanathapuram" ||
+          d.slug === "thanjavur"
+        );
+      }
+
+      if (activeCategory === "october") {
+        return (
+          d.slug === "the-nilgiris" ||
+          d.slug === "dindigul" ||
+          d.slug === "dharmapuri" ||
+          d.slug === "salem" ||
+          d.slug === "theni" ||
+          d.slug === "tenkasi" ||
+          d.slug === "namakkal"
+        );
+      }
 
       if (activeCategory === "hills") {
         return (
@@ -201,7 +226,9 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
           {/* Category Filter Chips Bar */}
           <div className="mx-auto mt-4 flex max-w-[1500px] items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
             {[
-              { key: "all", label: lang === "ta" ? "அனைத்து 38" : "All 38 Districts", icon: Compass },
+              { key: "trending", label: lang === "ta" ? "🔥 பிரபலமான இடங்கள்" : "🔥 Trending Spots", icon: Sparkles },
+              { key: "october", label: lang === "ta" ? "📅 அக்டோபர் மாத உலா" : "📅 Best for October", icon: Sparkles },
+              { key: "all", label: lang === "ta" ? "அனைத்து 38" : "All 38 Districts & Culture", icon: Compass },
               { key: "hills", label: lang === "ta" ? "மலைவாசல் ⛰️" : "Hill Stations ⛰️", icon: Mountain },
               { key: "temples", label: lang === "ta" ? "கோவில்கள் 🛕" : "Heritage Temples 🛕", icon: Landmark },
               { key: "beaches", label: lang === "ta" ? "கடற்கரைகள் 🏖️" : "Beaches & Coast 🏖️", icon: Waves },

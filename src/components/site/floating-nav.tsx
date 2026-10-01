@@ -270,32 +270,96 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                     transition={{ duration: 0.2 }}
                     className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-[840px] rounded-3xl border border-zinc-800 bg-[#09090b]/98 backdrop-blur-2xl p-6 shadow-2xl z-50 text-white"
                   >
-                    {/* Header Action Banner */}
-                    <div className="mb-4 flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-950/80 via-zinc-900 to-amber-950/80 border border-emerald-500/30 p-3 px-4">
-                      <div className="flex items-center gap-3">
-                        <span className="grid size-9 place-items-center rounded-xl bg-emerald-500 text-zinc-950 font-black">
-                          <Compass className="size-5" />
-                        </span>
-                        <div>
-                          <div className="text-xs font-bold text-white">
-                            {lang === "ta" ? "தமிழ்நாட்டின் 38 மாவட்டங்கள்" : "Explore All 38 Districts of Tamil Nadu"}
-                          </div>
-                          <div className="text-[11px] text-zinc-400">
-                            {lang === "ta" ? "அனைத்து இடங்களின் முழு பட்டியல்" : "Launch scroll animated column catalog"}
-                          </div>
+                    {/* Header Banner: Best Places for October & Trending Spots */}
+                    <div className="mb-4 rounded-2xl bg-gradient-to-r from-emerald-950 via-zinc-900 to-amber-950 border border-emerald-500/30 p-4">
+                      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                        <div className="flex items-center gap-2">
+                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center gap-1">
+                            <Sparkles className="size-3 text-emerald-400" /> Best for October & Trending
+                          </span>
+                          <span className="text-xs font-bold text-zinc-300">
+                            Post-Monsoon Seasonal Picks
+                          </span>
                         </div>
+                        <button
+                          onClick={() => {
+                            setDestMenuOpen(false);
+                            setDistrictsModalOpen(true);
+                          }}
+                          className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-1.5 text-xs font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/20"
+                        >
+                          <Grid className="size-3.5" />
+                          <span>All 38 Districts & Culture</span>
+                          <ArrowRight className="size-3.5" />
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          setDestMenuOpen(false);
-                          setDistrictsModalOpen(true);
-                        }}
-                        className="flex items-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/20"
-                      >
-                        <Grid className="size-3.5" />
-                        <span>{lang === "ta" ? "அனைத்து 38 மாவட்டங்கள்" : "All 38 Districts Stream"}</span>
-                        <ArrowRight className="size-3.5" />
-                      </button>
+
+                      {/* Month-Based Top Spots Pills Grid */}
+                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                        <Link
+                          to="/districts/$districtSlug"
+                          params={{ districtSlug: "the-nilgiris" }}
+                          onClick={() => setDestMenuOpen(false)}
+                          className="group p-2.5 rounded-xl bg-zinc-900/90 border border-emerald-500/30 hover:border-emerald-400 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">🌿</span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300">Oct Top Hill</span>
+                            </div>
+                            <h4 className="text-xs font-extrabold text-white group-hover:text-emerald-400 mt-1">Ooty (Nilgiris)</h4>
+                            <p className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">Doddabetta, Toy Train & Pykara</p>
+                          </div>
+                        </Link>
+
+                        <Link
+                          to="/districts/$districtSlug"
+                          params={{ districtSlug: "dindigul" }}
+                          onClick={() => setDestMenuOpen(false)}
+                          className="group p-2.5 rounded-xl bg-zinc-900/90 border border-emerald-500/30 hover:border-emerald-400 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">⛰️</span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-emerald-500/20 text-emerald-300">Cool Mist</span>
+                            </div>
+                            <h4 className="text-xs font-extrabold text-white group-hover:text-emerald-400 mt-1">Kodaikanal</h4>
+                            <p className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">Star Lake & Pillar Rocks</p>
+                          </div>
+                        </Link>
+
+                        <Link
+                          to="/districts/$districtSlug"
+                          params={{ districtSlug: "dharmapuri" }}
+                          onClick={() => setDestMenuOpen(false)}
+                          className="group p-2.5 rounded-xl bg-zinc-900/90 border border-emerald-500/30 hover:border-emerald-400 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">💧</span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-500/20 text-blue-300">Cascades</span>
+                            </div>
+                            <h4 className="text-xs font-extrabold text-white group-hover:text-emerald-400 mt-1">Hogenakkal Falls</h4>
+                            <p className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">Kaveri Coracle Rafting</p>
+                          </div>
+                        </Link>
+
+                        <Link
+                          to="/districts/$districtSlug"
+                          params={{ districtSlug: "madurai" }}
+                          onClick={() => setDestMenuOpen(false)}
+                          className="group p-2.5 rounded-xl bg-zinc-900/90 border border-amber-500/30 hover:border-amber-400 transition flex flex-col justify-between"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-sm">🛕</span>
+                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-500/20 text-amber-300">Culture & Spot</span>
+                            </div>
+                            <h4 className="text-xs font-extrabold text-white group-hover:text-amber-300 mt-1">Madurai Heritage</h4>
+                            <p className="text-[10px] text-zinc-400 line-clamp-1 mt-0.5">Meenakshi Amman & Nayak Palace</p>
+                          </div>
+                        </Link>
+                      </div>
                     </div>
 
                     {/* Categorized 4-Column Grid */}

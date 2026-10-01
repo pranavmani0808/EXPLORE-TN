@@ -9,53 +9,84 @@ export function parseTripIntent(userPrompt: string): StructuredTripRequest {
   let originName = "";
   let originExplicitlySet = false;
 
-  if (lower.includes("from chennai") || lower.includes("starting from chennai")) { originName = "Chennai"; originExplicitlySet = true; }
-  else if (lower.includes("from madurai") || lower.includes("starting from madurai")) { originName = "Madurai"; originExplicitlySet = true; }
-  else if (lower.includes("from coimbatore") || lower.includes("starting from coimbatore")) { originName = "Coimbatore"; originExplicitlySet = true; }
-  else if (lower.includes("from salem") || lower.includes("starting from salem")) { originName = "Salem"; originExplicitlySet = true; }
-  else if (lower.includes("from trichy") || lower.includes("starting from trichy") || lower.includes("from tiruchirappalli")) { originName = "Tiruchirappalli"; originExplicitlySet = true; }
-  else if (lower.includes("from ooty") || lower.includes("starting from ooty")) { originName = "Ooty"; originExplicitlySet = true; }
-  else if (lower.includes("from kodaikanal") || lower.includes("starting from kodaikanal")) { originName = "Kodaikanal"; originExplicitlySet = true; }
-  else if (lower.includes("from kanyakumari") || lower.includes("starting from kanyakumari")) { originName = "Kanyakumari"; originExplicitlySet = true; }
+  const originMatch = lower.match(/(?:starting\s+from|from)\s+([a-z\s]+?)(?=\s+(to|focused|via|with|for|in|on|\d+|$))/i);
+  if (originMatch) {
+    const rawOrigin = originMatch[1].trim();
+    if (rawOrigin.includes("chennai")) { originName = "Chennai"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("madurai")) { originName = "Madurai"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("coimbatore") || rawOrigin.includes("kovai")) { originName = "Coimbatore"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("salem")) { originName = "Salem"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("trichy") || rawOrigin.includes("tiruchirappalli")) { originName = "Tiruchirappalli"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("ooty") || rawOrigin.includes("nilgiris")) { originName = "Ooty"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("kodaikanal") || rawOrigin.includes("kodai")) { originName = "Kodaikanal"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("kanyakumari")) { originName = "Kanyakumari"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("thanjavur") || rawOrigin.includes("tanjore")) { originName = "Thanjavur"; originExplicitlySet = true; }
+    else if (rawOrigin.includes("pondicherry") || rawOrigin.includes("pondy")) { originName = "Pondicherry"; originExplicitlySet = true; }
+    else { originName = rawOrigin; originExplicitlySet = true; }
+  }
+
+  if (!originExplicitlySet) {
+    if (lower.includes("from chennai") || lower.includes("starting from chennai")) { originName = "Chennai"; originExplicitlySet = true; }
+    else if (lower.includes("from madurai") || lower.includes("starting from madurai")) { originName = "Madurai"; originExplicitlySet = true; }
+    else if (lower.includes("from coimbatore") || lower.includes("starting from coimbatore")) { originName = "Coimbatore"; originExplicitlySet = true; }
+    else if (lower.includes("from salem") || lower.includes("starting from salem")) { originName = "Salem"; originExplicitlySet = true; }
+    else if (lower.includes("from trichy") || lower.includes("starting from trichy")) { originName = "Tiruchirappalli"; originExplicitlySet = true; }
+    else if (lower.includes("from ooty") || lower.includes("starting from ooty")) { originName = "Ooty"; originExplicitlySet = true; }
+    else if (lower.includes("from kodaikanal") || lower.includes("starting from kodaikanal")) { originName = "Kodaikanal"; originExplicitlySet = true; }
+    else if (lower.includes("from kanyakumari") || lower.includes("starting from kanyakumari")) { originName = "Kanyakumari"; originExplicitlySet = true; }
+  }
 
   // 2. Extract Destinations
   const destCandidates: string[] = [];
-  
-  // Multi-destination splitters (e.g., "Madurai -> Kodaikanal -> Munnar" or "Madurai to Kodaikanal")
+
+  // Remove origin phrase from text so origin city (e.g. Madurai) is NOT mistaken for target destination
+  let cleanedText = lower;
+  if (originExplicitlySet && originName) {
+    cleanedText = cleanedText
+      .replace(new RegExp(`(?:starting\\s+from|from)\\s+${originName}`, "gi"), "")
+      .replace(/(?:starting\s+from|from)\s+[a-z\s]+?(?=\s+(to|focused|via|with|for|in|on|\d+|$))/gi, "")
+      .trim();
+  }
+
+  // Multi-destination splitters (e.g., "Madurai -> Kodaikanal")
   if (prompt.includes("→") || prompt.includes("->")) {
     const parts = prompt.split(/→|->/);
     parts.forEach(p => {
       const pClean = p.replace(/(plan|trip|for|days?|\d+)/gi, "").trim();
       if (pClean && pClean.length > 2) destCandidates.push(pClean);
     });
-  } else if (lower.includes(" to ") && !lower.startsWith("plan a trip to")) {
-    const parts = lower.split(" to ");
-    parts.forEach((p, idx) => {
-      if (idx > 0) {
-        const pClean = p.replace(/(for|in|\d+|days?)/gi, "").trim();
-        if (pClean && pClean.length > 2) destCandidates.push(pClean);
+  } else {
+    // Try explicit "to [destination]" pattern first on cleanedText
+    const toMatch = cleanedText.match(/(?:to|in|around)\s+([a-zA-Z\s]+?)(?=\s+(starting|from|focused|via|with|for|\d+|$))/i);
+    if (toMatch && toMatch[1].trim()) {
+      const candidateStr = toMatch[1].trim();
+      if (candidateStr.length > 2 && candidateStr.toLowerCase() !== originName.toLowerCase()) {
+        destCandidates.push(candidateStr);
       }
-    });
+    }
   }
 
-  // Fallback single destination detection
+  // Fallback single destination keyword detection on cleanedText
   if (destCandidates.length === 0) {
-    if (lower.includes("kodaikanal") || lower.includes("kodai") || lower.includes("கொடைக்கானல்")) destCandidates.push("Kodaikanal");
-    else if (lower.includes("madurai") || lower.includes("மதுரை")) destCandidates.push("Madurai");
-    else if (lower.includes("ooty") || lower.includes("nilgiris") || lower.includes("ஊட்டி")) destCandidates.push("Ooty");
-    else if (lower.includes("thanjavur") || lower.includes("tanjore") || lower.includes("தஞ்சாவூர்")) destCandidates.push("Thanjavur");
-    else if (lower.includes("kanyakumari") || lower.includes("கன்னியாகுமரி")) destCandidates.push("Kanyakumari");
-    else if (lower.includes("theni") || lower.includes("தேனி")) destCandidates.push("Theni");
-    else if (lower.includes("pondicherry") || lower.includes("pondy") || lower.includes("புதுச்சேரி")) destCandidates.push("Pondicherry");
-    else if (lower.includes("mahabalipuram") || lower.includes("mamallapuram") || lower.includes("மகாபலிபுரம்")) destCandidates.push("Mahabalipuram");
-    else if (lower.includes("valparai") || lower.includes("வால்பாறை")) destCandidates.push("Valparai");
-    else if (lower.includes("yercaud") || lower.includes("ஏற்காடு")) destCandidates.push("Yercaud");
-    else if (lower.includes("courtallam") || lower.includes("குற்றாலம்")) destCandidates.push("Courtallam");
-    else if (lower.includes("thiruvannamalai") || lower.includes("திருவண்ணாமலை")) destCandidates.push("Thiruvannamalai");
-    else if (lower.includes("kanchipuram") || lower.includes("காஞ்சிபுரம்")) destCandidates.push("Kanchipuram");
-    else if (lower.includes("asgard")) destCandidates.push("Asgard City");
-    else if (lower.includes("atlantis")) destCandidates.push("Atlantis");
-    else if (lower.includes("chennai") || lower.includes("சென்னை")) destCandidates.push("Chennai");
+    if (cleanedText.includes("kodaikanal") || cleanedText.includes("kodai") || cleanedText.includes("கொடைக்கானல்")) destCandidates.push("Kodaikanal");
+    else if (cleanedText.includes("ooty") || cleanedText.includes("nilgiris") || cleanedText.includes("udagamandalam") || cleanedText.includes("coonoor") || cleanedText.includes("ஊட்டி")) destCandidates.push("Ooty");
+    else if (cleanedText.includes("thanjavur") || cleanedText.includes("tanjore") || cleanedText.includes("தஞ்சாவூர்")) destCandidates.push("Thanjavur");
+    else if (cleanedText.includes("kanyakumari") || cleanedText.includes("கன்னியாகுமரி")) destCandidates.push("Kanyakumari");
+    else if (cleanedText.includes("valparai") || cleanedText.includes("வால்பாறை")) destCandidates.push("Valparai");
+    else if (cleanedText.includes("yercaud") || cleanedText.includes("ஏற்காடு")) destCandidates.push("Yercaud");
+    else if (cleanedText.includes("kolli hills") || cleanedText.includes("kolli") || cleanedText.includes("கொல்லி")) destCandidates.push("Kolli Hills");
+    else if (cleanedText.includes("hogenakkal") || cleanedText.includes("ஒகேனக்கல்")) destCandidates.push("Hogenakkal");
+    else if (cleanedText.includes("theni") || cleanedText.includes("தேனி")) destCandidates.push("Theni");
+    else if (cleanedText.includes("pondicherry") || cleanedText.includes("pondy") || cleanedText.includes("புதுச்சேரி")) destCandidates.push("Pondicherry");
+    else if (cleanedText.includes("mahabalipuram") || cleanedText.includes("mamallapuram") || cleanedText.includes("மகாபலிபுரம்")) destCandidates.push("Mahabalipuram");
+    else if (cleanedText.includes("courtallam") || cleanedText.includes("குற்றாலம்")) destCandidates.push("Courtallam");
+    else if (cleanedText.includes("thiruvannamalai") || cleanedText.includes("திருவண்ணாமலை")) destCandidates.push("Thiruvannamalai");
+    else if (cleanedText.includes("kanchipuram") || cleanedText.includes("காஞ்சிபுரம்")) destCandidates.push("Kanchipuram");
+    else if (cleanedText.includes("madurai") || cleanedText.includes("மதுரை")) destCandidates.push("Madurai");
+    else if (cleanedText.includes("coimbatore") || cleanedText.includes("கோயம்புத்தூர்")) destCandidates.push("Coimbatore");
+    else if (cleanedText.includes("trichy") || cleanedText.includes("tiruchirappalli")) destCandidates.push("Tiruchirappalli");
+    else if (cleanedText.includes("salem") || cleanedText.includes("சேலம்")) destCandidates.push("Salem");
+    else if (cleanedText.includes("chennai") || cleanedText.includes("சென்னை")) destCandidates.push("Chennai");
   }
 
   // Default origin to destination city if no explicit "from [city]" was specified

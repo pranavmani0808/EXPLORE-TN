@@ -115,13 +115,24 @@ export function resolveDestination(rawInput: string): ResolvedDestinationResult 
   }
 
   const clean = rawInput.trim();
+  const lower = clean.toLowerCase();
+
+  // 0. Extract explicit target destination from "to <dest>" patterns if full prompt was passed
+  const toMatch = lower.match(/(?:to|in|around)\s+([a-z\s]+?)(?=\s+(starting|from|focused|via|with|for|\d+|$))/i);
+  if (toMatch && toMatch[1].trim()) {
+    const target = toMatch[1].trim();
+    if (target.length > 2 && target !== lower) {
+      if (TYPO_DICTIONARY[target]) return buildResolvedResult(TYPO_DICTIONARY[target], clean);
+      if (TAMIL_DESTINATION_MAP[target]) return buildResolvedResult(TAMIL_DESTINATION_MAP[target], clean);
+      const canonicalTarget = CANONICAL_PLACES.find(p => p.name.toLowerCase() === target || p.canonicalName.toLowerCase() === target || p.slug.toLowerCase() === target);
+      if (canonicalTarget) return buildResolvedResult(canonicalTarget.canonicalName, clean);
+    }
+  }
 
   // 1. Check Tamil Script Dictionary
   if (TAMIL_DESTINATION_MAP[clean]) {
     return buildResolvedResult(TAMIL_DESTINATION_MAP[clean], clean);
   }
-
-  const lower = clean.toLowerCase();
 
   // 2. Check Typo Dictionary
   if (TYPO_DICTIONARY[lower]) {
@@ -152,7 +163,7 @@ export function resolveDestination(rawInput: string): ResolvedDestinationResult 
 
   // 5. Partial substring matching against place names & districts
   const substringMatch = CANONICAL_PLACES.find(
-    (p) => p.name.toLowerCase().includes(lower) || lower.includes(p.name.toLowerCase())
+    (p) => p.name.toLowerCase() === lower || p.canonicalName.toLowerCase() === lower
   );
 
   if (substringMatch) {

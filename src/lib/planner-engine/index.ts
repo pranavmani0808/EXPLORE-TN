@@ -103,8 +103,9 @@ export function generateVerifiedItinerary(
 
   // 3. Route & Ghat Intelligence Engine
   const originName = request.origin.name || "Chennai";
-  const originLat = originName.toLowerCase() === "madurai" ? 9.9252 : 13.0827; // Default Chennai coordinates
-  const originLng = originName.toLowerCase() === "madurai" ? 78.1198 : 80.2707;
+  const originResolution = resolveDestination(originName);
+  const originLat = originResolution.destination?.latitude || (originName.toLowerCase() === "madurai" ? 9.9252 : 13.0827);
+  const originLng = originResolution.destination?.longitude || (originName.toLowerCase() === "madurai" ? 78.1198 : 80.2707);
 
   const routeInfo = calculateRouteLeg(
     originLat,
