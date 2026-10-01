@@ -18,6 +18,8 @@ export type PlaceCategory =
   | "coastal";
 
 import { CanonicalEntityType, SourceType, VerificationStatus } from "../data-quality";
+import { COIMBATORE_REGIONAL_PLACES } from "./coimbatore-places";
+import { CHENNAI_EXPANDED_PLACES } from "./chennai-places";
 
 export interface ExplorerPlace {
   id: string;
@@ -48,13 +50,27 @@ export interface ExplorerPlace {
   dataVersion?: number;
   tags: string[];
   highlights?: string[];
-  placeType?: "city" | "town" | "attraction" | "village";
+  placeType?: "city" | "town" | "attraction" | "village" | "neighborhood" | "experience" | "region";
   minZoom?: number;
   metadata?: {
     bestTime?: string;
     duration?: string;
     difficulty?: string;
+    accessPermissions?: string;
+    forestPermitRequired?: boolean;
+    roadCondition?: string;
+    experienceType?: string;
+    areaCentroid?: { latitude: number; longitude: number };
   };
+  travelOrigins?: string[];
+  geographicRegion?: string;
+  taluk?: string;
+  nearbyTown?: string;
+  distanceFromCoimbatoreKm?: number;
+  durationFromCoimbatoreHours?: number;
+  distanceFromChennaiKm?: number;
+  durationFromChennaiHours?: number;
+  distanceFromOrigin?: Record<string, { km: number; durationHours: number; durationText: string }>;
 }
 
 export type PlaceReference = {
@@ -1267,7 +1283,9 @@ export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
     reviewsCount: 390,
     aliases: ["yercaud", "yercaud lake", "salem hill station"],
     tags: ["yercaud", "salem", "hills"]
-  }
+  },
+  ...COIMBATORE_REGIONAL_PLACES,
+  ...CHENNAI_EXPANDED_PLACES
 };
 
 export const CANONICAL_PLACES: ExplorerPlace[] = Object.values(KNOWN_DESTINATIONS);
