@@ -193,12 +193,16 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
       parking: {
         carParking: "Available",
         bikeParking: "Available",
+        vanParking: "Available",
+        busParking: "Available",
         parkingType: "Paid",
         capacityCars: "250+ Cars",
         capacityBikes: "600+ Bikes",
+        capacityVans: "40+ Vans",
+        capacityBuses: "20+ Tourist Buses",
         parkingDistance: "150m walk from East Gopuram Multi-level Car Stand",
         parkingCoordinates: { latitude: lat + 0.0015, longitude: lng + 0.0025 },
-        parkingFeeDetails: "₹50 for 3 hrs (Cars) · ₹20 (Two-wheelers)",
+        parkingFeeDetails: "₹50 for 3 hrs (Cars) · ₹20 (Two-wheelers) · ₹100 (Buses)",
         parkingNotes: "Multi-level parking at Periyar Bus Stand and East Tower Street. Extremely crowded during Chittirai Festival.",
       },
       roadCondition: {
@@ -240,6 +244,21 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
         soloCrowdLevel: "Peaceful early mornings (5-7 AM); bustling evening market hours",
         bestSoloTime: "05:30 AM for quiet temple walking and photography outside gopurams.",
       },
+      facilities: {
+        restrooms: {
+          available: true,
+          changingRoomsAvailable: true,
+          details: "🚽 Restrooms: Pay-and-use clean restrooms available inside temple outer complex.",
+        },
+        foodShops: {
+          available: true,
+          details: "🍿 Food & Dining: Traditional South Indian vegetarian messes, prasad counters & juice stalls in temple street.",
+        },
+        drinkingWater: {
+          available: true,
+          details: "Free RO drinking water points around temple corridor.",
+        },
+      },
     };
   }
 
@@ -251,12 +270,16 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
       parking: {
         carParking: "Available",
         bikeParking: "Available",
+        vanParking: "Available",
+        busParking: "Available",
         parkingType: "Paid",
         capacityCars: "120 Cars",
         capacityBikes: "300 Bikes",
+        capacityVans: "30 Vans",
+        capacityBuses: "15 Tourist Buses",
         parkingDistance: "On-site parking along Lake Road & Bryant Park complex",
         parkingCoordinates: { latitude: lat - 0.001, longitude: lng + 0.001 },
-        parkingFeeDetails: "₹40 Cars · ₹15 Bikes",
+        parkingFeeDetails: "₹40 Cars · ₹15 Bikes · ₹80 Vans/Buses",
         parkingNotes: "Peak summer months (April-May) see lake road parking fill up by 11 AM.",
       },
       roadCondition: {
@@ -303,6 +326,21 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
         soloCrowdLevel: "Quiet mornings; peaceful pine forest walks",
         bestSoloTime: "07:00 AM for solitary walks along Coaker's Walk and misty lake views.",
       },
+      facilities: {
+        restrooms: {
+          available: true,
+          changingRoomsAvailable: true,
+          details: "🚽 Restrooms & Changing Rooms: Clean public restrooms & changing rooms inside boat house complex.",
+        },
+        foodShops: {
+          available: true,
+          details: "🍿 Food & Refreshments: Boat house cafeteria, snack stalls, tea shops, maggi & fresh corn stalls.",
+        },
+        drinkingWater: {
+          available: true,
+          details: "Drinking water fountains at boat house.",
+        },
+      },
     };
   }
 
@@ -314,12 +352,16 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
       parking: {
         carParking: "Limited",
         bikeParking: "Available",
+        vanParking: "Limited",
+        busParking: "Limited",
         parkingType: "Paid",
         capacityCars: "80 Cars",
         capacityBikes: "200 Bikes",
+        capacityVans: "15 Vans",
+        capacityBuses: "10 Buses",
         parkingDistance: "200m walk from Doddabetta hilltop parking plaza",
         parkingCoordinates: { latitude: lat + 0.002, longitude: lng - 0.001 },
-        parkingFeeDetails: "₹50 Cars · ₹20 Bikes",
+        parkingFeeDetails: "₹50 Cars · ₹20 Bikes · ₹100 Buses",
         parkingNotes: "Narrow parking lane on peak approach road. Early morning arrival advised.",
       },
       roadCondition: {
@@ -365,6 +407,21 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
         punctureRepairNearby: "Nilgiri Auto Works near Commercial Road (2km)",
         soloCrowdLevel: "Peaceful hill trails; quiet tea factory gardens",
         bestSoloTime: "08:00 AM at Ooty Botanical Gardens or Doddabetta peak.",
+      },
+      facilities: {
+        restrooms: {
+          available: true,
+          changingRoomsAvailable: false,
+          details: "🚽 Restrooms: Public eco-toilet facility at viewpoint entrance plaza.",
+        },
+        foodShops: {
+          available: true,
+          details: "🍿 Food Shops & Tea Stalls: Hot tea/coffee, maggi noodles, fresh roasted corn, snacks & souvenir shops at summit viewpoint.",
+        },
+        drinkingWater: {
+          available: true,
+          details: "Bottled water stalls at viewpoint.",
+        },
       },
     };
   }

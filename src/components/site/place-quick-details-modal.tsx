@@ -160,7 +160,7 @@ export function PlaceQuickDetailsModal({
                   <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
                     <ParkingCircle className="size-4 text-emerald-400" /> Vehicle Parking Availability
                   </h3>
-                  {intel.parking.parkingFeeDetails && (
+                  {intel?.parking?.parkingFeeDetails && (
                     <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20">
                       💰 {intel.parking.parkingFeeDetails}
                     </span>
@@ -175,10 +175,10 @@ export function PlaceQuickDetailsModal({
                       <span>Car</span>
                     </div>
                     <p className="text-xs font-bold text-white">
-                      {intel.parking.carParking}
+                      {intel?.parking?.carParking ?? "Available"}
                     </p>
                     <p className="text-[10px] text-zinc-400 font-mono">
-                      {intel.parking.capacityCars || "50+ Capacity"}
+                      {intel?.parking?.capacityCars || "50+ Capacity"}
                     </p>
                   </div>
 
@@ -189,10 +189,10 @@ export function PlaceQuickDetailsModal({
                       <span>Bike</span>
                     </div>
                     <p className="text-xs font-bold text-white">
-                      {intel.parking.bikeParking}
+                      {intel?.parking?.bikeParking ?? "Available"}
                     </p>
                     <p className="text-[10px] text-zinc-400 font-mono">
-                      {intel.parking.capacityBikes || "150+ Capacity"}
+                      {intel?.parking?.capacityBikes || "150+ Capacity"}
                     </p>
                   </div>
 
@@ -203,10 +203,10 @@ export function PlaceQuickDetailsModal({
                       <span>Van / Traveller</span>
                     </div>
                     <p className="text-xs font-bold text-white">
-                      {intel.parking.vanParking || "Available"}
+                      {intel?.parking?.vanParking || "Available"}
                     </p>
                     <p className="text-[10px] text-zinc-400 font-mono">
-                      {intel.parking.capacityVans || "Tourist Van Bay"}
+                      {intel?.parking?.capacityVans || "Tourist Van Bay"}
                     </p>
                   </div>
 
@@ -217,15 +217,15 @@ export function PlaceQuickDetailsModal({
                       <span>Tourist Bus</span>
                     </div>
                     <p className="text-xs font-bold text-white">
-                      {intel.parking.busParking || (isWaterfall ? "Limited" : "Available")}
+                      {intel?.parking?.busParking || (isWaterfall ? "Limited" : "Available")}
                     </p>
                     <p className="text-[10px] text-zinc-400 font-mono">
-                      {intel.parking.capacityBuses || "Gate Bus Stand"}
+                      {intel?.parking?.capacityBuses || "Gate Bus Stand"}
                     </p>
                   </div>
                 </div>
 
-                {intel.parking.parkingNotes && (
+                {intel?.parking?.parkingNotes && (
                   <p className="text-[11px] text-zinc-400 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 font-mono">
                     📍 <strong className="text-zinc-300">Distance & Advisory:</strong> {intel.parking.parkingNotes} ({intel.parking.parkingDistance})
                   </p>
@@ -240,10 +240,10 @@ export function PlaceQuickDetailsModal({
                     <span>Operating Hours / Timings</span>
                   </div>
                   <p className="text-xs font-bold text-white pt-1">
-                    {place.timings || intel.beforeYouGo.timings}
+                    {place.timings || intel?.beforeYouGo?.timings || "06:00 AM – 06:00 PM Daily"}
                   </p>
                   <p className="text-[11px] text-zinc-400 font-mono">
-                    Ticket/Entry: {place.entryFee || intel.beforeYouGo.entryFeeDetails}
+                    Ticket/Entry: {place.entryFee || intel?.beforeYouGo?.entryFeeDetails || "Free"}
                   </p>
                 </div>
 
@@ -253,7 +253,7 @@ export function PlaceQuickDetailsModal({
                     <span>Best Time to Visit</span>
                   </div>
                   <p className="text-xs font-bold text-white pt-1">
-                    {intel.beforeYouGo.bestTimeToArrive}
+                    {intel?.beforeYouGo?.bestTimeToArrive || "07:00 AM – 09:30 AM"}
                   </p>
                   <p className="text-[11px] text-zinc-400 font-mono">
                     Best Season: {place.bestSeason || "Year-round"}
@@ -290,9 +290,9 @@ export function PlaceQuickDetailsModal({
                           )}
                         </div>
                         <p className="text-xs text-zinc-300 leading-snug">
-                          {intel.facilities.restrooms.details}
+                          {intel?.facilities?.restrooms?.details || (isWaterBody ? "🚽 Restrooms & Changing Rooms: Clean pay-and-use toilets & dedicated changing stalls available near entrance." : "🚽 Restrooms: Public pay-and-use clean restrooms available near main entrance.")}
                         </p>
-                        {intel.facilities.restrooms.changingRoomsAvailable && (
+                        {intel?.facilities?.restrooms?.changingRoomsAvailable && (
                           <p className="text-[11px] font-bold text-emerald-400 font-mono pt-0.5">
                             ✓ Dedicated dress changing stalls available
                           </p>
@@ -323,14 +323,14 @@ export function PlaceQuickDetailsModal({
                           )}
                         </div>
                         <p className="text-xs text-zinc-300 leading-snug">
-                          {intel.facilities.foodShops.details}
+                          {intel?.facilities?.foodShops?.details || "🍿 Food & Refreshments: Local tea stalls, fresh snacks & eateries available nearby."}
                         </p>
                       </div>
                     </div>
                   </div>
 
                   {/* Temple / Spiritual Guidelines */}
-                  {isTemple && intel.beforeYouGo.dressCodeEtiquette && (
+                  {isTemple && intel?.beforeYouGo?.dressCodeEtiquette && (
                     <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-200 space-y-1">
                       <p className="text-xs font-bold text-white flex items-center gap-1.5">
                         <Footprints className="size-4 text-purple-400" /> Temple Dress Code & Etiquette
@@ -342,19 +342,21 @@ export function PlaceQuickDetailsModal({
                   )}
 
                   {/* Road Condition Badge */}
-                  <div className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-3 text-xs">
-                    <div className="flex items-center gap-2">
-                      <RouteIcon className="size-4 text-emerald-400 shrink-0" />
-                      <span className="text-zinc-300 font-medium">
-                        Road Access: <strong className="text-white">{intel.roadCondition.roadType}</strong> ({intel.roadCondition.condition})
-                      </span>
+                  {intel?.roadCondition && (
+                    <div className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-3 text-xs">
+                      <div className="flex items-center gap-2">
+                        <RouteIcon className="size-4 text-emerald-400 shrink-0" />
+                        <span className="text-zinc-300 font-medium">
+                          Road Access: <strong className="text-white">{intel.roadCondition.roadType}</strong> ({intel.roadCondition.condition})
+                        </span>
+                      </div>
+                      {intel.hillGhatSafety?.isHillGhatRoad && (
+                        <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                          🏔️ {intel.hillGhatSafety.hairpinBends || 12} Hairpin Bends
+                        </span>
+                      )}
                     </div>
-                    {intel.hillGhatSafety.isHillGhatRoad && (
-                      <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
-                        🏔️ {intel.hillGhatSafety.hairpinBends || 12} Hairpin Bends
-                      </span>
-                    )}
-                  </div>
+                  )}
                 </div>
               </div>
 
