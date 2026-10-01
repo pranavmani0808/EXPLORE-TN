@@ -7,10 +7,11 @@ import {
   ArrowRight, Bookmark, RefreshCw, Trash2, CheckCircle2,
   Mountain, Waves, TreePine, Landmark, UtensilsCrossed, Bus,
   Calendar, Timer, LocateFixed, ChevronRight, Star, Info,
-  Compass
+  Compass, Home
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { toast } from "sonner";
+import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
 import {
   CANONICAL_PLACES,
   searchEntities,
@@ -113,10 +114,12 @@ function catColorClass(cat: string) {
 function NearbyPlaceCard({
   place,
   onAddToTrip,
+  onOpenDetails,
   isInTrip,
 }: {
   place: NearbyPlace;
   onAddToTrip: (p: NearbyPlace) => void;
+  onOpenDetails?: (p: NearbyPlace) => void;
   isInTrip: boolean;
 }) {
   const emoji = CATEGORY_EMOJI[place.primaryCategory] || "📍";
@@ -126,10 +129,13 @@ function NearbyPlaceCard({
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
-      className="shrink-0 w-56 bg-[#141c26] border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:border-white/25 transition-all group cursor-pointer"
+      className="shrink-0 w-56 bg-[#141c26] border border-white/10 rounded-2xl overflow-hidden shadow-lg hover:border-white/25 transition-all group"
     >
       {/* Image area */}
-      <div className="h-28 bg-gradient-to-br from-slate-700 to-slate-800 relative overflow-hidden">
+      <div
+        className="h-28 bg-gradient-to-br from-slate-700 to-slate-800 relative overflow-hidden cursor-pointer"
+        onClick={() => onOpenDetails?.(place)}
+      >
         {place.image ? (
           <img
             src={place.image}
@@ -169,19 +175,28 @@ function NearbyPlaceCard({
           </span>
         </div>
 
-        {/* Add to Trip */}
-        <button
-          type="button"
-          onClick={() => onAddToTrip(place)}
-          className={`w-full py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
-            isInTrip
-              ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
-              : "bg-white/5 border border-white/15 text-slate-300 hover:bg-emerald-500/15 hover:border-emerald-500/40 hover:text-emerald-400"
-          }`}
-        >
-          {isInTrip ? <CheckCircle2 className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
-          {isInTrip ? "Added to Trip" : "Add to Trip"}
-        </button>
+        {/* Card Actions */}
+        <div className="flex items-center gap-1.5 pt-0.5">
+          <button
+            type="button"
+            onClick={() => onOpenDetails?.(place)}
+            className="flex-1 py-1.5 rounded-xl text-[11px] font-bold bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10 transition cursor-pointer"
+          >
+            Details
+          </button>
+          <button
+            type="button"
+            onClick={() => onAddToTrip(place)}
+            className={`flex-[1.4] py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
+              isInTrip
+                ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
+                : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black hover:border-emerald-500"
+            }`}
+          >
+            {isInTrip ? <CheckCircle2 className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
+            {isInTrip ? "In Trip" : "Add Stop"}
+          </button>
+        </div>
       </div>
     </motion.div>
   );
@@ -253,19 +268,61 @@ function LocationInput({
 
 // ─── Main Component ───────────────────────────────────────────────────────────
 function TripPlannerPage() {
-  // ── Origin / Destination state
+  // ── Origin / Destination / Hometown state
   const [originText, setOriginText] = useState("");
   const [originCoords, setOriginCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [originName, setOriginName] = useState("");
+  const [hometownText, setHometownText] = useState("");
   const [destText, setDestText] = useState("");
   const [destCoords, setDestCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [destName, setDestName] = useState("");
 
+  // Initialize from URL search parameters on mount if provided (e.g. ?dest=Ooty&origin=Chennai)
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const destParam = params.get("destination") || params.get("dest") || params.get("to");
+    const originParam = params.get("origin") || params.get("start") || params.get("from");
+    const hometownParam = params.get("hometown");
+
+    if (destParam) {
+      setDestText(destParam);
+      setDestName(destParam);
+      const matchedCity = CITY_COORDS[destParam];
+      if (matchedCity) {
+        setDestCoords(matchedCity);
+      } else {
+        const found = CANONICAL_PLACES.find((p) => p.name.toLowerCase().includes(destParam.toLowerCase()) || p.canonicalName.toLowerCase().includes(destParam.toLowerCase()));
+        if (found) {
+          setDestCoords({ lat: found.latitude, lng: found.longitude });
+        }
+      }
+    }
+
+    if (originParam) {
+      setOriginText(originParam);
+      setOriginName(originParam);
+      const matchedCity = CITY_COORDS[originParam];
+      if (matchedCity) {
+        setOriginCoords(matchedCity);
+      }
+    }
+
+    if (hometownParam) {
+      setHometownText(hometownParam);
+    }
+  }, []);
+
   // ── Autocomplete suggestions
   const [originSugs, setOriginSugs] = useState<LocationSuggestion[]>([]);
+  const [hometownSugs, setHometownSugs] = useState<LocationSuggestion[]>([]);
   const [destSugs, setDestSugs] = useState<LocationSuggestion[]>([]);
   const [showOriginDrop, setShowOriginDrop] = useState(false);
+  const [showHometownDrop, setShowHometownDrop] = useState(false);
   const [showDestDrop, setShowDestDrop] = useState(false);
+
+  // ── Selected place for Quick Details Modal
+  const [detailsModalPlace, setDetailsModalPlace] = useState<any | null>(null);
 
   // ── Trip config
   const [travelMode, setTravelMode] = useState<"driving" | "motorcycle" | "walking" | "cycling">("driving");
@@ -334,12 +391,21 @@ function TripPlannerPage() {
   }, [originText]);
 
   useEffect(() => {
+    setHometownSugs(buildSuggestions(hometownText));
+  }, [hometownText]);
+
+  useEffect(() => {
     setDestSugs(buildSuggestions(destText));
   }, [destText]);
 
   useEffect(() => {
     setStopSugs(buildSuggestions(stopText));
   }, [stopText]);
+
+  const handleSelectHometown = useCallback((s: LocationSuggestion) => {
+    setHometownText(s.name);
+    setShowHometownDrop(false);
+  }, []);
 
   const handleSelectOrigin = useCallback((s: LocationSuggestion) => {
     setOriginText(s.name);
@@ -512,10 +578,6 @@ function TripPlannerPage() {
   // Add to trip handler (from nearby section)
   // ─────────────────────────────────────────────────────
   const handleAddNearbyToTrip = useCallback((place: NearbyPlace) => {
-    if (!activeTrip) {
-      toast.error("Plan a route first, then add stops to your trip.");
-      return;
-    }
     const stop: TripStop = {
       id: place.id,
       name: place.canonicalName || place.name,
@@ -525,12 +587,19 @@ function TripPlannerPage() {
       category: place.primaryCategory,
       addedAt: new Date().toISOString(),
     };
-    addStopToTrip(stop);
-    setActiveTrip(getActiveTrip());
-    toast.success(`${place.canonicalName || place.name} added to your trip! 📍`);
+
+    setExtraStops((prev) => (prev.some((s) => s.id === place.id) ? prev : [...prev, stop]));
+
+    if (activeTrip) {
+      addStopToTrip(stop);
+      setActiveTrip(getActiveTrip());
+    }
+
+    toast.success(`${place.canonicalName || place.name} added to your trip stops! 📍`);
   }, [activeTrip]);
 
   const handleRemoveStop = useCallback((stopId: string) => {
+    setExtraStops((prev) => prev.filter((s) => s.id !== stopId));
     removeStopFromTrip(stopId);
     setActiveTrip(getActiveTrip());
   }, []);
@@ -553,14 +622,15 @@ function TripPlannerPage() {
   // ─────────────────────────────────────────────────────
   const NEARBY_CATS: { id: PlaceCategory; label: string }[] = [
     { id: "all", label: "All" },
-    { id: "waterfalls", label: "💧 Falls" },
-    { id: "hills", label: "⛰️ Hills" },
+    { id: "waterfalls", label: "💧 Waterfalls" },
+    { id: "hills", label: "⛰️ Hill Stations" },
     { id: "beaches", label: "🏖️ Beaches" },
-    { id: "temples", label: "🛕 Temples" },
-    { id: "heritage", label: "🏛️ Heritage" },
     { id: "trekking", label: "🥾 Trekking" },
+    { id: "temples", label: "🛕 Temples" },
+    { id: "heritage", label: "🏛️ Historical" },
+    { id: "wildlife", label: "🌿 Nature" },
+    { id: "adventure", label: "🧗 Adventure" },
     { id: "food", label: "🍲 Food" },
-    { id: "wildlife", label: "🌿 Wildlife" },
   ];
 
   return (
@@ -636,6 +706,20 @@ function TripPlannerPage() {
                     </button>
                   ))}
                 </div>
+
+                {/* Hometown */}
+                <LocationInput
+                  label="Hometown (Return Location)"
+                  icon={<Home className="w-4 h-4" />}
+                  value={hometownText}
+                  placeholder="Enter your hometown..."
+                  onChange={(v) => setHometownText(v)}
+                  onSelect={handleSelectHometown}
+                  suggestions={hometownSugs}
+                  showDropdown={showHometownDrop && hometownSugs.length > 0}
+                  onFocus={() => setShowHometownDrop(true)}
+                  onBlur={() => setShowHometownDrop(false)}
+                />
 
                 {/* Destination */}
                 <LocationInput
@@ -917,6 +1001,7 @@ function TripPlannerPage() {
                       key={place.id}
                       place={place}
                       onAddToTrip={handleAddNearbyToTrip}
+                      onOpenDetails={(p) => setDetailsModalPlace(p)}
                       isInTrip={tripStopIds.has(place.id)}
                     />
                   ))}
@@ -981,6 +1066,7 @@ function TripPlannerPage() {
                         key={place.id}
                         place={place}
                         onAddToTrip={handleAddNearbyToTrip}
+                        onOpenDetails={(p) => setDetailsModalPlace(p)}
                         isInTrip={tripStopIds.has(place.id)}
                       />
                     ))}
@@ -1023,6 +1109,19 @@ function TripPlannerPage() {
             </div>
           )}
         </div>
+
+        {/* ─── Destination Intelligence Quick Details Modal ─── */}
+        <PlaceQuickDetailsModal
+          place={detailsModalPlace}
+          isOpen={!!detailsModalPlace}
+          onClose={() => setDetailsModalPlace(null)}
+          onToggleTrip={(p) => {
+            if (detailsModalPlace) {
+              handleAddNearbyToTrip(detailsModalPlace);
+            }
+          }}
+          isAddedToTrip={detailsModalPlace ? tripStopIds.has(detailsModalPlace.id) : false}
+        />
       </div>
     </AppShell>
   );
