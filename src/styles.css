@@ -315,3 +315,20 @@
 .leaflet-container a.leaflet-popup-close-button:hover {
   color: #ffffff !important;
 }
+
+/* ETN Minimal Tooltip — strip Leaflet default styling, show our custom pill */
+.etn-minimal-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
+}
+.etn-minimal-tooltip::before {
+  display: none !important;
+}
+.leaflet-tooltip.etn-minimal-tooltip {
+  background: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}

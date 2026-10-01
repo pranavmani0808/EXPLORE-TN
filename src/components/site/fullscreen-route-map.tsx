@@ -186,8 +186,10 @@ export function FullscreenRouteMap({
   const leafletMapRef = useRef<any>(null);
   const leafletModuleRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const markersByIdRef = useRef<Record<string, any>>({});
   const polylineGroupRef = useRef<any>(null);
   const activeRequestIdRef = useRef<string>("");
+  const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
 
   // Derived list of places in current scope & category filter
   const placesInScope = useMemo(() => {
@@ -546,6 +548,7 @@ export function FullscreenRouteMap({
 
     markersRef.current.forEach((m) => map.removeLayer(m));
     markersRef.current = [];
+    markersByIdRef.current = {};
     polylineGroup.clearLayers();
 
     const bounds = L.latLngBounds([]);
@@ -638,40 +641,60 @@ export function FullscreenRouteMap({
       bounds.extend([place.latitude, place.longitude]);
 
       const isSelectedPOI = mapScope.type === "POI" && mapScope.selectedPOI?.id === place.id;
-      const categoryIcon = place.primaryCategory === "temples" ? "🛕" : place.primaryCategory === "heritage" ? "🏛️" : place.primaryCategory === "waterfalls" ? "💧" : "📍";
+      const categoryColor =
+        place.primaryCategory === "temples" ? "#f59e0b" :
+        place.primaryCategory === "waterfalls" ? "#38bdf8" :
+        place.primaryCategory === "beaches" ? "#06b6d4" :
+        place.primaryCategory === "heritage" ? "#a78bfa" :
+        place.primaryCategory === "hills" ? "#4ade80" :
+        place.primaryCategory === "food" ? "#fb923c" :
+        "#10b981";
 
-      const customIcon = L.divIcon({
-        className: `custom-area-pin-${place.id}`,
+      // Minimal dot pin — no text label, just a clean circle
+      const dotIcon = L.divIcon({
+        className: `custom-dot-pin-${place.id}`,
         html: `
           <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
-            ${isSelectedPOI ? '<span style="position: absolute; width: 44px; height: 44px; border-radius: 50%; background: rgba(16,185,129,0.4); animation: ping 1.5s infinite;"></span>' : ''}
+            ${isSelectedPOI ? '<span style="position: absolute; width: 28px; height: 28px; border-radius: 50%; background: rgba(16,185,129,0.35); animation: ping 1.5s infinite;"></span>' : ''}
             <div style="
-              background: ${isSelectedPOI ? '#10b981' : '#1e293b'};
-              color: ${isSelectedPOI ? '#000000' : '#ffffff'};
-              border: 2px solid ${isSelectedPOI ? '#6ee7b7' : 'rgba(255,255,255,0.2)'};
-              font-weight: 700;
-              font-size: 11px;
-              padding: 4px 10px;
-              border-radius: 9999px;
-              box-shadow: 0 4px 14px rgba(0,0,0,0.6);
-              white-space: nowrap;
-              display: flex;
-              align-items: center;
-              gap: 4px;
-            ">
-              <span>${categoryIcon}</span>
-              ${place.canonicalName || place.name}
-            </div>
+              width: ${isSelectedPOI ? '14px' : '10px'};
+              height: ${isSelectedPOI ? '14px' : '10px'};
+              border-radius: 50%;
+              background: ${isSelectedPOI ? '#10b981' : categoryColor};
+              border: 2px solid ${isSelectedPOI ? '#6ee7b7' : 'rgba(255,255,255,0.55)'};
+              box-shadow: 0 2px 8px rgba(0,0,0,0.55);
+              transition: transform 0.15s ease;
+            "></div>
           </div>
         `,
-        iconSize: [140, 28],
-        iconAnchor: [70, 14],
+        iconSize: [20, 20],
+        iconAnchor: [10, 10],
       });
 
       const marker = L.marker([place.latitude, place.longitude], {
-        icon: customIcon,
+        icon: dotIcon,
         zIndexOffset: isSelectedPOI ? 2000 : 1000,
       }).addTo(map);
+
+      // Attach a lightweight tooltip that shows the place name on hover
+      const categoryEmoji =
+        place.primaryCategory === "temples" ? "🛕" :
+        place.primaryCategory === "waterfalls" ? "💧" :
+        place.primaryCategory === "beaches" ? "🏖️" :
+        place.primaryCategory === "heritage" ? "🏛️" :
+        place.primaryCategory === "hills" ? "⛰️" :
+        place.primaryCategory === "food" ? "🍲" : "📍";
+
+      marker.bindTooltip(
+        `<div style="font-family:system-ui,sans-serif;font-size:12px;font-weight:700;color:#fff;background:#121821cc;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,0.18);white-space:nowrap;box-shadow:0 2px 12px rgba(0,0,0,0.5);">${categoryEmoji} ${place.canonicalName || place.name}</div>`,
+        {
+          permanent: false,
+          direction: "top",
+          offset: [0, -10],
+          className: "etn-minimal-tooltip",
+          opacity: 1,
+        }
+      );
 
       const isSaved = savedPlaceIds.has(place.id);
 
@@ -714,16 +737,20 @@ export function FullscreenRouteMap({
       `, { className: "custom-mapcn-popup-window" });
 
       marker.on("mouseover", () => {
-        marker.openPopup();
+        marker.openTooltip();
       });
 
       marker.on("click", () => {
         setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
         map.flyTo([place.latitude, place.longitude], 14, { animate: true, duration: 1 });
+        marker.openPopup();
       });
 
       markersRef.current.push(marker);
+      markersByIdRef.current[place.id] = marker;
     });
+
+
 
     if (mapScope.type === "POI" && mapScope.selectedPOI) {
       map.flyTo([mapScope.selectedPOI.latitude, mapScope.selectedPOI.longitude], 14, { animate: true });
@@ -782,7 +809,56 @@ export function FullscreenRouteMap({
     renderMapElements();
   }, [mapScope, placesInScope, stops, segmentData, selectedStopIndex]);
 
-  // Handle Geographic Area selection from search
+  // Sidebar hover → highlight marker on map
+  const handleSidebarHover = (place: ExplorerPlace | null) => {
+    const L = leafletModuleRef.current;
+    if (!L) return;
+
+    setHoveredPlaceId(place?.id ?? null);
+
+    if (place) {
+      const marker = markersByIdRef.current[place.id];
+      if (marker) {
+        const categoryColor =
+          place.primaryCategory === "temples" ? "#f59e0b" :
+          place.primaryCategory === "waterfalls" ? "#38bdf8" :
+          place.primaryCategory === "beaches" ? "#06b6d4" :
+          place.primaryCategory === "heritage" ? "#a78bfa" :
+          place.primaryCategory === "hills" ? "#4ade80" :
+          place.primaryCategory === "food" ? "#fb923c" :
+          "#10b981";
+
+        // Enlarge the dot and give it a glowing ring
+        const highlightIcon = L.divIcon({
+          className: `custom-dot-hover-${place.id}`,
+          html: `
+            <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+              <span style="position: absolute; width: 26px; height: 26px; border-radius: 50%; background: ${categoryColor}44; animation: ping 1.2s infinite;"></span>
+              <div style="
+                width: 14px;
+                height: 14px;
+                border-radius: 50%;
+                background: ${categoryColor};
+                border: 2px solid #fff;
+                box-shadow: 0 0 0 3px ${categoryColor}66, 0 4px 12px rgba(0,0,0,0.6);
+                transform: scale(1.3);
+              "></div>
+            </div>
+          `,
+          iconSize: [28, 28],
+          iconAnchor: [14, 14],
+        });
+        marker.setIcon(highlightIcon);
+        marker.setZIndexOffset(3000);
+        marker.openTooltip();
+      }
+    } else {
+      // Reset all markers back to their default dot icon
+      renderMapElements();
+    }
+  };
+
+
   const handleSelectArea = (area: GeographicArea) => {
     setMapScope({
       type: area.entityType,
@@ -1360,15 +1436,19 @@ export function FullscreenRouteMap({
                   return (
                     <div
                       key={place.id}
+                      onMouseEnter={() => handleSidebarHover(place)}
+                      onMouseLeave={() => handleSidebarHover(null)}
                       onClick={() => {
                         setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
                         if (leafletMapRef.current) {
                           leafletMapRef.current.flyTo([place.latitude, place.longitude], 14, { animate: true });
                         }
                       }}
-                      className={`group p-3 rounded-2xl border transition cursor-pointer flex flex-col gap-2.5 ${
+                      className={`group p-3 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2.5 ${
                         isSelected
                           ? "bg-emerald-500/20 border-emerald-500/60 shadow-lg"
+                          : hoveredPlaceId === place.id
+                          ? "bg-white/10 border-white/30 shadow-md"
                           : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
                       }`}
                     >
