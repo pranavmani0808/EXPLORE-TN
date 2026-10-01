@@ -54,6 +54,50 @@ export interface FullscreenRouteMapProps {
   initialPlaceId?: string;
 }
 
+
+// All 38 Tamil Nadu Districts with approximate center coordinates
+const TN_DISTRICTS: { name: string; lat: number; lng: number; zoom: number }[] = [
+  { name: 'Chennai', lat: 13.0827, lng: 80.2707, zoom: 12 },
+  { name: 'Tiruvallur', lat: 13.1436, lng: 79.9068, zoom: 11 },
+  { name: 'Chengalpattu', lat: 12.6922, lng: 79.9722, zoom: 11 },
+  { name: 'Kancheepuram', lat: 12.8308, lng: 79.7086, zoom: 11 },
+  { name: 'Vellore', lat: 12.9165, lng: 79.1325, zoom: 10 },
+  { name: 'Ranipet', lat: 12.9279, lng: 79.3328, zoom: 10 },
+  { name: 'Tirupattur', lat: 12.4958, lng: 78.5683, zoom: 10 },
+  { name: 'Krishnagiri', lat: 12.5266, lng: 78.2139, zoom: 10 },
+  { name: 'Dharmapuri', lat: 12.1182, lng: 77.9283, zoom: 10 },
+  { name: 'Salem', lat: 11.6643, lng: 78.1460, zoom: 10 },
+  { name: 'Namakkal', lat: 11.2183, lng: 78.1673, zoom: 10 },
+  { name: 'Erode', lat: 11.3410, lng: 77.7172, zoom: 10 },
+  { name: 'Tirupur', lat: 11.1085, lng: 77.3411, zoom: 10 },
+  { name: 'Coimbatore', lat: 11.0168, lng: 76.9558, zoom: 11 },
+  { name: 'The Nilgiris', lat: 11.4067, lng: 76.6954, zoom: 10 },
+  { name: 'Tiruvannamalai', lat: 12.2253, lng: 79.0747, zoom: 10 },
+  { name: 'Viluppuram', lat: 11.9396, lng: 79.4927, zoom: 10 },
+  { name: 'Villupuram', lat: 11.9396, lng: 79.4927, zoom: 10 },
+  { name: 'Kallakurichi', lat: 11.7383, lng: 78.9590, zoom: 10 },
+  { name: 'Cuddalore', lat: 11.7480, lng: 79.7714, zoom: 10 },
+  { name: 'Ariyalur', lat: 11.1404, lng: 79.0783, zoom: 10 },
+  { name: 'Perambalur', lat: 11.2339, lng: 78.8804, zoom: 10 },
+  { name: 'Tiruchirappalli', lat: 10.7905, lng: 78.7047, zoom: 11 },
+  { name: 'Karur', lat: 10.9601, lng: 78.0766, zoom: 10 },
+  { name: 'Dindigul', lat: 10.3624, lng: 77.9695, zoom: 10 },
+  { name: 'Theni', lat: 10.0130, lng: 77.4769, zoom: 10 },
+  { name: 'Madurai', lat: 9.9252, lng: 78.1198, zoom: 11 },
+  { name: 'Sivaganga', lat: 9.8464, lng: 78.4839, zoom: 10 },
+  { name: 'Virudhunagar', lat: 9.5839, lng: 77.9628, zoom: 10 },
+  { name: 'Tenkasi', lat: 8.9595, lng: 77.3155, zoom: 10 },
+  { name: 'Tirunelveli', lat: 8.7139, lng: 77.7567, zoom: 11 },
+  { name: 'Thoothukudi', lat: 8.7642, lng: 78.1348, zoom: 10 },
+  { name: 'Kanyakumari', lat: 8.0883, lng: 77.5385, zoom: 11 },
+  { name: 'Ramanathapuram', lat: 9.3638, lng: 78.8395, zoom: 10 },
+  { name: 'Pudukottai', lat: 10.3793, lng: 78.8171, zoom: 10 },
+  { name: 'Thanjavur', lat: 10.7870, lng: 79.1378, zoom: 11 },
+  { name: 'Nagapattinam', lat: 10.7667, lng: 79.8420, zoom: 10 },
+  { name: 'Tiruvarur', lat: 10.7694, lng: 79.6364, zoom: 10 },
+  { name: 'Mayiladuthurai', lat: 11.1019, lng: 79.6516, zoom: 10 },
+];
+
 const ROUTE_LEG_CACHE = new Map<string, { distanceKm: number; durationMins: number; polyline: [number, number][] }>();
 
 export function FullscreenRouteMap({
@@ -139,6 +183,8 @@ export function FullscreenRouteMap({
   });
 
   const [activeCategoryFilter, setActiveCategoryFilter] = useState<PlaceCategory>("all");
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+  const [showDistrictPicker, setShowDistrictPicker] = useState(false);
   const [globalQuery, setGlobalQuery] = useState("");
 
   // Origin & Destination Routing State
@@ -197,8 +243,11 @@ export function FullscreenRouteMap({
     if (activeCategoryFilter !== "all") {
       list = list.filter((p) => p.categories?.includes(activeCategoryFilter) || p.primaryCategory === activeCategoryFilter);
     }
+    if (selectedDistrict) {
+      list = list.filter((p) => p.district?.toLowerCase() === selectedDistrict.toLowerCase());
+    }
     return list;
-  }, [mapScope.areaName, activeCategoryFilter]);
+  }, [mapScope.areaName, activeCategoryFilter, selectedDistrict]);
 
   // Sync initial props when passed
   useEffect(() => {
@@ -882,6 +931,24 @@ export function FullscreenRouteMap({
     setSearchFocused(null);
   };
 
+
+  // Handle District selection — zoom into district with dramatic animation
+  const handleSelectDistrict = (district: { name: string; lat: number; lng: number; zoom: number }) => {
+    setSelectedDistrict(district.name);
+    setShowDistrictPicker(false);
+    // Reset scope to all TN so district filter works across all places
+    setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] });
+    if (leafletMapRef.current) {
+      // First zoom out slightly for dramatic effect, then zoom in
+      leafletMapRef.current.flyTo([district.lat, district.lng], district.zoom, {
+        animate: true,
+        duration: 1.4,
+        easeLinearity: 0.25,
+      });
+    }
+    toast.success(`📍 Showing ${district.name} District spots`);
+  };
+
   if (!isOpen) return null;
 
   const categorizedResults = searchEntities(globalQuery);
@@ -1243,31 +1310,100 @@ export function FullscreenRouteMap({
           </div>
 
           {/* Category Filter Pills Bar */}
-          <div className="flex items-center gap-1.5 overflow-x-auto py-2.5 shrink-0 border-b border-white/10 custom-scrollbar">
-            {[
-              { id: "all", label: "All" },
-              { id: "temples", label: "Temples" },
-              { id: "heritage", label: "Heritage" },
-              { id: "waterfalls", label: "Waterfalls" },
-              { id: "hills", label: "Hills" },
-              { id: "beaches", label: "Beaches" },
-              { id: "food", label: "Food" },
-              { id: "museums", label: "Museums" },
-              { id: "trekking", label: "Trekking" },
-            ].map((cat) => (
+          <div className="flex flex-col gap-1.5 shrink-0 border-b border-white/10 pb-2.5 pt-1.5">
+            {/* Category pills row */}
+            <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+              {[
+                { id: "all", label: "All" },
+                { id: "temples", label: "🛕 Temples" },
+                { id: "heritage", label: "🏛️ Heritage" },
+                { id: "waterfalls", label: "💧 Falls" },
+                { id: "hills", label: "⛰️ Hills" },
+                { id: "beaches", label: "🏖️ Beaches" },
+                { id: "food", label: "🍲 Food" },
+                { id: "museums", label: "🏛 Museums" },
+                { id: "trekking", label: "🥾 Trekking" },
+              ].map((cat) => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => {
+                    setActiveCategoryFilter(cat.id as any);
+                    setSelectedDistrict(null);
+                  }}
+                  className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${
+                    activeCategoryFilter === cat.id && !selectedDistrict
+                      ? "bg-emerald-500 text-black shadow-md"
+                      : "bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
+                  }`}
+                >
+                  {cat.label}
+                </button>
+              ))}
+            </div>
+
+            {/* District selector row */}
+            <div className="relative">
               <button
-                key={cat.id}
                 type="button"
-                onClick={() => setActiveCategoryFilter(cat.id as any)}
-                className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${
-                  activeCategoryFilter === cat.id
-                    ? "bg-emerald-500 text-black shadow-md"
+                onClick={() => setShowDistrictPicker((v) => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 transition w-full justify-between ${
+                  selectedDistrict
+                    ? "bg-sky-500 text-black shadow-md"
                     : "bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
                 }`}
               >
-                {cat.label}
+                <span className="flex items-center gap-1.5">
+                  <MapPin className="w-3 h-3" />
+                  {selectedDistrict ? `${selectedDistrict} District` : "📍 Filter by District"}
+                </span>
+                <span className="flex items-center gap-1">
+                  {selectedDistrict && (
+                    <span
+                      onClick={(e) => { e.stopPropagation(); setSelectedDistrict(null); setShowDistrictPicker(false); }}
+                      className="text-black/60 hover:text-black font-black text-sm leading-none"
+                    >×</span>
+                  )}
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDistrictPicker ? "rotate-180" : ""}`} />
+                </span>
               </button>
-            ))}
+
+              {/* District Dropdown Grid */}
+              {showDistrictPicker && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#0c1218]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.85)] max-h-64 overflow-y-auto custom-scrollbar">
+                  <p className="text-[9px] font-mono text-slate-400 uppercase tracking-widest mb-2">Tamil Nadu Districts — Select to focus map</p>
+                  <div className="grid grid-cols-2 gap-1">
+                    {TN_DISTRICTS.map((d) => (
+                      <button
+                        key={d.name}
+                        type="button"
+                        onClick={() => handleSelectDistrict(d)}
+                        className={`px-2 py-1.5 rounded-xl text-[11px] font-semibold text-left transition cursor-pointer ${
+                          selectedDistrict === d.name
+                            ? "bg-sky-500 text-black font-bold"
+                            : "bg-white/5 hover:bg-sky-500/20 hover:text-sky-300 text-slate-300 border border-white/8 hover:border-sky-500/40"
+                        }`}
+                      >
+                        {d.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Active district badge */}
+            {selectedDistrict && (
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-sky-500/15 border border-sky-500/30 rounded-xl text-[10px] text-sky-300 font-semibold">
+                <MapPin className="w-3 h-3 text-sky-400 shrink-0" />
+                <span>Showing <strong className="text-sky-200">{selectedDistrict}</strong> District · {placesInScope.length} spots</span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDistrict(null)}
+                  className="ml-auto text-sky-400 hover:text-white font-bold text-xs"
+                >Clear</button>
+              </div>
+            )}
           </div>
 
           {/* Active Route Calculation Metrics & Intermediate Waypoint Addition */}
