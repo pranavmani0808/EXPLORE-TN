@@ -188,6 +188,7 @@ export function FullscreenRouteMap({
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [showDistrictPicker, setShowDistrictPicker] = useState(false);
   const [globalQuery, setGlobalQuery] = useState("");
+  const [statusMessage, setStatusMessage] = useState<string>("");
 
   // Origin & Destination Routing State
   const [originQuery, setOriginQuery] = useState("");
@@ -1258,6 +1259,7 @@ export function FullscreenRouteMap({
 
       {/* Main Left Explorer Panel */}
       <aside
+        aria-labelledby="explorer-destinations-heading"
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
         className={`absolute z-40 transition-all duration-300 pointer-events-auto ${
@@ -1268,58 +1270,90 @@ export function FullscreenRouteMap({
             : "left-4 top-20 w-80 sm:w-[380px] h-[calc(100dvh-100px)] max-h-[calc(100dvh-100px)] max-sm:top-auto max-sm:bottom-4 max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:h-[70vh] max-sm:max-h-[70vh]"
         }`}
       >
+        {/* Polite Live Region for dynamic screen reader updates */}
+        <div aria-live="polite" className="sr-only">
+          {statusMessage}
+        </div>
+
         <div className="w-full h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white overscroll-contain">
-          {/* Drag Handle */}
-          <div
-            onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
-            className="w-full flex flex-col items-center cursor-pointer py-1 group shrink-0"
+          {/* Drag Handle Collapse Button */}
+          <button
+            type="button"
+            aria-expanded={panelState === "expanded"}
+            aria-controls="explorer-places-list"
+            aria-label={panelState === "expanded" ? "Collapse destinations panel" : "Expand destinations panel"}
+            onClick={() => {
+              const next = panelState === "expanded" ? "compact" : "expanded";
+              setPanelState(next);
+              setStatusMessage(next === "expanded" ? "Destinations panel expanded" : "Destinations panel collapsed");
+            }}
+            className="w-full flex flex-col items-center cursor-pointer py-1 group shrink-0 focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg min-h-[36px] justify-center"
           >
             <div className="w-12 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition" />
-            <span className="text-[9px] text-slate-400 uppercase tracking-widest mt-1 font-mono">
+            <span className="text-[10px] text-slate-300 uppercase tracking-widest mt-1 font-mono font-semibold">
               {panelState === "expanded" ? "Click to Collapse" : "Click to Expand"}
             </span>
-          </div>
+          </button>
 
           {/* Panel Header & Breadcrumbs */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-1 shrink-0">
             <div>
-              <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
-                <span
-                  onClick={() => setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] })}
-                  className="cursor-pointer hover:underline"
+              <nav aria-label="Breadcrumb" className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] });
+                    setStatusMessage("Reset scope to All Tamil Nadu");
+                  }}
+                  className="cursor-pointer hover:underline text-emerald-400 font-bold focus-visible:ring-2 focus-visible:ring-emerald-400 rounded px-1 py-0.5"
                 >
                   Tamil Nadu
-                </span>
+                </button>
                 {mapScope.areaName !== "Tamil Nadu" && (
                   <>
-                    <span>/</span>
+                    <span aria-hidden="true">/</span>
                     <span className="text-white font-extrabold">{mapScope.areaName}</span>
                   </>
                 )}
                 {mapScope.selectedPOI && (
                   <>
-                    <span>/</span>
+                    <span aria-hidden="true">/</span>
                     <span className="text-sky-300 font-extrabold truncate max-w-[120px] inline-block">{mapScope.selectedPOI.canonicalName || mapScope.selectedPOI.name}</span>
                   </>
                 )}
-              </div>
-              <h2 className="text-sm font-extrabold text-white uppercase tracking-wider mt-0.5">
+              </nav>
+              <h2 id="explorer-destinations-heading" className="text-sm font-extrabold text-white uppercase tracking-wider mt-0.5">
                 {mapScope.areaName.toUpperCase()} DESTINATIONS ({placesInScope.length})
               </h2>
             </div>
             <button
               type="button"
-              onClick={() => setPanelState((prev) => (prev === "expanded" ? "compact" : "expanded"))}
-              className="p-1 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition"
+              aria-expanded={panelState === "expanded"}
+              aria-controls="explorer-places-list"
+              aria-label={panelState === "expanded" ? "Collapse destinations panel" : "Expand destinations panel"}
+              onClick={() => {
+                const next = panelState === "expanded" ? "compact" : "expanded";
+                setPanelState(next);
+                setStatusMessage(next === "expanded" ? "Destinations panel expanded" : "Destinations panel collapsed");
+              }}
+              className="p-1.5 min-w-[36px] min-h-[36px] grid place-items-center rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition focus-visible:ring-2 focus-visible:ring-emerald-400"
             >
-              {panelState === "expanded" ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
+              {panelState === "expanded" ? (
+                <ChevronDown className="w-4 h-4" aria-hidden="true" />
+              ) : (
+                <ChevronUp className="w-4 h-4" aria-hidden="true" />
+              )}
             </button>
           </div>
 
           {/* Category Filter Pills Bar */}
           <div className="flex flex-col gap-1.5 shrink-0 border-b border-white/10 pb-2.5 pt-1.5">
             {/* Category pills row */}
-            <div className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar">
+            <div
+              role="toolbar"
+              aria-label="Filter destinations by category"
+              className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar pb-1"
+            >
               {[
                 { id: "all", label: "All" },
                 { id: "temples", label: "🛕 Temples" },
@@ -1330,65 +1364,109 @@ export function FullscreenRouteMap({
                 { id: "food", label: "🍲 Food" },
                 { id: "museums", label: "🏛 Museums" },
                 { id: "trekking", label: "🥾 Trekking" },
-              ].map((cat) => (
-                <button
-                  key={cat.id}
-                  type="button"
-                  onClick={() => {
-                    setActiveCategoryFilter(cat.id as any);
-                    setSelectedDistrict(null);
-                  }}
-                  className={`px-3 py-1 rounded-full text-xs font-bold shrink-0 transition ${
-                    activeCategoryFilter === cat.id && !selectedDistrict
-                      ? "bg-emerald-500 text-black shadow-md"
-                      : "bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
-                  }`}
-                >
-                  {cat.label}
-                </button>
-              ))}
+              ].map((cat) => {
+                const isSelected = activeCategoryFilter === cat.id && !selectedDistrict;
+                return (
+                  <button
+                    key={cat.id}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      setActiveCategoryFilter(cat.id as any);
+                      setSelectedDistrict(null);
+                      setStatusMessage(`Category filter set to ${cat.label}`);
+                    }}
+                    className={`px-3 py-1.5 min-h-[32px] rounded-full text-xs font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                      isSelected
+                        ? "bg-emerald-500 text-black shadow-md font-extrabold"
+                        : "bg-white/5 border border-white/15 text-slate-200 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                );
+              })}
             </div>
 
             {/* District selector row */}
             <div className="relative">
               <button
                 type="button"
+                id="district-filter-trigger"
+                aria-haspopup="dialog"
+                aria-expanded={showDistrictPicker}
+                aria-controls="district-picker-dropdown"
                 onClick={() => setShowDistrictPicker((v) => !v)}
-                className={`flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold shrink-0 transition w-full justify-between ${
+                onKeyDown={(e) => {
+                  if (e.key === "Escape" && showDistrictPicker) {
+                    e.preventDefault();
+                    setShowDistrictPicker(false);
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-full text-xs font-bold shrink-0 transition w-full justify-between focus-visible:ring-2 focus-visible:ring-sky-400 ${
                   selectedDistrict
-                    ? "bg-sky-500 text-black shadow-md"
-                    : "bg-white/5 border border-white/10 text-slate-300 hover:text-white hover:bg-white/10"
+                    ? "bg-sky-500 text-black shadow-md font-extrabold"
+                    : "bg-white/5 border border-white/15 text-slate-200 hover:text-white hover:bg-white/10"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3 h-3" />
+                  <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
                   {selectedDistrict ? `${selectedDistrict} District` : "📍 Filter by District"}
                 </span>
                 <span className="flex items-center gap-1">
                   {selectedDistrict && (
                     <span
-                      onClick={(e) => { e.stopPropagation(); setSelectedDistrict(null); setShowDistrictPicker(false); }}
-                      className="text-black/60 hover:text-black font-black text-sm leading-none"
-                    >×</span>
+                      role="button"
+                      tabIndex={0}
+                      aria-label={`Clear ${selectedDistrict} district filter`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setSelectedDistrict(null);
+                        setShowDistrictPicker(false);
+                        setStatusMessage("District filter cleared");
+                      }}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          e.stopPropagation();
+                          setSelectedDistrict(null);
+                          setShowDistrictPicker(false);
+                          setStatusMessage("District filter cleared");
+                        }
+                      }}
+                      className="text-black/70 hover:text-black font-black text-sm leading-none p-1"
+                    >
+                      ×
+                    </span>
                   )}
-                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDistrictPicker ? "rotate-180" : ""}`} />
+                  <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showDistrictPicker ? "rotate-180" : ""}`} aria-hidden="true" />
                 </span>
               </button>
 
               {/* District Dropdown Grid */}
               {showDistrictPicker && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#0c1218]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.85)] max-h-64 overflow-y-auto custom-scrollbar">
-                  <p className="text-[9px] font-mono text-slate-400 uppercase tracking-widest mb-2">Tamil Nadu Districts — Select to focus map</p>
-                  <div className="grid grid-cols-2 gap-1">
+                <div
+                  id="district-picker-dropdown"
+                  role="dialog"
+                  aria-label="Tamil Nadu Districts Filter"
+                  className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#0c1218]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.85)] max-h-64 overflow-y-auto custom-scrollbar"
+                >
+                  <p className="text-[10px] font-mono text-slate-300 uppercase tracking-widest mb-2 font-semibold">
+                    Tamil Nadu Districts — Select to focus map
+                  </p>
+                  <div className="grid grid-cols-2 gap-1.5">
                     {TN_DISTRICTS.map((d) => (
                       <button
                         key={d.name}
                         type="button"
-                        onClick={() => handleSelectDistrict(d)}
-                        className={`px-2 py-1.5 rounded-xl text-[11px] font-semibold text-left transition cursor-pointer ${
+                        onClick={() => {
+                          handleSelectDistrict(d);
+                          setStatusMessage(`Filtered to ${d.name} District`);
+                        }}
+                        className={`px-2.5 py-2 min-h-[36px] rounded-xl text-xs font-semibold text-left transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400 ${
                           selectedDistrict === d.name
                             ? "bg-sky-500 text-black font-bold"
-                            : "bg-white/5 hover:bg-sky-500/20 hover:text-sky-300 text-slate-300 border border-white/8 hover:border-sky-500/40"
+                            : "bg-white/5 hover:bg-sky-500/20 hover:text-sky-300 text-slate-200 border border-white/10 hover:border-sky-500/40"
                         }`}
                       >
                         {d.name}
@@ -1401,14 +1479,19 @@ export function FullscreenRouteMap({
 
             {/* Active district badge */}
             {selectedDistrict && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-sky-500/15 border border-sky-500/30 rounded-xl text-[10px] text-sky-300 font-semibold">
-                <MapPin className="w-3 h-3 text-sky-400 shrink-0" />
-                <span>Showing <strong className="text-sky-200">{selectedDistrict}</strong> District · {placesInScope.length} spots</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-500/15 border border-sky-500/30 rounded-xl text-[11px] text-sky-300 font-semibold">
+                <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
+                <span>Showing <strong className="text-sky-100">{selectedDistrict}</strong> District · {placesInScope.length} spots</span>
                 <button
                   type="button"
-                  onClick={() => setSelectedDistrict(null)}
-                  className="ml-auto text-sky-400 hover:text-white font-bold text-xs"
-                >Clear</button>
+                  onClick={() => {
+                    setSelectedDistrict(null);
+                    setStatusMessage("District filter cleared");
+                  }}
+                  className="ml-auto text-sky-300 hover:text-white font-bold text-xs underline p-1 focus-visible:ring-2 focus-visible:ring-sky-400 rounded"
+                >
+                  Clear
+                </button>
               </div>
             )}
           </div>
@@ -1555,17 +1638,21 @@ export function FullscreenRouteMap({
 
           {/* Places List for Selected Scope */}
           {panelState === "expanded" && (
-            <div className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 custom-scrollbar">
+            <div
+              id="explorer-places-list"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 custom-scrollbar"
+            >
               {placesInScope.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-400 bg-white/5 border border-white/10 rounded-2xl my-2 space-y-2">
+                <div className="p-6 text-center text-xs text-slate-300 bg-white/5 border border-white/15 rounded-2xl my-2 space-y-2">
                   <p>No verified tourist places found in {mapScope.areaName} for this category filter.</p>
                   <button
                     type="button"
                     onClick={() => {
                       setActiveCategoryFilter("all");
                       setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] });
+                      setStatusMessage("Reset to All Tamil Nadu Destinations");
                     }}
-                    className="text-emerald-400 font-bold underline cursor-pointer block mx-auto text-xs"
+                    className="text-emerald-400 font-bold underline cursor-pointer block mx-auto text-xs py-1 min-h-[36px]"
                   >
                     Reset to All Tamil Nadu Destinations
                   </button>
@@ -1577,39 +1664,48 @@ export function FullscreenRouteMap({
                   const categoryIcon = place.primaryCategory === "temples" ? "🛕" : place.primaryCategory === "heritage" ? "🏛️" : place.primaryCategory === "waterfalls" ? "💧" : "📍";
 
                   return (
-                    <div
+                    <article
                       key={place.id}
                       onMouseEnter={() => handleSidebarHover(place)}
                       onMouseLeave={() => handleSidebarHover(null)}
-                      onClick={() => {
-                        setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
-                        if (leafletMapRef.current) {
-                          leafletMapRef.current.flyTo([place.latitude, place.longitude], 14, { animate: true });
-                        }
-                      }}
-                      className={`group p-3 rounded-2xl border transition-all cursor-pointer flex flex-col gap-2.5 ${
+                      className={`group p-3 rounded-2xl border transition-all flex flex-col gap-2.5 ${
                         isSelected
                           ? "bg-emerald-500/20 border-emerald-500/60 shadow-lg"
                           : hoveredPlaceId === place.id
                           ? "bg-white/10 border-white/30 shadow-md"
-                          : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                          : "bg-white/5 border-white/15 hover:bg-white/10 hover:border-white/30"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
-                        <div className="space-y-1 min-w-0 flex-1">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setMapScope({ type: "POI", areaName: place.district, selectedPOI: place });
+                            if (leafletMapRef.current) {
+                              leafletMapRef.current.flyTo([place.latitude, place.longitude], 14, { animate: true });
+                            }
+                            setStatusMessage(`Focused map on ${place.canonicalName || place.name}`);
+                          }}
+                          className="space-y-1 min-w-0 flex-1 text-left cursor-pointer rounded-lg p-0.5 focus-visible:ring-2 focus-visible:ring-emerald-400"
+                          aria-label={`Focus map on ${place.canonicalName || place.name}, ${place.district} District`}
+                        >
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm">{categoryIcon}</span>
-                            <h4 className="font-bold text-white text-xs truncate">{place.canonicalName || place.name}</h4>
+                            <span className="text-sm" aria-hidden="true">{categoryIcon}</span>
+                            <h4 className="font-bold text-white text-xs truncate group-hover:text-emerald-300 transition-colors">
+                              {place.canonicalName || place.name}
+                            </h4>
                           </div>
-                          <p className="text-[11px] text-slate-300 line-clamp-1">{place.tagline || place.description}</p>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono pt-0.5">
+                          <p className="text-[11px] text-slate-200 line-clamp-1 leading-snug">
+                            {place.tagline || place.description}
+                          </p>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-300 font-mono pt-0.5">
                             <span className="text-emerald-400 font-bold uppercase">{place.primaryCategory}</span>
-                            <span>•</span>
+                            <span aria-hidden="true">•</span>
                             <span>{place.district} District</span>
-                            <span>•</span>
+                            <span aria-hidden="true">•</span>
                             <span>{place.rating ? `★ ${place.rating}` : "No reviews yet"}</span>
                           </div>
-                        </div>
+                        </button>
                       </div>
 
                       {/* Action Buttons Row — Directions, Save, +Origin, +Dest */}
@@ -1617,31 +1713,29 @@ export function FullscreenRouteMap({
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleGetDirections(place);
-                            }}
-                            className="px-2.5 py-1 rounded-lg bg-blue-500/20 hover:bg-blue-500/35 text-blue-300 border border-blue-500/40 text-[10px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer"
-                            title="Get Directions"
+                            onClick={() => handleGetDirections(place)}
+                            className="px-2.5 py-1.5 min-h-[32px] rounded-lg bg-blue-500/20 hover:bg-blue-500/35 text-blue-200 border border-blue-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-400"
+                            aria-label={`Get directions to ${place.canonicalName || place.name}`}
                           >
-                            <Navigation className="w-3 h-3" />
+                            <Navigation className="w-3.5 h-3.5" aria-hidden="true" />
                             Directions
                           </button>
 
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            aria-pressed={isSaved}
+                            onClick={() => {
                               toggleSavePlace(place);
+                              setStatusMessage(isSaved ? `Removed ${place.name} from saved places` : `Saved ${place.name} to collection`);
                             }}
-                            className={`px-2.5 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer border ${
+                            className={`px-2.5 py-1.5 min-h-[32px] rounded-lg text-[11px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer border focus-visible:ring-2 focus-visible:ring-emerald-400 ${
                               isSaved
-                                ? "bg-emerald-500/30 text-emerald-300 border-emerald-500/60"
-                                : "bg-white/10 hover:bg-white/20 text-slate-200 border-white/15"
+                                ? "bg-emerald-500/30 text-emerald-200 border-emerald-500/60"
+                                : "bg-white/10 hover:bg-white/20 text-slate-200 border-white/20"
                             }`}
-                            title={isSaved ? "Saved to Collection" : "Save Place"}
+                            aria-label={isSaved ? `Remove ${place.name} from saved places` : `Save ${place.name}`}
                           >
-                            <Bookmark className={`w-3 h-3 ${isSaved ? "fill-emerald-400 text-emerald-400" : ""}`} />
+                            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? "fill-emerald-400 text-emerald-400" : ""}`} aria-hidden="true" />
                             {isSaved ? "Saved" : "Save"}
                           </button>
                         </div>
@@ -1649,29 +1743,31 @@ export function FullscreenRouteMap({
                         <div className="flex items-center gap-1">
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            onClick={() => {
                               setSelectedOrigin(place);
                               toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
+                              setStatusMessage(`Set ${place.canonicalName || place.name} as Route Origin`);
                             }}
-                            className="px-2 py-1 rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 text-[9px] font-bold transition active:scale-95 cursor-pointer"
+                            className="px-2 py-1.5 min-h-[32px] rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400"
+                            aria-label={`Set ${place.name} as Route Origin`}
                           >
                             + Origin
                           </button>
                           <button
                             type="button"
-                            onClick={(e) => {
-                              e.stopPropagation();
+                            onClick={() => {
                               setSelectedDestination(place);
                               toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
+                              setStatusMessage(`Set ${place.canonicalName || place.name} as Route Destination`);
                             }}
-                            className="px-2 py-1 rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/30 text-[9px] font-bold transition active:scale-95 cursor-pointer"
+                            className="px-2 py-1.5 min-h-[32px] rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-200 border border-sky-500/30 text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
+                            aria-label={`Set ${place.name} as Route Destination`}
                           >
                             + Dest
                           </button>
                         </div>
                       </div>
-                    </div>
+                    </article>
                   );
                 })
               )}

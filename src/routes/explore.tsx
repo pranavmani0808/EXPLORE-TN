@@ -293,9 +293,9 @@ function ExploreByExperiencePage() {
 
       if (isTrek === "true") {
         setSelectedCategory("trekking");
-      } else if (cat) {
-        const normalized = cat.toLowerCase();
-        if (normalized === "arupadai" || normalized === "murugan" || normalized === "arupadaiveedu") setSelectedCategory("arupadai");
+      } else if (cat !== null) {
+        const normalized = (cat || "").toLowerCase().trim();
+        if (normalized === "" || normalized === "arupadai" || normalized === "murugan" || normalized === "arupadaiveedu") setSelectedCategory("arupadai");
         else if (normalized === "mountain" || normalized === "hills" || normalized === "hill-escapes") setSelectedCategory("hills");
         else if (normalized === "coastal" || normalized === "beaches") setSelectedCategory("beaches");
         else if (normalized === "heritage-temples" || normalized === "temples" || normalized === "temple") setSelectedCategory("temple");
@@ -303,7 +303,7 @@ function ExploreByExperiencePage() {
         else if (normalized === "culinary" || normalized === "food") setSelectedCategory("food");
         else if (normalized === "wildlife" || normalized === "nature" || normalized === "forest") setSelectedCategory("nature");
         else if (validCategoryIds.includes(normalized)) setSelectedCategory(normalized);
-        else setSelectedCategory("all");
+        else setSelectedCategory("arupadai");
       } else if (tag && validCategoryIds.includes(tag.toLowerCase())) {
         setSelectedCategory(tag.toLowerCase());
       }
