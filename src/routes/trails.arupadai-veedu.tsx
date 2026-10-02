@@ -242,7 +242,7 @@ function ArupadaiVeeduTrailPage() {
               </div>
 
               {/* Stops List (1 to 6) */}
-              <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1 scrollbar-none">
+              <div className="space-y-2 max-h-[480px] overflow-y-auto pr-1 scrollbar-none no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                 {arupadaiVeeduTemples.map((temple, idx) => {
                   const isSelected = selectedStopIndex === idx;
                   return (

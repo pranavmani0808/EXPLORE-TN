@@ -1148,7 +1148,7 @@ export function FullscreenRouteMap({
 
               {/* Live Search Suggestions Dropdown */}
               {focusOriginQuery.trim() && (
-                <div className="bg-[#121821] border border-white/20 rounded-2xl max-h-48 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar">
+                <div className="bg-[#121821] border border-white/20 rounded-2xl max-h-48 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                   {searchEntities(focusOriginQuery).length === 0 ? (
                     <div className="p-2.5 text-xs text-slate-400 text-center">No origin matching '{focusOriginQuery}'</div>
                   ) : (
@@ -1449,7 +1449,7 @@ export function FullscreenRouteMap({
                   id="district-picker-dropdown"
                   role="dialog"
                   aria-label="Tamil Nadu Districts Filter"
-                  className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#0c1218]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.85)] max-h-64 overflow-y-auto custom-scrollbar"
+                  className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#0c1218]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.85)] max-h-64 overflow-y-auto custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                 >
                   <p className="text-[10px] font-mono text-slate-300 uppercase tracking-widest mb-2 font-semibold">
                     Tamil Nadu Districts — Select to focus map
@@ -1557,7 +1557,7 @@ export function FullscreenRouteMap({
                   />
 
                   {waypointQuery.trim() && (
-                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#121821] border border-white/20 rounded-2xl max-h-40 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar">
+                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#121821] border border-white/20 rounded-2xl max-h-40 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                       {searchEntities(waypointQuery).map((item) => {
                         const placeObj = item.place || (item.area ? {
                           id: item.area.id,
