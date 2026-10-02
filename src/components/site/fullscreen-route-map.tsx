@@ -145,9 +145,7 @@ export function FullscreenRouteMap({
     }
   };
 
-  const [isDirectionsFocusMode, setIsDirectionsFocusMode] = useState<boolean>(() => {
-    return Boolean(initialDestinationPlaceId && !initialOriginPlaceId);
-  });
+  const [isDirectionsFocusMode, setIsDirectionsFocusMode] = useState<boolean>(false);
   const [focusOriginQuery, setFocusOriginQuery] = useState("");
 
   const handleGetDirections = (place: ExplorerPlace) => {
@@ -192,12 +190,47 @@ export function FullscreenRouteMap({
 
   // Origin & Destination Routing State
   const [originQuery, setOriginQuery] = useState("");
-  const [destinationQuery, setDestinationQuery] = useState("");
-  const [selectedOrigin, setSelectedOrigin] = useState<ExplorerPlace | null>(() => {
-    return initialOriginPlaceId ? resolvePlaceById(initialOriginPlaceId) : null;
-  });
   const [selectedDestination, setSelectedDestination] = useState<ExplorerPlace | null>(() => {
     return initialDestinationPlaceId ? resolvePlaceById(initialDestinationPlaceId) : null;
+  });
+  const [selectedOrigin, setSelectedOrigin] = useState<ExplorerPlace | null>(() => {
+    if (initialOriginPlaceId) return resolvePlaceById(initialOriginPlaceId);
+    if (initialDestinationPlaceId) {
+      const p = resolvePlaceById(initialDestinationPlaceId);
+      if (p) {
+        const hubs = [
+          { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+          { name: "Madurai", lat: 9.9252, lng: 78.1198 },
+          { name: "Coimbatore", lat: 11.0168, lng: 76.9558 },
+          { name: "Salem", lat: 11.6643, lng: 78.1460 },
+          { name: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
+        ];
+        let closestHub = hubs[0];
+        let minDistance = Infinity;
+        for (const hub of hubs) {
+          const d = Math.hypot(hub.lat - p.latitude, hub.lng - p.longitude);
+          if (d < minDistance) {
+            minDistance = d;
+            closestHub = hub;
+          }
+        }
+        return {
+          id: `geo-${closestHub.name.toLowerCase()}`,
+          canonicalName: closestHub.name,
+          name: closestHub.name,
+          slug: closestHub.name.toLowerCase(),
+          district: closestHub.name,
+          state: "Tamil Nadu",
+          country: "India",
+          latitude: closestHub.lat,
+          longitude: closestHub.lng,
+          categories: ["all"],
+          primaryCategory: "all",
+          verified: true,
+        };
+      }
+    }
+    return null;
   });
   const [waypoints, setWaypoints] = useState<ExplorerPlace[]>([]);
   const [waypointQuery, setWaypointQuery] = useState("");
@@ -263,7 +296,42 @@ export function FullscreenRouteMap({
       if (p) {
         setSelectedDestination(p);
         if (!initialOriginPlaceId) {
-          setIsDirectionsFocusMode(true);
+          // Find closest major hub to calculate immediate initial route
+          const hubs = [
+            { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+            { name: "Madurai", lat: 9.9252, lng: 78.1198 },
+            { name: "Coimbatore", lat: 11.0168, lng: 76.9558 },
+            { name: "Salem", lat: 11.6643, lng: 78.1460 },
+            { name: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
+          ];
+          // Calculate distance to each hub
+          let closestHub = hubs[0];
+          let minDistance = Infinity;
+          for (const hub of hubs) {
+            const d = Math.hypot(hub.lat - p.latitude, hub.lng - p.longitude);
+            if (d < minDistance) {
+              minDistance = d;
+              closestHub = hub;
+            }
+          }
+
+          const defaultOrigin: ExplorerPlace = {
+            id: `geo-${closestHub.name.toLowerCase()}`,
+            canonicalName: closestHub.name,
+            name: closestHub.name,
+            slug: closestHub.name.toLowerCase(),
+            district: closestHub.name,
+            state: "Tamil Nadu",
+            country: "India",
+            latitude: closestHub.lat,
+            longitude: closestHub.lng,
+            categories: ["all"],
+            primaryCategory: "all",
+            verified: true,
+          };
+          setSelectedOrigin(defaultOrigin);
+          setIsDirectionsFocusMode(false);
+          toast.success(`Generated route from ${closestHub.name} to ${p.canonicalName || p.name} 🚗`);
         }
       }
     }
