@@ -279,6 +279,11 @@ export function KodaiPoiDetailView({ poi }: { poi: KodaiPoiRecord }) {
             <h1 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
               {poi.name}
             </h1>
+            {poi.shortDescription && (
+              <p className="text-sm sm:text-base text-emerald-200/90 font-medium">
+                {poi.shortDescription}
+              </p>
+            )}
             <p className="text-sm text-slate-300 flex items-center gap-2">
               <MapPin className="w-4 h-4 text-emerald-400 shrink-0" />
               <span>{poi.latitude.toFixed(4)}° N, {poi.longitude.toFixed(4)}° E</span>

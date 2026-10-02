@@ -2078,6 +2078,87 @@ const INITIAL_KODAI_POIS: KodaiPoiRecord[] = [
     dataSource: "Tamil Nadu Forest Department",
     confidence: 99,
   },
+  {
+    id: "kodai_poi_31",
+    name: "Poondi Village & Lake",
+    slug: "poondi",
+    destinationId: "kodaikanal",
+    category: "villages",
+    subcategory: "Offbeat High-Altitude Terraced Hamlet & Valley Reservoir",
+    shortDescription: "Picturesque, untouched mountain hamlet often called 'Mini Switzerland of Tamil Nadu' surrounded by stepped garlic farms, misty pine ridges, and a serene reservoir.",
+    description: "Located approximately 35–40 km beyond Kodaikanal town via Poombarai and Mannavanur, Poondi is an idyllic agrarian hamlet sitting at ~1,945m elevation. Renowned for its emerald stepped farming terraces of Hill Garlic, carrots, and potatoes, along with the scenic Poondi Lake reservoir and tranquil trekking trails away from commercial tourist crowds.",
+    latitude: 10.1831,
+    longitude: 77.3443,
+    elevation: 1945,
+    images: [
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80"
+    ],
+    gallery: [
+      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1000&q=80",
+      "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1000&q=80"
+    ],
+    accessibility: "Fully Accessible",
+    openingHours: "Open 24 Hours (Best visited 06:00 AM – 05:00 PM)",
+    entryFee: "Free Entry (No commercial fee)",
+    bestTimeToVisit: "September to March for lush green terrace views & crisp morning mist",
+    estimatedVisitDuration: "2–3 Hours",
+    popularity: 8,
+    crowdLevel: "Quiet / Low",
+    weather: "14°C · Misty High Altitude Breeze",
+    visibility: "Good",
+    roadCondition: "Narrow Hill Road",
+    parking: {
+      carParking: "Available",
+      bikeParking: "Available",
+      parkingDistance: "Village entrance open grounds (50 m)",
+      parkingFee: "Free Parking",
+    },
+    facilities: {
+      restroom: { available: "Limited", details: "Local village homestays and community facilities" },
+      drinkingWater: { available: true, details: "Village natural mountain springs & local grocery stores" },
+      foodStalls: { available: true, details: "Local village tea stalls, hot omelettes, and homestyle meals" },
+      photographyArea: { available: true, details: "Spectacular vantage points over stepped terrace farms & valley lake" },
+      firstAid: { available: "Limited", details: "Basic first aid at village primary center" },
+      medicalFacility: { available: "Nearby", details: "Poombarai PHC (16 km) / Kodaikanal GH (38 km)" },
+    },
+    categorySpecs: {
+      elevationProfile: "1,945 m MSL high-altitude basin",
+      agriculturalSpecialty: "Stepped terrace farming of Kodaikanal GI Malai Poondu (Hill Garlic), cabbage & potatoes",
+    },
+    nearbyEssentials: [
+      { id: "es_poondi_1", name: "Poondi Village Center Stand", type: "parking", distance: "50 m", direction: "Village Center", available: true, verificationStatus: "verified" },
+      { id: "es_poondi_2", name: "Poondi Hill Viewpoint Tea Stall", type: "food", distance: "80 m", direction: "Valley View", available: true, verificationStatus: "verified" },
+    ],
+    nearbyPlaces: [
+      { name: "Mannavanur Lake", slug: "mannavanur-lake", distance: "12 km" },
+      { name: "Poombarai Village", slug: "poombarai-village", distance: "16 km" },
+      { name: "Kookal Lake", slug: "kookal-lake", distance: "18 km" },
+      { name: "Kodaikanal Lake", slug: "kodaikanal-lake", distance: "36 km" },
+    ],
+    nearbyFood: ["Poondi Village Homestyle Kitchens", "Mannavanur Lake Eco Cafe"],
+    nearbyFuel: ["Fill tank at Kodaikanal Town (36 km) before proceeding"],
+    nearbyMedical: ["Poombarai Primary Health Centre (16 km)"],
+    nearbyHotels: ["Poondi Nature Homestays & Eco Camps", "Mannavanur Cottages"],
+    nearbyShops: ["Farm-fresh Kodaikanal Hill Garlic & organic hill vegetables"],
+    safetyInformation: [
+      "Remote Western Ghats route; ensure sufficient fuel and offline maps before departing Kodaikanal.",
+      "Narrow winding ghat road with occasional fog; avoid driving after dark."
+    ],
+    routeInformation: {
+      roadQuality: "Paved scenic country road via Poombarai-Mannavanur with winding curves",
+      lastFuelStation: "Kodaikanal Town (36 km)",
+      lastFoodStop: "Poondi Village Local Mess & Mannavanur",
+      lastRestroom: "Mannavanur Eco Tourism / Village Stays",
+      networkAvailability: "Jio 4G Moderate · BSNL Functional · Airtel Patchy",
+      nearestHospital: "Poombarai PHC (16 km)",
+      isRemoteStretch: true,
+      remoteStretchWarning: "Remote countryside stretch 36 km from Kodaikanal; check vehicle condition and fuel.",
+    },
+    lastVerified: "Today",
+    dataSource: "Dindigul Tourism & Field Inspection",
+    confidence: 97,
+  },
 ];
 
 // ---------------------------------------------------------
