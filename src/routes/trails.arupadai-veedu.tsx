@@ -10,6 +10,7 @@ import {
   Check,
   Calendar,
   Flame,
+  Route as RouteIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -69,7 +70,10 @@ function ArupadaiVeeduTrailPage() {
 
   const handlePlanWithAI = () => {
     navigate({
-      to: "/planner",
+      to: "/routes",
+      search: {
+        destination: "palani-murugan-temple",
+      },
     });
   };
 
@@ -174,7 +178,7 @@ function ArupadaiVeeduTrailPage() {
                 size="lg"
                 className="rounded-xl bg-amber-500 px-6 py-6 font-extrabold text-slate-950 hover:bg-amber-400 shadow-xl shadow-amber-500/25 transition-all"
               >
-                <Sparkles className="mr-2 size-4 text-slate-950" /> Plan this trail with AI{" "}
+                <RouteIcon className="mr-2 size-4 text-slate-950" /> Plan Route on Map{" "}
                 <ArrowRight className="ml-2 size-4 text-slate-950" />
               </Button>
 
@@ -211,7 +215,7 @@ function ArupadaiVeeduTrailPage() {
               <h2 className="text-2xl font-black text-white font-display mt-1">Interactive Trail Map & Route Navigator</h2>
             </div>
             <Button onClick={handlePlanWithAI} variant="outline" size="sm" className="rounded-xl border-amber-500/30 text-amber-300 hover:bg-amber-500/10">
-              <Sparkles className="mr-1.5 size-3.5 text-amber-400" /> Optimize Route in Trip Copilot
+              <RouteIcon className="mr-1.5 size-3.5 text-amber-400" /> Plan Route on Map
             </Button>
           </div>
 
@@ -431,18 +435,18 @@ function ArupadaiVeeduTrailPage() {
         <div className="mt-16 glass-strong rounded-4xl p-8 text-center shadow-elevate">
           <div className="mx-auto max-w-xl">
             <span className="grid size-12 place-items-center rounded-2xl bg-amber-500/20 text-amber-400 mx-auto">
-              <Sparkles className="size-6" />
+              <RouteIcon className="size-6" />
             </span>
-            <h3 className="mt-4 text-2xl font-bold sm:text-3xl">Plan the Arupadai Veedu Trail with AI Copilot</h3>
+            <h3 className="mt-4 text-2xl font-bold sm:text-3xl">Plan the Arupadai Veedu Route on Interactive Map</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Let Trip Copilot optimize your route order from your starting location, calculate real OSRM riding ETAs, fuel math, and weather advisories.
+              Explore the six sacred Murugan shrines with road routing, live turn-by-turn geometry, distance, and district checkpoints.
             </p>
             <Button
               onClick={handlePlanWithAI}
               size="lg"
               className="mt-6 rounded-xl bg-amber-500 text-black hover:bg-amber-600 font-bold px-8 shadow-lg shadow-amber-500/20"
             >
-              <Sparkles className="mr-2 size-4" /> Launch AI Copilot <ArrowRight className="ml-2 size-4" />
+              <RouteIcon className="mr-2 size-4" /> Open Fullscreen Route Map <ArrowRight className="ml-2 size-4" />
             </Button>
           </div>
         </div>

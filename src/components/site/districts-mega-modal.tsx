@@ -494,7 +494,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                 onSelectPlaceForPlanner={(place, origin) => {
                   onClose();
                   if (typeof window !== "undefined") {
-                    window.location.href = `/planner?destination=${encodeURIComponent(place.canonicalName)}&origin=${encodeURIComponent(origin.name)}`;
+                    window.location.href = `/routes?destination=${encodeURIComponent(place.canonicalName)}&origin=${encodeURIComponent(origin.name)}`;
                   }
                 }}
               />
@@ -553,10 +553,10 @@ function SpotGridCard({ spot, onClose }: { spot: any; onClose: () => void }) {
 
   return (
     <Link
-      to="/planner"
+      to="/routes"
       search={{ destination: spot.name }}
       onClick={onClose}
-      aria-label={`${spot.name}, ${spot.district} District — Plan Trip to Spot`}
+      aria-label={`${spot.name}, ${spot.district} District — Plan Route to Spot`}
       className="gsap-district-card group relative flex flex-col rounded-2xl border border-zinc-800 bg-[#121215] p-3.5 transition-all duration-300 hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5 cursor-pointer min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
     >
       <div className="relative h-36 w-full overflow-hidden rounded-xl bg-zinc-900 shrink-0">
@@ -602,7 +602,7 @@ function SpotGridCard({ spot, onClose }: { spot: any; onClose: () => void }) {
         </div>
 
         <div className="mt-3.5 flex items-center justify-between text-xs font-bold text-emerald-400 pt-2.5 border-t border-zinc-800/80 group-hover:text-emerald-300">
-          <span>Plan Trip to Spot</span>
+          <span>Plan Route to Spot</span>
           <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
         </div>
       </div>

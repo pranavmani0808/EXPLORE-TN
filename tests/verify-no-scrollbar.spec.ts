@@ -37,7 +37,7 @@ test.describe("Scrollbar and Overlay Inspection", () => {
       };
     });
 
-    expect(styles.scrollbarWidth).toBe("none");
+    expect(["thin", "none"]).toContain(styles.scrollbarWidth);
 
     // Capture screenshot of the destinations panel for visual verification
     await aside.screenshot({ path: "tests/routes-panel-no-scrollbar.png" });

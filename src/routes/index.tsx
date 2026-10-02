@@ -243,11 +243,11 @@ function Index() {
               className="mt-8 flex flex-wrap items-center gap-4"
             >
               <Link
-                to="/planner"
+                to="/routes"
                 className="flex items-center gap-2 rounded-full bg-emerald-500 px-7 py-3 text-sm font-extrabold text-zinc-950 hover:bg-emerald-400 transition shadow-lg shadow-emerald-500/20"
               >
                 <Sparkles className="size-4 text-zinc-950 fill-zinc-950" />
-                <span>Plan My Trip</span>
+                <span>Plan Route</span>
                 <ArrowRight className="size-4" />
               </Link>
 

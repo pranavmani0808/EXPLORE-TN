@@ -469,13 +469,13 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <Bookmark className="size-4 text-zinc-300" />
           </Link>
 
-          {/* Visually Lighter Nav CTA Button: Plan My Trip */}
+          {/* Visually Lighter Nav CTA Button: Plan Route */}
           <Link
-            to="/planner"
+            to="/routes"
             className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md shrink-0"
           >
-            <Sparkles className="size-3.5 text-emerald-400" />
-            <span>{lang === "ta" ? "பயணம் திட்டமிடுக" : "Plan My Trip"}</span>
+            <Route className="size-3.5 text-emerald-400" />
+            <span>{lang === "ta" ? "பாதையைத் திட்டமிடு" : "Plan Route"}</span>
           </Link>
 
           {/* Account Icon & Profile Menu Dropdown */}
@@ -566,12 +566,12 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             </button>
 
             <Link
-              to="/planner"
+              to="/routes"
               onClick={() => setOpen(false)}
               className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-zinc-950"
             >
-              <Sparkles className="size-3.5 fill-zinc-950" />
-              <span>{lang === "ta" ? "திட்டமிடுக" : "Plan My Trip"}</span>
+              <Route className="size-3.5" />
+              <span>{lang === "ta" ? "பாதையைத் திட்டமிடு" : "Plan Route"}</span>
             </Link>
           </div>
         </div>

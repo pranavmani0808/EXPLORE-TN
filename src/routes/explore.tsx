@@ -25,6 +25,7 @@ import {
   ChevronRight,
   Plus,
   Check,
+  Route as RouteIcon,
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -545,11 +546,11 @@ function ExploreByExperiencePage() {
 
             <div className="flex items-center gap-3">
               <Link
-                to="/planner"
+                to="/routes"
                 className="px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-2"
               >
-                <Sparkles className="size-3.5" />
-                <span>AI Trip Copilot</span>
+                <RouteIcon className="size-3.5" />
+                <span>Plan Route</span>
               </Link>
             </div>
           </div>
