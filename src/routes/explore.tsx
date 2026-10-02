@@ -270,7 +270,17 @@ function ExploreByExperiencePage() {
     return [];
   });
 
-  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
+  const [isPanelOpen, setIsPanelOpen] = useState<boolean>(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        return Array.isArray(parsed) && parsed.length > 0;
+      }
+    } catch {}
+    return false;
+  });
   const [selectedModalPlace, setSelectedModalPlace] = useState<Place | null>(null);
 
   // Sync routeStops with localStorage
