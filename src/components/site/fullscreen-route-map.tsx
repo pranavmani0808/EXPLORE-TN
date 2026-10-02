@@ -1352,7 +1352,7 @@ export function FullscreenRouteMap({
             <div
               role="toolbar"
               aria-label="Filter destinations by category"
-              className="flex items-center gap-1.5 overflow-x-auto custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pb-1"
+              className="flex items-center gap-1.5 overflow-x-auto pb-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
             >
               {[
                 { id: "all", label: "All" },
@@ -1640,7 +1640,7 @@ export function FullscreenRouteMap({
           {panelState === "expanded" && (
             <div
               id="explorer-places-list"
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
             >
               {placesInScope.length === 0 ? (
                 <div className="p-6 text-center text-xs text-slate-300 bg-white/5 border border-white/15 rounded-2xl my-2 space-y-2">

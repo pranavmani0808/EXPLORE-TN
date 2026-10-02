@@ -557,9 +557,9 @@ export function TripRouteBuilderPanel({
             search={{
               destination: stops[stops.length - 1]?.id || stops[0]?.id,
             }}
-            className="flex-1 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs text-center transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2"
+            className="flex-1 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs text-center transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
           >
-            <span>Plan My Trip</span>
+            <span>Plan Route</span>
             <ArrowRight className="size-4" />
           </Link>
         </div>
