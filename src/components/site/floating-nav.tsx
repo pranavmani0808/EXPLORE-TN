@@ -472,6 +472,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* Visually Lighter Nav CTA Button: Plan Route */}
           <Link
             to="/routes"
+            data-testid="desktop-plan-route-btn"
             className="hidden md:flex items-center gap-2 rounded-full border border-emerald-500/40 bg-emerald-500/10 px-4 py-2 text-xs font-bold text-emerald-400 hover:bg-emerald-500/20 hover:border-emerald-500/60 transition backdrop-blur-md shrink-0"
           >
             <Route className="size-3.5 text-emerald-400" />

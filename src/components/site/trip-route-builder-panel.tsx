@@ -554,6 +554,7 @@ export function TripRouteBuilderPanel({
         <div className="p-4 bg-zinc-900/90 border-t border-zinc-800 shrink-0 flex items-center gap-2">
           <Link
             to="/routes"
+            data-testid="panel-plan-route-btn"
             search={{
               destination: stops[stops.length - 1]?.id || stops[0]?.id,
             }}
