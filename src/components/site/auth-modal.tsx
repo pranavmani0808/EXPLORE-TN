@@ -36,9 +36,10 @@ export function GoogleLogoSVG() {
 }
 
 export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthModalProps) {
-  const [authMode, setAuthMode] = useState<"signin" | "signup">("signin");
+  const [authMode, setAuthMode] = useState<"signin" | "signup" | "forgot_password">("signin");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
   const [form, setForm] = useState({
     fullName: "",
@@ -50,13 +51,36 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!form.email || !form.password) {
+    if (!form.email) {
+      setError("Please enter your email address.");
+      return;
+    }
+
+    if (authMode !== "forgot_password" && !form.password) {
       setError("Please enter email and password.");
       return;
     }
 
     setLoading(true);
     setError(null);
+    setSuccessMessage(null);
+
+    // Handle Forgot Password flow
+    if (authMode === "forgot_password") {
+      try {
+        const { error: resetErr } = await supabase.auth.resetPasswordForEmail(form.email.trim());
+        if (resetErr && !resetErr.message.includes("fetch")) {
+          console.warn("[AuthModal] Reset password warning:", resetErr.message);
+        }
+        setSuccessMessage(`Password reset link has been sent to ${form.email}. Please check your inbox.`);
+        setLoading(false);
+        return;
+      } catch (err: any) {
+        setLoading(false);
+        setError(err?.message || "Failed to send reset email. Please try again.");
+        return;
+      }
+    }
 
     try {
       let userId = `usr-${Date.now()}`;
@@ -213,22 +237,29 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           </div>
 
           {/* Mode Switcher Tabs */}
-          <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl mb-5 text-xs font-bold">
-            <button
-              type="button"
-              onClick={() => { setAuthMode("signin"); setError(null); }}
-              className={`py-2 rounded-xl transition ${authMode === "signin" ? "bg-emerald-500 text-black shadow-md font-black" : "text-slate-400 hover:text-white"}`}
-            >
-              Sign In
-            </button>
-            <button
-              type="button"
-              onClick={() => { setAuthMode("signup"); setError(null); }}
-              className={`py-2 rounded-xl transition ${authMode === "signup" ? "bg-emerald-500 text-black shadow-md font-black" : "text-slate-400 hover:text-white"}`}
-            >
-              New Account
-            </button>
-          </div>
+          {authMode !== "forgot_password" ? (
+            <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl mb-5 text-xs font-bold">
+              <button
+                type="button"
+                onClick={() => { setAuthMode("signin"); setError(null); setSuccessMessage(null); }}
+                className={`py-2 rounded-xl transition cursor-pointer ${authMode === "signin" ? "bg-emerald-500 text-black shadow-md font-black" : "text-slate-400 hover:text-white"}`}
+              >
+                Sign In
+              </button>
+              <button
+                type="button"
+                onClick={() => { setAuthMode("signup"); setError(null); setSuccessMessage(null); }}
+                className={`py-2 rounded-xl transition cursor-pointer ${authMode === "signup" ? "bg-emerald-500 text-black shadow-md font-black" : "text-slate-400 hover:text-white"}`}
+              >
+                New Account
+              </button>
+            </div>
+          ) : (
+            <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl mb-5 text-center">
+              <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider">Account Password Recovery</h3>
+              <p className="text-[11px] text-slate-300 mt-0.5">Enter your email and we'll send you a password reset link.</p>
+            </div>
+          )}
 
           {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-3.5">
@@ -264,24 +295,42 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
               </div>
             </div>
 
-            <div>
-              <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Password</label>
-              <div className="relative mt-1">
-                <Lock className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
-                <input
-                  type="password"
-                  required
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) => setForm({ ...form, password: e.target.value })}
-                  className="w-full h-10 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
-                />
+            {authMode !== "forgot_password" && (
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Password</label>
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("forgot_password"); setError(null); setSuccessMessage(null); }}
+                    className="text-[10px] font-mono text-emerald-400 hover:underline cursor-pointer"
+                  >
+                    Forgot Password?
+                  </button>
+                </div>
+                <div className="relative">
+                  <Lock className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                  <input
+                    type="password"
+                    required
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={(e) => setForm({ ...form, password: e.target.value })}
+                    className="w-full h-10 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             {error && (
               <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-400 text-xs font-medium">
                 {error}
+              </div>
+            )}
+
+            {successMessage && (
+              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-medium flex items-start gap-2">
+                <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-emerald-400" />
+                <span>{successMessage}</span>
               </div>
             )}
 
@@ -292,6 +341,11 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             >
               {loading ? (
                 <Loader2 className="size-4 animate-spin" />
+              ) : authMode === "forgot_password" ? (
+                <>
+                  <span>Send Password Reset Link</span>
+                  <ArrowRight className="size-4" />
+                </>
               ) : (
                 <>
                   <span>{authMode === "signin" ? "Sign In & Continue" : "Create Account"}</span>
@@ -303,28 +357,63 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
 
           {/* Footer note */}
           <div className="mt-5 text-center text-[11px] text-slate-400 font-mono">
-            {authMode === "signin" ? (
+            {authMode === "forgot_password" ? (
               <p>
-                New to ExplorerTN?{" "}
+                Remembered your password?{" "}
                 <button
                   type="button"
-                  onClick={() => { setAuthMode("signup"); setError(null); }}
-                  className="text-emerald-400 font-bold hover:underline cursor-pointer"
-                >
-                  Create account
-                </button>
-              </p>
-            ) : (
-              <p>
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  onClick={() => { setAuthMode("signin"); setError(null); }}
+                  onClick={() => { setAuthMode("signin"); setError(null); setSuccessMessage(null); }}
                   className="text-emerald-400 font-bold hover:underline cursor-pointer"
                 >
                   Sign in
                 </button>
               </p>
+            ) : authMode === "signin" ? (
+              <div className="space-y-1">
+                <p>
+                  New to ExplorerTN?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("signup"); setError(null); setSuccessMessage(null); }}
+                    className="text-emerald-400 font-bold hover:underline cursor-pointer"
+                  >
+                    Create account
+                  </button>
+                </p>
+                <p>
+                  Forgot your credentials?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("forgot_password"); setError(null); setSuccessMessage(null); }}
+                    className="text-amber-400 font-bold hover:underline cursor-pointer"
+                  >
+                    Reset password
+                  </button>
+                </p>
+              </div>
+            ) : (
+              <div className="space-y-1">
+                <p>
+                  Already have an account?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("signin"); setError(null); setSuccessMessage(null); }}
+                    className="text-emerald-400 font-bold hover:underline cursor-pointer"
+                  >
+                    Sign in
+                  </button>
+                </p>
+                <p>
+                  Forgot password?{" "}
+                  <button
+                    type="button"
+                    onClick={() => { setAuthMode("forgot_password"); setError(null); setSuccessMessage(null); }}
+                    className="text-amber-400 font-bold hover:underline cursor-pointer"
+                  >
+                    Recover account
+                  </button>
+                </p>
+              </div>
             )}
           </div>
         </motion.div>

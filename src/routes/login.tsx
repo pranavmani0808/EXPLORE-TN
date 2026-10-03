@@ -386,7 +386,16 @@ function LoginPage() {
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Password</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-slate-300 font-bold">Password</label>
+                      <button
+                        type="button"
+                        onClick={() => { setAuthMode("forgot_password"); setAuthStep("idle"); setMessage(null); }}
+                        className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
+                      >
+                        Forgot Password?
+                      </button>
+                    </div>
                     <div className="relative">
                       <Key className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input

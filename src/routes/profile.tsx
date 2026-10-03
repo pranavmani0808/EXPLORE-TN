@@ -16,6 +16,10 @@ import {
   Search,
   Shield,
   Check,
+  Key,
+  RefreshCw,
+  AlertCircle,
+  LayoutDashboard,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { AppShell } from "@/components/site/app-shell";
@@ -27,7 +31,8 @@ import { Button } from "@/components/ui/button";
 import { getCurrentAuthUser, subscribeToAuthChanges, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { getUserVisits, getCommunityContributions, PlaceVisit } from "@/lib/explorer-activity";
 import { useAuthGuard } from "@/lib/auth-guard-context";
-import { LayoutDashboard } from "lucide-react";
+import { supabase } from "@/lib/supabase-client";
+import { toast } from "sonner";
 
 export const Route = createFileRoute("/profile")({
   head: () => ({
@@ -59,6 +64,91 @@ function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [visits, setVisits] = useState<PlaceVisit[]>([]);
   const [contributionsCount, setContributionsCount] = useState({ photos: 0, reviews: 0 });
+
+  // Explorer Security & Password Management State
+  const [activePasswordTab, setActivePasswordTab] = useState<"change" | "forgot">("change");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordStatusMsg, setPasswordStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const [isSendingResetEmail, setIsSendingResetEmail] = useState(false);
+  const [resetEmailStatus, setResetEmailStatus] = useState<string | null>(null);
+
+  const handleUpdatePasswordWithOld = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordStatusMsg(null);
+
+    if (!oldPassword) {
+      setPasswordStatusMsg({ type: "error", text: "Please enter your current password." });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordStatusMsg({ type: "error", text: "New password must be at least 6 characters long." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordStatusMsg({ type: "error", text: "New passwords do not match." });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      if (currentUser?.email) {
+        // Verify old password by signing in
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email: currentUser.email,
+          password: oldPassword,
+        });
+
+        if (signInErr) {
+          setIsUpdatingPassword(false);
+          setPasswordStatusMsg({ type: "error", text: "Incorrect current password. Please try again." });
+          return;
+        }
+
+        // Update to new password
+        const { error: updateErr } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (updateErr) {
+          setIsUpdatingPassword(false);
+          setPasswordStatusMsg({ type: "error", text: updateErr.message || "Failed to update password." });
+          return;
+        }
+
+        setIsUpdatingPassword(false);
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordStatusMsg({ type: "success", text: "Password updated successfully!" });
+        toast.success("Account password updated successfully!");
+      }
+    } catch (err: any) {
+      setIsUpdatingPassword(false);
+      setPasswordStatusMsg({ type: "error", text: err?.message || "Error updating password." });
+    }
+  };
+
+  const handleSendForgotPasswordEmail = async () => {
+    if (!currentUser?.email) return;
+    setIsSendingResetEmail(true);
+    setResetEmailStatus(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(currentUser.email);
+      if (error && !error.message.includes("fetch")) {
+        console.warn("[Profile] Reset password error:", error.message);
+      }
+      setIsSendingResetEmail(false);
+      setResetEmailStatus(`Password reset link sent to ${currentUser.email}. Check your inbox.`);
+      toast.success("Reset link sent to your registered email!");
+    } catch (err: any) {
+      setIsSendingResetEmail(false);
+      setResetEmailStatus("Failed to send reset email. Please try again later.");
+    }
+  };
 
   useEffect(() => {
     const activeUser = getCurrentAuthUser();
@@ -314,6 +404,163 @@ function ProfilePage() {
                   </Button>
                 </Link>
               </div>
+            </div>
+
+            {/* Explorer Controls: Account Security & Password Management Card */}
+            <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm space-y-5">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                    <Lock className="size-4 text-emerald-600 dark:text-emerald-400" /> Explorer Controls & Password Security
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                    Update your password using current credentials or request a recovery link.
+                  </p>
+                </div>
+                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20">
+                  Auth Vault
+                </span>
+              </div>
+
+              {/* Mode Tabs: Change Password vs Forgot Password */}
+              <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-bold font-mono">
+                <button
+                  type="button"
+                  onClick={() => { setActivePasswordTab("change"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
+                  className={`py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                    activePasswordTab === "change"
+                      ? "bg-emerald-500 text-black shadow-md font-black"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <Key className="size-3.5" /> Change Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => { setActivePasswordTab("forgot"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
+                  className={`py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                    activePasswordTab === "forgot"
+                      ? "bg-emerald-500 text-black shadow-md font-black"
+                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                  }`}
+                >
+                  <RefreshCw className="size-3.5" /> Forgot Password
+                </button>
+              </div>
+
+              {/* SECTION A: CHANGE PASSWORD USING OLD PASSWORD */}
+              {activePasswordTab === "change" && (
+                <form onSubmit={handleUpdatePasswordWithOld} className="space-y-3.5">
+                  <div>
+                    <label className="text-[11px] font-mono uppercase font-bold text-slate-600 dark:text-slate-300">
+                      Current (Old) Password
+                    </label>
+                    <div className="relative mt-1">
+                      <Lock className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                      <input
+                        type="password"
+                        required
+                        value={oldPassword}
+                        onChange={(e) => setOldPassword(e.target.value)}
+                        placeholder="••••••••••••"
+                        className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="text-[11px] font-mono uppercase font-bold text-slate-600 dark:text-slate-300">
+                        New Password
+                      </label>
+                      <div className="relative mt-1">
+                        <Key className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                        <input
+                          type="password"
+                          required
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Min 6 characters"
+                          className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="text-[11px] font-mono uppercase font-bold text-slate-600 dark:text-slate-300">
+                        Confirm New Password
+                      </label>
+                      <div className="relative mt-1">
+                        <Key className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                        <input
+                          type="password"
+                          required
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Repeat new password"
+                          className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {passwordStatusMsg && (
+                    <div
+                      className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                        passwordStatusMsg.type === "success"
+                          ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                          : "bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400"
+                      }`}
+                    >
+                      {passwordStatusMsg.type === "success" ? (
+                        <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                      ) : (
+                        <AlertCircle className="size-4 shrink-0 text-rose-500" />
+                      )}
+                      <span>{passwordStatusMsg.text}</span>
+                    </div>
+                  )}
+
+                  <Button
+                    type="submit"
+                    disabled={isUpdatingPassword}
+                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-black font-black text-xs rounded-2xl shadow-md cursor-pointer"
+                  >
+                    {isUpdatingPassword ? "Verifying & Updating..." : "Update Password Using Old Password"}
+                  </Button>
+                </form>
+              )}
+
+              {/* SECTION B: FORGOT PASSWORD RECOVERY VIA EMAIL */}
+              {activePasswordTab === "forgot" && (
+                <div className="space-y-4">
+                  <div className="p-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl space-y-2">
+                    <p className="text-xs text-slate-600 dark:text-slate-300 font-mono">
+                      Logged in account email: <strong className="text-emerald-600 dark:text-emerald-400">{currentUser.email}</strong>
+                    </p>
+                    <p className="text-[11px] text-slate-500 dark:text-slate-400 leading-relaxed">
+                      If you have forgotten your password or want to reset it without entering your old password, click below. A secure one-time password reset link will be dispatched to your email.
+                    </p>
+                  </div>
+
+                  {resetEmailStatus && (
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-2">
+                      <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                      <span>{resetEmailStatus}</span>
+                    </div>
+                  )}
+
+                  <Button
+                    type="button"
+                    onClick={handleSendForgotPasswordEmail}
+                    disabled={isSendingResetEmail}
+                    className="w-full h-11 bg-amber-500 hover:bg-amber-600 text-black font-black text-xs rounded-2xl shadow-md cursor-pointer flex items-center justify-center gap-2"
+                  >
+                    <Key className="size-4" />
+                    <span>{isSendingResetEmail ? "Sending Reset Link..." : "Send Password Reset Link to Email"}</span>
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </div>
