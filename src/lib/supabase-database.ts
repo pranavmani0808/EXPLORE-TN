@@ -1,6 +1,7 @@
 import { supabase } from "./supabase-client";
 import { CANONICAL_PLACES } from "./data/canonical-places";
 import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, DEFAULT_PANCHA_BHOOTA_TEMPLES } from "@/data/places";
+import { TAMIL_NADU_DISTRICTS } from "./data/districts";
 
 export interface SupabasePlaceRecord {
   id: string;
@@ -178,8 +179,43 @@ export class SupabaseDatabaseRepository {
    */
   static async seedCanonicalPlacesToSupabase(): Promise<boolean> {
     try {
+      // Extract all spots from all 38 Tamil Nadu districts
+      const districtSpotsCanonical = Object.values(TAMIL_NADU_DISTRICTS).flatMap((d) =>
+        d.spots.map((s) => {
+          let primaryCategory = "tourist-spots";
+          if (s.category === "temples") primaryCategory = "temples";
+          else if (s.category === "food-spots") primaryCategory = "food";
+          else if (s.category === "hills") primaryCategory = "hills";
+          else if (s.category === "falls") primaryCategory = "waterfalls";
+          else if (s.category === "beaches") primaryCategory = "beaches";
+          else if (s.category === "thrift-streets") primaryCategory = "shopping";
+
+          return {
+            id: s.id,
+            canonicalName: s.name,
+            name: s.name,
+            slug: s.id,
+            district: d.name.replace(/\s+District$/i, ""),
+            state: "Tamil Nadu",
+            country: "India" as const,
+            latitude: s.latitude,
+            longitude: s.longitude,
+            categories: [s.category, primaryCategory],
+            primaryCategory,
+            tagline: s.tagline,
+            description: s.description,
+            image: s.image,
+            rating: s.rating,
+            reviewsCount: s.reviewsCount,
+            verified: s.verified,
+            tags: [s.category, d.slug, ...(s.highlights || []), ...(s.mustTry || [])],
+          };
+        })
+      );
+
       const allCanonical = [
         ...CANONICAL_PLACES,
+        ...districtSpotsCanonical,
         ...DEFAULT_ARUPADAI_VEEDU_TEMPLES.map(t => ({
           id: `p-${t.slug}`,
           canonicalName: t.name,
@@ -417,6 +453,63 @@ export class SupabaseDatabaseRepository {
       console.error("[Supabase DB] Exception in createPlace:", err);
       return null;
     }
+  }
+
+  /**
+   * Fetch district-wise categorized collection table from Supabase / Memory
+   * Categorizes places into Tourist Spots, Food, Temples, Hills, Falls, and Beaches
+   */
+  static async getDistrictCollectionTable(districtSlug: string): Promise<{
+    districtName: string;
+    districtSlug: string;
+    totalCount: number;
+    categories: {
+      touristSpots: SupabasePlaceRecord[];
+      foodSpots: SupabasePlaceRecord[];
+      temples: SupabasePlaceRecord[];
+      hills: SupabasePlaceRecord[];
+      falls: SupabasePlaceRecord[];
+      beaches: SupabasePlaceRecord[];
+    };
+  }> {
+    const places = await SupabaseDatabaseRepository.getPublicPlaces({ district: districtSlug });
+
+    const categories = {
+      touristSpots: [] as SupabasePlaceRecord[],
+      foodSpots: [] as SupabasePlaceRecord[],
+      temples: [] as SupabasePlaceRecord[],
+      hills: [] as SupabasePlaceRecord[],
+      falls: [] as SupabasePlaceRecord[],
+      beaches: [] as SupabasePlaceRecord[],
+    };
+
+    places.forEach((p) => {
+      const cat = (p.category || '').toLowerCase();
+      const prim = (p.primary_category || '').toLowerCase();
+      const tags = (p.tags || []).map((t: string) => String(t).toLowerCase());
+      const allTokens = [cat, prim, ...tags].join(' ');
+
+      if (allTokens.includes('beach') || allTokens.includes('coast')) {
+        categories.beaches.push(p);
+      } else if (allTokens.includes('waterfall') || allTokens.includes('falls') || allTokens.includes('cascade')) {
+        categories.falls.push(p);
+      } else if (allTokens.includes('hill') || allTokens.includes('mountain') || allTokens.includes('peak') || allTokens.includes('valley') || allTokens.includes('ghat')) {
+        categories.hills.push(p);
+      } else if (allTokens.includes('temple') || allTokens.includes('shrine') || allTokens.includes('spiritual')) {
+        categories.temples.push(p);
+      } else if (allTokens.includes('food') || allTokens.includes('culinary') || allTokens.includes('mess') || allTokens.includes('sweet') || allTokens.includes('parotta') || allTokens.includes('biryani')) {
+        categories.foodSpots.push(p);
+      } else {
+        categories.touristSpots.push(p);
+      }
+    });
+
+    return {
+      districtName: places[0]?.district || districtSlug,
+      districtSlug,
+      totalCount: places.length,
+      categories,
+    };
   }
 
   /**

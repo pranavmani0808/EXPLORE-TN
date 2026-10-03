@@ -43,6 +43,7 @@ import {
 import { KodaiTouristPlacesSection } from "@/components/site/kodai-poi-components";
 import { OotyComprehensiveGuide } from "@/components/site/ooty-guide-components";
 import { KodaiFoodAndTravelGuide } from "@/components/site/kodai-guide-components";
+import { DistrictPlacesCollectionTable } from "@/components/site/district-places-collection-table";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -54,9 +55,12 @@ interface DistrictViewProps {
 
 const CATEGORY_TABS: { key: DistrictCategoryKey; label: string; icon: string }[] = [
   { key: "all", label: "All Spots", icon: "📍" },
-  { key: "temples", label: "Temples", icon: "🛕" },
   { key: "tourist-spots", label: "Tourist Spots", icon: "🏛️" },
   { key: "food-spots", label: "Food Spots", icon: "🍲" },
+  { key: "temples", label: "Temples", icon: "🛕" },
+  { key: "hills", label: "Hills & Nature", icon: "⛰️" },
+  { key: "falls", label: "Waterfalls", icon: "💦" },
+  { key: "beaches", label: "Beaches", icon: "🌊" },
   { key: "thrift-streets", label: "Thrift Streets", icon: "🛍️" },
 ];
 
@@ -118,9 +122,12 @@ export function DistrictView({ district }: DistrictViewProps) {
 
   const counts = useMemo(() => {
     return {
-      temples: district.spots.filter((s) => s.category === "temples").length,
       tourist: district.spots.filter((s) => s.category === "tourist-spots").length,
       food: district.spots.filter((s) => s.category === "food-spots").length,
+      temples: district.spots.filter((s) => s.category === "temples").length,
+      hills: district.spots.filter((s) => s.category === "hills").length,
+      falls: district.spots.filter((s) => s.category === "falls").length,
+      beaches: district.spots.filter((s) => s.category === "beaches").length,
       thrift: district.spots.filter((s) => s.category === "thrift-streets").length,
     };
   }, [district.spots]);
@@ -824,6 +831,14 @@ export function DistrictView({ district }: DistrictViewProps) {
                 </div>
               ))}
             </div>
+          </div>
+
+          {/* DISTRICT PLACES COLLECTION TABLE (Categorized for all 38 districts) */}
+          <div className="mt-12">
+            <DistrictPlacesCollectionTable
+              district={district}
+              onSelectSpot={(spot) => handleSpotFocus(spot)}
+            />
           </div>
 
           {/* OOTY COMPREHENSIVE GUIDE (12 Spots, 5 Food, 4 Seasons, Transit, Tips) */}
