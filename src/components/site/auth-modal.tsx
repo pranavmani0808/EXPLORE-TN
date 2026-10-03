@@ -107,6 +107,28 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
         districtCount: assignedRole === "super_admin" ? 38 : 1,
       };
 
+      // Sync user to Supabase and check if user exists on normal sign in
+      try {
+        const syncRes = await fetch("/api/v1/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: authenticatedUser,
+            isSignUp: authMode === "signup"
+          })
+        });
+
+        if (syncRes.status === 404 && authMode === "signin") {
+          const data = await syncRes.json().catch(() => ({}));
+          const alertMsg = data.message || "User information not found in ExplorerTN database. Please register a new account.";
+          setError(alertMsg);
+          setLoading(false);
+          return;
+        }
+      } catch (syncErr) {
+        console.warn("[AuthModal] Sync attempt notice:", syncErr);
+      }
+
       setAuthSession(authenticatedUser);
       setLoading(false);
       onClose();

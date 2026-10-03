@@ -156,6 +156,22 @@ function LoginPage() {
         // Switch to email verification step after signup
         setAuthMode("email_verification");
         setMessage(`Account created for ${form.email}! Please enter the verification code sent to your email.`);
+
+        // Also sync registration record to Supabase public tables
+        fetch("/api/v1/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: {
+              id: userId,
+              name: userName,
+              email: form.email.trim(),
+              role: assignedRole,
+            },
+            isSignUp: true,
+          }),
+        }).catch(() => null);
+
         return;
       } else {
         const res: any = await safeSupabaseCall(() =>
@@ -185,6 +201,30 @@ function LoginPage() {
       rank: isAdminCreds ? "Super Admin" : "Verified Explorer",
       districtCount: isAdminCreds ? 38 : 1,
     };
+
+    // Check if user information exists in Supabase
+    try {
+      const syncRes = await fetch("/api/v1/user/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: createdUser,
+          isSignUp: false,
+        }),
+      });
+
+      if (syncRes.status === 404 && authMode === "signin") {
+        const syncData = await syncRes.json().catch(() => ({}));
+        setMessage(
+          syncData.message ||
+            "User information not found in ExplorerTN database. Please register a new account."
+        );
+        setAuthStep("idle");
+        return;
+      }
+    } catch (syncErr) {
+      console.warn("[LoginPage] User sync check error:", syncErr);
+    }
 
     setAuthSession(createdUser);
     setAuthStep("authorized");
