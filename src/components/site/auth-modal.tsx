@@ -120,7 +120,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
 
         if (syncRes.status === 404 && authMode === "signin") {
           const data = await syncRes.json().catch(() => ({}));
-          const alertMsg = data.message || "User information not found in ExplorerTN database. Please register a new account.";
+          const alertMsg = data.message || "user not found";
           setError(alertMsg);
           setLoading(false);
           return;

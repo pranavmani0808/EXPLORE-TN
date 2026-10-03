@@ -215,10 +215,7 @@ function LoginPage() {
 
       if (syncRes.status === 404 && authMode === "signin") {
         const syncData = await syncRes.json().catch(() => ({}));
-        setMessage(
-          syncData.message ||
-            "User information not found in ExplorerTN database. Please register a new account."
-        );
+        setMessage(syncData.message || "user not found");
         setAuthStep("idle");
         return;
       }

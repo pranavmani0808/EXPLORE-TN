@@ -52,8 +52,7 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         return new Response(
           JSON.stringify({
             exists: false,
-            message:
-              "User information not found in ExplorerTN database. Please register a new account or contact support.",
+            message: "user not found",
           }),
           { status: 404, headers: { "Content-Type": "application/json" } }
         );
