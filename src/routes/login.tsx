@@ -67,7 +67,7 @@ function LoginPage() {
         return null;
       }
       try {
-        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 300));
+        const timeoutPromise = new Promise<null>((resolve) => setTimeout(() => resolve(null), 8000));
         return await Promise.race([fn().catch(() => null), timeoutPromise]);
       } catch {
         return null;

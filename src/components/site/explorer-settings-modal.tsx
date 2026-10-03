@@ -304,7 +304,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
 
   if (!isOpen) return null;
 
-  const handleSaveProfile = (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     saveStoredPreferences({
       name,
@@ -324,6 +324,23 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
     });
     if (currentUser) {
       updateProfileUser({ name, email });
+
+      // Persist profile updates directly to Supabase
+      fetch("/api/v1/user/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: {
+            ...currentUser,
+            name,
+            email,
+            phone,
+            bio,
+            city: homeLocation,
+          },
+          isSignUp: false,
+        }),
+      }).catch((err) => console.warn("[ExplorerSettingsModal] Profile sync error:", err));
     }
     toast.success("Explorer profile & settings updated successfully!");
   };

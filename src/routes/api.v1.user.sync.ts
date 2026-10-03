@@ -91,6 +91,8 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         .upsert(
           {
             user_id: targetId,
+            bio: user.bio !== undefined ? user.bio : undefined,
+            phone: user.phone !== undefined ? user.phone : undefined,
             city: user.city || "Tamil Nadu",
             state: "Tamil Nadu",
             preferred_language: "en",
