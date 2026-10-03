@@ -149,6 +149,24 @@ const CATEGORY_MAP: Record<string, CategoryMeta> = {
     defaultSeason: "Year-Round",
     defaultDifficulty: "Easy",
   },
+  "pancha-bhoota": {
+    title: "Pancha Bhoota Sthalams",
+    subtitle: "Five sacred Shiva elemental temples across Tamil Nadu & border (Earth, Water, Fire, Air, Space)",
+    icon: Landmark,
+    badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    bannerGradient: "from-orange-500/10 via-orange-500/5 to-transparent",
+    defaultSeason: "Year-Round (Oct-Mar best)",
+    defaultDifficulty: "Easy",
+  },
+  "panchabhoota": {
+    title: "Pancha Bhoota Sthalams",
+    subtitle: "Five sacred Shiva elemental temples across Tamil Nadu & border (Earth, Water, Fire, Air, Space)",
+    icon: Landmark,
+    badgeColor: "bg-orange-500/15 text-orange-400 border-orange-500/30",
+    bannerGradient: "from-orange-500/10 via-orange-500/5 to-transparent",
+    defaultSeason: "Year-Round (Oct-Mar best)",
+    defaultDifficulty: "Easy",
+  },
   heritage: {
     title: "Heritage & Historical Monuments",
     subtitle: "UNESCO Pallava rock sculptures, Chola temples, hill citadels & hanging aqueducts",
@@ -321,6 +339,8 @@ function CategoryExplorePage() {
         matchCat = cats.includes("nature") || primaryCat === "wildlife" || primaryCat === "forest" || subCat === "mangrove";
       } else if (catKey === "temples") {
         matchCat = cats.includes("temple") || primaryCat === "temple" || subCat === "temple" || nameLower.includes("temple") || nameLower.includes("kovil");
+      } else if (catKey === "pancha-bhoota" || catKey === "panchabhoota") {
+        matchCat = cats.includes("pancha_bhoota") || tagsStr.includes("pancha_bhoota") || tagsStr.includes("element") || tagsStr.includes("prithvi") || tagsStr.includes("appu") || tagsStr.includes("agni") || tagsStr.includes("vayu") || tagsStr.includes("akasha") || nameLower.includes("ekambareswarar") || nameLower.includes("jambukeswarar") || nameLower.includes("arunachaleswarar") || nameLower.includes("kalahasti") || nameLower.includes("nataraja");
       } else if (catKey === "heritage") {
         matchCat = cats.includes("heritage") || primaryCat === "heritage" || subCat === "fort" || subCat === "palace" || nameLower.includes("fort") || nameLower.includes("aqueduct");
       } else if (catKey === "adventure") {

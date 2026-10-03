@@ -31,7 +31,7 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { PlaceApiRepository } from "@/lib/api-client/places";
 import { CANONICAL_PLACES, ExplorerPlace } from "@/lib/data/canonical-places";
-import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, getPlace, type Place } from "@/data/places";
+import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, DEFAULT_PANCHA_BHOOTA_TEMPLES, getPlace, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 import { TripRouteBuilderPanel } from "@/components/site/trip-route-builder-panel";
 import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
@@ -97,6 +97,15 @@ const CATEGORY_TILES: CategoryTile[] = [
     color: "text-amber-400",
     bgGradient: "from-amber-500/15 via-amber-500/5 to-transparent border-amber-500/40",
     badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/40",
+  },
+  {
+    id: "pancha-bhoota",
+    title: "Pancha Bhoota Sthalams",
+    subtitle: "Five sacred Shiva elemental temples (Earth, Water, Fire, Air, Space)",
+    icon: Landmark,
+    color: "text-orange-400",
+    bgGradient: "from-orange-500/15 via-orange-500/5 to-transparent border-orange-500/40",
+    badgeColor: "bg-orange-500/20 text-orange-300 border-orange-500/40",
   },
   {
     id: "waterfall",
@@ -307,6 +316,7 @@ function ExploreByExperiencePage() {
       } else if (cat !== null) {
         const normalized = (cat || "").toLowerCase().trim();
         if (normalized === "" || normalized === "arupadai" || normalized === "murugan" || normalized === "arupadaiveedu") setSelectedCategory("arupadai");
+        else if (normalized === "pancha-bhoota" || normalized === "panchabhoota" || normalized === "five-elements" || normalized === "elements") setSelectedCategory("pancha-bhoota");
         else if (normalized === "mountain" || normalized === "hills" || normalized === "hill-escapes") setSelectedCategory("hills");
         else if (normalized === "coastal" || normalized === "beaches") setSelectedCategory("beaches");
         else if (normalized === "heritage-temples" || normalized === "temples" || normalized === "temple") setSelectedCategory("temple");
@@ -402,6 +412,7 @@ function ExploreByExperiencePage() {
   // Helper: compute category count
   const getCategoryCount = (tileId: string) => {
     if (tileId === "arupadai") return 6;
+    if (tileId === "pancha-bhoota") return 5;
 
     return places.filter((p) => {
       if (!p) return false;
@@ -463,6 +474,23 @@ function ExploreByExperiencePage() {
         name: t.name,
         district: t.district,
         category: "arupadai",
+        tagline: t.tagline,
+        description: t.story,
+        latitude: t.latitude,
+        longitude: t.longitude,
+        image: t.image,
+        rating: t.rating,
+        verified: true,
+      }));
+    }
+
+    if (selectedCategory === "pancha-bhoota") {
+      return DEFAULT_PANCHA_BHOOTA_TEMPLES.map((t) => ({
+        id: t.slug,
+        slug: t.slug,
+        name: `${t.name} (${t.element})`,
+        district: t.district,
+        category: "pancha-bhoota",
         tagline: t.tagline,
         description: t.story,
         latitude: t.latitude,
@@ -683,6 +711,51 @@ function ExploreByExperiencePage() {
                     </select>
                   </div>
                 </div>
+
+                {/* Trail Map Callout Banner for Dedicated Pilgrim Circuits */}
+                {selectedCategory === "pancha-bhoota" && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-orange-500/15 via-orange-500/5 to-transparent border border-orange-500/30">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 place-items-center rounded-xl bg-orange-500/20 text-orange-400 font-bold text-lg">
+                        🛕
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-extrabold text-white">Full Pancha Bhoota Sthalams Interactive Road Trail</h4>
+                        <p className="text-xs text-zinc-400">View real road route connecting all 5 elemental temples: Kanchipuram ➔ Srikalahasti ➔ Tiruvannamalai ➔ Chidambaram ➔ Thiruvanaikaval</p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/trails/pancha-bhoota"
+                      className="shrink-0 px-4 py-2 rounded-xl bg-orange-500 hover:bg-orange-400 text-zinc-950 font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-orange-500/20 transition"
+                    >
+                      <RouteIcon className="size-3.5" />
+                      <span>Open Interactive Trail Map</span>
+                      <ChevronRight className="size-3.5" />
+                    </Link>
+                  </div>
+                )}
+
+                {selectedCategory === "arupadai" && (
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30">
+                    <div className="flex items-center gap-3">
+                      <span className="grid size-10 place-items-center rounded-xl bg-amber-500/20 text-amber-400 font-bold text-lg">
+                        🔥
+                      </span>
+                      <div>
+                        <h4 className="text-sm font-extrabold text-white">Arupadai Veedu Interactive Road Trail</h4>
+                        <p className="text-xs text-zinc-400">View real road route connecting all six sacred Murugan shrines sequentially (1 to 6) with turn-by-turn geometry</p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/trails/arupadai-veedu"
+                      className="shrink-0 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition"
+                    >
+                      <RouteIcon className="size-3.5" />
+                      <span>Open Interactive Trail Map</span>
+                      <ChevronRight className="size-3.5" />
+                    </Link>
+                  </div>
+                )}
 
                 {/* Cards Grid */}
                 {categoryFilteredPlaces.length === 0 ? (

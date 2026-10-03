@@ -1,6 +1,6 @@
 import { supabase } from "./supabase-client";
 import { CANONICAL_PLACES } from "./data/canonical-places";
-import { DEFAULT_ARUPADAI_VEEDU_TEMPLES } from "@/data/places";
+import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, DEFAULT_PANCHA_BHOOTA_TEMPLES } from "@/data/places";
 
 export interface SupabasePlaceRecord {
   id: string;
@@ -178,26 +178,49 @@ export class SupabaseDatabaseRepository {
    */
   static async seedCanonicalPlacesToSupabase(): Promise<boolean> {
     try {
-      const allCanonical = [...CANONICAL_PLACES, ...DEFAULT_ARUPADAI_VEEDU_TEMPLES.map(t => ({
-        id: `p-${t.slug}`,
-        canonicalName: t.name,
-        name: t.name,
-        slug: t.slug,
-        district: t.district,
-        state: "Tamil Nadu",
-        country: "India" as const,
-        latitude: t.latitude,
-        longitude: t.longitude,
-        categories: [t.category === "spiritual" ? "temples" : t.category],
-        primaryCategory: t.category === "spiritual" ? "temples" : t.category,
-        tagline: t.tagline,
-        description: t.story,
-        image: t.image,
-        rating: t.rating,
-        reviewsCount: t.reviews,
-        verified: true,
-        tags: t.tips || [],
-      }))];
+      const allCanonical = [
+        ...CANONICAL_PLACES,
+        ...DEFAULT_ARUPADAI_VEEDU_TEMPLES.map(t => ({
+          id: `p-${t.slug}`,
+          canonicalName: t.name,
+          name: t.name,
+          slug: t.slug,
+          district: t.district,
+          state: "Tamil Nadu",
+          country: "India" as const,
+          latitude: t.latitude,
+          longitude: t.longitude,
+          categories: [t.category === "spiritual" ? "temples" : t.category],
+          primaryCategory: t.category === "spiritual" ? "temples" : t.category,
+          tagline: t.tagline,
+          description: t.story,
+          image: t.image,
+          rating: t.rating,
+          reviewsCount: t.reviews,
+          verified: true,
+          tags: t.tips || [],
+        })),
+        ...DEFAULT_PANCHA_BHOOTA_TEMPLES.map(t => ({
+          id: `p-${t.slug}`,
+          canonicalName: `${t.name} (${t.element})`,
+          name: t.name,
+          slug: t.slug,
+          district: t.district,
+          state: t.district === "Tirupati" ? "Andhra Pradesh" : "Tamil Nadu",
+          country: "India" as const,
+          latitude: t.latitude,
+          longitude: t.longitude,
+          categories: ["temples", "spiritual", "pancha_bhoota"],
+          primaryCategory: "temples",
+          tagline: t.tagline,
+          description: t.story,
+          image: t.image,
+          rating: t.rating,
+          reviewsCount: t.reviews,
+          verified: true,
+          tags: ["temple", "shiva", "pancha_bhoota", t.element, ...(t.tips || [])],
+        }))
+      ];
 
       const recordsToUpsert = allCanonical.map((p) => {
         let cat = "Heritage";

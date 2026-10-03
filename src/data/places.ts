@@ -137,6 +137,15 @@ export function getPlace(slug: string): Place | undefined {
   );
   if (foundArupadai) return foundArupadai;
 
+  // 2b. Direct match in Pancha Bhoota Sthalams
+  const foundPanchaBhoota = DEFAULT_PANCHA_BHOOTA_TEMPLES.find(
+    (p) =>
+      p.slug.toLowerCase() === q ||
+      p.slug.toLowerCase() === normalizedSlug ||
+      p.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") === normalizedSlug
+  );
+  if (foundPanchaBhoota) return foundPanchaBhoota;
+
   // 3. Direct match in Kodai POIs
   const kodaiPoi = getKodaiPoiBySlug(q);
   if (kodaiPoi) {
@@ -438,4 +447,182 @@ export const arupadaiVeeduTemples: Place[] = ARUPADAI_VEEDU_SLUGS.map((slug) => 
   if (found) return found;
   return DEFAULT_ARUPADAI_VEEDU_TEMPLES.find((d) => d.slug === slug || d.slug.includes(slug.split("-")[0])) || DEFAULT_ARUPADAI_VEEDU_TEMPLES[0];
 });
+
+export const PANCHA_BHOOTA_SLUGS = [
+  "ekambareswarar-temple",
+  "jambukeswarar-temple",
+  "arunachaleswarar-temple",
+  "srikalahasteeswara-temple",
+  "chidambaram-nataraja-temple",
+];
+
+export const DEFAULT_PANCHA_BHOOTA_TEMPLES: (Place & { element: string; elementTamil: string; elementSymbol: string })[] = [
+  {
+    slug: "ekambareswarar-temple",
+    name: "Ekambareswarar Temple",
+    district: "Kancheepuram",
+    category: "spiritual",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    tagline: "Earth (Prithvi) Stalam with 3,500-Year Sacred Mango Tree & Sand Lingam",
+    story: "One of the five sacred Pancha Bhoota Sthalams representing the Earth element (Prithvi). Revered for the Prithvi Lingam sculpted from sand by Goddess Parvati beneath a sacred mango tree. Features an imposing 59-meter tall 11-tier Southern Rajagopuram built by King Krishnadevaraya in 1509 CE.",
+    rating: 4.9,
+    reviews: 2840,
+    distanceFromChennai: "75 km",
+    difficulty: "Easy",
+    bestSeason: "October to March (Panguni Uthiram in March/April)",
+    roadCondition: "NH 48 Four-lane Highway",
+    parking: "Temple Car Street Parking",
+    entryFee: "Free",
+    timings: "06:00 AM – 12:30 PM, 04:00 PM – 08:30 PM",
+    safety: "Broad paved walkways, wheelchair assistance available",
+    weather: "Pleasant Temple Town",
+    tips: ["Revere the 3,500-year-old sacred mango tree in the courtyard", "Admire the 1000-pillared hall built by Vijayanagara kings"],
+    nearbyFood: ["Saravana Bhavan Kanchipuram", "Traditional Kanchipuram Idli outlets"],
+    nearbyFuel: ["Indian Oil Bunk 800m"],
+    x: 74,
+    y: 22,
+    trailOrder: 1,
+    coords: [12.8475, 79.6997],
+    latitude: 12.8475,
+    longitude: 79.6997,
+    element: "Earth (Prithvi)",
+    elementTamil: "நிலம் (பிருத்வி)",
+    elementSymbol: "🌍",
+  },
+  {
+    slug: "jambukeswarar-temple",
+    name: "Jambukeswarar Temple",
+    district: "Tiruchirappalli",
+    category: "spiritual",
+    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    tagline: "Water (Appu) Stalam with Perennial Underground Spring in Sanctum",
+    story: "Revered Pancha Bhoota Sthalam representing the Water element (Appu), situated in Thiruvanaikaval between Cauvery and Kollidam rivers. An underground perennial natural spring flows continuously beneath the Shiva Lingam in the inner sanctum, keeping it submerged in holy water throughout the year. Built by Early Chola King Kochengannan over 1,800 years ago.",
+    rating: 4.8,
+    reviews: 2310,
+    distanceFromChennai: "325 km",
+    difficulty: "Easy",
+    bestSeason: "October to March",
+    roadCondition: "NH 45 Grand Southern Trunk Road",
+    parking: "Temple Car Street & North Gopuram Grounds",
+    entryFee: "Free",
+    timings: "05:30 AM – 01:00 PM, 03:00 PM – 09:00 PM",
+    safety: "Covered pradakshina paths, senior-friendly access",
+    weather: "Breezy Cauvery Island",
+    tips: ["Witness the noon Uchikala Pooja where the priest dresses as Goddess Akhilandeshwari", "Observe water trickling continuously from the spring in the sanctum"],
+    nearbyFood: ["Srirangam Temple Prasadam Mess", "Traditional Veg Thali near North Gopuram"],
+    nearbyFuel: ["Bharat Petroleum Bunk 1.2km"],
+    x: 58,
+    y: 52,
+    trailOrder: 2,
+    coords: [10.8534, 78.7054],
+    latitude: 10.8534,
+    longitude: 78.7054,
+    element: "Water (Appu)",
+    elementTamil: "நீர் (அப்பு)",
+    elementSymbol: "💧",
+  },
+  {
+    slug: "arunachaleswarar-temple",
+    name: "Arunachaleswarar Temple",
+    district: "Tiruvannamalai",
+    category: "spiritual",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    tagline: "Fire (Agni) Stalam & 14km Arunachala Giri Pradakshina Hill Circuit",
+    story: "The magnificent Agni Stalam of the Pancha Bhoota representing the Fire element, standing at the foot of sacred Arunachala Hill. Encompassing 25 acres with four imposing Rajagopurams, including the 217-foot Eastern tower. Famous for the 14-km barefoot Giri Pradakshina circumambulation and the grand Karthigai Deepam festival where a mammoth sacred flame is lit atop Arunachala peak.",
+    rating: 4.9,
+    reviews: 5200,
+    distanceFromChennai: "195 km",
+    difficulty: "Easy (Giri Pradakshina Moderate)",
+    bestSeason: "October to March (Karthigai Deepam in Nov/Dec)",
+    roadCondition: "NH 77 Four-lane Highway",
+    parking: "Pazhani Aandavar Car Parking & East Gopuram Complex",
+    entryFee: "Free",
+    timings: "05:30 AM – 12:30 PM, 03:30 PM – 09:30 PM",
+    safety: "Wide pedestrian pathways, clean Giri Valam path with rest shelters",
+    weather: "Pleasant Hill Foot Weather",
+    tips: ["Undertake the 14km Giri Valam circuit on full moon nights or early mornings", "Visit Sri Ramana Ashram situated along the Giri Pradakshina route"],
+    nearbyFood: ["Udupi Brindavan Restaurant", "Sri Ramana Vegetarian Canteen"],
+    nearbyFuel: ["HPCL Bunk Girivalam Road 1.5km"],
+    x: 68,
+    y: 35,
+    trailOrder: 3,
+    coords: [12.2319, 79.0677],
+    latitude: 12.2319,
+    longitude: 79.0677,
+    element: "Fire (Agni)",
+    elementTamil: "நெருப்பு (தேயு)",
+    elementSymbol: "🔥",
+  },
+  {
+    slug: "srikalahasteeswara-temple",
+    name: "Srikalahasteeswara Temple",
+    district: "Tirupati",
+    category: "spiritual",
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+    tagline: "Air (Vayu) Stalam with Flickering Sanctum Lamp & Rahu-Ketu Kshetram",
+    story: "The ancient Vayu Stalam of the Pancha Bhoota representing the Air element, situated on the banks of the Swarnamukhi River bordering northern Tamil Nadu. Inside the airtight inner sanctum devoid of any wind, the lamp flame continuously flickers, confirming the living presence of the Air Lingam. Renowned worldwide for Rahu-Ketu Sarpa Dosha Nivarana pujas and rich Chola/Vijayanagara stone sculpture.",
+    rating: 4.8,
+    reviews: 3600,
+    distanceFromChennai: "115 km",
+    difficulty: "Easy",
+    bestSeason: "September to March (Maha Shivaratri in Feb/March)",
+    roadCondition: "NH 716 / Tada-Srikalahasti Highway",
+    parking: "Devasthanam Multi-level Car Parking",
+    entryFee: "Free (Special Pooja tickets available)",
+    timings: "06:00 AM – 09:00 PM Continuous",
+    safety: "Organized queue lines, crowd control systems during Rahu Kalam",
+    weather: "River Breeze",
+    tips: ["Observe the sanctum deepam that flickers perpetually even without air draft", "Book Rahu-Ketu Pooja tickets early during auspicious Rahu Kalam timings"],
+    nearbyFood: ["Srikalahasti Devasthanam Annadanam", "Bhimas Deluxe Tiffin"],
+    nearbyFuel: ["Indian Oil Bunk 600m"],
+    x: 75,
+    y: 12,
+    trailOrder: 4,
+    coords: [13.7498, 79.6984],
+    latitude: 13.7498,
+    longitude: 79.6984,
+    element: "Air (Vayu)",
+    elementTamil: "காற்று (வாயு)",
+    elementSymbol: "💨",
+  },
+  {
+    slug: "chidambaram-nataraja-temple",
+    name: "Thillai Nataraja Temple",
+    district: "Cuddalore",
+    category: "spiritual",
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80",
+    tagline: "Space (Akasha) Stalam with Gold-Tiled Chit Sabha & Chidambara Rahasyam",
+    story: "The supreme Akasha Stalam representing the Space (Ether) element where Lord Shiva is worshipped as Nataraja performing the cosmic dance of creation and dissolution (Ananda Tandava). Famous for the 'Chidambara Rahasyam' (secret of formless divine space behind golden bilva leaves), the 21,600 gold tiles on the sanctum roof representing human breaths, and the 108 classical Bharatanatyam dance postures carved in stone.",
+    rating: 4.9,
+    reviews: 4100,
+    distanceFromChennai: "235 km",
+    difficulty: "Easy",
+    bestSeason: "October to March (Natyanjali Dance Festival in Feb/March)",
+    roadCondition: "ECR / NH 32 Highway",
+    parking: "East Car Street & Temple Tank Grounds",
+    entryFee: "Free",
+    timings: "06:00 AM – 12:00 PM, 05:00 PM – 10:00 PM",
+    safety: "Well-paved ancient stone courtyards, quiet ambiance",
+    weather: "Coastal Temple Town",
+    tips: ["Witness the spectacular evening Ruby Nataraja (Rathina Sabai) Abhishekam", "Explore the 108 Bharatanatyam mudras sculpted on the East and West Gopurams"],
+    nearbyFood: ["Sri Krishna Bhavan Traditional Mess", "Vandaiyar Hotel Cuddalore Road"],
+    nearbyFuel: ["Bharat Petroleum Bunk 1km"],
+    x: 72,
+    y: 42,
+    trailOrder: 5,
+    coords: [11.3992, 79.6934],
+    latitude: 11.3992,
+    longitude: 79.6934,
+    element: "Space (Akasha)",
+    elementTamil: "ஆகாயம் (ஆகாய ஸ்தலம்)",
+    elementSymbol: "🌌",
+  },
+];
+
+export const panchaBhootaTemples: Place[] = PANCHA_BHOOTA_SLUGS.map((slug) => {
+  const found = places.find((p) => p.slug === slug || p.slug.includes(slug.split("-")[0]));
+  if (found) return found;
+  return DEFAULT_PANCHA_BHOOTA_TEMPLES.find((d) => d.slug === slug || d.slug.includes(slug.split("-")[0])) || DEFAULT_PANCHA_BHOOTA_TEMPLES[0];
+});
+
 

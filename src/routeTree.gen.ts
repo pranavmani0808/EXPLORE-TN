@@ -52,6 +52,7 @@ import { Route as PlaceSlugRouteImport } from './routes/place.$slug'
 import { Route as SettingsSecurityRouteImport } from './routes/settings.security'
 import { Route as TrailsSlugRouteImport } from './routes/trails.$slug'
 import { Route as TrailsArupadaiVeeduRouteImport } from './routes/trails.arupadai-veedu'
+import { Route as TrailsPanchaBhootaRouteImport } from './routes/trails.pancha-bhoota'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -269,6 +270,11 @@ const TrailsArupadaiVeeduRoute = TrailsArupadaiVeeduRouteImport.update({
   path: '/trails/arupadai-veedu',
   getParentRoute: () => rootRouteImport,
 } as any)
+const TrailsPanchaBhootaRoute = TrailsPanchaBhootaRouteImport.update({
+  id: '/trails/pancha-bhoota',
+  path: '/trails/pancha-bhoota',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -313,6 +319,7 @@ export interface FileRoutesByFullPath {
   '/settings/security': typeof SettingsSecurityRoute
   '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
+  '/trails/pancha-bhoota': typeof TrailsPanchaBhootaRoute
   '/districts/': typeof DistrictsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -358,6 +365,7 @@ export interface FileRoutesByTo {
   '/settings/security': typeof SettingsSecurityRoute
   '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
+  '/trails/pancha-bhoota': typeof TrailsPanchaBhootaRoute
   '/districts': typeof DistrictsIndexRoute
 }
 export interface FileRoutesById {
@@ -404,6 +412,7 @@ export interface FileRoutesById {
   '/settings/security': typeof SettingsSecurityRoute
   '/trails/$slug': typeof TrailsSlugRoute
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
+  '/trails/pancha-bhoota': typeof TrailsPanchaBhootaRoute
   '/districts/': typeof DistrictsIndexRoute
 }
 export interface FileRouteTypes {
@@ -451,6 +460,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/trails/$slug'
     | '/trails/arupadai-veedu'
+    | '/trails/pancha-bhoota'
     | '/districts/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -496,6 +506,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/trails/$slug'
     | '/trails/arupadai-veedu'
+    | '/trails/pancha-bhoota'
     | '/districts'
   id:
     | '__root__'
@@ -541,6 +552,7 @@ export interface FileRouteTypes {
     | '/settings/security'
     | '/trails/$slug'
     | '/trails/arupadai-veedu'
+    | '/trails/pancha-bhoota'
     | '/districts/'
   fileRoutesById: FileRoutesById
 }
@@ -585,6 +597,7 @@ export interface RootRouteChildren {
   PlaceSlugRoute: typeof PlaceSlugRoute
   TrailsSlugRoute: typeof TrailsSlugRoute
   TrailsArupadaiVeeduRoute: typeof TrailsArupadaiVeeduRoute
+  TrailsPanchaBhootaRoute: typeof TrailsPanchaBhootaRoute
   DistrictsIndexRoute: typeof DistrictsIndexRoute
 }
 
@@ -891,6 +904,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TrailsArupadaiVeeduRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/trails/pancha-bhoota': {
+      id: '/trails/pancha-bhoota'
+      path: '/trails/pancha-bhoota'
+      fullPath: '/trails/pancha-bhoota'
+      preLoaderRoute: typeof TrailsPanchaBhootaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -958,6 +978,7 @@ const rootRouteChildren: RootRouteChildren = {
   PlaceSlugRoute: PlaceSlugRoute,
   TrailsSlugRoute: TrailsSlugRoute,
   TrailsArupadaiVeeduRoute: TrailsArupadaiVeeduRoute,
+  TrailsPanchaBhootaRoute: TrailsPanchaBhootaRoute,
   DistrictsIndexRoute: DistrictsIndexRoute,
 }
 export const routeTree = rootRouteImport
