@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import { computeSha256 } from "./browser-crypto";
 import { ChainedAuditLogEntry, AuditActionType, AuditEntityType, SecuritySeverity } from "./types";
 import { signAdminAction } from "./digital-signature";
 
@@ -28,7 +28,7 @@ export function computeEventHash(entryPayload: Omit<ChainedAuditLogEntry, "curre
     previousHash: prevHash,
   });
 
-  return crypto.createHash("sha256").update(contentToHash, "utf8").digest("hex");
+  return computeSha256(contentToHash);
 }
 
 /**

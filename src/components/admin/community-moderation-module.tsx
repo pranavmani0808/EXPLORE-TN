@@ -44,6 +44,8 @@ export interface ReportItem {
   submittedAt: string;
 }
 
+import { getCommunityContributions, CommunityContribution } from "@/lib/explorer-activity";
+
 export function CommunityModerationModule() {
   const [reviewList, setReviewList] = useState<ReviewQueueItem[]>([]);
   const [reportList, setReportList] = useState<ReportItem[]>([]);
@@ -51,13 +53,44 @@ export function CommunityModerationModule() {
 
   useEffect(() => {
     if (typeof window !== "undefined") {
+      // 1. Load reviews from live user website contributions
+      const liveContributions = getCommunityContributions().filter(
+        (c) => c.type === "review" && c.status === "PENDING_MODERATION"
+      );
+
+      const liveReviewQueue: ReviewQueueItem[] = liveContributions.map((c) => ({
+        id: c.id,
+        userName: c.userName || "Verified Explorer",
+        userBadge: c.userRole === "super_admin" ? "Super Admin" : "Community Scout",
+        placeName: c.placeName,
+        rating: c.rating || 5,
+        comment: c.content,
+        aiRiskScore: 0,
+        gpsValid: true,
+        duplicateScore: 0,
+        submittedAt: c.submittedAt,
+      }));
+
+      // 2. Load stored items from local moderation store
+      let localReviews: ReviewQueueItem[] = [];
       const storedRev = localStorage.getItem("etn_community_reviews");
       if (storedRev) {
-        try { setReviewList(JSON.parse(storedRev)); } catch {}
+        try {
+          localReviews = JSON.parse(storedRev);
+        } catch {}
       }
+
+      // Combine unique reviews
+      const combinedMap = new Map<string, ReviewQueueItem>();
+      [...liveReviewQueue, ...localReviews].forEach((r) => combinedMap.set(r.id, r));
+      setReviewList(Array.from(combinedMap.values()));
+
+      // 3. Load reports
       const storedRep = localStorage.getItem("etn_community_reports");
       if (storedRep) {
-        try { setReportList(JSON.parse(storedRep)); } catch {}
+        try {
+          setReportList(JSON.parse(storedRep));
+        } catch {}
       }
     }
   }, []);
@@ -67,6 +100,14 @@ export function CommunityModerationModule() {
     setReviewList(updated);
     if (typeof window !== "undefined") {
       localStorage.setItem("etn_community_reviews", JSON.stringify(updated));
+      // Also update status in contributions
+      try {
+        const contribs = getCommunityContributions();
+        const updatedContribs = contribs.map((c) =>
+          c.id === id ? { ...c, status: "APPROVED" as const } : c
+        );
+        localStorage.setItem("etn_community_contributions_v3", JSON.stringify(updatedContribs));
+      } catch {}
     }
   };
 

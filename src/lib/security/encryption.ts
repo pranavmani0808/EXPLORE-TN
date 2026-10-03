@@ -1,13 +1,9 @@
-import crypto from "node:crypto";
+import { generateRandomHex, computeSha256 } from "./browser-crypto";
 
 // Fallback key if environment secret is not set (32-byte key for AES-256)
 const SECRET_KEY_HEX =
-  process.env.EXPLORETN_SECURITY_SECRET ||
+  (typeof process !== "undefined" && process.env?.EXPLORETN_SECURITY_SECRET) ||
   "4f8a9b2c3d1e0f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e";
-
-function getKeyBuffer(): Buffer {
-  return Buffer.from(SECRET_KEY_HEX.slice(0, 64), "hex");
-}
 
 export interface EncryptedPayload {
   ciphertext: string;
@@ -17,22 +13,26 @@ export interface EncryptedPayload {
 }
 
 /**
- * Encrypt sensitive string data using AES-256-GCM
+ * Encrypt sensitive string data (browser-safe XOR stream cipher with SHA-256 key derivation)
  */
 export function encryptData(plainText: string, keyVersion: string = "v1"): EncryptedPayload {
   try {
-    const iv = crypto.randomBytes(12);
-    const key = getKeyBuffer();
-    const cipher = crypto.createCipheriv("aes-256-gcm", key, iv);
+    const iv = generateRandomHex(12);
+    // Deterministic keystream generation using SHA-256(secret + iv)
+    const keystream = computeSha256(SECRET_KEY_HEX + iv);
+    let ciphertext = "";
+    for (let i = 0; i < plainText.length; i++) {
+      const charCode = plainText.charCodeAt(i);
+      const keyCode = keystream.charCodeAt(i % keystream.length);
+      const enc = charCode ^ keyCode;
+      ciphertext += enc.toString(16).padStart(4, "0");
+    }
 
-    let encrypted = cipher.update(plainText, "utf8", "hex");
-    encrypted += cipher.final("hex");
-
-    const authTag = cipher.getAuthTag().toString("hex");
+    const authTag = computeSha256(ciphertext + iv + SECRET_KEY_HEX).slice(0, 32);
 
     return {
-      ciphertext: encrypted,
-      iv: iv.toString("hex"),
+      ciphertext,
+      iv,
       authTag,
       keyVersion,
     };
@@ -43,21 +43,25 @@ export function encryptData(plainText: string, keyVersion: string = "v1"): Encry
 }
 
 /**
- * Decrypt AES-256-GCM encrypted data
+ * Decrypt data
  */
 export function decryptData(encryptedData: string, ivHex: string, authTagHex: string): string {
   try {
-    const key = getKeyBuffer();
-    const iv = Buffer.from(ivHex, "hex");
-    const authTag = Buffer.from(authTagHex, "hex");
-    const decipher = crypto.createDecipheriv("aes-256-gcm", key, iv);
+    const expectedTag = computeSha256(encryptedData + ivHex + SECRET_KEY_HEX).slice(0, 32);
+    if (expectedTag !== authTagHex) {
+      throw new Error("Authentication tag mismatch");
+    }
 
-    decipher.setAuthTag(authTag);
+    const keystream = computeSha256(SECRET_KEY_HEX + ivHex);
+    let plainText = "";
+    for (let i = 0; i < encryptedData.length; i += 4) {
+      const chunk = parseInt(encryptedData.substr(i, 4), 16);
+      const keyIndex = Math.floor(i / 4) % keystream.length;
+      const keyCode = keystream.charCodeAt(keyIndex);
+      plainText += String.fromCharCode(chunk ^ keyCode);
+    }
 
-    let decrypted = decipher.update(encryptedData, "hex", "utf8");
-    decrypted += decipher.final("utf8");
-
-    return decrypted;
+    return plainText;
   } catch (error) {
     console.error("[CAIN Decryption Error]", error);
     throw new Error("Data decryption failed or authentication tag mismatch");

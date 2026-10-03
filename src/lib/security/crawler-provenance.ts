@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import { computeSha256 } from "./browser-crypto";
 import { DataProvenance } from "./types";
 
 const provenanceStore = new Map<string, DataProvenance>();
@@ -11,8 +11,8 @@ export function registerCrawledDataProvenance(params: {
   rawContent: string;
   trustScore?: number;
 }): DataProvenance {
-  const sourceHash = crypto.createHash("sha256").update(params.sourceUrl, "utf8").digest("hex");
-  const rawContentHash = crypto.createHash("sha256").update(params.rawContent, "utf8").digest("hex");
+  const sourceHash = computeSha256(params.sourceUrl);
+  const rawContentHash = computeSha256(params.rawContent);
 
   const id = `prov-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
 

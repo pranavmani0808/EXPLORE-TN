@@ -28,10 +28,14 @@ const FAQS = [
   },
 ];
 
+import { SupabaseDatabaseRepository } from "@/lib/supabase-database";
+import { getCurrentAuthUser } from "@/lib/auth-rbac";
+
 function SupportPage() {
   const [searchQuery, setSearchQuery] = useState("");
-  const [ticket, setTicket] = useState({ subject: "", email: "", message: "" });
+  const [ticket, setTicket] = useState({ subject: "", email: "", message: "", location: "Tamil Nadu" });
   const [ticketSubmitted, setTicketSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const filteredFaqs = FAQS.filter(
     (f) =>
@@ -39,11 +43,31 @@ function SupportPage() {
       f.a.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const handleSubmitTicket = (e: React.FormEvent) => {
+  const handleSubmitTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!ticket.email || !ticket.message) return;
-    setTicketSubmitted(true);
-    toast.success("Support ticket submitted! Ticket ID: #TN-" + Math.floor(100000 + Math.random() * 900000));
+    setIsSubmitting(true);
+    try {
+      const user = getCurrentAuthUser();
+      const userName = user?.name || ticket.email.split("@")[0];
+
+      await SupabaseDatabaseRepository.createUserQuery({
+        userName,
+        userEmail: ticket.email,
+        queryType: "General Travel",
+        locationContext: ticket.location || "Tamil Nadu",
+        subject: ticket.subject || "Traveler Inquiry",
+        message: ticket.message,
+        aiSuggestedAnswer: `Automated response: We received your query regarding "${ticket.subject || ticket.location}". An ExplorerTN travel operations specialist will review and update you.`,
+      });
+
+      setTicketSubmitted(true);
+      toast.success("Support ticket submitted directly to Admin Helpdesk! Ticket ID: #TN-" + Math.floor(100000 + Math.random() * 900000));
+    } catch {
+      toast.error("Failed to submit ticket. Please check connection.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

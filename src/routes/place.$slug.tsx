@@ -400,7 +400,29 @@ function PlacePage() {
                 </form>
               )}
 
+              {/* Live Explorer Reviews List */}
               <div className="space-y-3">
+                {getCommunityContributions()
+                  .filter((c) => c.type === "review" && (c.placeSlug === place.slug || c.placeName === place.name))
+                  .map((c) => (
+                    <div key={c.id} className="rounded-3xl border border-emerald-500/30 bg-card p-5 space-y-2">
+                      <div className="flex items-center justify-between">
+                        <p className="flex items-center gap-2 font-display text-sm font-semibold">
+                          {c.userName}
+                          <span className="flex items-center gap-1 text-xs text-amber-400 font-mono">
+                            <Star className="size-3 fill-current" aria-hidden /> {c.rating ? `${c.rating}.0` : "5.0"}
+                          </span>
+                        </p>
+                        <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400">
+                          {c.status === "APPROVED" ? "Verified Review" : "In Admin Moderation Queue"}
+                        </span>
+                      </div>
+                      <p className="font-bold text-xs text-foreground">{c.title}</p>
+                      <p className="text-sm text-muted-foreground">{c.content}</p>
+                      <p className="text-[10px] text-muted-foreground font-mono">{c.submittedAt}</p>
+                    </div>
+                  ))}
+
                 {[
                   ["Santhosh V.", "Rode down at 5 AM on a Sunday and had the whole place to myself. Worth the early alarm."],
                   ["Divya S.", "Beautiful, but go on a weekday. Weekends get crowded by 10."],

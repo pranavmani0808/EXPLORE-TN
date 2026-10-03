@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import { computeSha256, computeHmacSha256, generateRandomBytes, generateRandomHex } from "./browser-crypto";
 import { MfaConfig } from "./types";
 import { recordChainedAuditLog } from "./hash-chain-audit";
 
@@ -8,7 +8,7 @@ const mfaStore = new Map<string, MfaConfig>();
  * Generate Base32-like TOTP secret key for MFA setup
  */
 export function generateMfaSecret(): string {
-  const bytes = crypto.randomBytes(20);
+  const bytes = generateRandomBytes(20);
   const base32Chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
   let secret = "";
   for (let i = 0; i < bytes.length; i++) {
@@ -21,7 +21,7 @@ export function generateMfaSecret(): string {
  * Helper to compute SHA-256 hash of a recovery code
  */
 export function hashRecoveryCode(code: string): string {
-  return crypto.createHash("sha256").update(code.toUpperCase().trim(), "utf8").digest("hex");
+  return computeSha256(code.toUpperCase().trim());
 }
 
 /**
@@ -32,7 +32,7 @@ export function generateBackupCodes(): { plainCodes: string[]; hashedCodes: stri
   const hashedCodes: string[] = [];
 
   for (let i = 0; i < 6; i++) {
-    const code = crypto.randomBytes(4).toString("hex").toUpperCase();
+    const code = generateRandomHex(4).toUpperCase();
     plainCodes.push(code);
     hashedCodes.push(hashRecoveryCode(code));
   }
@@ -81,23 +81,9 @@ export function setupAdminMfa(userId: string, email: string): MfaConfig {
 export function generateTotpToken(secret: string, windowOffset: number = 0): string {
   const epoch = Math.floor(Date.now() / 1000);
   const timeStep = Math.floor(epoch / 30) + windowOffset;
-
-  const buffer = Buffer.alloc(8);
-  for (let i = 7; i >= 0; i--) {
-    buffer[i] = timeStep & 0xff;
-    timeStep >>> 8;
-  }
-
-  const hmac = crypto.createHmac("sha1", Buffer.from(secret, "ascii")).update(buffer).digest();
-  const offset = hmac[hmac.length - 1] & 0xf;
-  const code =
-    ((hmac[offset] & 0x7f) << 24) |
-    ((hmac[offset + 1] & 0xff) << 16) |
-    ((hmac[offset + 2] & 0xff) << 8) |
-    (hmac[offset + 3] & 0xff);
-
-  const otp = (code % 1000000).toString().padStart(6, "0");
-  return otp;
+  const hash = computeHmacSha256(secret, String(timeStep));
+  const num = parseInt(hash.slice(0, 8), 16);
+  return (num % 1000000).toString().padStart(6, "0");
 }
 
 /**

@@ -1,4 +1,4 @@
-import crypto from "node:crypto";
+import { computeSha256 } from "./browser-crypto";
 import { RecordVersionEntry, AuditEntityType, DataClassification } from "./types";
 
 /**
@@ -15,7 +15,7 @@ export function computeCanonicalRecordHash(data: Record<string, any> | string): 
     canonicalString = JSON.stringify(sortedObj);
   }
 
-  return crypto.createHash("sha256").update(canonicalString, "utf8").digest("hex");
+  return computeSha256(canonicalString);
 }
 
 function sortKeysRecursive(obj: any): any {

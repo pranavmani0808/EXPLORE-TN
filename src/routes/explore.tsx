@@ -88,7 +88,9 @@ interface CategoryTile {
   badgeColor: string;
 }
 
-const CATEGORY_TILES: CategoryTile[] = [
+import { getAllCategories } from "@/lib/data/taxonomy-categories";
+
+const BASE_CATEGORY_TILES: CategoryTile[] = [
   {
     id: "arupadai",
     title: "Arupadai Veedu (Six Abodes)",
@@ -225,6 +227,29 @@ const CATEGORY_TILES: CategoryTile[] = [
     badgeColor: "bg-teal-500/15 text-teal-400 border-teal-500/30",
   },
 ];
+
+export function getLiveCategoryTiles(): CategoryTile[] {
+  const dynamicCategories = getAllCategories();
+  const baseMap = new Map<string, CategoryTile>();
+  BASE_CATEGORY_TILES.forEach((t) => baseMap.set(t.id, t));
+
+  // Merge any custom category added via admin panel
+  dynamicCategories.forEach((dc) => {
+    if (!baseMap.has(dc.id)) {
+      baseMap.set(dc.id, {
+        id: dc.id,
+        title: dc.title,
+        subtitle: dc.subtitle,
+        icon: Sparkles,
+        color: dc.color || "text-emerald-400",
+        bgGradient: "from-emerald-500/10 via-emerald-500/5 to-transparent border-emerald-500/30",
+        badgeColor: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      });
+    }
+  });
+
+  return Array.from(baseMap.values());
+}
 
 const TN_DISTRICTS = [
   "All Districts",
@@ -560,9 +585,13 @@ function ExploreByExperiencePage() {
     });
   }, [places, selectedCategory, selectedDistrict, searchQuery]);
 
+  const categoryTiles = useMemo(() => {
+    return getLiveCategoryTiles();
+  }, []);
+
   const selectedCategoryTile = useMemo(() => {
-    return CATEGORY_TILES.find((t) => t.id === selectedCategory) || CATEGORY_TILES[0];
-  }, [selectedCategory]);
+    return categoryTiles.find((t) => t.id === selectedCategory) || categoryTiles[0];
+  }, [selectedCategory, categoryTiles]);
 
   return (
     <AppShell className="bg-[#09090b]">
@@ -613,7 +642,7 @@ function ExploreByExperiencePage() {
 
               {/* Category List Items */}
               <div className="space-y-1.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 custom-scrollbar">
-                {CATEGORY_TILES.map((tile) => {
+                {categoryTiles.map((tile) => {
                   const isSelected = selectedCategory === tile.id;
                   const count = getCategoryCount(tile.id);
                   const Icon = tile.icon;

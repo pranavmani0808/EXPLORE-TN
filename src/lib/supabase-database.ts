@@ -292,6 +292,10 @@ export class SupabaseDatabaseRepository {
         new Map(recordsToUpsert.map((item) => [item.slug, item])).values()
       );
 
+      // Always populate memory cache immediately with full live dataset
+      memoryPlacesCache = uniqueRecords as unknown as SupabasePlaceRecord[];
+      isSeededInMemory = true;
+
       const { data, error } = await supabase
         .from('places')
         .upsert(uniqueRecords, { onConflict: 'slug' })
@@ -301,7 +305,6 @@ export class SupabaseDatabaseRepository {
         console.warn("[Supabase Primary Memory] Table seed notice:", error.message);
       } else if (data && data.length > 0) {
         memoryPlacesCache = data as SupabasePlaceRecord[];
-        isSeededInMemory = true;
       }
       return true;
     } catch (err) {
