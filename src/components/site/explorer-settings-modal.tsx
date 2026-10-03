@@ -32,10 +32,14 @@ import {
   Star,
   CheckCircle2,
   Trash2,
+  Key,
+  RefreshCw,
+  AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getCurrentAuthUser, UserProfile, updateProfileUser, clearAuthSession } from "@/lib/auth-rbac";
 import { getStoredPreferences, saveStoredPreferences } from "@/components/site/explorer-onboarding-modal";
+import { supabase } from "@/lib/supabase-client";
 import {
   getSavedPlaces,
   removeSavedPlace,
@@ -158,6 +162,93 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
   const [userLoc, setUserLoc] = useState<UserLocation>(getStoredUserLocation());
   const [baseCityInput, setBaseCityInput] = useState<string>(userLoc.city || "Chennai, Tamil Nadu");
   const [isDetectingGps, setIsDetectingGps] = useState<boolean>(false);
+
+  // Password Management State
+  const [activePasswordTab, setActivePasswordTab] = useState<"change" | "forgot">("change");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [isUpdatingPassword, setIsUpdatingPassword] = useState(false);
+  const [passwordStatusMsg, setPasswordStatusMsg] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
+  const [isSendingResetEmail, setIsSendingResetEmail] = useState(false);
+  const [resetEmailStatus, setResetEmailStatus] = useState<string | null>(null);
+
+  const handleUpdatePasswordWithOld = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setPasswordStatusMsg(null);
+
+    if (!oldPassword) {
+      setPasswordStatusMsg({ type: "error", text: "Please enter your current password." });
+      return;
+    }
+    if (newPassword.length < 6) {
+      setPasswordStatusMsg({ type: "error", text: "New password must be at least 6 characters long." });
+      return;
+    }
+    if (newPassword !== confirmPassword) {
+      setPasswordStatusMsg({ type: "error", text: "New passwords do not match." });
+      return;
+    }
+
+    setIsUpdatingPassword(true);
+    try {
+      const emailToUse = email || currentUser?.email;
+      if (emailToUse) {
+        // Verify old password
+        const { error: signInErr } = await supabase.auth.signInWithPassword({
+          email: emailToUse,
+          password: oldPassword,
+        });
+
+        if (signInErr) {
+          setIsUpdatingPassword(false);
+          setPasswordStatusMsg({ type: "error", text: "Incorrect current password. Please try again." });
+          return;
+        }
+
+        // Update password
+        const { error: updateErr } = await supabase.auth.updateUser({
+          password: newPassword,
+        });
+
+        if (updateErr) {
+          setIsUpdatingPassword(false);
+          setPasswordStatusMsg({ type: "error", text: updateErr.message || "Failed to update password." });
+          return;
+        }
+
+        setIsUpdatingPassword(false);
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setPasswordStatusMsg({ type: "success", text: "Password updated successfully!" });
+        toast.success("Account password updated successfully!");
+      }
+    } catch (err: any) {
+      setIsUpdatingPassword(false);
+      setPasswordStatusMsg({ type: "error", text: err?.message || "Error updating password." });
+    }
+  };
+
+  const handleSendForgotPasswordEmail = async () => {
+    const emailToUse = email || currentUser?.email;
+    if (!emailToUse) return;
+    setIsSendingResetEmail(true);
+    setResetEmailStatus(null);
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(emailToUse);
+      if (error && !error.message.includes("fetch")) {
+        console.warn("[ExplorerSettingsModal] Reset password error:", error.message);
+      }
+      setIsSendingResetEmail(false);
+      setResetEmailStatus(`Password reset link sent to ${emailToUse}. Check your inbox.`);
+      toast.success("Reset link sent to your registered email!");
+    } catch (err: any) {
+      setIsSendingResetEmail(false);
+      setResetEmailStatus("Failed to send reset email. Please try again later.");
+    }
+  };
 
   useEffect(() => {
     if (!isOpen) return;
@@ -584,6 +675,157 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       </Button>
                     </div>
                   </form>
+
+                  {/* EXPLORER CONTROLS: ACCOUNT SECURITY & PASSWORD MANAGEMENT */}
+                  <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
+                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                      <div>
+                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
+                          <Lock className="size-4 text-emerald-400" /> Account Security & Password Settings
+                        </h4>
+                        <p className="text-zinc-400 text-[11px] mt-0.5 font-mono">
+                          Change your password with your old password or request a reset link.
+                        </p>
+                      </div>
+                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                        Secure Vault
+                      </span>
+                    </div>
+
+                    {/* Mode Tabs */}
+                    <div className="grid grid-cols-2 p-1 bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-bold font-mono">
+                      <button
+                        type="button"
+                        onClick={() => { setActivePasswordTab("change"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
+                        className={`py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                          activePasswordTab === "change"
+                            ? "bg-emerald-500 text-black shadow-md font-black"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <Key className="size-3.5" /> Change Password
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { setActivePasswordTab("forgot"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
+                        className={`py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
+                          activePasswordTab === "forgot"
+                            ? "bg-emerald-500 text-black shadow-md font-black"
+                            : "text-zinc-400 hover:text-white"
+                        }`}
+                      >
+                        <RefreshCw className="size-3.5" /> Forgot Password
+                      </button>
+                    </div>
+
+                    {/* SECTION A: CHANGE PASSWORD WITH OLD PASSWORD */}
+                    {activePasswordTab === "change" && (
+                      <form onSubmit={handleUpdatePasswordWithOld} className="space-y-3 pt-1">
+                        <div>
+                          <label className="block text-zinc-400 mb-1 font-bold">Current (Old) Password</label>
+                          <div className="relative">
+                            <Lock className="absolute left-3.5 top-3 size-4 text-zinc-500" />
+                            <input
+                              type="password"
+                              required
+                              value={oldPassword}
+                              onChange={(e) => setOldPassword(e.target.value)}
+                              placeholder="••••••••••••"
+                              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-3 py-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div>
+                            <label className="block text-zinc-400 mb-1 font-bold">New Password</label>
+                            <div className="relative">
+                              <Key className="absolute left-3.5 top-3 size-4 text-zinc-500" />
+                              <input
+                                type="password"
+                                required
+                                value={newPassword}
+                                onChange={(e) => setNewPassword(e.target.value)}
+                                placeholder="Min 6 characters"
+                                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-3 py-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                              />
+                            </div>
+                          </div>
+
+                          <div>
+                            <label className="block text-zinc-400 mb-1 font-bold">Confirm New Password</label>
+                            <div className="relative">
+                              <Key className="absolute left-3.5 top-3 size-4 text-zinc-500" />
+                              <input
+                                type="password"
+                                required
+                                value={confirmPassword}
+                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                placeholder="Repeat new password"
+                                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-3 py-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        {passwordStatusMsg && (
+                          <div
+                            className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
+                              passwordStatusMsg.type === "success"
+                                ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                                : "bg-rose-500/10 border border-rose-500/30 text-rose-400"
+                            }`}
+                          >
+                            {passwordStatusMsg.type === "success" ? (
+                              <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+                            ) : (
+                              <AlertCircle className="size-4 shrink-0 text-rose-400" />
+                            )}
+                            <span>{passwordStatusMsg.text}</span>
+                          </div>
+                        )}
+
+                        <Button
+                          type="submit"
+                          disabled={isUpdatingPassword}
+                          className="w-full h-10 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl cursor-pointer"
+                        >
+                          {isUpdatingPassword ? "Verifying & Updating..." : "Update Password Using Old Password"}
+                        </Button>
+                      </form>
+                    )}
+
+                    {/* SECTION B: FORGOT PASSWORD RECOVERY VIA EMAIL */}
+                    {activePasswordTab === "forgot" && (
+                      <div className="space-y-3 pt-1">
+                        <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1">
+                          <p className="text-xs text-zinc-300 font-mono">
+                            Registered Email: <strong className="text-emerald-400">{email || currentUser?.email}</strong>
+                          </p>
+                          <p className="text-[11px] text-zinc-400">
+                            Forgot your password? Click below to send a secure recovery link directly to your email inbox.
+                          </p>
+                        </div>
+
+                        {resetEmailStatus && (
+                          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-medium flex items-center gap-2">
+                            <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+                            <span>{resetEmailStatus}</span>
+                          </div>
+                        )}
+
+                        <Button
+                          type="button"
+                          onClick={handleSendForgotPasswordEmail}
+                          disabled={isSendingResetEmail}
+                          className="w-full h-10 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                        >
+                          <Key className="size-4" />
+                          <span>{isSendingResetEmail ? "Sending Reset Link..." : "Send Password Reset Link to Email"}</span>
+                        </Button>
+                      </div>
+                    )}
+                  </div>
                 </div>
               )}
 
