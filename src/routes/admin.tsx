@@ -43,7 +43,8 @@ import {
   Sliders,
   Bell,
   SearchCode,
-  FileCheck
+  FileCheck,
+  Table as TableIcon
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -84,6 +85,7 @@ import { WeeklyDigestModule } from "@/components/admin/weekly-digest-module";
 import { GeospatialSafetyModule } from "@/components/admin/geospatial-safety-module";
 import { KodaiPoiManagementModule } from "@/components/admin/kodai-poi-management-module";
 import { SecurityDashboardModule } from "@/components/admin/security-dashboard";
+import { DistrictPlacesAdminModule } from "@/components/admin/district-places-admin-module";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -101,6 +103,7 @@ export const Route = createFileRoute("/admin")({
 export type AdminSection =
   | "dashboard"
   | "destinations"
+  | "district_places"
   | "kodai_pois"
   | "place_suggestions"
   | "map_intelligence"
@@ -225,8 +228,8 @@ function AdminOperationsCenter() {
               <RefreshCw className={`h-4 w-4 ${loading ? "animate-spin" : ""}`} />
               Refresh Telemetry
             </Button>
-            <Button size="sm" onClick={() => setActiveSection("destinations")} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm cursor-pointer">
-              <Plus className="h-4 w-4" /> Add Place
+            <Button size="sm" onClick={() => setActiveSection("district_places")} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm cursor-pointer">
+              <Plus className="h-4 w-4" /> Add Place in District
             </Button>
           </div>
         </div>
@@ -264,7 +267,8 @@ function AdminOperationsCenter() {
                 </div>
                 <nav className="space-y-0.5">
                   {[
-                    { id: "destinations", label: "Places Management", icon: Globe, count: destinations.length },
+                    { id: "district_places", label: "District-Wise Tables (38)", icon: TableIcon, badge: "All 38 Districts" },
+                    { id: "destinations", label: "Global Places Catalog", icon: Globe, count: destinations.length },
                     { id: "kodai_pois", label: "Kodaikanal POIs (30)", icon: Mountain, badge: "Kodai 30" },
                     { id: "place_suggestions", label: "Place Suggestions & Scout Reviews", icon: Sparkles, badge: "4 New" },
                     { id: "map_intelligence", label: "Map Intelligence & Bounds", icon: Map, badge: "GIS" },
@@ -571,12 +575,17 @@ function AdminOperationsCenter() {
               <ExecutiveSaaSCommandCenter onNavigateTab={(tab) => setActiveSection(tab as AdminSection)} />
             )}
 
-            {/* 2. PLACES MANAGEMENT */}
+            {/* 2. DISTRICT-WISE PLACES TABLES (ALL 38 DISTRICTS) */}
+            {activeSection === "district_places" && (
+              <DistrictPlacesAdminModule />
+            )}
+
+            {/* 2a. GLOBAL PLACES CATALOG */}
             {activeSection === "destinations" && (
               <PlacesManagementModule />
             )}
 
-            {/* 2a. KODAIKANAL POIS MANAGEMENT */}
+            {/* 2b. KODAIKANAL POIS MANAGEMENT */}
             {activeSection === "kodai_pois" && (
               <KodaiPoiManagementModule />
             )}

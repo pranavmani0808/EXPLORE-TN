@@ -2968,4 +2968,54 @@ export const DISTRICT_DETAILS = Object.values(TAMIL_NADU_DISTRICTS).map((d) => {
   };
 });
 
+/**
+ * Add a new spot to a district in the in-memory/runtime dataset
+ */
+export function addDistrictSpot(districtSlug: string, spot: DistrictSpot): boolean {
+  const normalized = districtSlug.toLowerCase().trim();
+  const district = TAMIL_NADU_DISTRICTS[normalized];
+  if (!district) return false;
+
+  // Check if exists
+  const existingIdx = district.spots.findIndex((s) => s.id === spot.id);
+  if (existingIdx >= 0) {
+    district.spots[existingIdx] = spot;
+  } else {
+    district.spots.push(spot);
+  }
+  return true;
+}
+
+/**
+ * Update an existing spot in a district
+ */
+export function updateDistrictSpot(districtSlug: string, spotId: string, updates: Partial<DistrictSpot>): boolean {
+  const normalized = districtSlug.toLowerCase().trim();
+  const district = TAMIL_NADU_DISTRICTS[normalized];
+  if (!district) return false;
+
+  const idx = district.spots.findIndex((s) => s.id === spotId);
+  if (idx < 0) return false;
+
+  district.spots[idx] = {
+    ...district.spots[idx],
+    ...updates,
+  };
+  return true;
+}
+
+/**
+ * Delete a spot from a district
+ */
+export function deleteDistrictSpot(districtSlug: string, spotId: string): boolean {
+  const normalized = districtSlug.toLowerCase().trim();
+  const district = TAMIL_NADU_DISTRICTS[normalized];
+  if (!district) return false;
+
+  const prevLen = district.spots.length;
+  district.spots = district.spots.filter((s) => s.id !== spotId);
+  return district.spots.length < prevLen;
+}
+
+
 
