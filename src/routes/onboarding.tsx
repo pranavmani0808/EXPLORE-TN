@@ -43,6 +43,7 @@ function OnboardingPage() {
   // Form State
   const [explorerHandle, setExplorerHandle] = useState("ExploreTN Traveler");
   const [baseCity, setBaseCity] = useState("Chennai");
+  const [vehicleType, setVehicleType] = useState<string>("car");
   const [selectedStyles, setSelectedStyles] = useState<string[]>(["adventure", "heritage"]);
   const [selectedDistricts, setSelectedDistricts] = useState<string[]>(["Nilgiris (Ooty)", "Madurai"]);
   const [budgetTier, setBudgetTier] = useState<"budget" | "standard" | "luxury">("standard");
@@ -60,20 +61,49 @@ function OnboardingPage() {
     );
   };
 
-  const handleFinishOnboarding = () => {
+  const handleFinishOnboarding = async () => {
+    const onboardingData = {
+      explorerHandle,
+      baseCity,
+      vehicleType,
+      selectedStyles,
+      selectedDistricts,
+      budgetTier,
+      completedAt: new Date().toISOString(),
+    };
+
     try {
       if (typeof window !== "undefined") {
-        localStorage.setItem(
-          "explorertn_user_onboarding",
-          JSON.stringify({
-            explorerHandle,
-            baseCity,
-            selectedStyles,
-            selectedDistricts,
-            budgetTier,
-            completedAt: new Date().toISOString(),
-          })
-        );
+        localStorage.setItem("explorertn_user_onboarding", JSON.stringify(onboardingData));
+        const authUserRaw = localStorage.getItem("etn_auth_user");
+        if (authUserRaw) {
+          const authUser = JSON.parse(authUserRaw);
+          authUser.city = baseCity;
+          authUser.vehicleType = vehicleType;
+          localStorage.setItem("etn_auth_user", JSON.stringify(authUser));
+
+          // Sync to Supabase user_profiles
+          fetch("/api/v1/user/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user: {
+                id: authUser.id,
+                email: authUser.email,
+                name: explorerHandle || authUser.name,
+                role: authUser.role || "explorer",
+                city: baseCity,
+                location: baseCity,
+                vehicleType,
+                interests: selectedStyles,
+                targetDistricts: selectedDistricts,
+                budgetTier,
+                profileComplete: true,
+              },
+              isSignUp: false,
+            }),
+          }).catch((err) => console.warn("Onboarding Supabase sync error:", err));
+        }
       }
     } catch (err) {
       console.warn("Storage operation skipped in onboarding:", err);
@@ -212,11 +242,45 @@ function OnboardingPage() {
         </div>
       )}
 
-      {/* STEP 4: BUDGET TIER */}
+      {/* STEP 4: VEHICLE & BUDGET TIER */}
       {currentStepIndex === 3 && (
         <div className="space-y-6">
-          <p className="text-xs text-zinc-400">Used by AI Travel Planner to recommend appropriate stays and food joints.</p>
-          <div className="space-y-3">
+          <div>
+            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+              🚗 Vehicle / Mode of Transit
+            </h4>
+            <p className="text-xs text-zinc-400 mb-3">
+              Essential for calculating ghat road clearance, hair-pin curves, and range estimates.
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+              {[
+                { id: "car", label: "Car (Sedan / Hatchback)", icon: "🚗" },
+                { id: "suv", label: "SUV / 4x4", icon: "🚙" },
+                { id: "motorcycle", label: "Motorcycle / Royal Enfield", icon: "🏍️" },
+                { id: "public_transit", label: "Bus & Train Transit", icon: "🚌" },
+              ].map((v) => (
+                <div
+                  key={v.id}
+                  onClick={() => setVehicleType(v.id)}
+                  className={`p-3 rounded-xl border text-center cursor-pointer transition ${
+                    vehicleType === v.id
+                      ? "bg-amber-500/10 border-amber-400 text-white font-bold"
+                      : "bg-zinc-950/50 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                  }`}
+                >
+                  <div className="text-xl mb-1">{v.icon}</div>
+                  <div className="text-[11px] leading-tight">{v.label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="pt-2">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-amber-300 mb-2">
+              💰 Budget Tier
+            </h4>
+            <p className="text-xs text-zinc-400 mb-3">Used by AI Travel Planner to recommend appropriate stays and food joints.</p>
+            <div className="space-y-3">
             {[
               { id: "budget", label: "Budget Explorer", price: "₹800 - ₹2,000 / day", desc: "Backpacker hostels, local state buses, authentic mess food" },
               { id: "standard", label: "Standard Traveler", price: "₹2,000 - ₹5,000 / day", desc: "Boutique stays, rental bikes/cars, multi-cuisine dining" },
@@ -238,6 +302,7 @@ function OnboardingPage() {
                 <p className="text-xs text-zinc-400 mt-1">{tier.desc}</p>
               </div>
             ))}
+            </div>
           </div>
         </div>
       )}

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import { Compass, X, Mail, Lock, User, ArrowRight, Sparkles, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -36,6 +37,7 @@ export function GoogleLogoSVG() {
 }
 
 export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthModalProps) {
+  const navigate = useNavigate();
   const [authMode, setAuthMode] = useState<"signin" | "signup" | "forgot_password">("signin");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -135,6 +137,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
         districtCount: assignedRole === "super_admin" ? 38 : 1,
       };
 
+      let isProfileComplete = assignedRole === "super_admin";
       // Sync user to Supabase and check if user exists on normal sign in
       try {
         const syncRes = await fetch("/api/v1/user/sync", {
@@ -153,6 +156,13 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           setLoading(false);
           return;
         }
+
+        if (syncRes.ok) {
+          const syncData = await syncRes.json().catch(() => ({}));
+          if (syncData.profileComplete !== undefined) {
+            isProfileComplete = syncData.profileComplete;
+          }
+        }
       } catch (syncErr) {
         console.warn("[AuthModal] Sync attempt notice:", syncErr);
       }
@@ -161,7 +171,9 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
       setLoading(false);
       onClose();
 
-      if (onSuccess) {
+      if (!isProfileComplete && assignedRole !== "super_admin") {
+        navigate({ to: "/onboarding" });
+      } else if (onSuccess) {
         onSuccess();
       }
     } catch (err: any) {

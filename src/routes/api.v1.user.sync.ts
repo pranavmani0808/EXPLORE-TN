@@ -58,6 +58,19 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         );
       }
 
+      // Check if user profile already has profile_complete set
+      let isProfileComplete = false;
+      if (existingUser) {
+        const { data: prof } = await supabaseAdmin
+          .from("user_profiles")
+          .select("profile_complete")
+          .eq("user_id", existingUser.id)
+          .maybeSingle();
+        if (prof?.profile_complete) {
+          isProfileComplete = true;
+        }
+      }
+
       // User exists or is signing up -> upsert in public.users
       const targetId = existingUser?.id || userId;
       const { data: savedUser, error: userError } = await supabaseAdmin
@@ -86,20 +99,27 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
       }
 
       // Upsert linked user_profiles table (Foreign key: user_id -> users.id)
+      const profilePayload: any = {
+        user_id: targetId,
+        city: user.city || user.location || "Tamil Nadu",
+        state: "Tamil Nadu",
+        preferred_language: "en",
+        updated_at: new Date().toISOString(),
+      };
+
+      if (user.bio !== undefined) profilePayload.bio = user.bio;
+      if (user.phone !== undefined) profilePayload.phone = user.phone;
+      if (user.vehicleType !== undefined || user.vehicle !== undefined) {
+        profilePayload.vehicle_type = user.vehicleType || user.vehicle;
+      }
+      if (user.interests !== undefined) profilePayload.interests = user.interests;
+      if (user.targetDistricts !== undefined) profilePayload.target_districts = user.targetDistricts;
+      if (user.budgetTier !== undefined) profilePayload.budget_tier = user.budgetTier;
+      if (user.profileComplete !== undefined) profilePayload.profile_complete = user.profileComplete;
+
       await supabaseAdmin
         .from("user_profiles")
-        .upsert(
-          {
-            user_id: targetId,
-            bio: user.bio !== undefined ? user.bio : undefined,
-            phone: user.phone !== undefined ? user.phone : undefined,
-            city: user.city || "Tamil Nadu",
-            state: "Tamil Nadu",
-            preferred_language: "en",
-            updated_at: new Date().toISOString(),
-          },
-          { onConflict: "user_id" }
-        )
+        .upsert(profilePayload, { onConflict: "user_id" })
         .catch(() => null);
 
       // Upsert linked user_stats table (Foreign key: user_id -> users.id)
@@ -122,6 +142,7 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         JSON.stringify({
           success: true,
           exists: true,
+          profileComplete: isProfileComplete || user.profileComplete || role === "super_admin",
           user: savedUser,
         }),
         { status: 200, headers: { "Content-Type": "application/json" } }

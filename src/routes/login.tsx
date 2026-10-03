@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Compass, Lock, UserCheck, UserPlus, Mail, Key, User, ArrowLeft, CheckCircle2, ShieldCheck, RefreshCw } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
@@ -45,6 +45,7 @@ export function GoogleLogoSVG() {
 type AuthMode = "signin" | "signup" | "forgot_password" | "reset_password" | "email_verification";
 
 function LoginPage() {
+  const navigate = useNavigate();
   const [authMode, setAuthMode] = useState<AuthMode>("signin");
   const [authStep, setAuthStep] = useState<"idle" | "authenticating" | "authorized" | "verified" | "reset_sent" | "password_updated">("idle");
   const [message, setMessage] = useState<string | null>(null);
@@ -108,7 +109,7 @@ function LoginPage() {
         setMessage("Please enter the 6-digit verification code sent to your email.");
         return;
       }
-      await safeSupabaseCall(() =>
+      const verifyRes: any = await safeSupabaseCall(() =>
         supabase.auth.verifyOtp({
           email: form.email,
           token: form.otpCode,
@@ -117,6 +118,37 @@ function LoginPage() {
       );
       setAuthStep("verified");
       setMessage("Email address verified successfully!");
+
+      const verifiedUserId = verifyRes?.data?.user?.id || `usr-${Date.now()}`;
+      const verifiedUserName = form.fullName.trim() || form.email.split("@")[0] || "New Explorer";
+      const verifiedUser: UserProfile = {
+        id: verifiedUserId,
+        name: verifiedUserName,
+        email: form.email.trim(),
+        avatar: verifiedUserName.slice(0, 2).toUpperCase(),
+        role: "explorer",
+        status: "active",
+        rank: "New Explorer",
+        districtCount: 0,
+      };
+
+      // Sync verified user to Supabase
+      fetch("/api/v1/user/sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          user: verifiedUser,
+          isSignUp: true,
+        }),
+      }).catch(() => null);
+
+      setAuthSession(verifiedUser);
+
+      // Automatically redirect to onboarding page to complete vehicle, location, interests
+      setTimeout(() => {
+        navigate({ to: "/onboarding" });
+      }, 1500);
+
       return;
     }
 
@@ -209,6 +241,7 @@ function LoginPage() {
       districtCount: isAdminCreds ? 38 : 1,
     };
 
+    let isProfileComplete = isAdminCreds;
     // Check if user information exists in Supabase
     try {
       const syncRes = await fetch("/api/v1/user/sync", {
@@ -226,12 +259,29 @@ function LoginPage() {
         setAuthStep("idle");
         return;
       }
+
+      if (syncRes.ok) {
+        const syncData = await syncRes.json().catch(() => ({}));
+        if (syncData.profileComplete !== undefined) {
+          isProfileComplete = syncData.profileComplete;
+        }
+      }
     } catch (syncErr) {
       console.warn("[LoginPage] User sync check error:", syncErr);
     }
 
     setAuthSession(createdUser);
     setAuthStep("authorized");
+
+    // Automatically redirect new users to onboarding page
+    setTimeout(() => {
+      if (!isProfileComplete && assignedRole !== "super_admin") {
+        navigate({ to: "/onboarding" });
+      } else {
+        const targetRoute = getAuthorizedRedirectRoute(createdUser.role);
+        navigate({ to: targetRoute as any });
+      }
+    }, 1200);
   };
 
   return (
