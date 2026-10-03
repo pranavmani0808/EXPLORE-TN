@@ -5,7 +5,6 @@ import {
   LayoutDashboard,
   Globe,
   MapPin,
-  Hotel,
   Utensils,
   PartyPopper,
   Map,
@@ -53,12 +52,8 @@ import {
   AdminDashboardMetrics,
   DestinationDetail,
   AttractionDetail,
-  HotelDetail,
   RestaurantDetail,
   EventDetail,
-  CrawlerSource,
-  CrawlerJob,
-  CrawledDataDiff,
   AdminUserRole,
   AdminAnalytics,
   ContentCmsSection,
@@ -98,7 +93,7 @@ export const Route = createFileRoute("/admin")({
       { title: "Explore TN — Travel Intelligence CMS & Geospatial Operations Center" },
       {
         name: "description",
-        content: "Explore TN Travel Intelligence CMS: Geospatial Map Operations, Content Quality Center, AI Controls & Web Crawler Suite.",
+        content: "Explore TN Travel Intelligence CMS: Geospatial Map Operations, Content Quality Center & AI Controls.",
       },
     ],
   }),
@@ -135,7 +130,6 @@ export type AdminSection =
 
 function AdminOperationsCenter() {
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
-  const [crawlerSubTab, setCrawlerSubTab] = useState<"overview" | "sources" | "jobs" | "crawled" | "pending" | "approved" | "failed">("pending");
   const [attractionCategoryFilter, setAttractionCategoryFilter] = useState<string>("All");
   const [eventStatusFilter, setEventStatusFilter] = useState<string>("All");
 
@@ -143,12 +137,8 @@ function AdminOperationsCenter() {
   const [liveMetrics, setLiveMetrics] = useState<DashboardMetrics | null>(null);
   const [destinations, setDestinations] = useState<DestinationDetail[]>([]);
   const [attractions, setAttractions] = useState<AttractionDetail[]>([]);
-  const [hotels, setHotels] = useState<HotelDetail[]>([]);
   const [restaurants, setRestaurants] = useState<RestaurantDetail[]>([]);
   const [events, setEvents] = useState<EventDetail[]>([]);
-  const [crawlerSources, setCrawlerSources] = useState<CrawlerSource[]>([]);
-  const [crawlerJobs, setCrawlerJobs] = useState<CrawlerJob[]>([]);
-  const [crawlerDiffs, setCrawlerDiffs] = useState<CrawledDataDiff[]>([]);
   const [users, setUsers] = useState<AdminUserRole[]>([]);
   const [analytics, setAnalytics] = useState<AdminAnalytics | null>(null);
   const [cmsSections, setCmsSections] = useState<ContentCmsSection[]>([]);
@@ -206,16 +196,12 @@ function AdminOperationsCenter() {
   const loadAdminData = async () => {
     setLoading(true);
     try {
-      const [m, d, a, h, r, e, cs, cj, cd, u, an, cm, s, aud] = await Promise.all([
+      const [m, d, a, r, e, u, an, cm, s, aud] = await Promise.all([
         AdminDashboardApiRepository.getOverview().catch(() => null),
         AdminDashboardApiRepository.getDestinations().catch(() => []),
         AdminDashboardApiRepository.getAttractions().catch(() => []),
-        AdminDashboardApiRepository.getHotels().catch(() => []),
         AdminDashboardApiRepository.getRestaurants().catch(() => []),
         AdminDashboardApiRepository.getEvents().catch(() => []),
-        AdminDashboardApiRepository.getCrawlerSources().catch(() => []),
-        AdminDashboardApiRepository.getCrawlerJobs().catch(() => []),
-        AdminDashboardApiRepository.getCrawlerDiffs().catch(() => []),
         AdminDashboardApiRepository.getUsers().catch(() => []),
         AdminDashboardApiRepository.getAnalytics().catch(() => null),
         AdminDashboardApiRepository.getCmsSections().catch(() => []),
@@ -225,12 +211,8 @@ function AdminOperationsCenter() {
       setMetrics(m);
       setDestinations(d);
       setAttractions(a);
-      setHotels(h);
       setRestaurants(r);
       setEvents(e);
-      setCrawlerSources(cs);
-      setCrawlerJobs(cj);
-      setCrawlerDiffs(cd);
       setUsers(u);
       setAnalytics(an);
       setCmsSections(cm);

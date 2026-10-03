@@ -31,6 +31,9 @@ import {
 import { toast } from "sonner";
 
 export function SecurityDashboardModule() {
+  // SSR guard: localStorage and crypto are browser-only; return null on server render
+  if (typeof window === "undefined") return null;
+
   const [status, setStatus] = useState<CainSecurityStatus | null>(null);
   const [auditLogs, setAuditLogs] = useState<ChainedAuditLogEntry[]>([]);
   const [chainValidation, setChainValidation] = useState<{
