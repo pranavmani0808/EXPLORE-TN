@@ -41,6 +41,8 @@ import {
   MapFacilityFilterState,
 } from "@/components/site/hill-region-intelligence-components";
 import { KodaiTouristPlacesSection } from "@/components/site/kodai-poi-components";
+import { OotyComprehensiveGuide } from "@/components/site/ooty-guide-components";
+import { KodaiFoodAndTravelGuide } from "@/components/site/kodai-guide-components";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -823,6 +825,20 @@ export function DistrictView({ district }: DistrictViewProps) {
               ))}
             </div>
           </div>
+
+          {/* OOTY COMPREHENSIVE GUIDE (12 Spots, 5 Food, 4 Seasons, Transit, Tips) */}
+          {(district.slug === "the-nilgiris" || district.slug === "ooty" || district.name.toLowerCase().includes("nilgiris") || district.name.toLowerCase().includes("ooty")) && (
+            <div className="mt-12">
+              <OotyComprehensiveGuide />
+            </div>
+          )}
+
+          {/* KODAIKANAL FOOD, SEASONS & TRANSIT GUIDE */}
+          {(district.slug === "dindigul" || district.slug === "kodaikanal" || district.name.toLowerCase().includes("dindigul") || district.name.toLowerCase().includes("kodaikanal")) && (
+            <div className="mt-12">
+              <KodaiFoodAndTravelGuide />
+            </div>
+          )}
 
           {/* KODAIKANAL TOURIST PLACES SYSTEM SECTION */}
           {(district.slug === "dindigul" || district.slug === "kodaikanal" || district.name.toLowerCase().includes("dindigul") || district.name.toLowerCase().includes("kodaikanal")) && (
