@@ -87,6 +87,7 @@ import { KodaiPoiManagementModule } from "@/components/admin/kodai-poi-managemen
 import { SecurityDashboardModule } from "@/components/admin/security-dashboard";
 import { DistrictPlacesAdminModule } from "@/components/admin/district-places-admin-module";
 import { CategoriesManagementModule } from "@/components/admin/categories-management-module";
+import { UserManagementModal } from "@/components/admin/entity-management-modals";
 import { getLiveDashboardMetrics, DashboardMetrics } from "@/lib/dashboard-telemetry";
 import { TAMIL_NADU_DISTRICTS } from "@/lib/data/tamil-nadu-districts";
 import { getAnalyticsEvents } from "@/lib/explorer-activity";
@@ -157,6 +158,50 @@ function AdminOperationsCenter() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [newCatInput, setNewCatInput] = useState("");
+
+  // Interactive Management States
+  const [isUserModalOpen, setIsUserModalOpen] = useState(false);
+  
+  // Activities state
+  const [activitiesList, setActivitiesList] = useState([
+    { id: "act-scuba-rameshwaram", title: "Scuba Diving in Rameswaram", cat: "Water Adventures", duration: "2–3 Hours", difficulty: "Easy" },
+    { id: "act-paragliding-yelagiri", title: "Paragliding in Yelagiri", cat: "Air Adventures", duration: "1–2 Hours", difficulty: "Moderate" },
+    { id: "act-offroad-kolli", title: "Off Roading & Ghat Driving in Kolli Hills", cat: "Extreme Adventures", duration: "Full Day", difficulty: "Challenging" },
+    { id: "act-trek-agasthiyar", title: "Trek to Agasthiyar Falls (Papanasam)", cat: "Mountain Adventures", duration: "3 Hours", difficulty: "Easy" },
+    { id: "act-rockclimbing-gingee", title: "Rock Climbing at Gingee Fort", cat: "Extreme Adventures", duration: "4 Hours", difficulty: "Challenging" },
+    { id: "act-camping-kolli", title: "Wild Camping at Kolli Hills", cat: "Mountain Adventures", duration: "Overnight", difficulty: "Easy" },
+    { id: "act-surfing-kovalam", title: "Surfing at Kovalam (Covelong Chennai)", cat: "Water Adventures", duration: "2 Hours", difficulty: "Moderate" },
+    { id: "act-safari-mudumalai", title: "Wildlife Safari in Mudumalai", cat: "Extreme Adventures", duration: "3 Hours", difficulty: "Easy" },
+    { id: "act-cave-sittanavasal", title: "Cave Exploring at Sittanavasal", cat: "Mountain Adventures", duration: "2 Hours", difficulty: "Easy" }
+  ]);
+  const [showAddActivityModal, setShowAddActivityModal] = useState(false);
+  const [newActivityTitle, setNewActivityTitle] = useState("");
+  const [newActivityCat, setNewActivityCat] = useState("Trekking");
+  const [newActivityDuration, setNewActivityDuration] = useState("Half Day");
+  const [newActivityDifficulty, setNewActivityDifficulty] = useState("Moderate");
+
+  // Events state
+  const [showAddEventModal, setShowAddEventModal] = useState(false);
+  const [newEventTitle, setNewEventTitle] = useState("");
+  const [newEventCategory, setNewEventCategory] = useState("Cultural Festival");
+  const [newEventVenue, setNewEventVenue] = useState("");
+  const [newEventStartDate, setNewEventStartDate] = useState("2026-01-14");
+  const [newEventEndDate, setNewEventEndDate] = useState("2026-01-17");
+
+  // AI & System Configuration States
+  const [aiModelEngine, setAiModelEngine] = useState(() => {
+    return typeof window !== "undefined" ? localStorage.getItem("etn_ai_model") || "Google Gemini 1.5 Pro (Recommended)" : "Google Gemini 1.5 Pro (Recommended)";
+  });
+  const [aiSystemPrompt, setAiSystemPrompt] = useState(() => {
+    return typeof window !== "undefined" ? localStorage.getItem("etn_ai_prompt") || "You are an expert Tamil Nadu Travel Intelligence Architect. Generate optimal travel routes adhering to real driving distances, district limits, and canonical opening hours." : "You are an expert Tamil Nadu Travel Intelligence Architect. Generate optimal travel routes adhering to real driving distances, district limits, and canonical opening hours.";
+  });
+  const [aiMaxDestinations, setAiMaxDestinations] = useState(15);
+  const [aiMaxRouteLength, setAiMaxRouteLength] = useState(1200);
+
+  const [platformName, setPlatformName] = useState(() => {
+    return typeof window !== "undefined" ? localStorage.getItem("etn_platform_name") || "ExploreTN — Travel Intelligence Platform" : "ExploreTN — Travel Intelligence Platform";
+  });
+  const [mapEngineKey, setMapEngineKey] = useState("pk.eyJ1IjoicHJhbmF2IiwiYSI6ImNseXRzIn0");
 
   const loadAdminData = async () => {
     setLoading(true);
@@ -616,29 +661,144 @@ function AdminOperationsCenter() {
             )}
 
             {/* 6. ACTIVITIES & ADVENTURES */}
+            {/* 6. ACTIVITIES & ADVENTURES */}
             {activeSection === "activities" && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <h3 className="text-xl font-bold text-foreground font-serif">Activities & Adventures</h3>
-                  <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Activity</Button>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground font-serif">Activities & Adventures</h3>
+                    <p className="text-xs text-muted-foreground">Manage adventure trails, safaris, watersports, and outdoor excursions across Tamil Nadu.</p>
+                  </div>
+                  <Button size="sm" onClick={() => setShowAddActivityModal(true)} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer">
+                    <Plus className="h-4 w-4" /> Add Activity
+                  </Button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {[
-                    { title: "Kolli Hills 70 Hairpin Ride", cat: "Motorcycling", duration: "1 Day", difficulty: "Challenging" },
-                    { title: "Kodaikanal Elephant Valley Trek", cat: "Trekking", duration: "6 Hours", difficulty: "Moderate" },
-                    { title: "Rameswaram Sea Kayaking", cat: "Watersports", duration: "3 Hours", difficulty: "Easy" },
-                    { title: "Mudumalai Jungle Safari", cat: "Wildlife", duration: "4 Hours", difficulty: "Easy" }
-                  ].map((act, idx) => (
-                    <div key={idx} className="rounded-xl border border-border p-4 bg-background flex justify-between items-center">
+                  {activitiesList.map((act) => (
+                    <div key={act.id} className="rounded-xl border border-border p-4 bg-background flex justify-between items-center">
                       <div>
                         <div className="font-bold text-sm text-foreground">{act.title}</div>
                         <div className="text-xs text-muted-foreground mt-0.5">{act.cat} · {act.duration} · {act.difficulty}</div>
                       </div>
-                      <Button size="sm" variant="outline"><Edit className="h-3.5 w-3.5" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const newTitle = prompt("Update Activity Name:", act.title);
+                            if (newTitle && newTitle.trim()) {
+                              setActivitiesList(prev => prev.map(a => a.id === act.id ? { ...a, title: newTitle.trim() } : a));
+                              toast.success(`Updated activity: ${newTitle}`);
+                            }
+                          }}
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-rose-500 hover:text-rose-700 hover:bg-rose-500/10"
+                          onClick={() => {
+                            if (confirm(`Remove activity "${act.title}"?`)) {
+                              setActivitiesList(prev => prev.filter(a => a.id !== act.id));
+                              toast.success("Activity removed successfully.");
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                {showAddActivityModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-xl space-y-4">
+                      <div className="flex justify-between items-center border-b border-border pb-3">
+                        <h4 className="font-bold text-base text-foreground">Add New Adventure Activity</h4>
+                        <button onClick={() => setShowAddActivityModal(false)} className="text-muted-foreground hover:text-foreground">
+                          <XCircle className="h-5 w-5" />
+                        </button>
+                      </div>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!newActivityTitle.trim()) return;
+                          const newAct = {
+                            id: `act-${Date.now()}`,
+                            title: newActivityTitle.trim(),
+                            cat: newActivityCat,
+                            duration: newActivityDuration,
+                            difficulty: newActivityDifficulty
+                          };
+                          setActivitiesList(prev => [newAct, ...prev]);
+                          setNewActivityTitle("");
+                          setShowAddActivityModal(false);
+                          toast.success(`Activity "${newAct.title}" published.`);
+                        }}
+                        className="space-y-3 text-xs"
+                      >
+                        <div>
+                          <label className="block font-bold mb-1">Activity Title</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Yelagiri Paragliding Tandem Flight"
+                            value={newActivityTitle}
+                            onChange={(e) => setNewActivityTitle(e.target.value)}
+                            className="w-full p-2.5 rounded-xl border border-border bg-background"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block font-bold mb-1">Category</label>
+                            <select
+                              value={newActivityCat}
+                              onChange={(e) => setNewActivityCat(e.target.value)}
+                              className="w-full p-2 rounded-xl border border-border bg-background"
+                            >
+                              <option>Trekking</option>
+                              <option>Motorcycling</option>
+                              <option>Watersports</option>
+                              <option>Wildlife</option>
+                              <option>Paragliding</option>
+                              <option>Rock Climbing</option>
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block font-bold mb-1">Difficulty</label>
+                            <select
+                              value={newActivityDifficulty}
+                              onChange={(e) => setNewActivityDifficulty(e.target.value)}
+                              className="w-full p-2 rounded-xl border border-border bg-background"
+                            >
+                              <option>Easy</option>
+                              <option>Moderate</option>
+                              <option>Challenging</option>
+                              <option>Extreme</option>
+                            </select>
+                          </div>
+                        </div>
+                        <div>
+                          <label className="block font-bold mb-1">Estimated Duration</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 4 Hours / 1 Day"
+                            value={newActivityDuration}
+                            onChange={(e) => setNewActivityDuration(e.target.value)}
+                            className="w-full p-2.5 rounded-xl border border-border bg-background"
+                          />
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => setShowAddActivityModal(false)}>Cancel</Button>
+                          <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">Save Activity</Button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -646,8 +806,13 @@ function AdminOperationsCenter() {
             {activeSection === "events" && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <h3 className="text-xl font-bold text-foreground font-serif">Events & Cultural Festivals</h3>
-                  <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Create Event</Button>
+                  <div>
+                    <h3 className="text-xl font-bold text-foreground font-serif">Events & Cultural Festivals</h3>
+                    <p className="text-xs text-muted-foreground">Manage festivals, temple celebrations, cultural carnivals, and food expos.</p>
+                  </div>
+                  <Button size="sm" onClick={() => setShowAddEventModal(true)} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer">
+                    <Plus className="h-4 w-4" /> Create Event
+                  </Button>
                 </div>
 
                 <div className="divide-y divide-border">
@@ -660,10 +825,144 @@ function AdminOperationsCenter() {
                         </div>
                         <div className="text-xs text-muted-foreground mt-1">Venue: {e.venue} · Dates: {e.startDate} to {e.endDate}</div>
                       </div>
-                      <Button size="sm" variant="outline"><Edit className="h-4 w-4" /></Button>
+                      <div className="flex items-center gap-2">
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => {
+                            const updatedVenue = prompt("Update Venue:", e.venue);
+                            if (updatedVenue && updatedVenue.trim()) {
+                              setEvents(prev => prev.map(ev => ev.id === e.id ? { ...ev, venue: updatedVenue.trim() } : ev));
+                              toast.success(`Updated venue for ${e.title}`);
+                            }
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-rose-500 hover:text-rose-700 hover:bg-rose-500/10"
+                          onClick={() => {
+                            if (confirm(`Delete event "${e.title}"?`)) {
+                              setEvents(prev => prev.filter(ev => ev.id !== e.id));
+                              toast.success("Event deleted successfully.");
+                            }
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>
+
+                {showAddEventModal && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+                    <div className="w-full max-w-md bg-card border border-border rounded-2xl p-6 shadow-xl space-y-4">
+                      <div className="flex justify-between items-center border-b border-border pb-3">
+                        <h4 className="font-bold text-base text-foreground">Create Cultural Event</h4>
+                        <button onClick={() => setShowAddEventModal(false)} className="text-muted-foreground hover:text-foreground">
+                          <XCircle className="h-5 w-5" />
+                        </button>
+                      </div>
+                      <form
+                        onSubmit={(e) => {
+                          e.preventDefault();
+                          if (!newEventTitle.trim()) return;
+                          const newEv: EventDetail = {
+                            id: `ev-${Date.now()}`,
+                            title: newEventTitle.trim(),
+                            category: newEventCategory,
+                            venue: newEventVenue.trim() || "Tamil Nadu",
+                            district: "Tamil Nadu",
+                            startDate: newEventStartDate,
+                            endDate: newEventEndDate,
+                            startTime: "09:00",
+                            endTime: "21:00",
+                            location: newEventVenue.trim() || "Tamil Nadu",
+                            organizer: "ExploreTN Tourism Council",
+                            contact: "admin@exploretn.com",
+                            ticketPrice: "Free Entry",
+                            bookingUrl: "#",
+                            imageUrl: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?w=800",
+                            isRecurring: true,
+                            status: "Upcoming",
+                            isPublished: true,
+                            description: "Official cultural festival celebration in Tamil Nadu."
+                          };
+                          setEvents(prev => [newEv, ...prev]);
+                          setNewEventTitle("");
+                          setNewEventVenue("");
+                          setShowAddEventModal(false);
+                          toast.success(`Event "${newEv.title}" created successfully.`);
+                        }}
+                        className="space-y-3 text-xs"
+                      >
+                        <div>
+                          <label className="block font-bold mb-1">Event Name</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Pongal Harvest Carnival & Jallikattu"
+                            value={newEventTitle}
+                            onChange={(e) => setNewEventTitle(e.target.value)}
+                            className="w-full p-2.5 rounded-xl border border-border bg-background"
+                          />
+                        </div>
+                        <div>
+                          <label className="block font-bold mb-1">Category</label>
+                          <select
+                            value={newEventCategory}
+                            onChange={(e) => setNewEventCategory(e.target.value)}
+                            className="w-full p-2 rounded-xl border border-border bg-background"
+                          >
+                            <option>Cultural Festival</option>
+                            <option>Temple Festival</option>
+                            <option>Carnival</option>
+                            <option>Food Expo</option>
+                            <option>Music & Dance</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="block font-bold mb-1">Venue / District</label>
+                          <input
+                            type="text"
+                            required
+                            placeholder="e.g. Alanganallur, Madurai"
+                            value={newEventVenue}
+                            onChange={(e) => setNewEventVenue(e.target.value)}
+                            className="w-full p-2.5 rounded-xl border border-border bg-background"
+                          />
+                        </div>
+                        <div className="grid grid-cols-2 gap-3">
+                          <div>
+                            <label className="block font-bold mb-1">Start Date</label>
+                            <input
+                              type="date"
+                              value={newEventStartDate}
+                              onChange={(e) => setNewEventStartDate(e.target.value)}
+                              className="w-full p-2 rounded-xl border border-border bg-background"
+                            />
+                          </div>
+                          <div>
+                            <label className="block font-bold mb-1">End Date</label>
+                            <input
+                              type="date"
+                              value={newEventEndDate}
+                              onChange={(e) => setNewEventEndDate(e.target.value)}
+                              className="w-full p-2 rounded-xl border border-border bg-background"
+                            />
+                          </div>
+                        </div>
+                        <div className="flex justify-end gap-2 pt-2">
+                          <Button type="button" variant="outline" size="sm" onClick={() => setShowAddEventModal(false)}>Cancel</Button>
+                          <Button type="submit" size="sm" className="bg-emerald-600 hover:bg-emerald-700 text-white">Publish Event</Button>
+                        </div>
+                      </form>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
 
@@ -683,7 +982,11 @@ function AdminOperationsCenter() {
                 <div className="space-y-4 max-w-2xl text-xs">
                   <div>
                     <label className="block font-bold text-foreground mb-1">Active GenAI Model Engine</label>
-                    <select className="w-full rounded-xl border border-border bg-background p-2 text-foreground font-mono">
+                    <select
+                      value={aiModelEngine}
+                      onChange={(e) => setAiModelEngine(e.target.value)}
+                      className="w-full rounded-xl border border-border bg-background p-2 text-foreground font-mono"
+                    >
                       <option>Google Gemini 1.5 Pro (Recommended)</option>
                       <option>Google Gemini 1.5 Flash (Fast)</option>
                       <option>Claude 3.5 Sonnet</option>
@@ -695,7 +998,8 @@ function AdminOperationsCenter() {
                     <label className="block font-bold text-foreground mb-1">System Prompt Template</label>
                     <textarea
                       rows={5}
-                      defaultValue="You are an expert Tamil Nadu Travel Intelligence Architect. Generate optimal travel routes adhering to real driving distances, district limits, and canonical opening hours."
+                      value={aiSystemPrompt}
+                      onChange={(e) => setAiSystemPrompt(e.target.value)}
                       className="w-full rounded-xl border border-border bg-background p-3 text-foreground font-mono text-xs"
                     />
                   </div>
@@ -703,15 +1007,36 @@ function AdminOperationsCenter() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block font-bold text-foreground mb-1">Max Destinations per Plan</label>
-                      <input type="number" defaultValue={15} className="w-full rounded-xl border border-border bg-background p-2 font-mono" />
+                      <input
+                        type="number"
+                        value={aiMaxDestinations}
+                        onChange={(e) => setAiMaxDestinations(Number(e.target.value))}
+                        className="w-full rounded-xl border border-border bg-background p-2 font-mono"
+                      />
                     </div>
                     <div>
                       <label className="block font-bold text-foreground mb-1">Max Route Length (km)</label>
-                      <input type="number" defaultValue={1200} className="w-full rounded-xl border border-border bg-background p-2 font-mono" />
+                      <input
+                        type="number"
+                        value={aiMaxRouteLength}
+                        onChange={(e) => setAiMaxRouteLength(Number(e.target.value))}
+                        className="w-full rounded-xl border border-border bg-background p-2 font-mono"
+                      />
                     </div>
                   </div>
 
-                  <Button className="bg-emerald-600 hover:bg-emerald-700 text-white">Save AI Configurations</Button>
+                  <Button
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("etn_ai_model", aiModelEngine);
+                        localStorage.setItem("etn_ai_prompt", aiSystemPrompt);
+                      }
+                      toast.success("AI Configuration saved successfully.");
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                  >
+                    Save AI Configurations
+                  </Button>
                 </div>
               </div>
             )}
@@ -731,7 +1056,9 @@ function AdminOperationsCenter() {
                     <h3 className="text-xl font-bold text-foreground font-serif">Users & RBAC Permission Matrix</h3>
                     <p className="text-xs text-muted-foreground">Manage user roles, admin access, and security permissions.</p>
                   </div>
-                  <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add User</Button>
+                  <Button size="sm" onClick={() => setIsUserModalOpen(true)} className="gap-2 bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer">
+                    <Plus className="h-4 w-4" /> Add User
+                  </Button>
                 </div>
 
                 <div className="divide-y divide-border">
@@ -912,16 +1239,36 @@ function AdminOperationsCenter() {
             {activeSection === "settings" && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
                 <h3 className="text-xl font-bold text-foreground font-serif border-b border-border pb-3">Global System Settings</h3>
-                <div className="space-y-3 max-w-xl text-xs">
+                <div className="space-y-4 max-w-xl text-xs">
                   <div>
                     <label className="block font-bold text-foreground mb-1">Platform Name</label>
-                    <input type="text" defaultValue="ExploreTN — Travel Intelligence Platform" className="w-full p-2 rounded-xl border border-border bg-background" />
+                    <input
+                      type="text"
+                      value={platformName}
+                      onChange={(e) => setPlatformName(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-border bg-background"
+                    />
                   </div>
                   <div>
                     <label className="block font-bold text-foreground mb-1">Mapbox / Leaflet Map Engine Key</label>
-                    <input type="password" defaultValue="pk.eyJ1IjoicHJhbmF2IiwiYSI6ImNseXRzIn0" className="w-full p-2 rounded-xl border border-border bg-background font-mono" />
+                    <input
+                      type="password"
+                      value={mapEngineKey}
+                      onChange={(e) => setMapEngineKey(e.target.value)}
+                      className="w-full p-2.5 rounded-xl border border-border bg-background font-mono"
+                    />
                   </div>
-                  <Button className="bg-emerald-600 text-white">Save System Settings</Button>
+                  <Button
+                    onClick={() => {
+                      if (typeof window !== "undefined") {
+                        localStorage.setItem("etn_platform_name", platformName);
+                      }
+                      toast.success("System settings updated successfully.");
+                    }}
+                    className="bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                  >
+                    Save System Settings
+                  </Button>
                 </div>
               </div>
             )}
@@ -947,6 +1294,15 @@ function AdminOperationsCenter() {
 
             {/* 23. CAIN SECURITY DASHBOARD */}
             {activeSection === "security" && <SecurityDashboardModule />}
+
+            {/* User Management & RBAC Modal */}
+            <UserManagementModal
+              isOpen={isUserModalOpen}
+              onClose={() => {
+                setIsUserModalOpen(false);
+                loadAdminData();
+              }}
+            />
 
           </div>
         </div>

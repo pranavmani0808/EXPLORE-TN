@@ -86,7 +86,7 @@ function AdventuresPage() {
               className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold text-emerald-400"
             >
               <Flame className="size-4 text-emerald-400" />
-              <span>10 Curated Experiences Across India</span>
+              <span>19 Curated Adventure Expeditions in Tamil Nadu & India</span>
             </motion.div>
 
             <motion.h1
@@ -96,7 +96,7 @@ function AdventuresPage() {
               className="mt-4 text-4xl font-extrabold tracking-tight sm:text-6xl text-white"
             >
               Adventure Activities <br />
-              <span className="text-gradient font-black">in India</span>
+              <span className="text-gradient font-black">in Tamil Nadu & India</span>
             </motion.h1>
 
             <motion.p
@@ -105,7 +105,7 @@ function AdventuresPage() {
               transition={{ delay: 0.2 }}
               className="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed"
             >
-              From Himalayan paragliding in Bir Billing and Mysore skydiving to Ganges river rafting and Havelock coral scuba diving — click any activity to view full location details, GPS coordinates, how to reach, and safety protocols.
+              Explore top outdoor thrills: Scuba diving in Rameswaram, paragliding in Yelagiri, 70 hairpin off-roading in Kolli Hills, surfing at Kovalam Chennai, Mudumalai wildlife safaris, and high-altitude treks. Click any adventure to view full GPS coordinates, gear requirements, how to reach, and safety protocols.
             </motion.p>
           </div>
 

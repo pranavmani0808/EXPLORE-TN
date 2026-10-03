@@ -480,4 +480,401 @@ export const adventureActivities: AdventureActivity[] = [
     popularityScore: 94,
     featured: false,
   },
+  {
+    id: "scuba-diving-rameshwaram",
+    name: "Scuba Diving in Rameswaram",
+    destination: "Olaikuda / Sangumal Beach, Rameswaram",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Water Adventures",
+    description: "Explore Gulf of Mannar biosphere coral reefs, colorful clownfish, and sea grass beds with certified PADI dive masters.",
+    fullDescription: "Scuba diving in Rameswaram takes place primarily around the tranquil waters of Olaikuda Beach and Sangumal Beach near Holy Island Water Sports. Situated inside the biologically rich Gulf of Mannar Marine National Park, the diving sites showcase fringing coral reefs, sea anemones, clownfish, starfish, and stingrays. Diving programs include professional shallow-water pool training followed by an open-water escorted dive up to 6–10 meters with underwater HD GoPro footage.",
+    image: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1682687220063-4742bd7fd538?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Easy",
+    duration: "2–3 hrs (30–45m dive)",
+    estimatedPrice: "₹4,000 – ₹5,000",
+    bestSeason: "Oct – Apr",
+    altitude: "6m–10m ocean depth",
+    coordinates: { lat: 9.2974, lng: 79.3242 },
+    tags: ["Gulf of Mannar", "Coral Reefs", "PADI Certified", "Marine Life"],
+    highlights: [
+      "Dive inside the biodiverse Gulf of Mannar Marine Biosphere",
+      "Observe fringing coral reefs, parrotfish, sea turtles, and clownfish",
+      "Full 1-on-1 accompaniment by certified PADI dive masters",
+      "Includes complimentary underwater 4K GoPro photos and videos"
+    ],
+    howToReach: {
+      airport: "Madurai Airport (IXM) - 175 km away",
+      railway: "Rameswaram Railway Station (RMM) - 3.5 km away",
+      road: "Drive across Pamban Road Bridge via NH87 into Rameswaram island"
+    },
+    safetyEquipment: [
+      "PADI-standard buoyancy control devices (BCD) & regulators",
+      "Full-body neoprene wetsuits & dive boots",
+      "Emergency oxygen kit on dive support vessel",
+      "Certified ocean safety rescue diver escort"
+    ],
+    inclusions: [
+      "Theory & breathing technique briefing on shore",
+      "Shallow water practice session",
+      "30-45 minutes ocean reef dive",
+      "HD underwater photography and video transfer"
+    ],
+    popularityScore: 96,
+    featured: true,
+  },
+  {
+    id: "paragliding-yelagiri",
+    name: "Paragliding in Yelagiri",
+    destination: "Yelagiri Hills (Kottur / Raneri)",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Air Adventures",
+    description: "Tandem paragliding flight soaring above lush Jawadhu hill ranges and orchards at 920m altitude.",
+    fullDescription: "Organized through the Yelagiri Adventure Sports Association (YASA), Yelagiri is Tamil Nadu's premiere paragliding destination. With launching sites situated near Kottur and Raneri at an altitude of approximately 920 meters, tandem gliders catch thermal updrafts over terraced fruit orchards, rose gardens, and forested Western-Ghats offshoots. Passengers fly tandem with experienced pilots before touching down at dedicated landing fields.",
+    image: "https://images.unsplash.com/photo-1516738901171-8eb4fc13bd20?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1507608869274-d3177c8bb4c7?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Moderate",
+    duration: "1–2 hrs (15–20m flight)",
+    estimatedPrice: "₹2,500 – ₹4,000",
+    bestSeason: "Oct – Feb",
+    altitude: "920m (Takeoff point)",
+    coordinates: { lat: 12.5833, lng: 78.6333 },
+    tags: ["Tandem Paragliding", "Jawadhu Hills", "YASA Certified", "Aerial Views"],
+    highlights: [
+      "Aerial vista of Yelagiri valley, Athanavur, and Punganoor lake",
+      "Tandem flights accompanied by licensed aero-sports pilots",
+      "Smooth thermal wind conditions ideal for first-time flyers",
+      "GoPro flight footage recording packages available"
+    ],
+    howToReach: {
+      airport: "Bengaluru Kempegowda Airport (BLR) - 160 km / Chennai - 225 km",
+      railway: "Jolarpettai Junction (JTJ) - 21 km away",
+      road: "Drive up 14 hairpin bends on Ghat Road from Ponneri junction"
+    },
+    safetyEquipment: [
+      "Dual harness with reserve parachute system",
+      "Impact-resistant aviation safety helmet",
+      "Anemometer continuous wind speed monitoring",
+      "Two-way VHF radio ground link"
+    ],
+    inclusions: [
+      "Ground transport to Kottur takeoff ridge",
+      "Pre-flight safety instructions & gear fitting",
+      "15-20 min tandem paragliding joyride",
+      "Landing recovery transfer"
+    ],
+    popularityScore: 92,
+    featured: true,
+  },
+  {
+    id: "off-roading-kolli-hills",
+    name: "Off Roading & Ghat Driving in Kolli Hills",
+    destination: "Kolli Hills (Semmedu & Solakkadu)",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Extreme Adventures",
+    description: "Navigate 70 continuous hairpin bends followed by rugged rocky trails through cardamom estates and coffee plantations.",
+    fullDescription: "Kolli Hills (Mountain of Death) is legendary for its 70 continuous, numbered hairpin bends ascending 1,300 meters from Kalappanaickenpatti to Semmedu. Beyond the paved ghat circuit, adventure enthusiasts explore designated rugged estate trails, rocky forest fringes near Solakkadu, and steep off-road tracks connecting tribal hamlets and pepper valleys. The ride offers adrenaline, dramatic drop-offs, and dense fog rolling across hairpin turns 30 to 55.",
+    image: "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Advanced",
+    duration: "Full Day (4–6 hrs)",
+    estimatedPrice: "₹1,500 – ₹3,500 (Vehicle / Guide)",
+    bestSeason: "Sep – Mar",
+    altitude: "1,300m MSL",
+    coordinates: { lat: 11.2485, lng: 78.3387 },
+    tags: ["70 Hairpin Bends", "4x4 Trails", "Motorcycling", "Eastern Ghats"],
+    highlights: [
+      "Conquer India's most intense continuous 70-hairpin mountain climb",
+      "Navigate rugged 4x4 dirt trails across coffee and silver oak estates",
+      "Panoramic viewpoints at Seekuparai, Selur Nadu, and Sirumalai view",
+      "Dense fog encounters and challenging mountain switchbacks"
+    ],
+    howToReach: {
+      airport: "Tiruchirappalli International Airport (TRZ) - 95 km away",
+      railway: "Salem Junction - 85 km / Namakkal Railway Station - 45 km",
+      road: "Route via Namakkal -> Kalappanaickenpatti -> Karavalli checkpost"
+    },
+    safetyEquipment: [
+      "High-traction off-road tires & 4WD low-range transmission",
+      "Certified riding armor / full-face helmet for bikers",
+      "Fog lamps & GPS offline trail navigation",
+      "Emergency tire inflator & tow straps"
+    ],
+    inclusions: [
+      "Guided route orientation and convoy coordination",
+      "Hairpin bend navigation safety briefing",
+      "Estate trail access permissions",
+      "Local tribal lunch stopover experience"
+    ],
+    popularityScore: 95,
+    featured: true,
+  },
+  {
+    id: "trek-agasthiyar-falls",
+    name: "Trek to Agasthiyar Falls",
+    destination: "Papanasam, KMTR, Tirunelveli",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Mountain Adventures",
+    description: "Hike through pristine Western Ghats rainforest in Kalakkad-Mundanthurai Tiger Reserve to the sacred Thamirabarani cascade.",
+    fullDescription: "The trek to Agasthiyar Falls (Papanasam Falls) takes adventurers into the bio-rich buffer zone of the Kalakkad Mundanthurai Tiger Reserve (KMTR). Starting near the ancient Papanasanathar Temple along the perennial Thamirabarani River, a scenic trail leads uphill towards the roaring 25-meter cascade where Sage Agastya was blessed with the divine vision of Lord Shiva. The path continues towards the serene Kalyanatheertham pool higher up the Western Ghats slope.",
+    image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1546182990-dffeafbe841d?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Easy",
+    duration: "2–4 hrs (3 km walk/hike)",
+    estimatedPrice: "₹100 – ₹500 (Forest entry & parking)",
+    bestSeason: "Oct – Mar",
+    altitude: "350m MSL",
+    coordinates: { lat: 8.7042, lng: 77.3683 },
+    tags: ["KMTR Tiger Reserve", "Thamirabarani River", "Sacred Waterfall", "Herbal Waters"],
+    highlights: [
+      "Breathtaking 25-meter natural waterfall with mineral-rich herbal waters",
+      "Hike alongside the crystal-clear Thamirabarani riverbank",
+      "Spot endemic Western Ghats butterflies, hornbills, and Nilgiri langurs",
+      "Continue uphill to the sacred, tranquil Kalyanatheertham pool"
+    ],
+    howToReach: {
+      airport: "Tuticorin Airport (TCR) - 80 km / Madurai Airport - 170 km",
+      railway: "Tirunelveli Junction - 48 km away / Ambasamudram - 16 km",
+      road: "State Highway 40 from Tirunelveli via Cheranmahadevi to Papanasam"
+    },
+    safetyEquipment: [
+      "Sturdy anti-slip trekking shoes",
+      "Eco-friendly bamboo walking sticks",
+      "Forest department lifeguard surveillance at designated bathing pools",
+      "First aid post at KMTR checkpost"
+    ],
+    inclusions: [
+      "KMTR forest checkpost entry clearance",
+      "Waterfall viewpoint access",
+      "Natural herbal bath in permitted river sections",
+      "Papanasam nature interpretation trail"
+    ],
+    popularityScore: 91,
+    featured: false,
+  },
+  {
+    id: "rock-climbing-gingee-fort",
+    name: "Rock Climbing & Bouldering at Gingee Fort",
+    destination: "Gingee (Rajagiri & Krishnagiri), Viluppuram",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Extreme Adventures",
+    description: "Climb monolithic granite boulder towers and scale the impregnable 800-foot Rajagiri citadel dubbed the Troy of the East.",
+    fullDescription: "Gingee Fort, praised by Chhatrapati Shivaji as the most impregnable fortress in India, is built atop three colossal granite hills: Rajagiri, Krishnagiri, and Chandrayandurg. Rising 800 feet above the surrounding plains of Viluppuram, the massive weathered granite boulders and rocky outcrops offer world-class bouldering problems and endurance scrambling. Trekkers and boulderers scale steep stone cut ramps, fortified boulder gaps, and wooden drawbridges to reach the summit.",
+    image: "https://images.unsplash.com/photo-1522163182402-834f871fd851?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Advanced",
+    duration: "3–5 hrs (1,200 rock steps & scrambling)",
+    estimatedPrice: "₹25 (ASI Entry) / Guided: ₹800 – ₹1,500",
+    bestSeason: "Oct – Feb",
+    altitude: "240m (800 ft granite peak)",
+    coordinates: { lat: 12.2536, lng: 79.4181 },
+    tags: ["Troy of the East", "Granite Bouldering", "Rajagiri Citadel", "ASI Heritage"],
+    highlights: [
+      "Scale the dramatic 800-foot vertical granite citadel of Rajagiri",
+      "Cross the narrow hanging wooden bridge spanning a 60-foot canyon chasm",
+      "Explore massive granite boulder formations, granaries, and the 7-storey Kalyana Mahal",
+      "360-degree panoramic view of Viluppuram plains and Krishnagiri peak"
+    ],
+    howToReach: {
+      airport: "Chennai International Airport (MAA) - 150 km away",
+      railway: "Tindivanam Railway Station (TMV) - 27 km / Viluppuram - 40 km",
+      road: "NH77 Tindivanam - Tiruvannamalai highway directly connects to Gingee"
+    },
+    safetyEquipment: [
+      "Chalk bag & bouldering crash pad (for private boulder problems)",
+      "Vibram-sole climbing/approach shoes with high grip",
+      "Hydration backpack (minimum 2 liters recommended)",
+      "Sun protection & safety headgear"
+    ],
+    inclusions: [
+      "ASI archaeological fort complex admission",
+      "Rajagiri and Krishnagiri hill trail access",
+      "Historical citadel exploration",
+      "Archaeological interpretive trail guide"
+    ],
+    popularityScore: 93,
+    featured: true,
+  },
+  {
+    id: "camping-kolli-hills",
+    name: "Wild Camping in Kolli Hills",
+    destination: "Kolli Hills (Seekuparai / Selur Nadu)",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Mountain Adventures",
+    description: "Camp under starry skies amidst silver oak forests, coffee estates, and cool mountain breezes at 1,300m elevation.",
+    fullDescription: "Escape to the untouched wilderness of Kolli Hills for an authentic hill camping experience. Situated at 1,300 meters altitude away from commercial tourist rush, private campgrounds nestled in organic coffee and pepper estates offer weather-proof dome tents, nighttime campfires, acoustic music, and stargazing under pollution-free mountain skies. Mornings welcome campers with thick blanket fog, birdsong, and guided plantation walking trails.",
+    image: "https://images.unsplash.com/photo-1510312305653-8ed496efae75?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Easy",
+    duration: "Overnight (2 Days / 1 Night)",
+    estimatedPrice: "₹1,800 – ₹3,000 per person",
+    bestSeason: "Sep – Mar",
+    altitude: "1,300m MSL",
+    coordinates: { lat: 11.2333, lng: 78.3417 },
+    tags: ["Stargazing", "Coffee Estate Camp", "Campfire", "Cloud Line"],
+    highlights: [
+      "Overnight dome tent camping inside organic coffee and pepper plantations",
+      "Evening bonfire with traditional Kongu-style barbecue dinner",
+      "Stargazing under crisp, unpolluted Western Ghats skies",
+      "Morning sunrise walk to Seekuparai viewpoint overlooking deep gorges"
+    ],
+    howToReach: {
+      airport: "Tiruchirappalli Airport (TRZ) - 95 km away",
+      railway: "Salem Junction - 85 km / Namakkal - 45 km",
+      road: "Ascend 70 hairpin bends via Semmedu to private estate camp zones"
+    },
+    safetyEquipment: [
+      "Waterproof, wind-resistant double-layer dome tents",
+      "Sub-zero rated sleeping bags and foam camping mattresses",
+      "Perimeter solar fencing and 24/7 estate caretaker security",
+      "Emergency first-aid and vehicle standby"
+    ],
+    inclusions: [
+      "Dome tent accommodation with sleeping bags & pillows",
+      "Evening campfire and tea/snacks",
+      "Authentic South Indian dinner and breakfast",
+      "Guided estate plantation and viewpoint trek"
+    ],
+    popularityScore: 90,
+    featured: false,
+  },
+  {
+    id: "surfing-kovalam-chennai",
+    name: "Surfing at Kovalam (Covelong)",
+    destination: "Covelong Beach, East Coast Road, Chennai",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Water Adventures",
+    description: "Catch consistent ocean swells and learn to ride waves at India's premier surfing village on the scenic East Coast Road.",
+    fullDescription: "Kovalam (Covelong Point), located 35 km south of Chennai along the East Coast Road, is the surfing epicenter of Tamil Nadu and home to the annual Covelong Point Surf, Music & Yoga Festival. With natural sandbars and consistent beach breaks, certified schools like Surf Turf and Bay of Life provide safe, professional surf coaching for everyone from complete beginners to advanced wave riders. Warm tropical waters and gentle waves make it the ideal place to catch your first wave.",
+    image: "https://images.unsplash.com/photo-1502680390469-be75c86b636f?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1544551763-46a013bb70d5?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Moderate",
+    duration: "1.5 – 2 hrs (Instruction & water session)",
+    estimatedPrice: "₹1,500 – ₹2,200",
+    bestSeason: "May – Sep (High Swells) / Year-round beginners",
+    altitude: "Sea level",
+    coordinates: { lat: 12.7925, lng: 80.2528 },
+    tags: ["Covelong Point", "Surf Turf", "East Coast Road", "ISA Certified"],
+    highlights: [
+      "Learn surfing at India's most famous surf fishing village",
+      "Coached by ISA (International Surfing Association) certified surf instructors",
+      "Consistent beach-break waves ideal for mastering pop-ups and wave trim",
+      "Beachfront surf cafe, showers, board rentals, and ocean safety drills"
+    ],
+    howToReach: {
+      airport: "Chennai International Airport (MAA) - 34 km away",
+      railway: "Chennai Central (MAS) - 38 km / Chengalpattu - 32 km",
+      road: "Drive down scenic ECR (East Coast Road) towards Mahabalipuram"
+    },
+    safetyEquipment: [
+      "Soft-top beginner foam surfboards with safety leash",
+      "UV-protective rashguards and zinc sun-block",
+      "Ocean safety life buoys & trained surf lifesaver lifeguards",
+      "Shallow water sandbank training area"
+    ],
+    inclusions: [
+      "Surfboard and leash rental during the session",
+      "30-minute dry beach instruction on wave mechanics and pop-ups",
+      "60-minute in-water hands-on surf coaching",
+      "Access to changing rooms, showers, and equipment lockers"
+    ],
+    popularityScore: 97,
+    featured: true,
+  },
+  {
+    id: "wildlife-safari-mudumalai",
+    name: "Wildlife Safari in Mudumalai Tiger Reserve",
+    destination: "Theppakadu, Mudumalai, Nilgiris",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Extreme Adventures",
+    description: "Jeep and van jungle safari tracking Royal Bengal tigers, wild Asian elephants, leopards, and Indian gaur in Nilgiri Biosphere.",
+    fullDescription: "Mudumalai Tiger Reserve, nestled on the Nilgiri plateau border joining Bandipur and Wayanad, is one of South India's oldest and most bio-diverse tiger reserves. Operating from the Theppakadu reception hub, Tamil Nadu Forest Department safaris venture into deciduous teak forests, bamboo groves, and Moyar river valleys. Visitors frequently spot herds of wild elephants, majestic Indian gaur (bison), spotted deer, dholes (wild dogs), sloth bears, and elusive Royal Bengal tigers.",
+    image: "https://images.unsplash.com/photo-1547471080-7cc2caa01a7e?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1534177616072-ef7dc120449d?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Easy",
+    duration: "2–3 hrs (45–60m safari drive)",
+    estimatedPrice: "₹350 (Bus) / ₹3,000 – ₹4,200 (Forest Gypsy)",
+    bestSeason: "Oct – May",
+    altitude: "1,000m MSL",
+    coordinates: { lat: 11.5833, lng: 76.5833 },
+    tags: ["Project Tiger", "Asian Elephants", "Nilgiri Biosphere", "Forest Dept Safari"],
+    highlights: [
+      "Venture into core zones of Nilgiris UNESCO World Heritage Biosphere",
+      "High probability sightings of Asian elephants, Indian gaur, and wild boar",
+      "Track tiger pugmarks and alarm calls with trained forest department naturalists",
+      "Visit the historic Theppakadu Elephant Camp (Asia's oldest captive elephant facility)"
+    ],
+    howToReach: {
+      airport: "Coimbatore International Airport (CJB) - 130 km away / Mysore - 90 km",
+      railway: "Udhagamandalam (Ooty) - 36 km / Mysore Junction - 90 km",
+      road: "NH181 connecting Ooty to Mysore through Kalhatty ghats or Gudalur"
+    },
+    safetyEquipment: [
+      "Heavy-duty government forest safari vans and open 4x4 gypsies",
+      "Uniformed Tamil Nadu forest guard naturalist escort",
+      "Strict core-area animal standoff safety protocols",
+      "Emergency wireless radio transmission with checkposts"
+    ],
+    inclusions: [
+      "Mudumalai Tiger Reserve entry permit ticket",
+      "Forest department van or authorized 4x4 gypsy ride",
+      "Naturalist guide commentary on Nilgiri flora and fauna",
+      "Theppakadu elephant camp interpretive center access"
+    ],
+    popularityScore: 98,
+    featured: true,
+  },
+  {
+    id: "cave-exploring-sittanavasal",
+    name: "Cave Exploring at Sittanavasal",
+    destination: "Sittanavasal, Pudukkottai",
+    state: "Tamil Nadu",
+    country: "India",
+    category: "Mountain Adventures",
+    description: "Explore 2nd-century BC Jain cavern beds and rock-cut cave temple famous for vibrant 7th-century fresco-secco mural paintings.",
+    fullDescription: "Sittanavasal is an archaeological wonder carved into a monolithic granite hill in Pudukkottai district. The site features the Arivar Koil, a 7th-century rock-cut cave temple renowned for its extraordinary fresco-secco ceiling murals depicting a lotus pond (Samavasarana) with dancing damsels, fish, ducks, and elephants, rendered using organic vegetable dyes. Trekkers also hike up the rock face to Ezhadippattam, a natural cavern containing 17 polished stone beds used by Jain monks since the 2nd century BC inscribed with ancient Tamil-Brahmi scripts.",
+    image: "https://images.unsplash.com/photo-1599831104328-b141d6a4571a?q=80&w=1200&auto=format&fit=crop",
+    fallbackImage: "https://images.unsplash.com/photo-1548625361-185871f302b5?q=80&w=1200&auto=format&fit=crop",
+    difficulty: "Easy",
+    duration: "2–3 hrs (Cave exploration & hill hike)",
+    estimatedPrice: "₹25 (ASI entry ticket)",
+    bestSeason: "Oct – Mar",
+    altitude: "100m MSL",
+    coordinates: { lat: 10.4578, lng: 78.7495 },
+    tags: ["Jain Cave Temple", "Fresco Paintings", "Tamil-Brahmi Script", "ASI Monument"],
+    highlights: [
+      "Marvel at 7th-century rock-cut Jain cave murals rivaling Ajanta frescoes",
+      "Hike up granite rock steps to Ezhadippattam cavern with 2,200-year-old stone beds",
+      "Read ancient Tamil-Brahmi rock inscriptions by Jain ascetic Ilayar",
+      "Quiet reflection inside the acoustically resonant stone-pillared sanctum"
+    ],
+    howToReach: {
+      airport: "Tiruchirappalli International Airport (TRZ) - 48 km away",
+      railway: "Pudukkottai Railway Station (PDKT) - 16 km away",
+      road: "SH71 linking Pudukkottai with viralimalai / Trichy via Annavasal"
+    },
+    safetyEquipment: [
+      "Handrails along steep granite incline towards Ezhadippattam",
+      "Rubber-traction walking shoes for polished granite slopes",
+      "ASI protective fiber barriers preserving ceiling murals",
+      "Archaeological monument guard supervision"
+    ],
+    inclusions: [
+      "ASI entrance ticket to Arivar Koil cave paintings sanctum",
+      "Admission to Ezhadippattam cavern stone beds",
+      "Archaeological interpretive display panels",
+      "Access to adjacent tourist park and pond"
+    ],
+    popularityScore: 92,
+    featured: false,
+  },
 ];
+
