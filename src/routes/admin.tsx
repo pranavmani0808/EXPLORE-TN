@@ -306,14 +306,13 @@ function AdminOperationsCenter() {
                 </nav>
               </div>
 
-              {/* GROUP 3: STAYS & ACTIVITIES */}
+              {/* GROUP 3: ACTIVITIES & EXPERIENCES */}
               <div>
                 <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  🏨 STAYS & ACTIVITIES
+                  🏔️ ACTIVITIES & EXPERIENCES
                 </div>
                 <nav className="space-y-0.5">
                   {[
-                    { id: "hotels", label: "Hotels & Resorts", icon: Hotel, count: hotels.length },
                     { id: "activities", label: "Activities & Adventures", icon: Mountain, count: attractions.length },
                     { id: "events", label: "Events & Festivals", icon: PartyPopper, count: events.length }
                   ].map((item) => {
@@ -648,37 +647,7 @@ function AdminOperationsCenter() {
               <RoutesManagementModule />
             )}
 
-            {/* 6. HOTELS MANAGEMENT */}
-            {activeSection === "hotels" && (
-              <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
-                <div className="flex items-center justify-between pb-4 border-b border-border">
-                  <h3 className="text-xl font-bold text-foreground font-serif">Hotels & Accommodations</h3>
-                  <Button size="sm" className="gap-2"><Plus className="h-4 w-4" /> Add Hotel</Button>
-                </div>
-
-                <div className="divide-y divide-border">
-                  {hotels.map((h) => (
-                    <div key={h.id} className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-foreground text-lg">{h.name}</span>
-                          <span className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 font-bold">{h.verificationStatus}</span>
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-1">{h.address} · Phone: {h.phone}</div>
-                        <div className="text-xs text-muted-foreground mt-0.5">Tariff: {h.priceRange} · Rating: ⭐ {h.rating}</div>
-                      </div>
-
-                      <div className="flex items-center gap-2">
-                        <Button size="sm" variant="outline"><Eye className="h-4 w-4" /> Details</Button>
-                        <Button size="sm" variant="outline"><Edit className="h-4 w-4" /></Button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* 7. ACTIVITIES & ADVENTURES */}
+            {/* 6. ACTIVITIES & ADVENTURES */}
             {activeSection === "activities" && (
               <div className="rounded-2xl border border-border bg-card p-6 shadow-sm space-y-4">
                 <div className="flex items-center justify-between pb-4 border-b border-border">
