@@ -174,21 +174,28 @@ function LoginPage() {
 
         return;
       } else {
-        const res: any = await safeSupabaseCall(() =>
-          supabase.auth.signInWithPassword({
-            email: form.email,
-            password: form.password,
-          })
-        );
-        if (res?.data?.user) {
-          userId = res.data.user.id;
-          if (res.data.user.user_metadata?.full_name) {
-            userName = res.data.user.user_metadata.full_name;
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: form.email,
+          password: form.password,
+        });
+
+        if (error) {
+          setMessage(error.message || "Invalid login credentials");
+          setAuthStep("idle");
+          return;
+        }
+
+        if (data?.user) {
+          userId = data.user.id;
+          if (data.user.user_metadata?.full_name) {
+            userName = data.user.user_metadata.full_name;
           }
         }
       }
-    } catch (err) {
-      console.warn("[LoginPage] Supabase auth fallback to local session:", err);
+    } catch (err: any) {
+      setMessage(err?.message || "Invalid login credentials. Please try again.");
+      setAuthStep("idle");
+      return;
     }
 
     const createdUser: UserProfile = {

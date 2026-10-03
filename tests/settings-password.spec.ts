@@ -13,9 +13,12 @@ test.describe("Account Settings — Password Management Tests", () => {
     // Verify modal header and profile tab
     await expect(page.getByRole("heading", { name: /Account Security & Password Settings/i })).toBeVisible();
 
-    // Verify Change Password tab is present
-    const changePasswordTab = page.getByRole("button", { name: /Change Password/i });
-    await expect(changePasswordTab).toBeVisible();
+    // Verify Change Password button opposite Save Profile Changes is present
+    const changePasswordBtn = page.getByRole("button", { name: /Change Password/i }).first();
+    await expect(changePasswordBtn).toBeVisible();
+
+    // Verify Save Profile Changes button is present alongside it
+    await expect(page.getByRole("button", { name: /Save Profile Changes/i })).toBeVisible();
 
     // Verify Current (Old) Password input exists
     await expect(page.getByText(/Current \(Old\) Password/i)).toBeVisible();

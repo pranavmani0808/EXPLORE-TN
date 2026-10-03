@@ -165,6 +165,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
 
   // Password Management State
   const [activePasswordTab, setActivePasswordTab] = useState<"change" | "forgot">("change");
+  const [showPasswordPanel, setShowPasswordPanel] = useState(true);
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
@@ -686,15 +687,33 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       />
                     </div>
 
-                    <div className="flex justify-end pt-2">
-                      <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-6">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 pt-3">
+                      <Button
+                        type="button"
+                        onClick={() => {
+                          setShowPasswordPanel(true);
+                          setActivePasswordTab("change");
+                          setPasswordStatusMsg(null);
+                          setResetEmailStatus(null);
+                          const el = document.getElementById("password-settings-section");
+                          if (el) {
+                            el.scrollIntoView({ behavior: "smooth", block: "center" });
+                          }
+                        }}
+                        className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 hover:border-emerald-500/50 font-bold px-5 flex items-center justify-center gap-2 cursor-pointer transition shadow-md"
+                      >
+                        <Key className="size-4 text-emerald-400" />
+                        <span>Change Password</span>
+                      </Button>
+
+                      <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-6 shadow-lg shadow-emerald-500/20 cursor-pointer">
                         Save Profile Changes
                       </Button>
                     </div>
                   </form>
 
                   {/* EXPLORER CONTROLS: ACCOUNT SECURITY & PASSWORD MANAGEMENT */}
-                  <div className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4">
+                  <div id="password-settings-section" className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4 scroll-mt-6">
                     <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
                       <div>
                         <h4 className="text-sm font-bold text-white flex items-center gap-2">

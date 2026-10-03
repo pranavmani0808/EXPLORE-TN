@@ -104,8 +104,10 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             email,
             password: form.password,
           });
-          if (sbErr && !sbErr.message.includes("fetch")) {
-            console.warn("[AuthModal] Supabase signin notice:", sbErr.message);
+          if (sbErr) {
+            setError(sbErr.message || "Invalid login credentials");
+            setLoading(false);
+            return;
           }
           if (data?.user) {
             userId = data.user.id;
@@ -114,8 +116,10 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             }
           }
         }
-      } catch (err) {
-        console.warn("[AuthModal] Supabase auth fallback to local session:", err);
+      } catch (err: any) {
+        setError(err?.message || "Invalid login credentials. Please try again.");
+        setLoading(false);
+        return;
       }
 
       const assignedRole = email.endsWith("@explorertn.com") ? "super_admin" : "explorer";
