@@ -79,7 +79,7 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
 
     // Verify session validity against Supabase
     if (active && active.email) {
-      // Explicit check for deleted popz user or general database removal
+      // Explicit check for deleted popz user
       if (active.email.toLowerCase() === "popzdesigngroup@gmail.com") {
         clearAuthSession();
         setUser(null);
@@ -93,18 +93,6 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
           authListener?.subscription?.unsubscribe();
         };
       }
-
-      fetch(`/api/v1/user/sync?email=${encodeURIComponent(active.email)}`)
-        .then((res) => {
-          if (res.status === 404) {
-            clearAuthSession();
-            setUser(null);
-            alert(`Your account (${active.email}) is no longer active or has been removed from ExploreTN. You have been logged out.`);
-            toast.error("Session revoked: Account does not exist in ExploreTN.");
-            window.location.href = "/";
-          }
-        })
-        .catch(() => null);
     }
 
     return () => {
