@@ -67,37 +67,20 @@ export async function triggerGoogleSignIn(): Promise<UserProfile | null> {
         return profile;
       }
     } catch (fbErr: any) {
-      console.warn("[Google Auth] Firebase popup error, falling back to Supabase OAuth:", fbErr?.message);
+      console.warn("[Google Auth] Firebase popup error:", fbErr?.code, fbErr?.message);
       if (fbErr?.code === "auth/popup-closed-by-user") {
         return null;
       }
+      if (fbErr?.code === "auth/unauthorized-domain") {
+        toast.error("Authorized domain missing. Please add explore-tn-ochre.vercel.app to Firebase Console > Authentication > Settings > Authorized domains.");
+        throw new Error("Domain not authorized in Firebase. Add your Vercel URL to Authorized Domains.");
+      }
+      toast.error(fbErr?.message || "Google sign in failed.");
+      throw fbErr;
     }
   }
 
-  // Supabase Google OAuth fallback
-  try {
-    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: {
-        redirectTo,
-        queryParams: {
-          access_type: "offline",
-          prompt: "consent",
-        },
-      },
-    });
-
-    if (error) {
-      console.warn("[Google Auth] Supabase OAuth error:", error.message);
-      toast.error(`Google Sign-In error: ${error.message}`);
-      return null;
-    }
-
-    return null; // Redirect flow will handle session upon callback
-  } catch (err: any) {
-    console.error("[Google Auth] Unexpected error:", err);
-    toast.error(err?.message || "Google sign in failed. Please try again.");
-    return null;
-  }
+  // Fallback only if Firebase is completely unconfigured
+  toast.error("Firebase authentication is not configured yet.");
+  return null;
 }
