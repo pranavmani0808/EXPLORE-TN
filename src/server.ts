@@ -263,7 +263,31 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
           );
         }
 
-        const targetId = existingUser?.id || userId;
+        // Also sync user to Supabase auth.users so they appear in Supabase Authentication dashboard
+        let targetId = existingUser?.id || userId;
+        try {
+          const { data: authCreated, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
+            email: email,
+            email_confirm: true,
+            user_metadata: {
+              full_name: name,
+              avatar_url: user.avatar || "",
+              provider: "google",
+            },
+          });
+          if (authCreated?.user?.id) {
+            targetId = authCreated.user.id;
+          } else if (createAuthError) {
+            const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+            const match = listData?.users?.find((u) => u.email?.toLowerCase() === email);
+            if (match?.id) {
+              targetId = match.id;
+            }
+          }
+        } catch (authAdminErr) {
+          console.warn("[Server User Sync] auth.admin.createUser notice:", authAdminErr);
+        }
+
         const { data: savedUser, error: userError } = await supabaseAdmin
           .from("users")
           .upsert(
