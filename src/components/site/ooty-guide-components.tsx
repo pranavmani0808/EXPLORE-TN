@@ -52,7 +52,7 @@ export function OotyComprehensiveGuide() {
               Ooty Complete Travel & Culinary Guide
             </h2>
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Curated from on-ground traveler insights: 12 must-visit tourist landmarks, 5 top food spots & cafes, 4 seasonal weather guides, transit connections, and essential travel tips.
+              Curated from on-ground traveler insights: iconic sightseeing landmarks (Doddabetta, Botanical Garden, Pine Forest, 9th Mile, Pykara Falls & Boating, Toy Train), top food spots & cafes (including Moddy's Cafe), seasonal weather, and transit connections.
             </p>
           </div>
 
@@ -77,7 +77,7 @@ export function OotyComprehensiveGuide() {
                 : "bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
-            <span>⛰️</span> 12 Must-Visit Places ({OOTY_MUST_VISIT_PLACES.length})
+            <span>⛰️</span> Must-Visit Places ({OOTY_MUST_VISIT_PLACES.length})
           </button>
 
           <button
