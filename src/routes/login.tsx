@@ -169,18 +169,14 @@ function LoginPage() {
     }
 
     const emailLower = form.email.trim().toLowerCase();
-    const isPopzAdmin = emailLower === "popzdesigngroup@gmail.com";
     const isAdminCreds =
-      isPopzAdmin ||
       emailLower === "admin@exploretn.com" ||
       emailLower === "admin@explorertn.com" ||
       emailLower.endsWith("@explorertn.com");
 
     const assignedRole: UserRole = isAdminCreds ? "super_admin" : "explorer";
     let userId = "";
-    let userName = isPopzAdmin
-      ? "Popz Admin"
-      : isAdminCreds
+    let userName = isAdminCreds
       ? "Platform Super Admin"
       : form.fullName.trim() || (authMode === "signin" ? form.email.split("@")[0] || "Explorer User" : "New Explorer");
 
