@@ -26,13 +26,15 @@ import {
   KODAI_OVERALL_BEST_WINDOW,
   KODAI_FOOD_SPOTS,
   KODAI_TRANSIT_OPTIONS,
+  KODAI_MUST_VISIT_PLACES_SUMMARY,
   KodaiSeasonGuide,
   KodaiFoodSpot,
-  KodaiTransitOption
+  KodaiTransitOption,
+  KodaiMustVisitPlaceSummary
 } from "@/lib/data/kodaikanal-guide-data";
 
 export function KodaiFoodAndTravelGuide() {
-  const [activeTab, setActiveTab] = useState<"food" | "seasons" | "transit">("food");
+  const [activeTab, setActiveTab] = useState<"must-visit" | "food" | "seasons" | "transit">("must-visit");
 
   return (
     <div className="w-full space-y-6 pt-8 border-t border-slate-800 text-slate-200">
@@ -42,13 +44,13 @@ export function KodaiFoodAndTravelGuide() {
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 relative z-10">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 text-xs font-semibold uppercase tracking-wider">
-              <span>☕</span> Princess of Hill Stations — Curated Dining & Seasons
+              <span>☕</span> Princess of Hill Stations — Curated Attractions, Dining & Seasons
             </div>
             <h2 className="text-2xl md:text-3xl font-black text-white tracking-tight">
-              Kodaikanal Food Spots, Seasons & Transit
+              Kodaikanal Complete Travel Directory
             </h2>
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Discover Kodaikanal's 7 top-rated culinary gems (from heritage fine dining to famous hot chocolate), 3 seasonal weather guides, and transit connections.
+              Curated on-ground guide covering 27 top scenic spots (Coaker's Walk, Bryant Park, Pillar Rocks, Star Lake, Guna Caves, Silver Cascade, Moir Point, Pine Forest, Green Valley, Dolphin's Nose, Echo Point, Poondi, Kilavarai, Polur Falls, Mannavanur, Poombarai, Escape Route to Vattavada, Vilpatti, Pannaikadu, Chettiar Park, Perumalmalai, Pachamalai, Berijam, Kurinji & Kuzhanthai Velappar Temples, and Vattakanal Falls), plus dining & seasonal travel.
             </p>
           </div>
 
@@ -66,6 +68,17 @@ export function KodaiFoodAndTravelGuide() {
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none mt-8 pt-4 border-t border-slate-800/80">
           <button
+            onClick={() => setActiveTab("must-visit")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+              activeTab === "must-visit"
+                ? "bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/25"
+                : "bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
+          >
+            <span>⛰️</span> 27 Must-Visit Spots ({KODAI_MUST_VISIT_PLACES_SUMMARY.length})
+          </button>
+
+          <button
             onClick={() => setActiveTab("food")}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
               activeTab === "food"
@@ -80,7 +93,7 @@ export function KodaiFoodAndTravelGuide() {
             onClick={() => setActiveTab("seasons")}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
               activeTab === "seasons"
-                ? "bg-emerald-500 text-white shadow-lg shadow-emerald-500/25"
+                ? "bg-teal-500 text-white shadow-lg shadow-teal-500/25"
                 : "bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800"
             }`}
           >
@@ -99,6 +112,69 @@ export function KodaiFoodAndTravelGuide() {
           </button>
         </div>
       </div>
+
+      {/* TAB 0: 27 MUST-VISIT PLACES */}
+      {activeTab === "must-visit" && (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-xl font-bold text-white flex items-center gap-2">
+                <span>🌟</span> 27 Must-Visit Attractions Across Kodaikanal
+              </h3>
+              <p className="text-xs text-slate-400 mt-1">
+                Lakes, waterfalls, high summits, ancient megalithic dolmens, flower parks & historic escape routes
+              </p>
+            </div>
+            <span className="text-xs text-emerald-400 font-mono bg-emerald-500/10 px-3 py-1 rounded-full border border-emerald-500/20">
+              {KODAI_MUST_VISIT_PLACES_SUMMARY.length} Verified Spots
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            {KODAI_MUST_VISIT_PLACES_SUMMARY.map((place) => (
+              <div
+                key={place.slug}
+                className="group relative flex flex-col justify-between p-4 rounded-2xl border border-slate-800 bg-slate-900/80 hover:border-emerald-500/50 hover:bg-slate-900 transition-all duration-300"
+              >
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-xs font-mono font-bold text-amber-400 bg-amber-500/10 px-2 py-0.5 rounded-md border border-amber-500/20">
+                      #{place.rank}
+                    </span>
+                    <span className="text-[11px] font-mono text-emerald-300 bg-emerald-500/10 px-2 py-0.5 rounded-md">
+                      {place.elevation} MSL
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">{place.icon}</span>
+                    <h4 className="text-sm font-bold text-white group-hover:text-emerald-300 transition-colors">
+                      {place.name}
+                    </h4>
+                  </div>
+                  <span className="text-[10px] text-slate-400 uppercase font-mono tracking-wider block mt-1">
+                    {place.category}
+                  </span>
+
+                  <p className="text-xs text-slate-300 mt-2 line-clamp-2 leading-relaxed">
+                    {place.tagline}
+                  </p>
+                </div>
+
+                <div className="mt-4 pt-3 border-t border-slate-800 flex items-center justify-between text-[11px] text-slate-400">
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-3 h-3 text-slate-500" />
+                    <span>{place.timings}</span>
+                  </div>
+                  <span className="text-emerald-400 font-semibold group-hover:translate-x-0.5 transition-transform">
+                    Explore →
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* TAB 1: 7 FOOD SPOTS */}
       {activeTab === "food" && (
