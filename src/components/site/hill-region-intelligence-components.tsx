@@ -94,9 +94,31 @@ export function DestinationHillIntelligenceCard({ intel }: { intel: HillDestinat
           <h2 className="text-2xl font-bold font-display text-foreground mt-1.5">
             {intel.destinationName}
           </h2>
-          <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5 font-mono">
-            <MapPin className="size-3 text-emerald-500" /> {intel.district} · Regional Overview
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-1 font-mono text-xs">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <MapPin className="size-3 text-emerald-500" /> {intel.district}
+            </span>
+            {intel.region && (
+              <span className="bg-purple-500/10 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                🏔️ Region: {intel.region}
+              </span>
+            )}
+            {intel.altitude && (
+              <span className="bg-blue-500/10 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                📏 Altitude: {intel.altitude}
+              </span>
+            )}
+            {intel.hairpinBends !== undefined && (
+              <span className="bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                🔄 Hairpins: {intel.hairpinBends} Bends
+              </span>
+            )}
+            {intel.bestTimeToVisit && (
+              <span className="bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+                📅 Best Time: {intel.bestTimeToVisit}
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
@@ -105,6 +127,18 @@ export function DestinationHillIntelligenceCard({ intel }: { intel: HillDestinat
           </Badge>
         </div>
       </div>
+
+      {/* Highlights Tag Cloud if present */}
+      {intel.highlights && intel.highlights.length > 0 && (
+        <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+          <span className="text-[11px] font-mono font-bold text-amber-400 mr-1 uppercase">Highlights:</span>
+          {intel.highlights.map((h, i) => (
+            <span key={i} className="text-xs px-2.5 py-1 rounded-xl bg-zinc-800/80 border border-zinc-700/60 text-zinc-200 font-medium">
+              ✨ {h}
+            </span>
+          ))}
+        </div>
+      )}
 
       {/* Weather & Road Grid */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

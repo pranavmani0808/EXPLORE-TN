@@ -469,7 +469,16 @@ export function getPlaceTravelIntelligence(slug: string): PlaceTravelIntelligenc
     },
     hillGhatSafety: {
       isHillGhatRoad: isHillGhatRoad(foundPlace),
-      hairpinBends: isHillPlace ? 12 : undefined,
+      hairpinBends: (() => {
+        if (normalizedSlug.includes("kolli")) return 70;
+        if (normalizedSlug.includes("valparai")) return 40;
+        if (normalizedSlug.includes("masinagudi") || normalizedSlug.includes("kalhatti")) return 46;
+        if (normalizedSlug.includes("yercaud")) return 20;
+        if (normalizedSlug.includes("kodaikanal") || normalizedSlug.includes("palani")) return 14;
+        if (normalizedSlug.includes("coonoor")) return 14;
+        if (normalizedSlug.includes("ooty") || normalizedSlug.includes("nilgiris")) return 36;
+        return isHillPlace ? 12 : undefined;
+      })(),
       steepAdvisory: isHillPlace ? "Maintain low gear on steep inclines and sound horn at hairpin bends." : undefined,
       monsoonAlert: isHillPlace || isWaterfall ? "Water flow increases rapidly during rainy season." : undefined,
     },

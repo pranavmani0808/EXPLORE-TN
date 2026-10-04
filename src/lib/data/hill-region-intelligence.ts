@@ -34,6 +34,11 @@ export interface HillDestinationIntelligence {
     vi: "4G Good" | "3G / Moderate" | "No Signal";
   };
   safetyAdvisory: string;
+  region?: string;
+  altitude?: string;
+  hairpinBends?: number | string;
+  highlights?: string[];
+  bestTimeToVisit?: string;
   mappedCounts: {
     touristPlaces: number;
     viewpoints: number;
@@ -191,10 +196,199 @@ export interface RouteHillIntelligence {
 // DATABASE OF HILL DESTINATIONS (REGION LEVEL)
 // ---------------------------------------------------------
 export const HILL_DESTINATIONS_INTELLIGENCE: Record<string, HillDestinationIntelligence> = {
+  kolli_hills: {
+    destinationSlug: "kolli-hills",
+    destinationName: "Kolli Hills Mountain Region",
+    district: "Namakkal District",
+    region: "Eastern Ghats",
+    altitude: "1,300m (Approx.)",
+    hairpinBends: 70,
+    highlights: ["Beautiful Valleys", "Waterfalls (Agaya Gangai)", "Tribal Villages", "Motorcycle Adventure"],
+    bestTimeToVisit: "Oct - Mar",
+    weather: {
+      temperatureC: 22.4,
+      condition: "Humid Mountain Breeze",
+      humidityPercent: 78,
+      windSpeedKmh: 8,
+      visibility: "Good (5-10 km)",
+      rainCondition: "Light Drizzle",
+    },
+    roadStatus: {
+      generalRoadCondition: "Moderate",
+      hillRoadCondition: "Narrow Curves & Hairpins",
+      nightAdvisory: "70 Hairpin bends! Driving after 8 PM strongly discouraged due to sharp unlit curves.",
+    },
+    crowdLevel: "Low / Quiet",
+    accessibility: "Fully Open & Accessible",
+    networkAvailability: {
+      airtel: "4G Good",
+      jio: "4G Good",
+      vi: "Weak / Patchy",
+    },
+    safetyAdvisory: "70 Continuous Hairpin Bends. Check brakes & tires before climbing from Karavalli.",
+    mappedCounts: {
+      touristPlaces: 9,
+      viewpoints: 3,
+      waterfalls: 3,
+      trekkingRoutes: 4,
+      essentialServices: 15,
+    },
+    verification: {
+      status: "verified",
+      label: "🟢 Verified Biker Telemetry",
+      source: "ExploreTN Mountain Rider Guild & Namakkal RTO",
+      lastUpdated: "1 hour ago",
+      confidence: 96,
+    },
+  },
+
+  valparai: {
+    destinationSlug: "valparai",
+    destinationName: "Valparai Anamalai Hills",
+    district: "Coimbatore District",
+    region: "Anamalai Hills",
+    altitude: "1,067m (Approx.)",
+    hairpinBends: "40+",
+    highlights: ["Tea Estates", "Dense Forest Canopy", "Wildlife & Lion-tailed Macaque", "Breathtaking Ghat Views"],
+    bestTimeToVisit: "Sept - May",
+    weather: {
+      temperatureC: 19.8,
+      condition: "Misty Tea Slopes & Evergreen Forest",
+      humidityPercent: 84,
+      windSpeedKmh: 12,
+      visibility: "Moderate (2-5 km)",
+      rainCondition: "Light Drizzle",
+    },
+    roadStatus: {
+      generalRoadCondition: "Good",
+      hillRoadCondition: "Narrow Curves & Hairpins",
+      nightAdvisory: "Aliyar checkpost closes at 6:00 PM; strictly no night driving through tiger reserve forest.",
+    },
+    crowdLevel: "Low / Quiet",
+    accessibility: "Conditional Pass (e-Pass Required)",
+    networkAvailability: {
+      airtel: "4G Good",
+      jio: "4G Good",
+      vi: "Weak / Patchy",
+    },
+    safetyAdvisory: "40+ Hairpin Bends from Pollachi/Aliyar Dam. Wildlife corridors; do not step out of vehicles in forest stretches.",
+    mappedCounts: {
+      touristPlaces: 14,
+      viewpoints: 5,
+      waterfalls: 4,
+      trekkingRoutes: 3,
+      essentialServices: 22,
+    },
+    verification: {
+      status: "verified",
+      label: "🟢 Verified Forest Telemetry",
+      source: "Anamalai Tiger Reserve & Pollachi RTO",
+      lastUpdated: "25 mins ago",
+      confidence: 97,
+    },
+  },
+
+  masinagudi: {
+    destinationSlug: "masinagudi",
+    destinationName: "Masinagudi – Ooty Foothills & Ghat",
+    district: "The Nilgiris District",
+    region: "Nilgiri Biosphere",
+    altitude: "2,240m (Approx. / Ooty Crest)",
+    hairpinBends: 46,
+    highlights: ["Dense Forests", "Wildlife Sightings (Elephants, Tigers, Deer)", "Cool Mountain Climate", "Extreme Kalhatti Ghat Adventure"],
+    bestTimeToVisit: "Oct - Jun",
+    weather: {
+      temperatureC: 18.2,
+      condition: "Forest Breeze & Crisp Hill Air",
+      humidityPercent: 76,
+      windSpeedKmh: 10,
+      visibility: "Good (5-10 km)",
+      rainCondition: "No Rain",
+    },
+    roadStatus: {
+      generalRoadCondition: "Moderate",
+      hillRoadCondition: "Narrow Curves & Hairpins",
+      nightAdvisory: "Kalhatti Ghat closed for descending non-local vehicles; heavy wild elephant movements at night.",
+    },
+    crowdLevel: "Moderate",
+    accessibility: "Conditional Pass (e-Pass Required)",
+    networkAvailability: {
+      airtel: "4G Good",
+      jio: "4G Good",
+      vi: "No Signal",
+    },
+    safetyAdvisory: "36-46 Hairpin Bends via Kalhatti Ghat (one of the steepest ghat passes in South India). Descend strictly in 1st/2nd gear.",
+    mappedCounts: {
+      touristPlaces: 11,
+      viewpoints: 4,
+      waterfalls: 2,
+      trekkingRoutes: 3,
+      essentialServices: 18,
+    },
+    verification: {
+      status: "official",
+      label: "🔵 Official Forest & Police Telemetry",
+      source: "Mudumalai Tiger Reserve & Nilgiris Police",
+      lastUpdated: "15 mins ago",
+      confidence: 98,
+    },
+  },
+
+  yercaud: {
+    destinationSlug: "yercaud",
+    destinationName: "Yercaud Shevaroy Hills",
+    district: "Salem District",
+    region: "Shevaroy Hills",
+    altitude: "1,515m (Approx.)",
+    hairpinBends: 20,
+    highlights: ["Pleasant Climate", "Emerald Lake", "Pagoda Point Viewpoints", "Lush Coffee & Spice Greenery"],
+    bestTimeToVisit: "Oct - May",
+    weather: {
+      temperatureC: 21.0,
+      condition: "Pleasant Sunshine",
+      humidityPercent: 65,
+      windSpeedKmh: 9,
+      visibility: "Excellent (>10 km)",
+      rainCondition: "No Rain",
+    },
+    roadStatus: {
+      generalRoadCondition: "Excellent",
+      hillRoadCondition: "Smooth Asphalt (Ghat Pass)",
+      nightAdvisory: "20 Hairpin bends well-lit with high reflectors; smooth night driving from Salem.",
+    },
+    crowdLevel: "Moderate",
+    accessibility: "Fully Open & Accessible",
+    networkAvailability: {
+      airtel: "5G High Speed",
+      jio: "5G High Speed",
+      vi: "4G Good",
+    },
+    safetyAdvisory: "Smooth 20 hairpin bend ghat road from Salem. Park only in designated zones near Emerald Lake.",
+    mappedCounts: {
+      touristPlaces: 12,
+      viewpoints: 4,
+      waterfalls: 2,
+      trekkingRoutes: 3,
+      essentialServices: 28,
+    },
+    verification: {
+      status: "verified",
+      label: "🟢 Verified Field Data",
+      source: "Salem District Collectorate & Tourism Board",
+      lastUpdated: "45 mins ago",
+      confidence: 94,
+    },
+  },
+
   kodaikanal: {
     destinationSlug: "kodaikanal",
     destinationName: "Kodaikanal Hill Region",
     district: "Dindigul District",
+    region: "Palani Hills",
+    altitude: "2,133m (Approx.)",
+    hairpinBends: "14-15",
+    highlights: ["Pine Forests", "Cascading Waterfalls", "Star-Shaped Kodai Lake", "Misty Mountain Peaks & Pillar Rocks"],
+    bestTimeToVisit: "Sept - Jun",
     weather: {
       temperatureC: 17.5,
       condition: "Partly Cloudy with Mild Mist",
@@ -215,7 +409,7 @@ export const HILL_DESTINATIONS_INTELLIGENCE: Record<string, HillDestinationIntel
       jio: "5G High Speed",
       vi: "3G / Moderate",
     },
-    safetyAdvisory: "Drive in low gear on 14 hairpin bends. Expect sudden fog patches near Moir Point & Pillar Rocks.",
+    safetyAdvisory: "Drive in low gear on 14-15 hairpin bends from Batlagundu. Expect sudden fog patches near Moir Point & Pillar Rocks.",
     mappedCounts: {
       touristPlaces: 18,
       viewpoints: 6,
@@ -232,10 +426,61 @@ export const HILL_DESTINATIONS_INTELLIGENCE: Record<string, HillDestinationIntel
     },
   },
 
+  coonoor: {
+    destinationSlug: "coonoor",
+    destinationName: "Coonoor – Ooty Nilgiri Hills",
+    district: "The Nilgiris District",
+    region: "Nilgiris",
+    altitude: "1,850m (Approx.)",
+    hairpinBends: 14,
+    highlights: ["Sprawling Tea Gardens", "Colonial Heritage Charm", "Scenic Ghat Drives", "Dolphin's Nose & Sim's Park"],
+    bestTimeToVisit: "Oct - May",
+    weather: {
+      temperatureC: 16.5,
+      condition: "Cool Mountain Breeze & Crisp Sun",
+      humidityPercent: 75,
+      windSpeedKmh: 11,
+      visibility: "Good (5-10 km)",
+      rainCondition: "No Rain",
+    },
+    roadStatus: {
+      generalRoadCondition: "Good",
+      hillRoadCondition: "Smooth Asphalt (Ghat Pass)",
+      nightAdvisory: "Mettupalayam-Coonoor NH 181 has 14 hairpin bends; drive with caution during fog.",
+    },
+    crowdLevel: "Moderate",
+    accessibility: "Conditional Pass (e-Pass Required)",
+    networkAvailability: {
+      airtel: "5G High Speed",
+      jio: "5G High Speed",
+      vi: "4G Good",
+    },
+    safetyAdvisory: "14 Hairpin Bends along NH 181 from Burliar to Coonoor. e-Pass mandatory for entry into Nilgiris district.",
+    mappedCounts: {
+      touristPlaces: 16,
+      viewpoints: 6,
+      waterfalls: 3,
+      trekkingRoutes: 4,
+      essentialServices: 34,
+    },
+    verification: {
+      status: "official",
+      label: "🔵 Official Department Telemetry",
+      source: "Nilgiris District Administration & TN Police",
+      lastUpdated: "20 mins ago",
+      confidence: 98,
+    },
+  },
+
   ooty: {
     destinationSlug: "ooty",
     destinationName: "Ooty & Nilgiri Hills Region",
     district: "The Nilgiris District",
+    region: "Nilgiris",
+    altitude: "2,240m (Approx.)",
+    hairpinBends: 36,
+    highlights: ["Tea Gardens", "Botanical Gardens", "Doddabetta Peak", "UNESCO Toy Train Heritage"],
+    bestTimeToVisit: "Oct - Jun",
     weather: {
       temperatureC: 14.2,
       condition: "Crisp Cool Air & Morning Mist",
@@ -270,88 +515,6 @@ export const HILL_DESTINATIONS_INTELLIGENCE: Record<string, HillDestinationIntel
       source: "Nilgiris District Administration & TN Police Operations",
       lastUpdated: "12 mins ago",
       confidence: 98,
-    },
-  },
-
-  yercaud: {
-    destinationSlug: "yercaud",
-    destinationName: "Yercaud Shevaroy Hills",
-    district: "Salem District",
-    weather: {
-      temperatureC: 21.0,
-      condition: "Pleasant Sunshine",
-      humidityPercent: 65,
-      windSpeedKmh: 9,
-      visibility: "Excellent (>10 km)",
-      rainCondition: "No Rain",
-    },
-    roadStatus: {
-      generalRoadCondition: "Excellent",
-      hillRoadCondition: "Smooth Asphalt (Ghat Pass)",
-      nightAdvisory: "20 Hairpin bends well-lit with high reflectors; night driving allowed.",
-    },
-    crowdLevel: "Moderate",
-    accessibility: "Fully Open & Accessible",
-    networkAvailability: {
-      airtel: "5G High Speed",
-      jio: "5G High Speed",
-      vi: "4G Good",
-    },
-    safetyAdvisory: "Smooth 20 hairpin bend ghat road from Salem. Park only in designated zones near Emerald Lake.",
-    mappedCounts: {
-      touristPlaces: 12,
-      viewpoints: 4,
-      waterfalls: 2,
-      trekkingRoutes: 3,
-      essentialServices: 28,
-    },
-    verification: {
-      status: "verified",
-      label: "🟢 Verified Field Data",
-      source: "Salem District Collectorate & Tourism Board",
-      lastUpdated: "45 mins ago",
-      confidence: 94,
-    },
-  },
-
-  "kolli-hills": {
-    destinationSlug: "kolli-hills",
-    destinationName: "Kolli Hills Mountain Region",
-    district: "Namakkal District",
-    weather: {
-      temperatureC: 22.4,
-      condition: "Humid Mountain Breeze",
-      humidityPercent: 78,
-      windSpeedKmh: 8,
-      visibility: "Good (5-10 km)",
-      rainCondition: "Light Drizzle",
-    },
-    roadStatus: {
-      generalRoadCondition: "Moderate",
-      hillRoadCondition: "Narrow Curves & Hairpins",
-      nightAdvisory: "70 Hairpin bends! Driving after 8 PM strongly discouraged due to sharp unlit curves.",
-    },
-    crowdLevel: "Low / Quiet",
-    accessibility: "Fully Open & Accessible",
-    networkAvailability: {
-      airtel: "4G Good",
-      jio: "4G Good",
-      vi: "Weak / Patchy",
-    },
-    safetyAdvisory: "70 Continuous Hairpin Bends. Check brakes & tires before climbing from Karavalli.",
-    mappedCounts: {
-      touristPlaces: 9,
-      viewpoints: 3,
-      waterfalls: 3,
-      trekkingRoutes: 4,
-      essentialServices: 15,
-    },
-    verification: {
-      status: "verified",
-      label: "🟢 Verified Biker Telemetry",
-      source: "ExploreTN Mountain Rider Guild & Namakkal RTO",
-      lastUpdated: "1 hour ago",
-      confidence: 92,
     },
   },
 };
@@ -616,11 +779,14 @@ export function getHillDestinationIntelligence(slug: string): HillDestinationInt
   if (HILL_DESTINATIONS_INTELLIGENCE[norm]) {
     return HILL_DESTINATIONS_INTELLIGENCE[norm];
   }
-  // Check district name matching
+  // Check exact / substring matching
+  if (norm.includes("kolli")) return HILL_DESTINATIONS_INTELLIGENCE["kolli_hills"];
+  if (norm.includes("valparai")) return HILL_DESTINATIONS_INTELLIGENCE["valparai"];
+  if (norm.includes("masinagudi") || norm.includes("mudumalai")) return HILL_DESTINATIONS_INTELLIGENCE["masinagudi"];
+  if (norm.includes("coonoor")) return HILL_DESTINATIONS_INTELLIGENCE["coonoor"];
+  if (norm.includes("yercaud") || norm.includes("shevaroy") || norm.includes("salem")) return HILL_DESTINATIONS_INTELLIGENCE["yercaud"];
+  if (norm.includes("dindigul") || norm.includes("kodai") || norm.includes("palani")) return HILL_DESTINATIONS_INTELLIGENCE["kodaikanal"];
   if (norm.includes("nilgiris") || norm.includes("ooty")) return HILL_DESTINATIONS_INTELLIGENCE["ooty"];
-  if (norm.includes("dindigul") || norm.includes("kodai")) return HILL_DESTINATIONS_INTELLIGENCE["kodaikanal"];
-  if (norm.includes("salem") || norm.includes("yercaud")) return HILL_DESTINATIONS_INTELLIGENCE["yercaud"];
-  if (norm.includes("namakkal") || norm.includes("kolli")) return HILL_DESTINATIONS_INTELLIGENCE["kolli-hills"];
   return undefined;
 }
 
