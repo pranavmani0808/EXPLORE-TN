@@ -35,8 +35,10 @@ import {
   OotyTravelTip
 } from "@/lib/data/ooty-guide-data";
 
+import { OotyTransitRouteMap } from "./ooty-transit-route-map";
+
 export function OotyComprehensiveGuide() {
-  const [activeTab, setActiveTab] = useState<"must-visit" | "food" | "seasons" | "transit" | "tips">("must-visit");
+  const [activeTab, setActiveTab] = useState<"route-map" | "must-visit" | "food" | "seasons" | "transit" | "tips">("route-map");
 
   return (
     <div className="w-full space-y-8 pt-8 border-t border-slate-800 text-slate-200">
@@ -52,7 +54,7 @@ export function OotyComprehensiveGuide() {
               Ooty Complete Travel & Culinary Guide
             </h2>
             <p className="text-sm text-slate-300 max-w-2xl leading-relaxed">
-              Curated from on-ground traveler insights: iconic sightseeing landmarks (Doddabetta, Botanical Garden, Pine Forest, 9th Mile, Pykara Falls & Boating, Toy Train), top food spots & cafes (including Moddy's Cafe), seasonal weather, and transit connections.
+              Curated from on-ground traveler insights: iconic sightseeing landmarks (Doddabetta, Botanical Garden, Pine Forest, 9th Mile, Pykara Falls & Boating, Toy Train, Uyilatti Holy Falls), top food spots & cafes (including Moddy's Cafe), seasonal weather, and interactive highway transit route map.
             </p>
           </div>
 
@@ -69,6 +71,17 @@ export function OotyComprehensiveGuide() {
 
         {/* Tab Navigation */}
         <div className="flex items-center gap-2 overflow-x-auto scrollbar-none mt-8 pt-4 border-t border-slate-800/80">
+          <button
+            onClick={() => setActiveTab("route-map")}
+            className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
+              activeTab === "route-map"
+                ? "bg-emerald-500 text-slate-950 font-extrabold shadow-lg shadow-emerald-500/25"
+                : "bg-slate-900/60 text-slate-400 hover:text-white hover:bg-slate-800"
+            }`}
+          >
+            <span>🗺️</span> Route Map & Distance Guide
+          </button>
+
           <button
             onClick={() => setActiveTab("must-visit")}
             className={`px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition-all whitespace-nowrap ${
@@ -126,12 +139,19 @@ export function OotyComprehensiveGuide() {
         </div>
       </div>
 
-      {/* TAB 1: 12 MUST-VISIT PLACES */}
+      {/* TAB 0: ROUTE MAP & DISTANCE GUIDE (Dedicated Interactive Component) */}
+      {activeTab === "route-map" && (
+        <div className="space-y-6">
+          <OotyTransitRouteMap />
+        </div>
+      )}
+
+      {/* TAB 1: MUST-VISIT PLACES */}
       {activeTab === "must-visit" && (
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold text-white flex items-center gap-2">
-              <span>🌟</span> Top 12 Attractions in Ooty
+              <span>🌟</span> Top {OOTY_MUST_VISIT_PLACES.length} Attractions in Ooty & Nilgiris
             </h3>
             <span className="text-xs text-slate-400">Complete scenic circuit</span>
           </div>

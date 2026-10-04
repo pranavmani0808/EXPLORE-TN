@@ -702,6 +702,174 @@ export const OOTY_MUST_VISIT_PLACES: OotyMustVisitPlace[] = [
     image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
     highlights: ["Sharp Needle-Shaped Rock Peak", "1 km Scenic Ridge Trail", "360° Sunset Horizon over Forests", "Kerala Border & Nilambur Valley Panoramas"],
     verified: true
+  },
+  {
+    rank: 19,
+    id: "ketti-valley-viewpoint",
+    name: "Ketti Valley View Point",
+    slug: "ketti-valley-viewpoint",
+    category: "Peak & Viewpoint",
+    icon: "🏞️",
+    tagline: "12 km from Ooty — sweeping panoramic views over the second largest gorge valley in the world",
+    description: "Known as the Switzerland of South India, Ketti Valley is one of the world's largest inhabited valleys. The telescope viewpoint situated on Ooty-Coonoor highway reveals terraced vegetable farms, tiny hamlets, and misty Western Ghats mountains.",
+    latitude: 11.3712,
+    longitude: 76.7380,
+    elevation: 2150,
+    timings: "07:00 AM – 07:00 PM Daily",
+    entryFee: "₹10 Telescope View Fee",
+    bestTime: "Morning 07:30 AM – 11:00 AM & 04:00 PM – 06:00 PM",
+    rating: 4.7,
+    reviewsCount: 19400,
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80",
+    highlights: ["2nd Largest Inhabited Valley in World", "Telescope House Viewing", "Terraced Vegetable Slopes"],
+    verified: true
+  },
+  {
+    rank: 20,
+    id: "dolphins-nose-viewpoint",
+    name: "Dolphin's Nose View Point",
+    slug: "dolphins-nose-viewpoint",
+    category: "Peak & Viewpoint",
+    icon: "🐬",
+    tagline: "14 km from Coonoor/Ooty — colossal rock cliff offering unobstructed views of Catherine Falls",
+    description: "An enormous rock formation shaped like a dolphin's nose projecting over a sheer drop of thousands of feet. Provides breathtaking views of Catherine Falls plunging into the canyon and endless tea carpeted gorges.",
+    latitude: 11.3541,
+    longitude: 76.8835,
+    elevation: 1550,
+    timings: "08:30 AM – 06:00 PM Daily",
+    entryFee: "₹15 Entry per person",
+    bestTime: "08:30 AM – 11:30 AM (Clear mountain visibility)",
+    rating: 4.8,
+    reviewsCount: 23500,
+    image: "https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=800&q=80",
+    highlights: ["Dolphin-Shaped Rock Cliff", "Unobstructed Catherine Falls View", "Deep Canyon Ravine Vista"],
+    verified: true
+  },
+  {
+    rank: 21,
+    id: "lambs-rock-viewpoint",
+    name: "Lamb's Rock View Point",
+    slug: "lambs-rock-viewpoint",
+    category: "Peak & Viewpoint",
+    icon: "🪨",
+    tagline: "13 km from Coonoor/Ooty — jagged precipice dropping dramatically toward Coimbatore plains",
+    description: "Named after Captain Lamb who developed access to this dramatic cliff edge. Towering above the dense shola vegetation, Lamb's Rock provides sweeping vistas of the Hulical Ravine, Nilgiri tea slopes, and Coimbatore plains.",
+    latitude: 11.3562,
+    longitude: 76.8423,
+    elevation: 1600,
+    timings: "08:30 AM – 05:30 PM Daily",
+    entryFee: "₹20 Entry per person",
+    bestTime: "09:00 AM – 12:00 PM & 03:30 PM – 05:00 PM",
+    rating: 4.7,
+    reviewsCount: 16800,
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+    highlights: ["Hulical Ravine Gorge Vista", "Dramatic Cliff Edge", "Lush Tea Estate Drive"],
+    verified: true
+  },
+  {
+    rank: 22,
+    id: "sims-park-coonoor",
+    name: "Sim's Park Coonoor",
+    slug: "sims-park-coonoor",
+    category: "Garden",
+    icon: "🌺",
+    tagline: "18 km from Ooty — historic 30-acre natural garden home to rare Japanese maples & fruit trees",
+    description: "Established in 1874 by J.D. Sim, this 30-acre natural botanical garden is landscaped along the natural hill slopes of Coonoor. Features over 1,000 species of rare plants, ancient Rudraksha trees, Queensland Karry pines, and an ornamental boating pond.",
+    latitude: 11.3533,
+    longitude: 76.7972,
+    elevation: 1780,
+    timings: "09:00 AM – 06:00 PM Daily",
+    entryFee: "₹30 Adults, ₹15 Children",
+    bestTime: "09:00 AM – 01:00 PM (May Fruit Show is iconic)",
+    rating: 4.8,
+    reviewsCount: 28400,
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    highlights: ["Annual May Fruit Show", "Rare Japanese Cherry & Maples", "Natural Valley Contours & Boating Pond"],
+    verified: true
+  },
+  {
+    rank: 23,
+    id: "govt-museum-ooty",
+    name: "Government Museum Ooty",
+    slug: "govt-museum-ooty",
+    category: "Culture & Tribal",
+    icon: "🏛️",
+    tagline: "3 km from Ooty Bus Stand — rich collection of Toda tribal artifacts, Nilgiri butterflies & ecology",
+    description: "Situated on Mysore Road, this museum preserves the distinct tribal heritage of Nilgiri indigenous communities including Toda, Kota, Kurumba, and Irula tribes. Displays traditional huts, bronze sculptures, geology, and Nilgiri butterfly fauna.",
+    latitude: 11.4190,
+    longitude: 76.6965,
+    elevation: 2220,
+    timings: "09:30 AM – 05:00 PM (Closed Fridays)",
+    entryFee: "₹10 Entry per person",
+    bestTime: "10:00 AM – 04:00 PM",
+    rating: 4.5,
+    reviewsCount: 3800,
+    image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?auto=format&fit=crop&w=800&q=80",
+    highlights: ["Indigenous Toda Tribal Artifacts", "Nilgiri Eco-Fauna Specimens", "Stone Sculptures & Woodcraft"],
+    verified: true
+  },
+  {
+    rank: 24,
+    id: "lovedale-railway-station",
+    name: "Lovedale Heritage Railway Station",
+    slug: "lovedale-railway-station",
+    category: "Heritage & Railway",
+    icon: "🚂",
+    tagline: "13 km along rail grade — quaint Victorian hill station perched amidst blue gum eucalyptus hills",
+    description: "One of the most photogenic halts on the UNESCO Nilgiri Mountain Railway. Built in the late Victorian era with old wooden ticket counters and flower gardens, Lovedale sits surrounded by misty pine forests and tea ridges near Lawrence School.",
+    latitude: 11.3820,
+    longitude: 76.7088,
+    elevation: 2190,
+    timings: "08:00 AM – 06:00 PM Daily",
+    entryFee: "Free Railway Platform Access",
+    bestTime: "Morning Toy Train Arrival (10:30 AM – 11:30 AM)",
+    rating: 4.8,
+    reviewsCount: 8200,
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80",
+    highlights: ["UNESCO Mountain Railway Station", "Victorian Architecture & Flower Beds", "Peaceful Pine Forest Environs"],
+    verified: true
+  },
+  {
+    rank: 25,
+    id: "govt-orange-farm-burliar",
+    name: "Government Orange Farm (Burliar)",
+    slug: "govt-orange-farm-burliar",
+    category: "Garden",
+    icon: "🍊",
+    tagline: "4 km from Kallar/Mettupalayam Ghat — lush 1871 fruit farm cultivating Mandarin oranges, mangosteen & spices",
+    description: "Established in 1871 along the Mettupalayam-Coonoor ghat road in Burliar. A renowned state horticultural station cultivating Coorg & Nilgiri mandarin oranges, exotic mangosteen, nutmeg, clove, and jackfruit trees on tiered mountain slopes.",
+    latitude: 11.3325,
+    longitude: 76.8480,
+    elevation: 850,
+    timings: "09:00 AM – 05:00 PM Daily",
+    entryFee: "₹15 Entry per person",
+    bestTime: "10:00 AM – 03:30 PM",
+    rating: 4.6,
+    reviewsCount: 4900,
+    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    highlights: ["Mandarin Orange Orchards", "Exotic Mangosteen & Spices", "Historic 1871 State Fruit Station"],
+    verified: true
+  },
+  {
+    rank: 26,
+    id: "uyilatti-holy-water-falls",
+    name: "Uyilatti Holy Water Falls (Elk Falls)",
+    slug: "uyilatti-holy-water-falls",
+    category: "Waterfall",
+    icon: "🌊",
+    tagline: "Untouched 80-foot double cascade & sacred mountain theertham near Rangaswamy Peak & Sullivan's Bungalow",
+    description: "Also celebrated as Elk Falls near Uyilatty village and Kookalthorai in the Kotagiri range. Originating from pristine high-altitude catchment streams near sacred Rangaswamy Peak, this peaceful 80-foot two-tiered waterfall tumbles into a sparkling forest pool. Revered by local communities for its pure mountain waters, flanked by sprawling tea gardens and orange groves without noisy commercial stalls.",
+    latitude: 11.4385,
+    longitude: 76.8842,
+    elevation: 1750,
+    timings: "08:00 AM – 05:30 PM Daily",
+    entryFee: "Free Public Nature Access",
+    bestTime: "Post-Monsoon (September to January) & 09:00 AM – 02:00 PM",
+    rating: 4.8,
+    reviewsCount: 6200,
+    image: "https://images.unsplash.com/photo-1432405972618-c60b0225b8f9?auto=format&fit=crop&w=800&q=80",
+    highlights: ["80-Foot Double-Tiered Waterfall", "Sacred Natural Mountain Spring", "Quiet Offbeat Tea Valley Hike", "Historic Sullivan's First Camp Region"],
+    verified: true
   }
 ];
 
@@ -811,3 +979,305 @@ export const OOTY_TRAVEL_TIPS: OotyTravelTip[] = [
     actionableHint: "Visit King Star or Moddy's on Commercial Road for authentic fudge, truffles, and spice-infused dark bars."
   }
 ];
+
+// =========================================================================
+// 6. EXPLORE OOTY ROUTE MAP & DISTANCE GUIDE (From User Uploaded Infographic)
+// Clean transit spine with distances, no watermark/channel handles
+// =========================================================================
+export interface OotyRouteBranchSpot {
+  name: string;
+  distanceKm: number;
+  distanceDisplay: string;
+  category: "viewpoint" | "garden" | "lake" | "heritage" | "activity" | "forest" | "temple" | "wildlife";
+  side: "left" | "right";
+  description: string;
+  connectedHub: "mettupalayam-ketti" | "ooty-bus-stand" | "ooty-ketti" | "ooty-gudalur" | "coonoor-spur";
+}
+
+export interface OotySpineStation {
+  name: string;
+  code: string;
+  distanceFromStart?: string;
+  role: "start" | "waypoint" | "hub" | "terminus";
+  elevation: string;
+  note: string;
+}
+
+export const OOTY_ROUTE_SPINE_STATIONS: OotySpineStation[] = [
+  {
+    name: "COIMBATORE (METTUPALAYAM)",
+    code: "MTP",
+    role: "start",
+    elevation: "325m MSL",
+    note: "Starting hub at the base of Nilgiri Ghats. Starting point of heritage Toy Train."
+  },
+  {
+    name: "KALLAR",
+    code: "KLR",
+    distanceFromStart: "12 KM",
+    role: "waypoint",
+    elevation: "384m MSL",
+    note: "Base ghat check post and start of the 36 hairpin mountain bends."
+  },
+  {
+    name: "KETTI",
+    code: "KTI",
+    distanceFromStart: "76 KM",
+    role: "waypoint",
+    elevation: "2,150m MSL",
+    note: "Gateway to the majestic Ketti Valley, world's 2nd largest inhabited valley."
+  },
+  {
+    name: "OOTY BUS STAND",
+    code: "UAM",
+    distanceFromStart: "88 KM",
+    role: "hub",
+    elevation: "2,240m MSL",
+    note: "Central nerve centre connecting town sights, lake, gardens & Gudalur highway."
+  },
+  {
+    name: "OOTY RAILWAY STATION",
+    code: "UAM-R",
+    distanceFromStart: "1.5 KM from Bus Stand",
+    role: "waypoint",
+    elevation: "2,210m MSL",
+    note: "UNESCO World Heritage terminus for the Nilgiri Mountain Railway."
+  },
+  {
+    name: "GUDALUR",
+    code: "GDR",
+    distanceFromStart: "48 KM from Ooty",
+    role: "terminus",
+    elevation: "1,180m MSL",
+    note: "Gateway town connecting to Mudumalai Sanctuary, Bandipur, and Mysuru."
+  }
+];
+
+export const OOTY_ROUTE_MAP_BRANCHES: OotyRouteBranchSpot[] = [
+  // --- Metttupalayam / Kallar to Ketti Sector ---
+  {
+    name: "Ketti Valley View Point",
+    distanceKm: 12,
+    distanceDisplay: "12 KM",
+    category: "viewpoint",
+    side: "left",
+    description: "Panoramic view over Switzerland of South India with telescope station",
+    connectedHub: "mettupalayam-ketti"
+  },
+  {
+    name: "Dolphin's Nose View Point",
+    distanceKm: 14,
+    distanceDisplay: "14 KM",
+    category: "viewpoint",
+    side: "left",
+    description: "Sheer rock face projecting over Catherine Falls gorge",
+    connectedHub: "mettupalayam-ketti"
+  },
+  {
+    name: "Lamb's Rock View Point",
+    distanceKm: 13,
+    distanceDisplay: "13 KM",
+    category: "viewpoint",
+    side: "left",
+    description: "Cliff edge viewpoint overlooking Hulical Ravine and Coimbatore plains",
+    connectedHub: "mettupalayam-ketti"
+  },
+  {
+    name: "Sim's Park",
+    distanceKm: 18,
+    distanceDisplay: "18 KM",
+    category: "garden",
+    side: "left",
+    description: "1874 natural terraced botanical park in Coonoor with rare flora & lake",
+    connectedHub: "mettupalayam-ketti"
+  },
+  {
+    name: "Wenlock Downs (9th Mile)",
+    distanceKm: 9,
+    distanceDisplay: "9 KM",
+    category: "viewpoint",
+    side: "right",
+    description: "Endless rolling green cinema meadows and shola peaks",
+    connectedHub: "mettupalayam-ketti"
+  },
+  {
+    name: "Pine Forest",
+    distanceKm: 10,
+    distanceDisplay: "10 KM",
+    category: "forest",
+    side: "right",
+    description: "Towering orderly pine woods canopy favored by movie directors",
+    connectedHub: "mettupalayam-ketti"
+  },
+  {
+    name: "Lovedale (Lovely Land) Railway Station",
+    distanceKm: 13,
+    distanceDisplay: "13 KM",
+    category: "heritage",
+    side: "right",
+    description: "Quaint colonial heritage mountain railway halt amidst pine ridges",
+    connectedHub: "mettupalayam-ketti"
+  },
+
+  // --- Ketti Valley / Southwest Sector ---
+  {
+    name: "Shooting Spot (Ketti)",
+    distanceKm: 6.5,
+    distanceDisplay: "6.5 KM",
+    category: "activity",
+    side: "left",
+    description: "Scenic valley clearing famous for cinema film sets",
+    connectedHub: "ooty-ketti"
+  },
+  {
+    name: "Horse Ride (Ketti Valley)",
+    distanceKm: 7,
+    distanceDisplay: "7 KM",
+    category: "activity",
+    side: "left",
+    description: "Guided horseback trails through pine woods and valley slopes",
+    connectedHub: "ooty-ketti"
+  },
+
+  // --- Central Ooty Bus Stand Hub Sector ---
+  {
+    name: "Botanical Garden",
+    distanceKm: 2,
+    distanceDisplay: "2 KM",
+    category: "garden",
+    side: "right",
+    description: "175-year-old 55-acre heritage garden with fossil tree trunk",
+    connectedHub: "ooty-bus-stand"
+  },
+  {
+    name: "Ooty Lake / Boating Area",
+    distanceKm: 3,
+    distanceDisplay: "3 KM",
+    category: "lake",
+    side: "right",
+    description: "65-acre 1824 recreational reservoir with pedal & motorboats",
+    connectedHub: "ooty-bus-stand"
+  },
+  {
+    name: "Tea Museum & Factory",
+    distanceKm: 2.5,
+    distanceDisplay: "2.5 KM",
+    category: "heritage",
+    side: "right",
+    description: "Live CTC tea leaf manufacture and artisan chocolate tasting",
+    connectedHub: "ooty-bus-stand"
+  },
+  {
+    name: "Rose Garden",
+    distanceKm: 2,
+    distanceDisplay: "2 KM",
+    category: "garden",
+    side: "right",
+    description: "South Asia's premier rosary with 20,000+ cultivars on Elk Hill",
+    connectedHub: "ooty-bus-stand"
+  },
+  {
+    name: "Govt. Museum",
+    distanceKm: 3,
+    distanceDisplay: "3 KM",
+    category: "heritage",
+    side: "right",
+    description: "Indigenous Toda tribal culture, artifacts and Nilgiri butterfly fauna",
+    connectedHub: "ooty-bus-stand"
+  },
+  {
+    name: "Dodda Betta Peak",
+    distanceKm: 6,
+    distanceDisplay: "6 KM",
+    category: "viewpoint",
+    side: "right",
+    description: "Highest Nilgiris peak (2,637m) with telescope house observatory",
+    connectedHub: "ooty-bus-stand"
+  },
+
+  // --- Coonoor Spur Sector ---
+  {
+    name: "Govt. Orange Farm (Burliar)",
+    distanceKm: 4,
+    distanceDisplay: "4 KM",
+    category: "garden",
+    side: "right",
+    description: "1871 fruit research station growing Mandarin oranges & exotic spices",
+    connectedHub: "coonoor-spur"
+  },
+  {
+    name: "Coonoor (Kunnoor) Town",
+    distanceKm: 18,
+    distanceDisplay: "18 KM",
+    category: "heritage",
+    side: "right",
+    description: "Scenic hill town known for Nilgiri tea estates and cooler altitude",
+    connectedHub: "coonoor-spur"
+  },
+  {
+    name: "Coonoor Railway Station",
+    distanceKm: 19,
+    distanceDisplay: "19 KM",
+    category: "heritage",
+    side: "right",
+    description: "Key locomotive changeover station for the Nilgiri Mountain Railway",
+    connectedHub: "coonoor-spur"
+  },
+  {
+    name: "Lakshmi Narayana Temple (Kunnoor)",
+    distanceKm: 20,
+    distanceDisplay: "20 KM",
+    category: "temple",
+    side: "right",
+    description: "Historic stone temple sanctuary with peaceful Nilgiri mountain backdrop",
+    connectedHub: "coonoor-spur"
+  },
+
+  // --- West / Gudalur Highway Sector ---
+  {
+    name: "Pykara Lake",
+    distanceKm: 20,
+    distanceDisplay: "20 KM",
+    category: "lake",
+    side: "left",
+    description: "Pristine reservoir surrounded by shola forests and speedboats",
+    connectedHub: "ooty-gudalur"
+  },
+  {
+    name: "Pykara Waterfalls",
+    distanceKm: 23,
+    distanceDisplay: "23 KM",
+    category: "viewpoint",
+    side: "left",
+    description: "Two-tiered dramatic natural cascade plunging through granite boulders",
+    connectedHub: "ooty-gudalur"
+  },
+  {
+    name: "Mudumalai Wildlife Sanctuary",
+    distanceKm: 35,
+    distanceDisplay: "35 KM",
+    category: "wildlife",
+    side: "left",
+    description: "Tiger reserve safari hub with wild elephants, gaur, and leopard habitats",
+    connectedHub: "ooty-gudalur"
+  },
+  {
+    name: "Avalanche Lake",
+    distanceKm: 28,
+    distanceDisplay: "28 KM",
+    category: "lake",
+    side: "left",
+    description: "Pristine biosphere reserve lake with trout streams and safari gypsies",
+    connectedHub: "ooty-gudalur"
+  },
+  {
+    name: "Pykara Check Post",
+    distanceKm: 27,
+    distanceDisplay: "27 KM",
+    category: "activity",
+    side: "left",
+    description: "High mountain forest boundary pass towards Gudalur & Nadugani",
+    connectedHub: "ooty-gudalur"
+  }
+];
+
