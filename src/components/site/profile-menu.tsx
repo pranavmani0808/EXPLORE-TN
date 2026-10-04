@@ -30,7 +30,7 @@ interface ProfileMenuProps {
 
 export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const { user: authGuardUser, openAuthModal } = useAuthGuard();
+  const { user: authGuardUser, openAuthModal, logout: authGuardLogout } = useAuthGuard();
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getCurrentAuthUser());
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -66,11 +66,20 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
     setIsOpen((prev) => !prev);
   };
 
-  const handleLogOut = () => {
+  const handleLogOut = async () => {
+    try {
+      const { supabase } = await import("@/lib/supabase-client");
+      await supabase.auth.signOut().catch(() => null);
+    } catch {
+      // ignore
+    }
     clearAuthSession();
     setCurrentUser(null);
+    authGuardLogout();
     setIsOpen(false);
-    window.location.href = "/";
+    if (typeof window !== "undefined") {
+      window.location.replace("/");
+    }
   };
 
   useEffect(() => {
