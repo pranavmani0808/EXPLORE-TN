@@ -61,7 +61,7 @@ import {
   AuditLogEntry,
   EntityPerformance
 } from "@/lib/api/admin-dashboard-api";
-import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, isAdminUser, isSectionAuthorized } from "@/lib/auth-rbac";
 import { toast } from "sonner";
 import { HelpCircle, TrendingUp } from "lucide-react";
 
@@ -129,6 +129,7 @@ export type AdminSection =
   | "security";
 
 function AdminOperationsCenter() {
+  const [currentUser, setCurrentUser] = useState(() => getCurrentAuthUser());
   const [activeSection, setActiveSection] = useState<AdminSection>("dashboard");
   const [attractionCategoryFilter, setAttractionCategoryFilter] = useState<string>("All");
   const [eventStatusFilter, setEventStatusFilter] = useState<string>("All");
@@ -238,6 +239,15 @@ function AdminOperationsCenter() {
       window.location.href = "/login";
       return;
     }
+    setCurrentUser(user);
+
+    // If initial dashboard section is restricted for role (e.g. Content Editor, Moderator, Support Agent), select their first authorized section
+    if (!isSectionAuthorized(user.role, "dashboard")) {
+      if (user.role === "content_editor") setActiveSection("destinations");
+      else if (user.role === "moderator") setActiveSection("reviews");
+      else if (user.role === "support_agent") setActiveSection("user_queries");
+    }
+
     loadAdminData();
   }, []);
 
@@ -277,324 +287,390 @@ function AdminOperationsCenter() {
             <div className="rounded-2xl border border-border bg-card p-4 shadow-sm space-y-5">
               
               {/* GROUP 1: OVERVIEW */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  📊 OVERVIEW
-                </div>
-                <button
-                  onClick={() => setActiveSection("dashboard")}
-                  className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
-                    activeSection === "dashboard"
-                      ? "bg-primary text-primary-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5">
-                    <LayoutDashboard className="h-4 w-4" />
-                    <span>Executive Dashboard</span>
+              {isSectionAuthorized(currentUser?.role || "explorer", "dashboard") && (
+                <div>
+                  <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                    📊 OVERVIEW
                   </div>
-                </button>
-              </div>
+                  <button
+                    onClick={() => setActiveSection("dashboard")}
+                    className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition-all cursor-pointer ${
+                      activeSection === "dashboard"
+                        ? "bg-primary text-primary-foreground shadow-sm"
+                        : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                    }`}
+                  >
+                    <div className="flex items-center gap-2.5">
+                      <LayoutDashboard className="h-4 w-4" />
+                      <span>Executive Dashboard</span>
+                    </div>
+                  </button>
+                </div>
+              )}
 
               {/* GROUP 2: DISCOVERY & GEOGRAPHY */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  🗺️ DISCOVERY & GEOGRAPHY
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "district_places", label: "District-Wise Tables (38)", icon: TableIcon, badge: "All 38 Districts" },
-                    { id: "destinations", label: "Global Places Catalog", icon: Globe, count: destinations.length },
-                    { id: "kodai_pois", label: "Kodaikanal POIs (30)", icon: Mountain, badge: "Kodai 30" },
-                    { id: "place_suggestions", label: "Place Suggestions & Scout Reviews", icon: Sparkles, badge: "4 New" },
-                    { id: "map_intelligence", label: "Map Intelligence & Bounds", icon: Map, badge: "GIS" },
-                    { id: "categories", label: "Categories & Taxonomy", icon: Tag },
-                    { id: "routes", label: "Routes & Road Trips", icon: Compass, count: 18 }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge ? (
-                          <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
-                            isActive ? "bg-primary-foreground text-primary" : "bg-emerald-500/10 text-emerald-600"
-                          }`}>
-                            {item.badge}
-                          </span>
-                        ) : item.count !== undefined ? (
-                          <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "district_places", label: "District-Wise Tables (38)", icon: TableIcon, badge: "All 38 Districts" },
+                  { id: "destinations", label: "Global Places Catalog", icon: Globe, count: destinations.length },
+                  { id: "kodai_pois", label: "Kodaikanal POIs (30)", icon: Mountain, badge: "Kodai 30" },
+                  { id: "place_suggestions", label: "Place Suggestions & Scout Reviews", icon: Sparkles, badge: "4 New" },
+                  { id: "map_intelligence", label: "Map Intelligence & Bounds", icon: Map, badge: "GIS" },
+                  { id: "categories", label: "Categories & Taxonomy", icon: Tag },
+                  { id: "routes", label: "Routes & Road Trips", icon: Compass, count: 18 }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      🗺️ DISCOVERY & GEOGRAPHY
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.badge ? (
+                              <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                                isActive ? "bg-primary-foreground text-primary" : "bg-emerald-500/10 text-emerald-600"
+                              }`}>
+                                {item.badge}
+                              </span>
+                            ) : item.count !== undefined ? (
+                              <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 3: ACTIVITIES & EXPERIENCES */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  🏔️ ACTIVITIES & EXPERIENCES
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "activities", label: "Activities & Adventures", icon: Mountain, count: attractions.length },
-                    { id: "events", label: "Events & Festivals", icon: PartyPopper, count: events.length }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.count !== undefined && (
-                          <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "activities", label: "Activities & Adventures", icon: Mountain, count: attractions.length },
+                  { id: "events", label: "Events & Festivals", icon: PartyPopper, count: events.length }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      🏔️ ACTIVITIES & EXPERIENCES
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.count !== undefined && (
+                              <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 4: AI INTELLIGENCE */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  🤖 AI INTELLIGENCE
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "ai_planner", label: "AI Planner Operations", icon: Bot, badge: "Telemetry" },
-                    { id: "ai_config", label: "AI Configuration & Prompts", icon: Sliders }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge && (
-                          <span className="rounded-full bg-amber-500/10 text-amber-500 px-2 py-0.5 text-[10px] font-bold">
-                            {item.badge}
-                          </span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "ai_planner", label: "AI Planner Operations", icon: Bot, badge: "Telemetry" },
+                  { id: "ai_config", label: "AI Configuration & Prompts", icon: Sliders }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      🤖 AI INTELLIGENCE
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.badge && (
+                              <span className="rounded-full bg-amber-500/10 text-amber-500 px-2 py-0.5 text-[10px] font-bold">
+                                {item.badge}
+                              </span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 5: DATA INTEGRITY & QUALITY */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  🛡️ DATA QUALITY & INTEGRITY
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "data_quality", label: "Data Quality Center", icon: FileCheck, count: destinations.length }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.count !== undefined ? (
-                          <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "data_quality", label: "Data Quality Center", icon: FileCheck, count: destinations.length }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      🛡️ DATA QUALITY & INTEGRITY
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.count !== undefined ? (
+                              <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 6: COMMUNITY & MODERATION */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  👥 COMMUNITY & HELPDESK
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "users", label: "Users & RBAC Matrix", icon: Users, count: users.length },
-                    { id: "user_queries", label: "User Queries & Support Helpdesk", icon: HelpCircle, badge: "Helpdesk" },
-                    { id: "reviews", label: "Reviews & Moderation", icon: Star, badge: "Moderation" }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge ? (
-                          <span className="rounded-full bg-emerald-500/10 text-emerald-600 px-2 py-0.5 text-[10px] font-bold">{item.badge}</span>
-                        ) : item.count !== undefined ? (
-                          <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "users", label: "Users & RBAC Matrix", icon: Users, count: users.length },
+                  { id: "user_queries", label: "User Queries & Support Helpdesk", icon: HelpCircle, badge: "Helpdesk" },
+                  { id: "reviews", label: "Reviews & Moderation", icon: Star, badge: "Moderation" }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      👥 COMMUNITY & HELPDESK
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.badge ? (
+                              <span className="rounded-full bg-emerald-500/10 text-emerald-600 px-2 py-0.5 text-[10px] font-bold">{item.badge}</span>
+                            ) : item.count !== undefined ? (
+                              <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 7: CONTENT & EDITORIAL */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  📸 CONTENT & EDITORIAL
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "media_library", label: "Media Asset Library", icon: Layers, count: destinations.length },
-                    { id: "articles", label: "Articles & Travel Guides", icon: FileText, count: cmsSections.length }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.count !== undefined && (
-                          <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        )}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "media_library", label: "Media Asset Library", icon: Layers, count: destinations.length },
+                  { id: "articles", label: "Articles & Travel Guides", icon: FileText, count: cmsSections.length }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      📸 CONTENT & EDITORIAL
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.count !== undefined && (
+                              <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
+                            )}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 8: ANALYTICS & REPORTS */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  📈 ANALYTICS & REPORTS
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "weekly_digest", label: "Weekly Digest & Performance Reports", icon: TrendingUp, badge: "Active" },
-                    { id: "search_analytics", label: "Search Management", icon: SearchCode },
-                    { id: "analytics", label: "Platform Analytics", icon: BarChart3 }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "weekly_digest", label: "Weekly Digest & Performance Reports", icon: TrendingUp, badge: "Active" },
+                  { id: "search_analytics", label: "Search Management", icon: SearchCode },
+                  { id: "analytics", label: "Platform Analytics", icon: BarChart3 }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      📈 ANALYTICS & REPORTS
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
               {/* GROUP 9: SYSTEM & SECURITY */}
-              <div>
-                <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
-                  ⚙️ SYSTEM & SECURITY
-                </div>
-                <nav className="space-y-0.5">
-                  {[
-                    { id: "security", label: "CAIN Security Dashboard", icon: ShieldCheck, badge: "CAIN Layer" },
-                    { id: "notifications", label: "Notifications Center", icon: Bell, badge: "12 Alerts" },
-                    { id: "audit", label: "Audit Logs", icon: ShieldCheck, count: auditLogs.length },
-                    { id: "settings", label: "System Settings", icon: SettingsIcon },
-                    { id: "system_health", label: "System Health Monitor", icon: Activity, badge: "100%" }
-                  ].map((item) => {
-                    const Icon = item.icon;
-                    const isActive = activeSection === item.id;
-                    return (
-                      <button
-                        key={item.id}
-                        onClick={() => setActiveSection(item.id as AdminSection)}
-                        className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
-                          isActive
-                            ? "bg-primary text-primary-foreground font-bold shadow-sm"
-                            : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-                        }`}
-                      >
-                        <div className="flex items-center gap-2.5">
-                          <Icon className="h-4 w-4" />
-                          <span>{item.label}</span>
-                        </div>
-                        {item.badge ? (
-                          <span className="rounded-full bg-emerald-500/10 text-emerald-600 px-2 py-0.5 text-[10px] font-bold">
-                            {item.badge}
-                          </span>
-                        ) : item.count !== undefined ? (
-                          <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
-                        ) : null}
-                      </button>
-                    );
-                  })}
-                </nav>
-              </div>
+              {(() => {
+                const items = [
+                  { id: "security", label: "CAIN Security Dashboard", icon: ShieldCheck, badge: "CAIN Layer" },
+                  { id: "notifications", label: "Notifications Center", icon: Bell, badge: "12 Alerts" },
+                  { id: "audit", label: "Audit Logs", icon: ShieldCheck, count: auditLogs.length },
+                  { id: "settings", label: "System Settings", icon: SettingsIcon },
+                  { id: "system_health", label: "System Health Monitor", icon: Activity, badge: "100%" }
+                ].filter(item => isSectionAuthorized(currentUser?.role || "explorer", item.id));
+
+                if (!items.length) return null;
+
+                return (
+                  <div>
+                    <div className="px-3 text-[10px] font-extrabold uppercase tracking-wider text-muted-foreground mb-1">
+                      ⚙️ SYSTEM & SECURITY
+                    </div>
+                    <nav className="space-y-0.5">
+                      {items.map((item) => {
+                        const Icon = item.icon;
+                        const isActive = activeSection === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            onClick={() => setActiveSection(item.id as AdminSection)}
+                            className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold transition-all cursor-pointer ${
+                              isActive
+                                ? "bg-primary text-primary-foreground font-bold shadow-sm"
+                                : "text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+                            }`}
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Icon className="h-4 w-4" />
+                              <span>{item.label}</span>
+                            </div>
+                            {item.badge ? (
+                              <span className="rounded-full bg-emerald-500/10 text-emerald-600 px-2 py-0.5 text-[10px] font-bold">
+                                {item.badge}
+                              </span>
+                            ) : item.count !== undefined ? (
+                              <span className="text-[11px] text-muted-foreground font-mono">{item.count}</span>
+                            ) : null}
+                          </button>
+                        );
+                      })}
+                    </nav>
+                  </div>
+                );
+              })()}
 
             </div>
           </div>

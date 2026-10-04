@@ -1,15 +1,12 @@
 export type UserRole =
-  | "explorer"
-  | "beta_tester"
-  | "place_manager"
-  | "route_manager"
-  | "community_manager"
-  | "content_editor"
-  | "weather_manager"
-  | "analytics_manager"
-  | "ai_manager"
-  | "admin"
-  | "super_admin";
+  | "guest"
+  | "explorer" // Registered User (Traveler)
+  | "scout" // Local Contributor
+  | "moderator" // Community & Content Safety
+  | "content_editor" // Editorial Management
+  | "support_agent" // Helpdesk & User Queries
+  | "admin" // Day-to-Day Platform Admin
+  | "super_admin"; // Highest Privilege / Platform Owner
 
 export type Permission =
   | "manage_users"
@@ -35,7 +32,9 @@ export type Permission =
   | "can_manage_weather"
   | "can_manage_ai"
   | "can_view_analytics"
-  | "can_moderate_community";
+  | "can_moderate_community"
+  | "can_contribute_scout"
+  | "can_manage_helpdesk";
 
 export interface UserProfile {
   id: string;
@@ -50,15 +49,19 @@ export interface UserProfile {
 }
 
 export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {
+  guest: [],
   explorer: [],
-  beta_tester: [],
-  place_manager: ["manage_places", "can_create_place", "can_edit_place", "can_verify_place"],
-  route_manager: ["manage_routes", "can_publish_route", "can_delete_route"],
-  community_manager: ["manage_reviews", "can_moderate_community"],
-  content_editor: ["manage_places", "can_create_place", "can_edit_place"],
-  weather_manager: ["can_manage_weather"],
-  analytics_manager: ["can_view_analytics"],
-  ai_manager: ["can_manage_ai"],
+  scout: ["can_contribute_scout"],
+  moderator: ["manage_reviews", "can_moderate_community"],
+  content_editor: [
+    "manage_places",
+    "can_create_place",
+    "can_edit_place",
+    "manage_routes",
+    "can_publish_route",
+    "manage_hotels",
+  ],
+  support_agent: ["can_manage_helpdesk"],
   admin: [
     "manage_places",
     "manage_routes",
@@ -79,6 +82,8 @@ export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {
     "can_manage_weather",
     "can_manage_ai",
     "can_view_analytics",
+    "can_manage_helpdesk",
+    "can_manage_users",
   ],
   super_admin: [
     "manage_users",
@@ -105,20 +110,23 @@ export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {
     "can_manage_ai",
     "can_view_analytics",
     "can_moderate_community",
+    "can_contribute_scout",
+    "can_manage_helpdesk",
   ],
 };
 
 export function getAuthorizedRedirectRoute(role: UserRole): string {
   switch (role) {
+    case "guest":
     case "explorer":
-    case "beta_tester":
+    case "scout":
       return "/";
-    case "place_manager":
-      return "/ops?tab=places";
-    case "route_manager":
-      return "/ops?tab=routes";
-    case "community_manager":
-      return "/ops?tab=community";
+    case "moderator":
+      return "/admin?section=reviews";
+    case "content_editor":
+      return "/admin?section=destinations";
+    case "support_agent":
+      return "/admin?section=user_queries";
     case "admin":
     case "super_admin":
     default:
@@ -132,7 +140,49 @@ export function hasPermission(role: UserRole, permission: Permission): boolean {
 
 export function isAdminUser(user: UserProfile | null): boolean {
   if (!user) return false;
-  return user.role === "super_admin" || user.role === "admin";
+  return (
+    user.role === "super_admin" ||
+    user.role === "admin" ||
+    user.role === "content_editor" ||
+    user.role === "moderator" ||
+    user.role === "support_agent"
+  );
+}
+
+// Module-level authorized role mapping matching official matrix
+export const MODULE_ALLOWED_ROLES: Record<string, UserRole[]> = {
+  dashboard: ["admin", "super_admin"],
+  district_places: ["content_editor", "admin", "super_admin"],
+  destinations: ["content_editor", "admin", "super_admin"],
+  kodai_pois: ["content_editor", "admin", "super_admin"],
+  place_suggestions: ["moderator", "admin", "super_admin"],
+  map_intelligence: ["content_editor", "admin", "super_admin"],
+  categories: ["content_editor", "admin", "super_admin"],
+  routes: ["content_editor", "admin", "super_admin"],
+  activities: ["content_editor", "admin", "super_admin"],
+  events: ["content_editor", "admin", "super_admin"],
+  ai_planner: ["admin", "super_admin"],
+  ai_config: ["admin", "super_admin"],
+  data_quality: ["content_editor", "admin", "super_admin"],
+  users: ["admin", "super_admin"], // Admin has limited scope, Super Admin has full
+  user_queries: ["support_agent", "admin", "super_admin"],
+  reviews: ["moderator", "admin", "super_admin"],
+  media_library: ["content_editor", "admin", "super_admin"],
+  articles: ["content_editor", "admin", "super_admin"],
+  weekly_digest: ["admin", "super_admin"],
+  search_analytics: ["admin", "super_admin"],
+  analytics: ["admin", "super_admin"],
+  security: ["super_admin"], // CAIN Security Dashboard: Super Admin only
+  notifications: ["support_agent", "moderator", "content_editor", "admin", "super_admin"],
+  audit: ["admin", "super_admin"], // Admin read-only, Super Admin full
+  settings: ["super_admin"], // System Settings: Super Admin only
+  system_health: ["admin", "super_admin"],
+};
+
+export function isSectionAuthorized(role: UserRole, sectionId: string): boolean {
+  if (role === "super_admin") return true;
+  const allowed = MODULE_ALLOWED_ROLES[sectionId];
+  return allowed ? allowed.includes(role) : false;
 }
 
 // REAL AUTH SESSION MANAGER with Reactive Event Broadcast

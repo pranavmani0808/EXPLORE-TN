@@ -33,8 +33,6 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
       const email = user.email.trim().toLowerCase();
       const userId = user.id;
       const name = user.name || email.split("@")[0] || "Explorer User";
-      const role =
-        user.role || (email.endsWith("@explorertn.com") ? "super_admin" : "explorer");
 
       // Check if user already exists in public.users table
       const { data: existingUser, error: checkError } = await supabaseAdmin
@@ -42,6 +40,17 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         .select("id, email, name, role, status")
         .eq("email", email)
         .maybeSingle();
+
+      // STRICT RBAC POLICY: Only super_admin can assign roles (Admin, Moderator, Content Editor, etc.)
+      // When a user verifies email and registers, they strictly start as "explorer" (Registered User).
+      // Platform owner admin@explorertn.com is the sole Super Admin.
+      let role = "explorer";
+      if (email === "admin@explorertn.com") {
+        role = "super_admin";
+      } else if (existingUser?.role) {
+        // Retain role assigned by Super Admin in users table
+        role = existingUser.role;
+      }
 
       if (checkError) {
         console.warn("[User Sync API] Check existing user warning:", checkError.message);
@@ -152,6 +161,56 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
       return new Response(
         JSON.stringify({ error: err?.message || "Internal server error" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+  },
+  GET: async ({ request }) => {
+    try {
+      const url = new URL(request.url);
+      const email = url.searchParams.get("email")?.trim().toLowerCase();
+
+      if (!email) {
+        return new Response(
+          JSON.stringify({ valid: false, message: "Missing email parameter" }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      // Check if user exists in public.users
+      const { data: userRecord } = await supabaseAdmin
+        .from("users")
+        .select("id, email, status, role")
+        .eq("email", email)
+        .maybeSingle();
+
+      // Also verify in auth.users
+      const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
+      const authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email);
+
+      if (!userRecord || !authUser || userRecord.status === "suspended" || userRecord.status === "blocked") {
+        return new Response(
+          JSON.stringify({
+            valid: false,
+            exists: false,
+            message: "User account has been removed or deactivated.",
+          }),
+          { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      return new Response(
+        JSON.stringify({
+          valid: true,
+          exists: true,
+          role: userRecord.role,
+          status: userRecord.status,
+        }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
+      );
+    } catch (err: any) {
+      return new Response(
+        JSON.stringify({ valid: true, error: err?.message }),
+        { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }
   },

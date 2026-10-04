@@ -27,7 +27,7 @@ export interface ManagedUser {
   id: string;
   name: string;
   email: string;
-  role: "super_admin" | "place_manager" | "route_manager" | "community_manager" | "explorer";
+  role: "super_admin" | "admin" | "content_editor" | "moderator" | "support_agent" | "scout" | "explorer" | "guest";
   status: "ACTIVE" | "INACTIVE" | "BLOCKED";
   district?: string;
   lastLogin: string;

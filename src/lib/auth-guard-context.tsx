@@ -21,10 +21,40 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
   const [pendingAction, setPendingAction] = useState<(() => void | Promise<void>) | null>(null);
 
   useEffect(() => {
-    setUser(getCurrentAuthUser());
+    const active = getCurrentAuthUser();
+    setUser(active);
+
     const unsubscribe = subscribeToAuthChanges((updatedUser) => {
       setUser(updatedUser);
     });
+
+    // Verify session validity against Supabase
+    if (active && active.email) {
+      // Explicit check for deleted popz user or general database removal
+      if (active.email.toLowerCase() === "popzdesigngroup@gmail.com") {
+        clearAuthSession();
+        setUser(null);
+        setTimeout(() => {
+          alert("Your account (popzdesigngroup@gmail.com) has been removed from ExploreTN by the administrator. You have been logged out.");
+          toast.error("Account removed. Logged out of ExploreTN.");
+          window.location.href = "/";
+        }, 300);
+        return () => unsubscribe();
+      }
+
+      fetch(`/api/v1/user/sync?email=${encodeURIComponent(active.email)}`)
+        .then((res) => {
+          if (res.status === 404) {
+            clearAuthSession();
+            setUser(null);
+            alert(`Your account (${active.email}) is no longer active or has been removed from ExploreTN. You have been logged out.`);
+            toast.error("Session revoked: Account does not exist in ExploreTN.");
+            window.location.href = "/";
+          }
+        })
+        .catch(() => null);
+    }
+
     return () => unsubscribe();
   }, []);
 

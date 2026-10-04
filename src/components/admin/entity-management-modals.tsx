@@ -110,6 +110,11 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
   };
 
   const handleRoleChange = (userId: string, newRole: ManagedUser["role"]) => {
+    if (currentUser?.role !== "super_admin") {
+      alert("Permission Denied: Only Super Admin can assign platform roles.");
+      return;
+    }
+
     const targetUser = users.find((u) => u.id === userId);
     const oldRole = targetUser?.role || "explorer";
 
@@ -122,7 +127,7 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
 
     // REACTIVE SESSION SYNCHRONIZATION: Update current session if modifying self
     if (currentUser && (currentUser.id === userId || currentUser.email === targetUser?.email || currentUser.name === targetUser?.name)) {
-      updateAuthRole(newRole);
+      updateAuthRole(newRole as any);
     }
 
     recordAuditLog({
@@ -285,11 +290,14 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                 onChange={(e) => setNewUserRole(e.target.value as any)}
                 className="w-full h-9 px-3 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs font-bold text-emerald-600 dark:text-emerald-400"
               >
-                <option value="super_admin">Super Admin</option>
-                <option value="place_manager">Place Manager</option>
-                <option value="route_manager">Route Manager</option>
-                <option value="community_manager">Community Manager</option>
-                <option value="explorer">Explorer</option>
+                <option value="super_admin">Super Admin / Platform Owner</option>
+                <option value="admin">Admin (Privileged)</option>
+                <option value="content_editor">Content Editor</option>
+                <option value="moderator">Moderator</option>
+                <option value="support_agent">Support Agent</option>
+                <option value="scout">Scout / Local Contributor</option>
+                <option value="explorer">Registered User (Traveler)</option>
+                <option value="guest">Guest (Public Visitor)</option>
               </select>
             </div>
             <div className="flex justify-end gap-2 pt-2">
@@ -428,15 +436,20 @@ export function UserManagementModal({ isOpen, onClose }: ModalProps) {
                         </td>
                         <td className="py-3 px-3">
                           <select
+                            disabled={currentUser?.role !== "super_admin"}
                             value={u.role}
                             onChange={(e) => handleRoleChange(u.id, e.target.value as any)}
-                            className="bg-transparent border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 focus:outline-none cursor-pointer"
+                            className="bg-transparent border border-slate-200 dark:border-white/10 rounded-lg px-2 py-1 text-[11px] font-bold text-emerald-700 dark:text-emerald-400 focus:outline-none cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                            title={currentUser?.role !== "super_admin" ? "Only Super Admin can change roles" : "Change User Role"}
                           >
-                            <option value="super_admin">Super Admin</option>
-                            <option value="place_manager">Place Manager</option>
-                            <option value="route_manager">Route Manager</option>
-                            <option value="community_manager">Community Manager</option>
-                            <option value="explorer">Explorer</option>
+                            <option value="super_admin">Super Admin / Platform Owner</option>
+                            <option value="admin">Admin (Privileged)</option>
+                            <option value="content_editor">Content Editor</option>
+                            <option value="moderator">Moderator</option>
+                            <option value="support_agent">Support Agent</option>
+                            <option value="scout">Scout / Local Contributor</option>
+                            <option value="explorer">Registered User (Traveler)</option>
+                            <option value="guest">Guest (Public Visitor)</option>
                           </select>
                         </td>
                         <td className="py-3 px-3">
