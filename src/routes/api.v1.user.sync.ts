@@ -68,6 +68,32 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         );
       }
 
+      // Also sync user to Supabase auth.users so they appear in Supabase Authentication dashboard
+      let targetId = existingUser?.id || userId;
+      try {
+        const { data: authCreated, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
+          email: email,
+          email_confirm: true,
+          user_metadata: {
+            full_name: name,
+            avatar_url: user.avatar || "",
+            provider: "google",
+          },
+        });
+        if (authCreated?.user?.id) {
+          targetId = authCreated.user.id;
+        } else if (createAuthError) {
+          // If already exists in auth, retrieve their auth id
+          const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
+          const match = listData?.users?.find((u) => u.email?.toLowerCase() === email);
+          if (match?.id) {
+            targetId = match.id;
+          }
+        }
+      } catch (authAdminErr) {
+        console.warn("[User Sync API] auth.admin.createUser notice:", authAdminErr);
+      }
+
       // Check if user profile already has profile_complete set
       let isProfileComplete = false;
       if (existingUser) {
@@ -82,7 +108,6 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
       }
 
       // User exists or is signing up -> upsert in public.users
-      const targetId = existingUser?.id || userId;
       const { data: savedUser, error: userError } = await supabaseAdmin
         .from("users")
         .upsert(
