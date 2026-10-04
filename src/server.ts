@@ -569,7 +569,7 @@ function applySecurityHeaders(res: Response): Response {
   newHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
   newHeaders.set(
     "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://maps.googleapis.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https:;"
+    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://maps.googleapis.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://apis.google.com https://*.firebaseapp.com https://*.google.com;"
   );
   newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self), payment=()");
   newHeaders.set("X-CAIN-Security-Layer", "Active; SHA256-Chained-Audit");
