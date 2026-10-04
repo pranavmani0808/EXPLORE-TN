@@ -1,5 +1,5 @@
-import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, User } from "firebase/auth";
-import { auth } from "./firebase-client";
+import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
+import { auth, isFirebaseConfigured } from "./firebase-client";
 import { supabase } from "./supabase-client";
 import { setAuthSession, UserProfile } from "./auth-rbac";
 import { toast } from "sonner";
@@ -52,13 +52,8 @@ export async function syncGoogleUserToProfile(
  * Uses Firebase signInWithPopup as primary, with seamless fallback to Supabase OAuth if Firebase is not yet configured.
  */
 export async function triggerGoogleSignIn(): Promise<UserProfile | null> {
-  // Check if Firebase apiKey is present
-  const hasFirebaseConfig = Boolean(
-    (typeof process !== "undefined" && (process.env?.VITE_FIREBASE_API_KEY || process.env?.NEXT_PUBLIC_FIREBASE_API_KEY)) ||
-    (typeof import.meta !== "undefined" && ((import.meta as any).env?.VITE_FIREBASE_API_KEY || (import.meta as any).env?.NEXT_PUBLIC_FIREBASE_API_KEY))
-  );
-
-  if (hasFirebaseConfig && auth) {
+  // If Firebase is configured with an active apiKey, use popup flow
+  if (isFirebaseConfigured && auth) {
     try {
       const provider = new GoogleAuthProvider();
       provider.addScope("profile");

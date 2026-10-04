@@ -39,6 +39,19 @@ const firebaseConfig = {
     "",
 };
 
-// Initialize Firebase safely without duplicate app initialization on SSR / Fast Refresh
-export const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-export const auth = getAuth(app);
+// Initialize Firebase safely only when a valid apiKey is present.
+// Prevents `Firebase: Error (auth/invalid-api-key)` when keys are not yet configured in production or dev.
+export const isFirebaseConfigured = Boolean(
+  firebaseConfig.apiKey &&
+  firebaseConfig.apiKey.trim().length > 0 &&
+  firebaseConfig.projectId &&
+  firebaseConfig.projectId.trim().length > 0
+);
+
+export const app = isFirebaseConfigured
+  ? getApps().length > 0
+    ? getApp()
+    : initializeApp(firebaseConfig)
+  : null;
+
+export const auth = app ? getAuth(app) : null;
