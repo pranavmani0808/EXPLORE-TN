@@ -26,6 +26,7 @@ export async function syncGoogleUserToProfile(
     rank: isAdmin ? "Super Admin" : "Verified Explorer",
     districtCount: isAdmin ? 38 : 1,
     xp: isAdmin ? 1000 : 100,
+    authProvider: "google",
   };
 
   // Sync with Supabase public.users and user_profiles table

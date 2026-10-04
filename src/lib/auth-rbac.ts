@@ -46,6 +46,7 @@ export interface UserProfile {
   rank: string; // Explorer Gamification Rank (e.g., Level 0 Explorer)
   districtCount: number;
   xp?: number;
+  authProvider?: "google" | "email" | "apple";
 }
 
 export const PERMISSION_MATRIX: Record<UserRole, Permission[]> = {

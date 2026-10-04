@@ -1429,47 +1429,82 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   </div>
 
                   <div className="space-y-3">
-                    <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-white font-bold">G</span>
-                        <div>
-                          <p className="font-bold text-white">Google Account</p>
-                          <p className="text-zinc-400 text-[11px]">
-                            {currentUser?.email ? `Linked to ${currentUser.email}` : "Not connected"}
-                          </p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          toast.success("Google Account connected & synced successfully ✓");
-                        }}
-                        className="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold hover:bg-emerald-500 hover:text-zinc-950 transition cursor-pointer"
-                      >
-                        ✓ Connected
-                      </button>
-                    </div>
+                    {/* Google Account */}
+                    {(() => {
+                      const isGoogleConnected = Boolean(
+                        currentUser?.authProvider === "google" ||
+                        currentUser?.id?.startsWith("usr-g-") ||
+                        (currentUser?.email && !currentUser?.authProvider?.includes("apple"))
+                      );
 
-                    <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
-                      <div className="flex items-center gap-3">
-                        <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-white font-bold"></span>
-                        <div>
-                          <p className="font-bold text-white">Apple ID</p>
-                          <p className="text-zinc-400 text-[11px]">
-                            {currentUser?.email ? `Linked to ${currentUser.email}` : "Not connected"}
-                          </p>
+                      return (
+                        <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-white font-bold">G</span>
+                            <div>
+                              <p className="font-bold text-white">Google Account</p>
+                              <p className="text-zinc-400 text-[11px]">
+                                {isGoogleConnected && currentUser?.email
+                                  ? `Linked to ${currentUser.email}`
+                                  : "Not connected"}
+                              </p>
+                            </div>
+                          </div>
+                          {isGoogleConnected ? (
+                            <span className="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[11px]">
+                              ✓ Connected
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const { triggerGoogleSignIn } = await import("@/lib/google-auth");
+                                await triggerGoogleSignIn();
+                              }}
+                              className="px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-bold text-[11px] hover:bg-white hover:text-black transition cursor-pointer"
+                            >
+                              Connect Google
+                            </button>
+                          )}
                         </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => {
-                          toast.success("Apple ID connected & synced successfully ✓");
-                        }}
-                        className="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold hover:bg-emerald-500 hover:text-zinc-950 transition cursor-pointer"
-                      >
-                        ✓ Connected
-                      </button>
-                    </div>
+                      );
+                    })()}
+
+                    {/* Apple ID */}
+                    {(() => {
+                      const isAppleConnected = Boolean(currentUser?.authProvider === "apple");
+
+                      return (
+                        <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
+                          <div className="flex items-center gap-3">
+                            <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-white font-bold"></span>
+                            <div>
+                              <p className="font-bold text-white">Apple ID</p>
+                              <p className="text-zinc-400 text-[11px]">
+                                {isAppleConnected && currentUser?.email
+                                  ? `Linked to ${currentUser.email}`
+                                  : "Not connected"}
+                              </p>
+                            </div>
+                          </div>
+                          {isAppleConnected ? (
+                            <span className="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[11px]">
+                              ✓ Connected
+                            </span>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                toast.info("Apple Sign-In is coming soon in an upcoming update.");
+                              }}
+                              className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-zinc-400 font-medium text-[11px] hover:text-white transition cursor-pointer"
+                            >
+                              Not Connected
+                            </button>
+                          )}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               )}
