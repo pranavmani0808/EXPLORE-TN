@@ -167,7 +167,7 @@ function LoginPage() {
       emailLower.endsWith("@explorertn.com");
 
     const assignedRole: UserRole = isAdminCreds ? "super_admin" : "explorer";
-    let userId = isPopzAdmin ? "usr-popz-admin" : `usr-${Date.now()}`;
+    let userId = "";
     let userName = isPopzAdmin
       ? "Popz Admin"
       : isAdminCreds
