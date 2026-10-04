@@ -38,7 +38,7 @@ export function GoogleLogoSVG() {
 
 export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthModalProps) {
   const navigate = useNavigate();
-  const [authMode, setAuthMode] = useState<"signin" | "signup" | "forgot_password">("signin");
+  const [authMode, setAuthMode] = useState<"signin" | "signup" | "forgot_password" | "email_verification">("signin");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -47,6 +47,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
     fullName: "",
     email: "",
     password: "",
+    otpCode: "",
   });
 
   if (!isOpen) return null;
@@ -58,7 +59,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
       return;
     }
 
-    if (authMode !== "forgot_password" && !form.password) {
+    if (authMode !== "forgot_password" && authMode !== "email_verification" && !form.password) {
       setError("Please enter email and password.");
       return;
     }
@@ -84,6 +85,63 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
       }
     }
 
+    // Handle Email Verification OTP flow
+    if (authMode === "email_verification") {
+      if (!form.otpCode || form.otpCode.trim().length < 4) {
+        setError("Please enter the 6-digit verification code sent to your email.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const { data: verifyData, error: verifyErr } = await supabase.auth.verifyOtp({
+          email: form.email.trim(),
+          token: form.otpCode.trim(),
+          type: "signup",
+        });
+
+        if (verifyErr) {
+          setError(verifyErr.message || "Invalid or expired verification code.");
+          setLoading(false);
+          return;
+        }
+
+        const verifiedUserId = verifyData?.user?.id || `usr-${Date.now()}`;
+        const verifiedName = form.fullName.trim() || form.email.split("@")[0] || "Explorer User";
+        const verifiedEmail = form.email.trim();
+
+        const verifiedUser: UserProfile = {
+          id: verifiedUserId,
+          name: verifiedName,
+          email: verifiedEmail,
+          avatar: verifiedName.slice(0, 2).toUpperCase(),
+          role: "explorer",
+          status: "active",
+          rank: "Verified Explorer",
+          districtCount: 1,
+        };
+
+        await fetch("/api/v1/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: verifiedUser,
+            isSignUp: true,
+          }),
+        }).catch(() => null);
+
+        setAuthSession(verifiedUser);
+        setLoading(false);
+        onClose();
+        navigate({ to: "/onboarding" });
+        return;
+      } catch (err: any) {
+        setLoading(false);
+        setError(err?.message || "Email verification failed.");
+        return;
+      }
+    }
+
     try {
       let userId = `usr-${Date.now()}`;
       let name = form.fullName.trim() || form.email.split("@")[0] || "Explorer User";
@@ -97,10 +155,18 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             password: form.password,
             options: { data: { full_name: name } }
           });
-          if (sbErr && !sbErr.message.includes("fetch")) {
-            console.warn("[AuthModal] Supabase signup notice:", sbErr.message);
+          if (sbErr) {
+            setError(sbErr.message || "Failed to create account. Please try again.");
+            setLoading(false);
+            return;
           }
           if (data?.user) userId = data.user.id;
+
+          // Transition to OTP verification step
+          setAuthMode("email_verification");
+          setSuccessMessage(`Account created for ${email}! Enter the 6-digit verification code sent to your email.`);
+          setLoading(false);
+          return;
         } else {
           const { data, error: sbErr } = await supabase.auth.signInWithPassword({
             email,
@@ -311,7 +377,28 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
               </div>
             </div>
 
-            {authMode !== "forgot_password" && (
+            {authMode === "email_verification" && (
+              <div className="space-y-3">
+                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center">
+                  <p className="text-xs text-emerald-400 font-bold">Verification code sent to {form.email}</p>
+                  <p className="text-[11px] text-slate-300 mt-1">Please enter the 6-digit code sent to your email inbox to verify your account.</p>
+                </div>
+                <div>
+                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">6-Digit Verification Code</label>
+                  <input
+                    type="text"
+                    maxLength={6}
+                    required
+                    placeholder="123456"
+                    value={form.otpCode}
+                    onChange={(e) => setForm({ ...form, otpCode: e.target.value })}
+                    className="w-full h-11 bg-white/5 border border-white/10 rounded-xl text-center font-mono text-lg tracking-[0.4em] text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 mt-1"
+                  />
+                </div>
+              </div>
+            )}
+
+            {authMode !== "forgot_password" && authMode !== "email_verification" && (
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Password</label>
@@ -362,9 +449,14 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
                   <span>Send Password Reset Link</span>
                   <ArrowRight className="size-4" />
                 </>
+              ) : authMode === "email_verification" ? (
+                <>
+                  <span>Verify Email & Complete Registration</span>
+                  <CheckCircle2 className="size-4" />
+                </>
               ) : (
                 <>
-                  <span>{authMode === "signin" ? "Sign In & Continue" : "Create Account"}</span>
+                  <span>{authMode === "signin" ? "Sign In & Continue" : "Create Account & Verify Email"}</span>
                   <ArrowRight className="size-4" />
                 </>
               )}

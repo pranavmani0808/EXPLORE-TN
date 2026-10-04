@@ -105,51 +105,61 @@ function LoginPage() {
 
     // 3. EMAIL VERIFICATION FLOW
     if (authMode === "email_verification") {
-      if (!form.otpCode || form.otpCode.length < 4) {
+      if (!form.otpCode || form.otpCode.trim().length < 4) {
         setMessage("Please enter the 6-digit verification code sent to your email.");
         return;
       }
-      const verifyRes: any = await safeSupabaseCall(() =>
-        supabase.auth.verifyOtp({
-          email: form.email,
-          token: form.otpCode,
+
+      try {
+        const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+          email: form.email.trim(),
+          token: form.otpCode.trim(),
           type: "signup",
-        })
-      );
-      setAuthStep("verified");
-      setMessage("Email address verified successfully!");
+        });
 
-      const verifiedUserId = verifyRes?.data?.user?.id || `usr-${Date.now()}`;
-      const verifiedUserName = form.fullName.trim() || form.email.split("@")[0] || "New Explorer";
-      const verifiedUser: UserProfile = {
-        id: verifiedUserId,
-        name: verifiedUserName,
-        email: form.email.trim(),
-        avatar: verifiedUserName.slice(0, 2).toUpperCase(),
-        role: "explorer",
-        status: "active",
-        rank: "New Explorer",
-        districtCount: 0,
-      };
+        if (verifyError) {
+          setMessage(verifyError.message || "Invalid or expired verification code. Please check your email.");
+          return;
+        }
 
-      // Sync verified user to Supabase
-      fetch("/api/v1/user/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user: verifiedUser,
-          isSignUp: true,
-        }),
-      }).catch(() => null);
+        setAuthStep("verified");
+        setMessage("Email address verified successfully!");
 
-      setAuthSession(verifiedUser);
+        const verifiedUserId = verifyData?.user?.id || `usr-${Date.now()}`;
+        const verifiedUserName = form.fullName.trim() || form.email.split("@")[0] || "New Explorer";
+        const verifiedUser: UserProfile = {
+          id: verifiedUserId,
+          name: verifiedUserName,
+          email: form.email.trim(),
+          avatar: verifiedUserName.slice(0, 2).toUpperCase(),
+          role: "explorer",
+          status: "active",
+          rank: "New Explorer",
+          districtCount: 0,
+        };
 
-      // Automatically redirect to onboarding page to complete vehicle, location, interests
-      setTimeout(() => {
-        navigate({ to: "/onboarding" });
-      }, 1500);
+        // Sync verified user to Supabase
+        await fetch("/api/v1/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: verifiedUser,
+            isSignUp: true,
+          }),
+        }).catch(() => null);
 
-      return;
+        setAuthSession(verifiedUser);
+
+        // Automatically redirect to onboarding page to complete vehicle, location, interests
+        setTimeout(() => {
+          navigate({ to: "/onboarding" });
+        }, 1500);
+
+        return;
+      } catch (err: any) {
+        setMessage(err?.message || "Verification failed. Please try again.");
+        return;
+      }
     }
 
     // 4. SIGN IN & SIGN UP FLOW
@@ -176,18 +186,23 @@ function LoginPage() {
 
     try {
       if (authMode === "signup") {
-        const res: any = await safeSupabaseCall(() =>
-          supabase.auth.signUp({
-            email: form.email,
-            password: form.password,
-            options: { data: { full_name: userName } },
-          })
-        );
-        if (res?.data?.user) userId = res.data.user.id;
+        const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+          email: form.email.trim(),
+          password: form.password,
+          options: { data: { full_name: userName } },
+        });
+
+        if (signUpError) {
+          setMessage(signUpError.message || "Failed to create account. Please try again.");
+          setAuthStep("idle");
+          return;
+        }
+
+        if (signUpData?.user) userId = signUpData.user.id;
 
         // Switch to email verification step after signup
         setAuthMode("email_verification");
-        setMessage(`Account created for ${form.email}! Please enter the verification code sent to your email.`);
+        setMessage(`Account created for ${form.email}! Please enter the verification code sent to your email to verify your account.`);
 
         // Also sync registration record to Supabase public tables
         fetch("/api/v1/user/sync", {

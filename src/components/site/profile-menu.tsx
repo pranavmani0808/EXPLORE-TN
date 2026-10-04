@@ -17,6 +17,7 @@ import {
   LogIn,
   UserPlus,
   Settings,
+  Lock,
 } from "lucide-react";
 import { getCurrentAuthUser, clearAuthSession, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { useAuthGuard } from "@/lib/auth-guard-context";
@@ -202,6 +203,7 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
   const mainActions = [
     { label: "Profile & Identity", icon: User, to: "/profile" },
     { label: "Explorer Settings", icon: Settings, to: "/settings" },
+    { label: "Change Password", icon: Lock, to: "/settings?tab=profile" },
     { label: "Saved Collections", icon: Bookmark, to: "/explore" },
     { label: "AI Expeditions", icon: Sparkles, to: "/planner" },
     { label: "Help & Support", icon: HelpCircle, to: "/support" },
