@@ -45,6 +45,8 @@ import { KodaiTouristPlacesSection } from "@/components/site/kodai-poi-component
 import { OotyComprehensiveGuide } from "@/components/site/ooty-guide-components";
 import { KodaiFoodAndTravelGuide } from "@/components/site/kodai-guide-components";
 import { DistrictPlacesCollectionTable } from "@/components/site/district-places-collection-table";
+import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
+import type { Place } from "@/data/places";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -100,6 +102,41 @@ export function DistrictView({ district }: DistrictViewProps) {
 
   const [dynamicSpots, setDynamicSpots] = useState<DistrictSpot[]>(district.spots || []);
   const [isLoadingSupabase, setIsLoadingSupabase] = useState(false);
+  const [selectedModalPlace, setSelectedModalPlace] = useState<Place | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  // Helper to convert DistrictSpot to Place for the rich details modal
+  const handleOpenSpotModal = (spot: DistrictSpot) => {
+    const modalPlace: Place = {
+      slug: spot.id,
+      name: spot.name,
+      district: district.name,
+      category: spot.category === "temples" ? "spiritual" : (spot.category as any),
+      image: spot.image,
+      tagline: spot.tagline,
+      story: spot.description,
+      rating: spot.rating,
+      reviews: spot.reviewsCount,
+      difficulty: "Easy",
+      bestSeason: "Year-round",
+      roadCondition: "Paved and accessible",
+      parking: "Available",
+      entryFee: spot.price || "Free",
+      timings: spot.timings || "Open Daily",
+      safety: "Standard travel safety precautions apply",
+      weather: "Pleasant",
+      tips: spot.highlights || [],
+      nearbyFood: spot.mustTry || [],
+      nearbyFuel: ["District Central Fuel Station"],
+      x: 50,
+      y: 50,
+      coords: [spot.coordinates.lat, spot.coordinates.lng],
+      latitude: spot.coordinates.lat,
+      longitude: spot.coordinates.lng,
+    };
+    setSelectedModalPlace(modalPlace);
+    setIsModalOpen(true);
+  };
 
   useEffect(() => {
     setIsMounted(true);
@@ -706,22 +743,35 @@ export function DistrictView({ district }: DistrictViewProps) {
                           ))}
                         </div>
 
-                        <button
-                          type="button"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleSpotFocus(spot);
-                          }}
-                          className={cn(
-                            "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition shrink-0",
-                            isSelected
-                              ? "bg-emerald-400 text-zinc-950 font-extrabold"
-                              : "bg-zinc-800 text-emerald-400 hover:bg-emerald-400 hover:text-zinc-950 font-bold",
-                          )}
-                        >
-                          <span>Focus on Map</span>
-                          <ArrowRight className="size-3" />
-                        </button>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleOpenSpotModal(spot);
+                            }}
+                            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold bg-amber-500/15 text-amber-300 hover:bg-amber-500 hover:text-zinc-950 border border-amber-500/30 transition"
+                          >
+                            <span>Details</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleSpotFocus(spot);
+                            }}
+                            className={cn(
+                              "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition",
+                              isSelected
+                                ? "bg-emerald-400 text-zinc-950 font-extrabold"
+                                : "bg-zinc-800 text-emerald-400 hover:bg-emerald-400 hover:text-zinc-950 font-bold",
+                            )}
+                          >
+                            <span>Focus</span>
+                            <ArrowRight className="size-3" />
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </CardContent>
@@ -866,7 +916,7 @@ export function DistrictView({ district }: DistrictViewProps) {
             <DistrictPlacesCollectionTable
               district={district}
               spots={dynamicSpots}
-              onSelectSpot={(spot) => handleSpotFocus(spot)}
+              onSelectSpot={(spot) => handleOpenSpotModal(spot)}
             />
           </div>
 
@@ -896,6 +946,33 @@ export function DistrictView({ district }: DistrictViewProps) {
 
         </div>
       </div>
+
+      {/* ============================================================ */}
+      {/* 6. PLACE QUICK DETAILS MODAL (TIMINGS, PARKING, AMENITIES)     */}
+      {/* ============================================================ */}
+      <PlaceQuickDetailsModal
+        place={selectedModalPlace}
+        isOpen={isModalOpen}
+        onClose={() => {
+          setIsModalOpen(false);
+          setSelectedModalPlace(null);
+        }}
+        nearbySuggestions={
+          selectedModalPlace
+            ? dynamicSpots
+                .filter((s) => s.id !== selectedModalPlace.slug)
+                .slice(0, 4)
+                .map((s) => ({
+                  name: s.name,
+                  slug: s.id,
+                  category: s.category,
+                  image: s.image,
+                  distance: "In District",
+                  description: s.tagline || s.description?.slice(0, 60),
+                }))
+            : []
+        }
+      />
     </div>
   </div>
 );

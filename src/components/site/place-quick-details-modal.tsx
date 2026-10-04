@@ -26,9 +26,10 @@ import {
   Route as RouteIcon,
   Store,
   Layers,
+  Compass,
 } from "lucide-react";
 import type { Place } from "@/data/places";
-import { getPlaceTravelIntelligence } from "@/lib/data/travel-intelligence";
+import { getPlaceTravelIntelligence, getGeospatialAroundPlace } from "@/lib/data/travel-intelligence";
 import { getPoiHillIntelligence } from "@/lib/data/hill-region-intelligence";
 import { getCategoryLabel } from "@/lib/categoryLabels";
 import { Button } from "@/components/ui/button";
@@ -39,6 +40,15 @@ export interface PlaceQuickDetailsModalProps {
   onClose: () => void;
   onToggleTrip?: (place: Place) => void;
   isAddedToTrip?: boolean;
+  onSelectPlace?: (place: Place) => void;
+  nearbySuggestions?: {
+    name: string;
+    slug?: string;
+    category?: string;
+    image?: string;
+    distance?: string;
+    description?: string;
+  }[];
 }
 
 export function PlaceQuickDetailsModal({
@@ -47,11 +57,32 @@ export function PlaceQuickDetailsModal({
   onClose,
   onToggleTrip,
   isAddedToTrip = false,
+  onSelectPlace,
+  nearbySuggestions,
 }: PlaceQuickDetailsModalProps) {
   if (!place || !isOpen) return null;
 
   const intel = getPlaceTravelIntelligence(place.slug);
   const hillIntel = getPoiHillIntelligence(place.slug);
+
+  // Compute nearby spots either from provided nearbySuggestions or travel intelligence geospatial data
+  const computedNearby = nearbySuggestions && nearbySuggestions.length > 0
+    ? nearbySuggestions
+    : (() => {
+        try {
+          const geo = getGeospatialAroundPlace(place.slug);
+          return geo.nearbyAll.slice(0, 4).map((s) => ({
+            name: s.name,
+            slug: s.slug,
+            category: s.category,
+            image: s.image,
+            distance: s.distanceFormatted,
+            description: s.tagline,
+          }));
+        } catch {
+          return [];
+        }
+      })();
 
   const isWaterfall =
     place.category === "waterfalls" ||
@@ -359,6 +390,66 @@ export function PlaceQuickDetailsModal({
                   )}
                 </div>
               </div>
+
+              {/* 🗺️ NEARBY PLACE SUGGESTIONS & CONNECTED STOPS */}
+              {computedNearby && computedNearby.length > 0 && (
+                <div className="space-y-3 pt-1 border-t border-zinc-800/60">
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
+                      <Compass className="size-4 text-amber-400" /> Nearby Places & Suggested Stops
+                    </h3>
+                    <span className="text-[10px] text-zinc-500 font-mono">
+                      Within radius
+                    </span>
+                  </div>
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    {computedNearby.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="group flex items-center gap-3 p-2.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-amber-500/40 hover:bg-zinc-800/80 transition-all text-left"
+                      >
+                        {item.image && (
+                          <img
+                            src={item.image}
+                            alt={item.name}
+                            className="size-12 rounded-xl object-cover shrink-0 border border-zinc-800 group-hover:scale-105 transition-transform"
+                            loading="lazy"
+                          />
+                        )}
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between gap-1">
+                            <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors truncate">
+                              {item.name}
+                            </p>
+                            {item.distance && (
+                              <span className="text-[10px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                                {item.distance}
+                              </span>
+                            )}
+                          </div>
+                          {item.description && (
+                            <p className="text-[10px] text-zinc-400 truncate mt-0.5">
+                              {item.description}
+                            </p>
+                          )}
+                          {item.slug && (
+                            <Link
+                              to="/place/$slug"
+                              params={{ slug: item.slug }}
+                              onClick={onClose}
+                              className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:underline mt-1"
+                            >
+                              <span>Explore Spot</span>
+                              <ExternalLink className="size-2.5" />
+                            </Link>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* FOOTER ACTIONS ROW */}
               <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center gap-3">
