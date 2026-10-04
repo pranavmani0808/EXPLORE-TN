@@ -377,7 +377,7 @@ function ExploreByExperiencePage() {
             longitude: p.longitude,
             rating: p.rating || 4.8,
             reviewsCount: p.review_count || 120,
-            image: p.image_url || p.image || "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+            image: p.image_url || p.image || "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
             verified: p.is_verified ?? true,
           })));
         }

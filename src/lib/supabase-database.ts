@@ -428,7 +428,7 @@ export class SupabaseDatabaseRepository {
         longitude: Number(placeInput.longitude || placeInput.coordinates?.longitude || placeInput.lng) || 78.5,
         tagline: placeInput.tagline || `Verified destination in ${district}`,
         description: placeInput.description || `Explore ${name} located in ${district}, Tamil Nadu.`,
-        image_url: placeInput.image_url || placeInput.heroImage || placeInput.image || "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+        image_url: placeInput.image_url || placeInput.heroImage || placeInput.image || "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
         rating: Number(placeInput.rating) || 5.0,
         review_count: Number(placeInput.review_count) || 1,
         is_verified: true,
@@ -628,16 +628,13 @@ export class SupabaseDatabaseRepository {
   // --- USER TABLE & RBAC MODULE (SUPABASE PRIMARY MEMORY) ---
   static async upsertUserRecord(user: { id: string; name: string; email: string; avatar?: string; role: string; status?: string; rank?: string; districtCount?: number; xp?: number }): Promise<boolean> {
     try {
-      const record: SupabaseUserRecord = {
+      const record = {
         id: user.id,
         name: user.name,
         email: user.email,
         avatar_url: user.avatar || "",
         role: user.role,
         status: user.status || "active",
-        explorer_rank: user.rank || "Explorer",
-        district_count: user.districtCount || 0,
-        xp: user.xp || 0,
         updated_at: new Date().toISOString()
       };
       const { error } = await supabase.from('users').upsert([record], { onConflict: 'email' });

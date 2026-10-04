@@ -144,7 +144,12 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
   // 1a-2. User Sync & Verification Endpoint: /api/v1/user/sync
   if (path === "/api/v1/user/sync") {
     const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://ajxnljrhueiiuwavbrra.supabase.co";
-    const SUPABASE_SECRET_KEY = process.env.SUPABASE_SECRET_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY || process.env.VITE_SUPABASE_ANON_KEY || "";
+    const SUPABASE_SECRET_KEY =
+      process.env.SUPABASE_SECRET_KEY ||
+      process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
+      process.env.SUPABASE_PUBLISHABLE_KEY ||
+      process.env.VITE_SUPABASE_ANON_KEY ||
+      "sb_publishable_7iBDUCQZQoCO6zg6KamalA_kdzdjk-8";
     const { createClient } = await import("@supabase/supabase-js");
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -167,13 +172,15 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
           .eq("email", email)
           .maybeSingle();
 
-        // Also verify in auth.users
+        // Also verify in auth.users if service role key is present
         let authUser = null;
-        try {
-          const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
-          authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email) || null;
-        } catch (authErr) {
-          console.warn("[User Sync API] auth list check warning:", authErr);
+        if (process.env.SUPABASE_SECRET_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY) {
+          try {
+            const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
+            authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email) || null;
+          } catch (authErr) {
+            console.warn("[User Sync API] auth list check warning:", authErr);
+          }
         }
 
         const emailFound = Boolean(userRecord || authUser);

@@ -494,7 +494,7 @@ export const DEFAULT_PANCHA_BHOOTA_TEMPLES: (Place & { element: string; elementT
     name: "Jambukeswarar Temple",
     district: "Tiruchirappalli",
     category: "spiritual",
-    image: "https://images.unsplash.com/photo-1600100397608-f010e423b961?auto=format&fit=crop&w=1000&q=80",
+    image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
     tagline: "Water (Appu) Stalam with Perennial Underground Spring in Sanctum",
     story: "Revered Pancha Bhoota Sthalam representing the Water element (Appu), situated in Thiruvanaikaval between Cauvery and Kollidam rivers. An underground perennial natural spring flows continuously beneath the Shiva Lingam in the inner sanctum, keeping it submerged in holy water throughout the year. Built by Early Chola King Kochengannan over 1,800 years ago.",
     rating: 4.8,

@@ -9,8 +9,9 @@ const SUPABASE_URL =
 const SUPABASE_SECRET_KEY =
   process.env.SUPABASE_SECRET_KEY ||
   process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
+  process.env.SUPABASE_PUBLISHABLE_KEY ||
   process.env.VITE_SUPABASE_ANON_KEY ||
-  "";
+  "sb_publishable_7iBDUCQZQoCO6zg6KamalA_kdzdjk-8";
 
 // Server-side privileged client with bypass RLS to sync user relational tables
 const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {

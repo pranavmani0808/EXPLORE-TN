@@ -19,7 +19,7 @@ import {
   Settings,
   Lock,
 } from "lucide-react";
-import { getCurrentAuthUser, clearAuthSession, UserProfile, isAdminUser } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, clearAuthSession, subscribeToAuthChanges, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { LayoutDashboard, Shield } from "lucide-react";
 

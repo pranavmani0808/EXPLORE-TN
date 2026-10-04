@@ -71,7 +71,7 @@ const DISTRICT_HIGHLIGHTS = [
   { name: "Kodaikanal", title: "Princess of Hill Stations & Lakes", spots: 28, image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=800&q=80", route: "/districts/dindigul" },
   { name: "Theni", title: "Cardamom Valleys & Cloud Mountain Treks", spots: 24, image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=800&q=80", route: "/districts/theni" },
   { name: "Nilgiris (Ooty)", title: "Tea Estates & Misty Peak Railways", spots: 36, image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80", route: "/districts/the-nilgiris" },
-  { name: "Thanjavur", title: "Chola Architecture & Great Temples", spots: 31, image: "https://images.unsplash.com/photo-1600100397608-f010e423b971?auto=format&fit=crop&w=800&q=80", route: "/districts/thanjavur" },
+  { name: "Thanjavur", title: "Chola Architecture & Great Temples", spots: 31, image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=800&q=80", route: "/districts/thanjavur" },
   { name: "Kanyakumari", title: "Tricontinental Sunset & Sea Confluence", spots: 19, image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=800&q=80", route: "/districts/kanniyakumari" },
 ];
 
