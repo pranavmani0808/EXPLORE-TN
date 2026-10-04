@@ -223,7 +223,18 @@ function LoginPage() {
         });
 
         if (error) {
-          setMessage(error.message || "Invalid login credentials");
+          try {
+            const checkRes = await fetch(`/api/v1/user/sync?email=${encodeURIComponent(form.email.trim().toLowerCase())}`);
+            const checkData = await checkRes.json().catch(() => ({}));
+            if (checkRes.ok && checkData.emailFound) {
+              setMessage("Password was wrong. Please check your password or reset it.");
+            } else {
+              setAuthMode("signup");
+              setMessage("New to ExplorerTN? Register your account in ExplorerTN — Discover Tamil Nadu's hidden trails, pristine hill stations, and living heritage.");
+            }
+          } catch {
+            setMessage("Password was wrong or credentials are invalid.");
+          }
           setAuthStep("idle");
           return;
         }
@@ -236,7 +247,18 @@ function LoginPage() {
         }
       }
     } catch (err: any) {
-      setMessage(err?.message || "Invalid login credentials. Please try again.");
+      try {
+        const checkRes = await fetch(`/api/v1/user/sync?email=${encodeURIComponent(form.email.trim().toLowerCase())}`);
+        const checkData = await checkRes.json().catch(() => ({}));
+        if (checkRes.ok && checkData.emailFound) {
+          setMessage("Password was wrong. Please check your password or reset it.");
+        } else {
+          setAuthMode("signup");
+          setMessage("New to ExplorerTN? Register your account in ExplorerTN — Discover Tamil Nadu's hidden trails, pristine hill stations, and living heritage.");
+        }
+      } catch {
+        setMessage(err?.message || "Invalid login credentials. Please try again.");
+      }
       setAuthStep("idle");
       return;
     }

@@ -184,17 +184,37 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         .maybeSingle();
 
       // Also verify in auth.users
-      const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
-      const authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email);
+      let authUser = null;
+      try {
+        const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
+        authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email) || null;
+      } catch (authErr) {
+        console.warn("[User Sync API] auth list check warning:", authErr);
+      }
 
-      if (!userRecord || !authUser || userRecord.status === "suspended" || userRecord.status === "blocked") {
+      const emailFound = Boolean(userRecord || authUser);
+
+      if (!emailFound) {
         return new Response(
           JSON.stringify({
-            valid: false,
             exists: false,
-            message: "User account has been removed or deactivated.",
+            emailFound: false,
+            valid: false,
+            message: "Email ID not registered. Create an account to explore Tamil Nadu.",
           }),
           { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      if (userRecord?.status === "suspended" || userRecord?.status === "blocked") {
+        return new Response(
+          JSON.stringify({
+            exists: true,
+            emailFound: true,
+            valid: false,
+            message: "User account has been deactivated or suspended.",
+          }),
+          { status: 403, headers: { "Content-Type": "application/json" } }
         );
       }
 
@@ -202,14 +222,15 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
         JSON.stringify({
           valid: true,
           exists: true,
-          role: userRecord.role,
-          status: userRecord.status,
+          emailFound: true,
+          role: userRecord?.role || "explorer",
+          status: userRecord?.status || "active",
         }),
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
     } catch (err: any) {
       return new Response(
-        JSON.stringify({ valid: true, error: err?.message }),
+        JSON.stringify({ valid: false, error: err?.message }),
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
     }

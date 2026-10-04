@@ -173,7 +173,22 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             password: form.password,
           });
           if (sbErr) {
-            setError(sbErr.message || "Invalid login credentials");
+            // Check if email actually exists in the database
+            try {
+              const checkRes = await fetch(`/api/v1/user/sync?email=${encodeURIComponent(email)}`);
+              const checkData = await checkRes.json().catch(() => ({}));
+              if (checkRes.ok && checkData.emailFound) {
+                // Email is in database -> wrong password!
+                setError("Password was wrong. Please check your password or click Forgot Password to reset it.");
+              } else {
+                // Email is NOT in database -> switch to Create Account / Register!
+                setAuthMode("signup");
+                setError(null);
+                setSuccessMessage("New to ExplorerTN? Register your account in ExplorerTN — Discover Tamil Nadu's hidden trails, pristine hill stations, and living heritage.");
+              }
+            } catch {
+              setError("Password was wrong or credentials are invalid. Please try again.");
+            }
             setLoading(false);
             return;
           }
@@ -185,7 +200,20 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           }
         }
       } catch (err: any) {
-        setError(err?.message || "Invalid login credentials. Please try again.");
+        // Fallback check if email exists in database
+        try {
+          const checkRes = await fetch(`/api/v1/user/sync?email=${encodeURIComponent(email)}`);
+          const checkData = await checkRes.json().catch(() => ({}));
+          if (checkRes.ok && checkData.emailFound) {
+            setError("Password was wrong. Please try again or use Forgot Password.");
+          } else {
+            setAuthMode("signup");
+            setError(null);
+            setSuccessMessage("New to ExplorerTN? Register your account in ExplorerTN — Discover Tamil Nadu's hidden trails, pristine hill stations, and living heritage.");
+          }
+        } catch {
+          setError(err?.message || "Invalid credentials. Please try again.");
+        }
         setLoading(false);
         return;
       }
