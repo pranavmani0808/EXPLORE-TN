@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { Compass, Lock, UserCheck, UserPlus, Mail, Key, User, ArrowLeft, CheckCircle2, ShieldCheck, RefreshCw } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
@@ -57,6 +57,42 @@ function LoginPage() {
     confirmPassword: "",
     otpCode: "",
   });
+
+  // Check if user landed on /login from Supabase email confirmation link
+  useEffect(() => {
+    supabase.auth.getSession().then(async ({ data }) => {
+      if (data?.session?.user) {
+        const u = data.session.user;
+        const verifiedName = u.user_metadata?.full_name || u.email?.split("@")[0] || "New Explorer";
+        const email = u.email || "";
+        const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
+        const verifiedUser: UserProfile = {
+          id: u.id,
+          name: verifiedName,
+          email: email,
+          avatar: verifiedName.slice(0, 2).toUpperCase(),
+          role: isAdmin ? "super_admin" : "explorer",
+          status: "active",
+          rank: isAdmin ? "Super Admin" : "Verified Explorer",
+          districtCount: isAdmin ? 38 : 1,
+        };
+
+        // Sync with database
+        await fetch("/api/v1/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ user: verifiedUser, isSignUp: true }),
+        }).catch(() => null);
+
+        setAuthSession(verifiedUser);
+        setAuthStep("authorized");
+        setMessage(`Welcome back, ${verifiedName}! You have been authenticated.`);
+        setTimeout(() => {
+          navigate({ to: "/onboarding" });
+        }, 1200);
+      }
+    }).catch(() => null);
+  }, [navigate]);
 
   const handleAuthSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();

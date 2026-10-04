@@ -30,13 +30,23 @@ interface ProfileMenuProps {
 
 export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  const { user: authGuardUser, openAuthModal } = useAuthGuard();
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getCurrentAuthUser());
 
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
-    setCurrentUser(getCurrentAuthUser());
-  }, [isOpen]);
+    // Keep local state in sync with auth-rbac and AuthGuardContext
+    setCurrentUser(authGuardUser || getCurrentAuthUser());
+
+    const unsubscribe = subscribeToAuthChanges((updatedUser) => {
+      setCurrentUser(updatedUser);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, [authGuardUser, isOpen]);
 
   const handleMouseEnter = () => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -68,8 +78,6 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
     };
   }, []);
-
-  const { openAuthModal } = useAuthGuard();
 
   // If user is NOT signed in, render Account Icon trigger & dropdown popover
   if (!currentUser) {

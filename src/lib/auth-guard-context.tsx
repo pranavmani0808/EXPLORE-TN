@@ -29,38 +29,51 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
       setUser(updatedUser);
     });
 
-    // Listen to Supabase Auth events (e.g., when user clicks the Confirm Email link)
+    const handleSessionUser = async (sessionUser: any) => {
+      if (!sessionUser?.email) return;
+      const email = sessionUser.email.toLowerCase();
+      const existing = getCurrentAuthUser();
+      if (!existing || existing.email.toLowerCase() !== email) {
+        const userName = sessionUser.user_metadata?.full_name || email.split("@")[0] || "Explorer User";
+        const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
+        const verifiedUser: UserProfile = {
+          id: sessionUser.id,
+          name: userName,
+          email: email,
+          avatar: userName.slice(0, 2).toUpperCase(),
+          role: isAdmin ? "super_admin" : "explorer",
+          status: "active",
+          rank: isAdmin ? "Super Admin" : "Verified Explorer",
+          districtCount: isAdmin ? 38 : 1,
+        };
+
+        // Sync to Supabase public tables
+        await fetch("/api/v1/user/sync", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            user: verifiedUser,
+            isSignUp: true,
+          }),
+        }).catch(() => null);
+
+        setAuthSession(verifiedUser);
+        setUser(verifiedUser);
+        toast.success(`Welcome to ExplorerTN, ${userName}! Email verified successfully.`);
+      }
+    };
+
+    // 1. Initial direct check for Supabase session (e.g. from #access_token=... email confirmation callback)
+    supabase.auth.getSession().then(({ data }) => {
+      if (data?.session?.user) {
+        handleSessionUser(data.session.user);
+      }
+    }).catch(() => null);
+
+    // 2. Listen to Supabase Auth state changes (SIGNED_IN, INITIAL_SESSION, USER_UPDATED, TOKEN_REFRESHED)
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event === "SIGNED_IN" || event === "USER_UPDATED") && session?.user?.email) {
-        const email = session.user.email.toLowerCase();
-        const existing = getCurrentAuthUser();
-        if (!existing || existing.email.toLowerCase() !== email) {
-          const userName = session.user.user_metadata?.full_name || email.split("@")[0] || "Explorer User";
-          const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
-          const verifiedUser: UserProfile = {
-            id: session.user.id,
-            name: userName,
-            email: email,
-            avatar: userName.slice(0, 2).toUpperCase(),
-            role: isAdmin ? "super_admin" : "explorer",
-            status: "active",
-            rank: isAdmin ? "Super Admin" : "Verified Explorer",
-            districtCount: isAdmin ? 38 : 1,
-          };
-
-          // Sync to database
-          await fetch("/api/v1/user/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              user: verifiedUser,
-              isSignUp: true,
-            }),
-          }).catch(() => null);
-
-          setAuthSession(verifiedUser);
-          toast.success(`Welcome to ExplorerTN, ${userName}! Email verified successfully.`);
-        }
+      if ((event === "SIGNED_IN" || event === "INITIAL_SESSION" || event === "USER_UPDATED" || event === "TOKEN_REFRESHED") && session?.user?.email) {
+        await handleSessionUser(session.user);
       }
     });
 
