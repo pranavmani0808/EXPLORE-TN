@@ -105,8 +105,38 @@ function LoginPage() {
 
     // 3. EMAIL VERIFICATION FLOW
     if (authMode === "email_verification") {
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session?.user) {
+          const u = sessionData.session.user;
+          const verifiedName = form.fullName.trim() || u.user_metadata?.full_name || u.email?.split("@")[0] || "New Explorer";
+          const verifiedUser: UserProfile = {
+            id: u.id,
+            name: verifiedName,
+            email: u.email || form.email.trim(),
+            avatar: verifiedName.slice(0, 2).toUpperCase(),
+            role: "explorer",
+            status: "active",
+            rank: "New Explorer",
+            districtCount: 0,
+          };
+          await fetch("/api/v1/user/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user: verifiedUser, isSignUp: true }),
+          }).catch(() => null);
+          setAuthSession(verifiedUser);
+          setAuthStep("verified");
+          setMessage("Email address verified successfully!");
+          setTimeout(() => navigate({ to: "/onboarding" }), 1500);
+          return;
+        }
+      } catch (checkErr) {
+        console.warn("[LoginPage] Session check notice:", checkErr);
+      }
+
       if (!form.otpCode || form.otpCode.trim().length < 4) {
-        setMessage("Please enter the 6-digit verification code sent to your email.");
+        setMessage("Please check your email and click 'Confirm email address', or enter the 6-digit verification code below.");
         return;
       }
 
@@ -118,7 +148,7 @@ function LoginPage() {
         });
 
         if (verifyError) {
-          setMessage(verifyError.message || "Invalid or expired verification code. Please check your email.");
+          setMessage(verifyError.message || "Invalid or expired verification code. You can also click the link sent to your email.");
           return;
         }
 
@@ -182,10 +212,14 @@ function LoginPage() {
 
     try {
       if (authMode === "signup") {
+        const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
         const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
           email: form.email.trim(),
           password: form.password,
-          options: { data: { full_name: userName } },
+          options: {
+            data: { full_name: userName },
+            emailRedirectTo: redirectTo,
+          },
         });
 
         if (signUpError) {
@@ -198,7 +232,7 @@ function LoginPage() {
 
         // Switch to email verification step after signup
         setAuthMode("email_verification");
-        setMessage(`Account created for ${form.email}! Please enter the verification code sent to your email to verify your account.`);
+        setMessage(`Account created for ${form.email}! Click the "Confirm email address" link in your email to activate your account.`);
 
         // Also sync registration record to Supabase public tables
         fetch("/api/v1/user/sync", {
@@ -514,16 +548,45 @@ function LoginPage() {
               {/* 3. EMAIL VERIFICATION MODE */}
               {authMode === "email_verification" && (
                 <>
-                  <div className="text-center py-2 space-y-1">
+                  <div className="text-center py-2 space-y-2">
                     <ShieldCheck className="mx-auto size-10 text-emerald-400" />
-                    <h3 className="font-bold text-sm text-white">Email Verification Required</h3>
-                    <p className="text-[11px] text-slate-400">
-                      We sent a 6-digit confirmation code to <span className="text-emerald-400 font-mono">{form.email}</span>.
-                    </p>
+                    <h3 className="font-bold text-sm text-white">Email Confirmation Dispatched</h3>
+                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-left space-y-1 text-xs">
+                      <p className="text-emerald-300 font-semibold">
+                        A verification email was sent to <span className="font-mono text-white">{form.email}</span>.
+                      </p>
+                      <p className="text-slate-300 text-[11px] leading-relaxed">
+                        Please open your inbox and click <strong className="text-white">"Confirm email address"</strong> to activate your account.
+                      </p>
+                      <p className="text-slate-400 text-[10px]">
+                        Or enter the 6-digit confirmation code below if you received one:
+                      </p>
+                    </div>
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">6-Digit OTP Verification Code</label>
+                    <div className="flex items-center justify-between mb-1">
+                      <label className="block text-slate-300 font-bold">Verification Code (Optional)</label>
+                      <button
+                        type="button"
+                        onClick={async () => {
+                          try {
+                            const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
+                            await supabase.auth.resend({
+                              type: "signup",
+                              email: form.email.trim(),
+                              options: { emailRedirectTo: redirectTo }
+                            });
+                            setMessage(`Fresh confirmation email sent to ${form.email}. Please check your inbox.`);
+                          } catch {
+                            setMessage("Unable to resend email right now. Please wait 60 seconds.");
+                          }
+                        }}
+                        className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
+                      >
+                        Resend Email ↻
+                      </button>
+                    </div>
                     <input
                       id="input-otp-code"
                       type="text"
@@ -532,7 +595,6 @@ function LoginPage() {
                       onChange={(e) => setForm({ ...form, otpCode: e.target.value })}
                       placeholder="123456"
                       className="w-full bg-[#0B0F14] border border-white/15 rounded-xl px-3 py-2.5 text-center text-white tracking-[0.5em] font-mono text-lg focus:outline-none focus:border-emerald-400"
-                      required
                     />
                   </div>
 
@@ -542,7 +604,7 @@ function LoginPage() {
                     size="lg"
                     className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2 cursor-pointer"
                   >
-                    <CheckCircle2 className="size-4 mr-1.5" /> Verify Email Address →
+                    <CheckCircle2 className="size-4 mr-1.5" /> Complete Verification →
                   </Button>
 
                   <button

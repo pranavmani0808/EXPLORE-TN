@@ -85,10 +85,41 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
       }
     }
 
-    // Handle Email Verification OTP flow
+    // Handle Email Verification OTP or Link flow
     if (authMode === "email_verification") {
+      // First check if user is already confirmed via email link
+      try {
+        const { data: sessionData } = await supabase.auth.getSession();
+        if (sessionData?.session?.user) {
+          const u = sessionData.session.user;
+          const verifiedName = form.fullName.trim() || u.user_metadata?.full_name || u.email?.split("@")[0] || "Explorer User";
+          const verifiedUser: UserProfile = {
+            id: u.id,
+            name: verifiedName,
+            email: u.email || form.email.trim(),
+            avatar: verifiedName.slice(0, 2).toUpperCase(),
+            role: "explorer",
+            status: "active",
+            rank: "Verified Explorer",
+            districtCount: 1,
+          };
+          await fetch("/api/v1/user/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ user: verifiedUser, isSignUp: true }),
+          }).catch(() => null);
+          setAuthSession(verifiedUser);
+          setLoading(false);
+          onClose();
+          navigate({ to: "/onboarding" });
+          return;
+        }
+      } catch (checkErr) {
+        console.warn("[AuthModal] Session check:", checkErr);
+      }
+
       if (!form.otpCode || form.otpCode.trim().length < 4) {
-        setError("Please enter the 6-digit verification code sent to your email.");
+        setError("Please check your email and click the 'Confirm email address' link, or enter the 6-digit verification code below.");
         setLoading(false);
         return;
       }
@@ -101,7 +132,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
         });
 
         if (verifyErr) {
-          setError(verifyErr.message || "Invalid or expired verification code.");
+          setError(verifyErr.message || "Invalid or expired verification code. You can also click the link sent to your email.");
           setLoading(false);
           return;
         }
@@ -150,10 +181,14 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
       // Try Supabase Auth authentication if available
       try {
         if (authMode === "signup") {
+          const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
           const { data, error: sbErr } = await supabase.auth.signUp({
             email,
             password: form.password,
-            options: { data: { full_name: name } }
+            options: {
+              data: { full_name: name },
+              emailRedirectTo: redirectTo,
+            }
           });
           if (sbErr) {
             setError(sbErr.message || "Failed to create account. Please try again.");
@@ -162,9 +197,9 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           }
           if (data?.user) userId = data.user.id;
 
-          // Transition to OTP verification step
+          // Transition to verification step
           setAuthMode("email_verification");
-          setSuccessMessage(`Account created for ${email}! Enter the 6-digit verification code sent to your email.`);
+          setSuccessMessage(`Account created for ${email}! Click the "Confirm email address" link in your email to activate your account.`);
           setLoading(false);
           return;
         } else {
@@ -407,16 +442,45 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
 
             {authMode === "email_verification" && (
               <div className="space-y-3">
-                <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-center">
-                  <p className="text-xs text-emerald-400 font-bold">Verification code sent to {form.email}</p>
-                  <p className="text-[11px] text-slate-300 mt-1">Please enter the 6-digit code sent to your email inbox to verify your account.</p>
+                <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-left space-y-1.5">
+                  <p className="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
+                    <CheckCircle2 className="size-4 shrink-0" />
+                    Confirmation sent to {form.email}
+                  </p>
+                  <p className="text-[11px] text-slate-300 leading-relaxed">
+                    Check your email and click <strong className="text-white">"Confirm email address"</strong> to instantly activate your account.
+                  </p>
+                  <p className="text-[10px] text-slate-400">
+                    If you received a 6-digit verification code instead, you can also enter it below:
+                  </p>
                 </div>
+
                 <div>
-                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">6-Digit Verification Code</label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Verification Code (Optional)</label>
+                    <button
+                      type="button"
+                      onClick={async () => {
+                        try {
+                          const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
+                          await supabase.auth.resend({
+                            type: "signup",
+                            email: form.email.trim(),
+                            options: { emailRedirectTo: redirectTo }
+                          });
+                          setSuccessMessage(`New confirmation email dispatched to ${form.email}.`);
+                        } catch {
+                          setError("Failed to resend confirmation email. Please wait a moment.");
+                        }
+                      }}
+                      className="text-[10px] font-mono text-emerald-400 hover:underline cursor-pointer"
+                    >
+                      Resend Email ↻
+                    </button>
+                  </div>
                   <input
                     type="text"
                     maxLength={6}
-                    required
                     placeholder="123456"
                     value={form.otpCode}
                     onChange={(e) => setForm({ ...form, otpCode: e.target.value })}

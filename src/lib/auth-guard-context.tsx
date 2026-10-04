@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { getCurrentAuthUser, subscribeToAuthChanges, clearAuthSession, UserProfile } from "./auth-rbac";
+import { getCurrentAuthUser, subscribeToAuthChanges, setAuthSession, clearAuthSession, UserProfile } from "./auth-rbac";
+import { supabase } from "./supabase-client";
 import { AuthModal } from "@/components/site/auth-modal";
 import { toast } from "sonner";
 
@@ -28,6 +29,41 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
       setUser(updatedUser);
     });
 
+    // Listen to Supabase Auth events (e.g., when user clicks the Confirm Email link)
+    const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === "SIGNED_IN" || event === "USER_UPDATED") && session?.user?.email) {
+        const email = session.user.email.toLowerCase();
+        const existing = getCurrentAuthUser();
+        if (!existing || existing.email.toLowerCase() !== email) {
+          const userName = session.user.user_metadata?.full_name || email.split("@")[0] || "Explorer User";
+          const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
+          const verifiedUser: UserProfile = {
+            id: session.user.id,
+            name: userName,
+            email: email,
+            avatar: userName.slice(0, 2).toUpperCase(),
+            role: isAdmin ? "super_admin" : "explorer",
+            status: "active",
+            rank: isAdmin ? "Super Admin" : "Verified Explorer",
+            districtCount: isAdmin ? 38 : 1,
+          };
+
+          // Sync to database
+          await fetch("/api/v1/user/sync", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              user: verifiedUser,
+              isSignUp: true,
+            }),
+          }).catch(() => null);
+
+          setAuthSession(verifiedUser);
+          toast.success(`Welcome to ExplorerTN, ${userName}! Email verified successfully.`);
+        }
+      }
+    });
+
     // Verify session validity against Supabase
     if (active && active.email) {
       // Explicit check for deleted popz user or general database removal
@@ -39,7 +75,10 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
           toast.error("Account removed. Logged out of ExploreTN.");
           window.location.href = "/";
         }, 300);
-        return () => unsubscribe();
+        return () => {
+          unsubscribe();
+          authListener?.subscription?.unsubscribe();
+        };
       }
 
       fetch(`/api/v1/user/sync?email=${encodeURIComponent(active.email)}`)
@@ -55,7 +94,10 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
         .catch(() => null);
     }
 
-    return () => unsubscribe();
+    return () => {
+      unsubscribe();
+      authListener?.subscription?.unsubscribe();
+    };
   }, []);
 
   const requireAuth = (action: () => void | Promise<void>, customPromptMessage?: string) => {
