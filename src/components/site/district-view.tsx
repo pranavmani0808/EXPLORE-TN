@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { useGSAP } from "@gsap/react";
 import { DistrictData, DistrictCategoryKey, DistrictSpot } from "@/lib/data/districts";
+import { fetchDistrictSpotsFromSupabase } from "@/lib/supabase-places-service";
 import { DistrictExplorerMap } from "@/components/site/district-explorer-map";
 import MaskedHeading from "@/components/ui/masked-heading";
 import { Skiper76Showcase, Skiper76Item } from "@/components/ui/skiper76";
@@ -97,17 +98,44 @@ export function DistrictView({ district }: DistrictViewProps) {
     }
   };
 
+  const [dynamicSpots, setDynamicSpots] = useState<DistrictSpot[]>(district.spots || []);
+  const [isLoadingSupabase, setIsLoadingSupabase] = useState(false);
+
   useEffect(() => {
     setIsMounted(true);
-    // Reset active spot when changing districts
-    if (district.spots.length > 0) {
-      setActiveSpotId(district.spots[0].id);
+    let isCancelled = false;
+
+    async function loadSupabaseSpots() {
+      setIsLoadingSupabase(true);
+      try {
+        const supabaseSpots = await fetchDistrictSpotsFromSupabase(district.slug);
+        if (!isCancelled && supabaseSpots && supabaseSpots.length > 0) {
+          setDynamicSpots(supabaseSpots);
+          setActiveSpotId(supabaseSpots[0].id);
+        } else if (!isCancelled && district.spots.length > 0) {
+          setDynamicSpots(district.spots);
+          setActiveSpotId(district.spots[0].id);
+        }
+      } catch (err) {
+        if (!isCancelled && district.spots.length > 0) {
+          setDynamicSpots(district.spots);
+          setActiveSpotId(district.spots[0].id);
+        }
+      } finally {
+        if (!isCancelled) setIsLoadingSupabase(false);
+      }
     }
-  }, [district]);
+
+    loadSupabaseSpots();
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [district.slug]);
 
   // Filter spots based on category & search query
   const filteredSpots = useMemo(() => {
-    return district.spots.filter((spot) => {
+    return dynamicSpots.filter((spot) => {
       const matchesCategory = selectedCategory === "all" || spot.category === selectedCategory;
       const matchesSearch =
         !searchQuery.trim() ||
@@ -118,23 +146,23 @@ export function DistrictView({ district }: DistrictViewProps) {
 
       return matchesCategory && matchesSearch;
     });
-  }, [district.spots, selectedCategory, searchQuery]);
+  }, [dynamicSpots, selectedCategory, searchQuery]);
 
   const counts = useMemo(() => {
     return {
-      tourist: district.spots.filter((s) => s.category === "tourist-spots").length,
-      food: district.spots.filter((s) => s.category === "food-spots").length,
-      temples: district.spots.filter((s) => s.category === "temples").length,
-      hills: district.spots.filter((s) => s.category === "hills").length,
-      falls: district.spots.filter((s) => s.category === "falls").length,
-      beaches: district.spots.filter((s) => s.category === "beaches").length,
-      thrift: district.spots.filter((s) => s.category === "thrift-streets").length,
+      tourist: dynamicSpots.filter((s) => s.category === "tourist-spots").length,
+      food: dynamicSpots.filter((s) => s.category === "food-spots").length,
+      temples: dynamicSpots.filter((s) => s.category === "temples").length,
+      hills: dynamicSpots.filter((s) => s.category === "hills").length,
+      falls: dynamicSpots.filter((s) => s.category === "falls").length,
+      beaches: dynamicSpots.filter((s) => s.category === "beaches").length,
+      thrift: dynamicSpots.filter((s) => s.category === "thrift-streets").length,
     };
-  }, [district.spots]);
+  }, [dynamicSpots]);
 
   // Transform district spots for Skiper76 Apple-style showcase
   const skiperItems: Skiper76Item[] = useMemo(() => {
-    return district.spots.map((spot) => ({
+    return dynamicSpots.map((spot) => ({
       id: spot.id,
       title: spot.name,
       subtitle: spot.tagline,
@@ -487,7 +515,7 @@ export function DistrictView({ district }: DistrictViewProps) {
               <div className="h-[440px] w-full rounded-2xl overflow-hidden border border-zinc-800 relative">
                 {isMounted ? (
                   <DistrictExplorerMap
-                    spots={district.spots}
+                    spots={dynamicSpots}
                     centerCoords={district.centerCoords}
                     defaultZoom={district.defaultZoom}
                     selectedCategory={selectedCategory}
@@ -505,7 +533,7 @@ export function DistrictView({ district }: DistrictViewProps) {
 
               <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
                 <span>📍 Boundary Locked</span>
-                <span className="text-amber-400 font-semibold">{district.spots.length} Spots Mapped</span>
+                <span className="text-amber-400 font-semibold">{dynamicSpots.length} Spots Mapped</span>
               </div>
             </div>
           </div>
@@ -837,6 +865,7 @@ export function DistrictView({ district }: DistrictViewProps) {
           <div className="mt-12">
             <DistrictPlacesCollectionTable
               district={district}
+              spots={dynamicSpots}
               onSelectSpot={(spot) => handleSpotFocus(spot)}
             />
           </div>

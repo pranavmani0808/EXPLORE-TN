@@ -20,6 +20,7 @@ import { DistrictData, DistrictSpot } from "@/lib/data/districts";
 
 interface DistrictPlacesCollectionTableProps {
   district: DistrictData;
+  spots?: DistrictSpot[];
   onSelectSpot?: (spot: DistrictSpot) => void;
 }
 
@@ -27,27 +28,29 @@ type CollectionCategoryFilter = "all" | "tourist-spots" | "food-spots" | "temple
 
 export function DistrictPlacesCollectionTable({
   district,
+  spots,
   onSelectSpot
 }: DistrictPlacesCollectionTableProps) {
+  const activeSpots = spots || district.spots || [];
   const [selectedCategory, setSelectedCategory] = useState<CollectionCategoryFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
   // Categories count
   const categoryStats = useMemo(() => {
     return {
-      all: district.spots.length,
-      tourist: district.spots.filter((s) => s.category === "tourist-spots").length,
-      food: district.spots.filter((s) => s.category === "food-spots").length,
-      temples: district.spots.filter((s) => s.category === "temples").length,
-      hills: district.spots.filter((s) => s.category === "hills").length,
-      falls: district.spots.filter((s) => s.category === "falls").length,
-      beaches: district.spots.filter((s) => s.category === "beaches").length,
+      all: activeSpots.length,
+      tourist: activeSpots.filter((s) => s.category === "tourist-spots").length,
+      food: activeSpots.filter((s) => s.category === "food-spots").length,
+      temples: activeSpots.filter((s) => s.category === "temples").length,
+      hills: activeSpots.filter((s) => s.category === "hills").length,
+      falls: activeSpots.filter((s) => s.category === "falls").length,
+      beaches: activeSpots.filter((s) => s.category === "beaches").length,
     };
-  }, [district.spots]);
+  }, [activeSpots]);
 
   // Filtered rows
   const filteredSpots = useMemo(() => {
-    return district.spots.filter((s) => {
+    return activeSpots.filter((s) => {
       const matchesCategory = selectedCategory === "all" || s.category === selectedCategory;
       const q = searchQuery.toLowerCase().trim();
       const matchesSearch =
