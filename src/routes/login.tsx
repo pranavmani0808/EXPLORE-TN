@@ -94,6 +94,27 @@ function LoginPage() {
     }).catch(() => null);
   }, [navigate]);
 
+  const handleGoogleLogin = async () => {
+    try {
+      setAuthStep("authenticating");
+      setMessage(null);
+      const { triggerGoogleSignIn } = await import("@/lib/google-auth");
+      const user = await triggerGoogleSignIn();
+      if (user) {
+        setAuthStep("authorized");
+        setMessage(`Welcome back, ${user.name}!`);
+        setTimeout(() => {
+          navigate({ to: "/onboarding" });
+        }, 1000);
+      } else {
+        setAuthStep("idle");
+      }
+    } catch (err: any) {
+      setAuthStep("idle");
+      setMessage(err?.message || "Google Sign-In failed.");
+    }
+  };
+
   const handleAuthSubmit = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     setMessage(null);
@@ -446,6 +467,7 @@ function LoginPage() {
                   <Button
                     type="button"
                     size="lg"
+                    onClick={handleGoogleLogin}
                     className="w-full rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-6 text-sm shadow-xl transition flex items-center justify-center gap-3 cursor-pointer"
                   >
                     <GoogleLogoSVG /> Continue with Google
@@ -513,6 +535,21 @@ function LoginPage() {
               {/* 2. SIGN UP / REGISTER MODE */}
               {authMode === "signup" && (
                 <>
+                  <Button
+                    type="button"
+                    size="lg"
+                    onClick={handleGoogleLogin}
+                    className="w-full rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-6 text-sm shadow-xl transition flex items-center justify-center gap-3 cursor-pointer mb-2"
+                  >
+                    <GoogleLogoSVG /> Sign up with Google
+                  </Button>
+
+                  <div className="flex items-center my-3">
+                    <div className="w-full border-t border-white/15" />
+                    <span className="px-3 text-[10px] font-mono text-slate-400 uppercase shrink-0">OR WITH EMAIL</span>
+                    <div className="w-full border-t border-white/15" />
+                  </div>
+
                   <div>
                     <label className="block text-slate-300 font-bold mb-1">Full Name</label>
                     <div className="relative">

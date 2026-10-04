@@ -313,22 +313,17 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
 
   const handleGoogleSignIn = async () => {
     try {
-      await supabase.auth.signInWithOAuth({ provider: "google" });
-    } catch (err) {
-      // Fallback mock google sign-in session for test
-      const googleUser: UserProfile = {
-        id: `usr-google-${Date.now()}`,
-        name: "Google Explorer",
-        email: "explorer@google.com",
-        avatar: "GE",
-        role: "explorer",
-        status: "active",
-        rank: "Verified Explorer",
-        districtCount: 3,
-      };
-      setAuthSession(googleUser);
-      onClose();
-      if (onSuccess) onSuccess();
+      setLoading(true);
+      const { triggerGoogleSignIn } = await import("@/lib/google-auth");
+      const user = await triggerGoogleSignIn();
+      if (user) {
+        onClose();
+        if (onSuccess) onSuccess();
+      }
+    } catch (err: any) {
+      setError(err?.message || "Google sign in failed.");
+    } finally {
+      setLoading(false);
     }
   };
 

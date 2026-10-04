@@ -1,0 +1,108 @@
+import { GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult, User } from "firebase/auth";
+import { auth } from "./firebase-client";
+import { supabase } from "./supabase-client";
+import { setAuthSession, UserProfile } from "./auth-rbac";
+import { toast } from "sonner";
+
+/**
+ * Maps a Google authenticated user into ExploreTN UserProfile and syncs to Supabase database.
+ */
+export async function syncGoogleUserToProfile(
+  firebaseUser: User,
+  customRole: "explorer" | "super_admin" = "explorer"
+): Promise<UserProfile> {
+  const email = (firebaseUser.email || "").toLowerCase().trim();
+  const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
+  const displayName = firebaseUser.displayName || email.split("@")[0] || "Explorer User";
+  const avatar = displayName.slice(0, 2).toUpperCase();
+
+  const userProfile: UserProfile = {
+    id: firebaseUser.uid || `usr-g-${Date.now()}`,
+    name: displayName,
+    email: email,
+    avatar: avatar,
+    role: isAdmin ? "super_admin" : customRole,
+    status: "active",
+    rank: isAdmin ? "Super Admin" : "Verified Explorer",
+    districtCount: isAdmin ? 38 : 1,
+    xp: isAdmin ? 1000 : 100,
+  };
+
+  // Sync with Supabase public.users and user_profiles table
+  try {
+    await fetch("/api/v1/user/sync", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        user: userProfile,
+        isSignUp: true,
+      }),
+    });
+  } catch (err) {
+    console.warn("[Google Auth] Warning syncing user to database:", err);
+  }
+
+  // Update local session & notify all components
+  setAuthSession(userProfile);
+  return userProfile;
+}
+
+/**
+ * Primary Google Sign-In Handler
+ * Uses Firebase signInWithPopup as primary, with seamless fallback to Supabase OAuth if Firebase is not yet configured.
+ */
+export async function triggerGoogleSignIn(): Promise<UserProfile | null> {
+  // Check if Firebase apiKey is present
+  const hasFirebaseConfig = Boolean(
+    (typeof process !== "undefined" && (process.env?.VITE_FIREBASE_API_KEY || process.env?.NEXT_PUBLIC_FIREBASE_API_KEY)) ||
+    (typeof import.meta !== "undefined" && ((import.meta as any).env?.VITE_FIREBASE_API_KEY || (import.meta as any).env?.NEXT_PUBLIC_FIREBASE_API_KEY))
+  );
+
+  if (hasFirebaseConfig && auth) {
+    try {
+      const provider = new GoogleAuthProvider();
+      provider.addScope("profile");
+      provider.addScope("email");
+      provider.setCustomParameters({ prompt: "select_account" });
+
+      const result = await signInWithPopup(auth, provider);
+      if (result?.user) {
+        const profile = await syncGoogleUserToProfile(result.user);
+        toast.success(`Welcome to ExploreTN, ${profile.name}! Signed in with Google ✓`);
+        return profile;
+      }
+    } catch (fbErr: any) {
+      console.warn("[Google Auth] Firebase popup error, falling back to Supabase OAuth:", fbErr?.message);
+      if (fbErr?.code === "auth/popup-closed-by-user") {
+        return null;
+      }
+    }
+  }
+
+  // Supabase Google OAuth fallback
+  try {
+    const redirectTo = typeof window !== "undefined" ? `${window.location.origin}/login` : undefined;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: "offline",
+          prompt: "consent",
+        },
+      },
+    });
+
+    if (error) {
+      console.warn("[Google Auth] Supabase OAuth error:", error.message);
+      toast.error(`Google Sign-In error: ${error.message}`);
+      return null;
+    }
+
+    return null; // Redirect flow will handle session upon callback
+  } catch (err: any) {
+    console.error("[Google Auth] Unexpected error:", err);
+    toast.error(err?.message || "Google sign in failed. Please try again.");
+    return null;
+  }
+}
