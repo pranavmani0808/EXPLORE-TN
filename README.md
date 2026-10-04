@@ -484,16 +484,6 @@ Use modern Next.js App Router architecture, Tailwind CSS, shadcn/ui components, 
 
 The final result should feel polished enough to compete visually with Apple's products, Airbnb, Strava, and other premium consumer applications while establishing a unique visual identity centered around exploration, adventure, and the culture of Tamil Nadu.
 
-This project was built with [Lovable](https://lovable.dev).
-
-## Build with Lovable
-
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/bd0f319c-8e2f-4df8-b799-f46385ac4382).
-
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
-
 ## Development
 
 Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
