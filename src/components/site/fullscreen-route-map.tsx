@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from "react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, useDragControls } from "motion/react";
 import { getGoogleTileUrl } from "@/lib/google-maps-loader";
 import {
   MapPin,
@@ -264,8 +264,10 @@ export function FullscreenRouteMap({
   const [availableRoutes, setAvailableRoutes] = useState<RouteOption[]>([]);
   const [selectedRouteId, setSelectedRouteId] = useState<string>("fastest");
 
-  // Panel State & Recommendations Tab
+  // Drag Controls & Panel State
+  const dragControls = useDragControls();
   const [panelState, setPanelState] = useState<"expanded" | "compact" | "hidden">("expanded");
+  const [isCorridorCollapsed, setIsCorridorCollapsed] = useState<boolean>(false);
   const [activePanelTab, setActivePanelTab] = useState<"explore" | "timeline" | "suggestions">("explore");
   const [departureTime, setDepartureTime] = useState<string>("06:00 AM");
   const [searchFocused, setSearchFocused] = useState<"global" | "origin" | "destination" | "header-origin" | "header-destination" | null>(null);
@@ -1540,6 +1542,44 @@ export function FullscreenRouteMap({
             </div>
           </div>
         </motion.div>
+
+        {/* Travel Mode Selector (Drive, Train, Bus, Flight, Bike) - Draggable */}
+        <motion.div
+          drag
+          dragMomentum={false}
+          className="flex items-center gap-1 bg-[#121821]/95 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto shadow-2xl touch-none cursor-grab active:cursor-grabbing"
+        >
+          {[
+            { id: "driving", label: "Drive", icon: Car },
+            { id: "train", label: "Train", icon: Train },
+            { id: "bus", label: "Bus", icon: Bus },
+            { id: "flight", label: "Flight", icon: Plane },
+            { id: "motorcycle", label: "Bike", icon: Bike },
+          ].map((mode) => {
+            const Icon = mode.icon;
+            const isActive = travelMode === mode.id;
+            return (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => {
+                  setTravelMode(mode.id as ExtendedTravelMode);
+                  if (multiModalData) {
+                    const match = multiModalData.options.find((opt) => opt.mode === mode.id);
+                    if (match) setSelectedTransitOptionId(match.id);
+                  }
+                  toast.info(`Switched transit corridor view to ${mode.label} 🧭`);
+                }}
+                className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
+                  isActive ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white hover:bg-white/5"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                <span className="hidden sm:inline">{mode.label}</span>
+              </button>
+            );
+          })}
+        </motion.div>
       </header>
 
       {/* Animated Focus Mode Origin Prompt Overlay */}
@@ -1705,11 +1745,13 @@ export function FullscreenRouteMap({
       {/* Main Left Explorer Panel (Draggable) */}
       <motion.aside
         drag
+        dragControls={dragControls}
+        dragListener={false}
         dragMomentum={false}
         aria-labelledby="explorer-destinations-heading"
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
-        className={`absolute z-40 transition-shadow duration-300 pointer-events-auto touch-none ${
+        className={`absolute z-40 transition-shadow duration-300 pointer-events-auto ${
           panelState === "hidden"
             ? "-left-96 top-20"
             : panelState === "compact"
@@ -1725,8 +1767,12 @@ export function FullscreenRouteMap({
         <div className="w-full h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white overscroll-contain">
           {/* Header Drag Handle & Collapse Button */}
           <div className="w-full flex items-center justify-between pb-1 shrink-0">
-            {/* Visual Drag Indicator */}
-            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono font-bold text-slate-400 cursor-grab active:cursor-grabbing hover:border-emerald-400/50 hover:text-emerald-300 transition select-none">
+            {/* Visual Drag Indicator Handle */}
+            <div
+              onPointerDown={(e) => dragControls.start(e)}
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono font-bold text-slate-400 cursor-grab active:cursor-grabbing hover:border-emerald-400/50 hover:text-emerald-300 transition select-none touch-none"
+              title="Drag to move panel"
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
               <span>DRAG PANEL</span>
             </div>
@@ -1950,31 +1996,59 @@ export function FullscreenRouteMap({
 
           {/* Active Route Calculation Metrics & Intermediate Waypoint Addition */}
           {(selectedOrigin || selectedDestination) && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl my-2 shrink-0 space-y-3 shadow-lg">
+            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl my-2 shrink-0 space-y-3 shadow-lg max-h-[45vh] overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
               <div className="flex items-center justify-between border-b border-white/10 pb-2">
-                <div>
-                  <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  onClick={() => setIsCorridorCollapsed((prev) => !prev)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      setIsCorridorCollapsed((prev) => !prev);
+                    }
+                  }}
+                  className="cursor-pointer select-none group flex flex-col"
+                  title="Click to toggle route details"
+                >
+                  <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 group-hover:text-emerald-300">
                     <Navigation className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
                     <span>Active Route Corridor</span>
+                    <span className="text-[9px] text-slate-400 font-normal">
+                      ({isCorridorCollapsed ? "Show details ▼" : "Collapse ▲"})
+                    </span>
                   </div>
-                  <h4 className="text-xs font-extrabold text-white truncate max-w-[200px] mt-0.5">
+                  <h4 className="text-xs font-extrabold text-white truncate max-w-[190px] mt-0.5">
                     {selectedOrigin ? selectedOrigin.name : "Select Origin"} → {selectedDestination ? selectedDestination.name : "Select Destination"}
                   </h4>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setSelectedOrigin(null);
-                    setSelectedDestination(null);
-                    setWaypoints([]);
-                    setIsDirectionsFocusMode(false);
-                  }}
-                  className="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[9px] font-bold transition active:scale-95 cursor-pointer"
-                >
-                  Clear Route
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setIsCorridorCollapsed((prev) => !prev)}
+                    className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
+                    title={isCorridorCollapsed ? "Expand route details" : "Collapse route details"}
+                    aria-label={isCorridorCollapsed ? "Expand route details" : "Collapse route details"}
+                  >
+                    {isCorridorCollapsed ? <ChevronDown className="w-3.5 h-3.5" /> : <ChevronUp className="w-3.5 h-3.5" />}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedOrigin(null);
+                      setSelectedDestination(null);
+                      setWaypoints([]);
+                      setIsDirectionsFocusMode(false);
+                    }}
+                    className="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[9px] font-bold transition active:scale-95 cursor-pointer"
+                  >
+                    Clear Route
+                  </button>
+                </div>
               </div>
 
+              {!isCorridorCollapsed && (
+                <>
               {/* Calculated Stats (Distance, Time, Stops) */}
               <div className="grid grid-cols-3 gap-1.5 bg-black/40 border border-white/10 rounded-xl p-2 text-center">
                 <div>
@@ -2252,6 +2326,8 @@ export function FullscreenRouteMap({
                     );
                   })}
                 </div>
+              )}
+                </>
               )}
             </div>
           )}
