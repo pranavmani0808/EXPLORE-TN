@@ -25,6 +25,11 @@ import {
   Search,
   SlidersHorizontal,
   X,
+  Plane,
+  Train,
+  Bus,
+  Info,
+  ArrowUpDown,
 } from "lucide-react";
 import {
   CANONICAL_PLACES,
@@ -41,15 +46,24 @@ import {
 import { RouteApiRepository, IsolatedRouteResultDTO, RouteOption } from "@/lib/api-client/routes";
 import { RouteStopRecommendationEngine, RouteStopCandidate } from "@/lib/routing/stop-recommendation-engine";
 import { getSavedPlaces, savePlaceToCollection, removeSavedPlace } from "@/lib/explorer-gamification";
+import {
+  getMultiModalJourney,
+  MultiModalJourneyResult,
+  MultiModalOption,
+  CorridorPlace,
+  TransitModeType,
+} from "@/lib/data/multi-modal-transit";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { toast } from "sonner";
+
+export type ExtendedTravelMode = "driving" | "flight" | "train" | "bus" | "motorcycle" | "walking" | "cycling";
 
 export interface FullscreenRouteMapProps {
   isOpen?: boolean;
   onClose?: () => void;
   initialOriginPlaceId?: string;
   initialDestinationPlaceId?: string;
-  initialTravelMode?: "driving" | "motorcycle" | "walking" | "cycling";
+  initialTravelMode?: ExtendedTravelMode;
   initialArea?: string;
   initialPlaceId?: string;
 }
@@ -235,7 +249,8 @@ export function FullscreenRouteMap({
   const [waypoints, setWaypoints] = useState<ExplorerPlace[]>([]);
   const [waypointQuery, setWaypointQuery] = useState("");
   const [excludedStopIds, setExcludedStopIds] = useState<Set<string>>(new Set());
-  const [travelMode, setTravelMode] = useState<"driving" | "motorcycle" | "walking" | "cycling">(initialTravelMode);
+  const [travelMode, setTravelMode] = useState<ExtendedTravelMode>(initialTravelMode || "driving");
+  const [selectedTransitOptionId, setSelectedTransitOptionId] = useState<string>("mode-drive");
 
   // Auto-close Focus Mode Origin Prompt once both Origin & Destination are selected
   useEffect(() => {
@@ -451,6 +466,32 @@ export function FullscreenRouteMap({
     if (hrs === 0) return `${mins} min`;
     return `${hrs} hr ${mins} min`;
   }, [totalDurationMins]);
+
+  // Multi-Modal Journey Options & En-Route Corridor Discovery
+  const multiModalData: MultiModalJourneyResult | null = useMemo(() => {
+    if (!selectedOrigin || !selectedDestination) return null;
+    return getMultiModalJourney(
+      {
+        name: selectedOrigin.canonicalName || selectedOrigin.name,
+        lat: selectedOrigin.latitude,
+        lng: selectedOrigin.longitude,
+      },
+      {
+        name: selectedDestination.canonicalName || selectedDestination.name,
+        lat: selectedDestination.latitude,
+        lng: selectedDestination.longitude,
+      }
+    );
+  }, [selectedOrigin, selectedDestination]);
+
+  const activeTransitOption = useMemo(() => {
+    if (!multiModalData) return null;
+    return (
+      multiModalData.options.find((opt) => opt.id === selectedTransitOptionId) ||
+      multiModalData.options.find((opt) => opt.mode === travelMode) ||
+      multiModalData.options[0]
+    );
+  }, [multiModalData, selectedTransitOptionId, travelMode]);
 
   // Rest & Meals Stop Recommendation Engine
   const recommendationResult = useMemo(() => {
@@ -680,6 +721,7 @@ export function FullscreenRouteMap({
 
     // CASE A: Active Route Engine Mode (Origin & Destination selected)
     if (selectedOrigin && selectedDestination && stops.length > 1) {
+      // 1. Origin & Destination Pins
       stops.forEach((place, idx) => {
         bounds.extend([place.latitude, place.longitude]);
 
@@ -733,27 +775,162 @@ export function FullscreenRouteMap({
         markersRef.current.push(marker);
       });
 
-      segmentData.forEach((seg, idx) => {
-        if (seg.polyline && seg.polyline.length > 0) {
-          const isSelectedLeg = idx === selectedStopIndex;
+      // 2. Flight Arc Rendering if mode is Flight
+      if (travelMode === "flight" && activeTransitOption?.flightArc) {
+        const { from, to } = activeTransitOption.flightArc;
+        bounds.extend(from);
+        bounds.extend(to);
 
-          L.polyline(seg.polyline, {
-            color: "#0f172a",
-            weight: isSelectedLeg ? 10 : 7,
-            opacity: 0.85,
-            lineJoin: "round",
-          }).addTo(polylineGroup);
+        // Generate curved quadratic arc coordinates between airports
+        const arcPoints: [number, number][] = [];
+        const stepsCount = 40;
+        const midLat = (from[0] + to[0]) / 2 + 0.55; // bow curve outwards
+        const midLng = (from[1] + to[1]) / 2 - 0.45;
 
-          L.polyline(seg.polyline, {
-            color: isSelectedLeg ? "#3b82f6" : "#2563eb",
-            weight: isSelectedLeg ? 8 : 6,
-            opacity: 0.95,
-            lineJoin: "round",
-          }).addTo(polylineGroup);
-
-          seg.polyline.forEach((pt) => bounds.extend(pt));
+        for (let i = 0; i <= stepsCount; i++) {
+          const t = i / stepsCount;
+          const lat = (1 - t) * (1 - t) * from[0] + 2 * (1 - t) * t * midLat + t * t * to[0];
+          const lng = (1 - t) * (1 - t) * from[1] + 2 * (1 - t) * t * midLng + t * t * to[1];
+          arcPoints.push([lat, lng]);
         }
-      });
+
+        // Casing and animated flight arc
+        L.polyline(arcPoints, {
+          color: "#0f172a",
+          weight: 7,
+          opacity: 0.9,
+          lineJoin: "round",
+        }).addTo(polylineGroup);
+
+        L.polyline(arcPoints, {
+          color: "#38bdf8",
+          weight: 4,
+          dashArray: "8, 8",
+          opacity: 0.95,
+          lineJoin: "round",
+        }).addTo(polylineGroup);
+
+        // Airport transfer road lines
+        L.polyline([[selectedOrigin.latitude, selectedOrigin.longitude], from], {
+          color: "#f59e0b",
+          weight: 3,
+          dashArray: "4, 6",
+          opacity: 0.85,
+        }).addTo(polylineGroup);
+
+        L.polyline([to, [selectedDestination.latitude, selectedDestination.longitude]], {
+          color: "#f59e0b",
+          weight: 3,
+          dashArray: "4, 6",
+          opacity: 0.85,
+        }).addTo(polylineGroup);
+      } else {
+        // Road / Train / Bus Polylines
+        const routeColor = travelMode === "train" ? "#f59e0b" : travelMode === "bus" ? "#06b6d4" : "#10b981";
+        const dashPattern = travelMode === "train" ? "10, 8" : undefined;
+
+        // Draw segmented OSRM road routes if available, or fallback to straight connector
+        if (segmentData.length > 0) {
+          segmentData.forEach((seg, idx) => {
+            if (seg.polyline && seg.polyline.length > 0) {
+              const isSelectedLeg = idx === selectedStopIndex;
+
+              L.polyline(seg.polyline, {
+                color: "#0f172a",
+                weight: isSelectedLeg ? 10 : 7,
+                opacity: 0.85,
+                lineJoin: "round",
+              }).addTo(polylineGroup);
+
+              L.polyline(seg.polyline, {
+                color: isSelectedLeg ? "#38bdf8" : routeColor,
+                weight: isSelectedLeg ? 7 : 5,
+                dashArray: dashPattern,
+                opacity: 0.95,
+                lineJoin: "round",
+              }).addTo(polylineGroup);
+
+              seg.polyline.forEach((pt) => bounds.extend(pt));
+            }
+          });
+        } else if (activeTransitOption?.routePolyline && activeTransitOption.routePolyline.length > 1) {
+          L.polyline(activeTransitOption.routePolyline, {
+            color: "#0f172a",
+            weight: 7,
+            opacity: 0.85,
+          }).addTo(polylineGroup);
+          L.polyline(activeTransitOption.routePolyline, {
+            color: routeColor,
+            weight: 5,
+            dashArray: dashPattern,
+            opacity: 0.95,
+          }).addTo(polylineGroup);
+          activeTransitOption.routePolyline.forEach((pt) => bounds.extend(pt));
+        }
+      }
+
+      // 3. En-Route Corridor Places Markers (Places that cover the route!)
+      if (multiModalData?.corridorPlaces && multiModalData.corridorPlaces.length > 0) {
+        multiModalData.corridorPlaces.forEach((poi) => {
+          bounds.extend([poi.latitude, poi.longitude]);
+
+          const isAlreadyWaypoint = waypoints.some((w) => w.id === poi.id);
+          const corridorPin = L.divIcon({
+            className: `custom-corridor-pin-${poi.id}`,
+            html: `
+              <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                <div style="
+                  background: ${isAlreadyWaypoint ? '#10b981' : '#1e293b'};
+                  color: #ffffff;
+                  border: 1.5px solid ${isAlreadyWaypoint ? '#6ee7b7' : '#f59e0b'};
+                  font-size: 10px;
+                  font-weight: 700;
+                  padding: 2px 7px;
+                  border-radius: 9999px;
+                  box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+                  white-space: nowrap;
+                  display: flex;
+                  align-items: center;
+                  gap: 3px;
+                ">
+                  <span>${poi.primaryCategory === 'temples' ? '🛕' : poi.primaryCategory === 'waterfalls' ? '💧' : poi.primaryCategory === 'hills' ? '⛰️' : '📍'}</span>
+                  <span>${poi.canonicalName || poi.name}</span>
+                  <span style="font-size: 8px; color: #fef08a; background: rgba(234,179,8,0.25); padding: 1px 4px; border-radius: 4px;">+${poi.detourKm}km</span>
+                </div>
+              </div>
+            `,
+            iconSize: [110, 24],
+            iconAnchor: [55, 12],
+          });
+
+          const poiMarker = L.marker([poi.latitude, poi.longitude], {
+            icon: corridorPin,
+            zIndexOffset: 500,
+          }).addTo(map);
+
+          poiMarker.bindPopup(`
+            <div style="font-family: system-ui, sans-serif; width: 230px; color: #fff; padding: 2px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 4px; margin-bottom: 2px;">
+                <strong style="font-size: 13px; color: #fde047;">${poi.canonicalName || poi.name}</strong>
+                <span style="font-size: 9px; font-weight: 800; background: rgba(234,179,8,0.2); color: #fde047; padding: 2px 6px; border-radius: 999px; border: 1px solid rgba(234,179,8,0.4);">
+                  +${poi.detourKm} km Detour
+                </span>
+              </div>
+              <span style="font-size: 10px; color: #94a3b8; display: block;">${poi.district} District · Near ${poi.highwayNear}</span>
+              <p style="font-size: 11px; margin: 4px 0 8px 0; color: #e2e8f0; line-height: 1.35;">${poi.tagline || poi.description}</p>
+              
+              <button
+                onclick="window.dispatchEvent(new CustomEvent('add-corridor-stop-event', { detail: '${poi.id}' }))"
+                style="width: 100%; padding: 6px 10px; border-radius: 8px; background: ${isAlreadyWaypoint ? 'rgba(16,185,129,0.3)' : 'rgba(16,185,129,0.9)'}; border: 1px solid #34d399; color: ${isAlreadyWaypoint ? '#34d399' : '#000'}; font-size: 11px; font-weight: 800; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px;"
+              >
+                ${isAlreadyWaypoint ? '✓ Added to Route Stops' : '+ Add to Trip Itinerary'}
+              </button>
+            </div>
+          `, { className: "custom-mapcn-popup-window" });
+
+          markersRef.current.push(poiMarker);
+        });
+      }
 
       if (bounds.isValid()) {
         map.fitBounds(bounds, { paddingTopLeft: [420, 100], paddingBottomRight: [80, 80], maxZoom: 14 });
@@ -916,23 +1093,37 @@ export function FullscreenRouteMap({
         handleGetDirections(place);
       }
     };
+    const handleAddCorridorStop = (e: any) => {
+      const placeId = e.detail;
+      const place = resolvePlaceById(placeId) || CANONICAL_PLACES.find((p) => p.id === placeId);
+      if (place) {
+        if (!waypoints.some((w) => w.id === place.id)) {
+          setWaypoints((prev) => [...prev, place]);
+          toast.success(`Added ${place.canonicalName || place.name} as En-Route Stop 📍`);
+        } else {
+          toast.info(`${place.canonicalName || place.name} is already in your stops`);
+        }
+      }
+    };
 
     window.addEventListener("set-origin-event", handleSetOrigin);
     window.addEventListener("set-dest-event", handleSetDest);
     window.addEventListener("save-place-event", handleSave);
     window.addEventListener("directions-place-event", handleDirections);
+    window.addEventListener("add-corridor-stop-event", handleAddCorridorStop);
     return () => {
       window.removeEventListener("set-origin-event", handleSetOrigin);
       window.removeEventListener("set-dest-event", handleSetDest);
       window.removeEventListener("save-place-event", handleSave);
       window.removeEventListener("directions-place-event", handleDirections);
+      window.removeEventListener("add-corridor-stop-event", handleAddCorridorStop);
     };
-  }, [placesInScope, savedPlaceIds, travelMode]);
+  }, [placesInScope, savedPlaceIds, travelMode, waypoints]);
 
-  // Re-render elements whenever scope, stops, or route updates
+  // Re-render elements whenever scope, stops, route, or multi-modal mode updates
   useEffect(() => {
     renderMapElements();
-  }, [mapScope, placesInScope, stops, segmentData, selectedStopIndex]);
+  }, [mapScope, placesInScope, stops, segmentData, selectedStopIndex, travelMode, activeTransitOption, multiModalData]);
 
   // Sidebar hover → highlight marker on map
   const handleSidebarHover = (place: ExplorerPlace | null) => {
@@ -1139,12 +1330,14 @@ export function FullscreenRouteMap({
           )}
         </div>
 
-        {/* Travel Mode Selector */}
-        <div className="flex items-center gap-1 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto">
+        {/* Travel Mode Selector (Drive, Train, Bus, Flight, Bike) */}
+        <div className="flex items-center gap-1 bg-[#121821]/95 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto shadow-2xl">
           {[
-            { id: "driving", label: "Driving", icon: Car },
-            { id: "motorcycle", label: "Motorcycle", icon: Bike },
-            { id: "walking", label: "Walk", icon: Footprints },
+            { id: "driving", label: "Drive", icon: Car },
+            { id: "train", label: "Train", icon: Train },
+            { id: "bus", label: "Bus", icon: Bus },
+            { id: "flight", label: "Flight", icon: Plane },
+            { id: "motorcycle", label: "Bike", icon: Bike },
           ].map((mode) => {
             const Icon = mode.icon;
             const isActive = travelMode === mode.id;
@@ -1152,7 +1345,14 @@ export function FullscreenRouteMap({
               <button
                 key={mode.id}
                 type="button"
-                onClick={() => setTravelMode(mode.id as any)}
+                onClick={() => {
+                  setTravelMode(mode.id as ExtendedTravelMode);
+                  if (multiModalData) {
+                    const match = multiModalData.options.find((opt) => opt.mode === mode.id);
+                    if (match) setSelectedTransitOptionId(match.id);
+                  }
+                  toast.info(`Switched transit corridor view to ${mode.label} 🧭`);
+                }}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
                   isActive ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white hover:bg-white/5"
                 }`}
@@ -1606,6 +1806,164 @@ export function FullscreenRouteMap({
                   <span className="text-xs font-black text-amber-400">{stops.length} Stops</span>
                 </div>
               </div>
+
+              {/* Multi-Modal Transit Comparison (Flight, Train, Bus, Drive) */}
+              {multiModalData && multiModalData.options.length > 0 && (
+                <div className="space-y-1.5 pt-1 border-t border-white/10">
+                  <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-300 uppercase">
+                    <span>Multi-Modal Transit Options</span>
+                    <span className="text-emerald-400">Rome2Rio Style</span>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-1.5">
+                    {multiModalData.options.map((opt) => {
+                      const isSelected = activeTransitOption?.id === opt.id;
+                      const ModeIcon =
+                        opt.mode === "flight" ? Plane : opt.mode === "train" ? Train : opt.mode === "bus" ? Bus : Car;
+                      const modeBadgeColor =
+                        opt.badge === "FASTEST"
+                          ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
+                          : opt.badge === "CHEAPEST"
+                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                          : opt.badge === "SCENIC"
+                          ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
+                          : "bg-amber-500/20 text-amber-300 border-amber-500/40";
+
+                      return (
+                        <button
+                          key={opt.id}
+                          type="button"
+                          onClick={() => {
+                            setSelectedTransitOptionId(opt.id);
+                            setTravelMode(opt.mode as ExtendedTravelMode);
+                            toast.success(`Selected ${opt.title} (${opt.totalDurationText})`);
+                          }}
+                          className={`p-2 rounded-xl text-left transition border cursor-pointer relative overflow-hidden flex flex-col justify-between ${
+                            isSelected
+                              ? "bg-emerald-500/20 border-emerald-500 shadow-md ring-1 ring-emerald-500"
+                              : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                          }`}
+                        >
+                          <div className="flex items-center justify-between gap-1">
+                            <div className="flex items-center gap-1.5 font-bold text-xs text-white truncate">
+                              <ModeIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                              <span className="capitalize">{opt.mode}</span>
+                            </div>
+                            {opt.badge && (
+                              <span className={`text-[8px] font-black px-1.5 py-0.5 rounded-full border ${modeBadgeColor}`}>
+                                {opt.badge}
+                              </span>
+                            )}
+                          </div>
+
+                          <div className="mt-1 flex items-baseline justify-between gap-1">
+                            <span className="text-xs font-black text-emerald-400">{opt.totalDurationText}</span>
+                            <span className="text-[10px] font-semibold text-slate-300 truncate">{opt.totalCostEstimate}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Selected Transit Mode Itinerary / Steps Breakdown */}
+                  {activeTransitOption && (
+                    <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-2 mt-2">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
+                        <span className="font-bold text-white uppercase">{activeTransitOption.title}</span>
+                        <span>{activeTransitOption.distanceKm} km · {activeTransitOption.totalCostEstimate}</span>
+                      </div>
+
+                      <div className="space-y-1.5 border-l-2 border-emerald-500/40 ml-1 pl-2.5 py-0.5">
+                        {activeTransitOption.steps.map((st, sIdx) => (
+                          <div key={sIdx} className="text-[11px] leading-tight space-y-0.5">
+                            <div className="flex items-center justify-between gap-2">
+                              <strong className="text-white font-bold">{st.title}</strong>
+                              <span className="text-[9px] font-mono text-emerald-400 shrink-0">{st.durationText}</span>
+                            </div>
+                            <p className="text-[10px] text-slate-400">{st.details}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* En-Route Corridor Discovery: Places that cover the route to reach destination */}
+              {multiModalData?.corridorPlaces && multiModalData.corridorPlaces.length > 0 && (
+                <div className="space-y-1.5 pt-2 border-t border-white/10">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-400" />
+                      Places Covering Route ({multiModalData.corridorPlaces.length})
+                    </span>
+                    <span className="text-[9px] text-slate-400 font-mono">Sequential Stops</span>
+                  </div>
+
+                  <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-amber-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+                    {multiModalData.corridorPlaces.map((poi) => {
+                      const isAdded = waypoints.some((w) => w.id === poi.id);
+                      return (
+                        <div
+                          key={poi.id}
+                          className="w-48 shrink-0 p-2 rounded-xl bg-white/5 border border-white/10 hover:border-amber-400/50 transition flex flex-col justify-between space-y-1.5"
+                        >
+                          <div>
+                            <div className="flex items-center justify-between gap-1">
+                              <span className="text-xs">
+                                {poi.primaryCategory === "temples"
+                                  ? "🛕"
+                                  : poi.primaryCategory === "waterfalls"
+                                  ? "💧"
+                                  : poi.primaryCategory === "hills"
+                                  ? "⛰️"
+                                  : "📍"}
+                              </span>
+                              <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                                +{poi.detourKm}km detour
+                              </span>
+                            </div>
+                            <h5 className="font-bold text-white text-[11px] truncate mt-0.5">{poi.canonicalName || poi.name}</h5>
+                            <span className="text-[9px] text-slate-400 block truncate">{poi.district} · {poi.highwayNear}</span>
+                          </div>
+
+                          <div className="flex items-center gap-1 pt-1">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (leafletMapRef.current) {
+                                  leafletMapRef.current.flyTo([poi.latitude, poi.longitude], 13, { animate: true });
+                                }
+                              }}
+                              className="flex-1 py-1 rounded bg-white/10 hover:bg-white/20 text-[9px] font-bold text-slate-200 transition text-center"
+                            >
+                              View Pin
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!isAdded) {
+                                  setWaypoints((prev) => [...prev, poi]);
+                                  toast.success(`Added ${poi.name} to route stops 📍`);
+                                } else {
+                                  handleRemoveRecommendedStop(poi.id);
+                                }
+                              }}
+                              className={`flex-1 py-1 rounded text-[9px] font-bold transition text-center ${
+                                isAdded
+                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                                  : "bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold"
+                              }`}
+                            >
+                              {isAdded ? "✓ Added" : "+ Add Stop"}
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
 
               {/* Waypoint Addition Input */}
               <div className="space-y-1.5">

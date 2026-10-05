@@ -6,7 +6,7 @@ export const Route = createFileRoute("/routes")({
     return {
       origin: (search.origin as string) || undefined,
       destination: (search.destination as string) || undefined,
-      mode: (search.mode as "driving" | "motorcycle" | "walking" | "cycling") || undefined,
+      mode: (search.mode as "driving" | "flight" | "train" | "bus" | "motorcycle" | "walking" | "cycling") || undefined,
       area: (search.area as string) || undefined,
       place: (search.place as string) || undefined,
     };
