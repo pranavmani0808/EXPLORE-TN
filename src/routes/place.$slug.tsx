@@ -104,7 +104,7 @@ function PlacePage() {
 
   const [hasVisited, setHasVisited] = useState(false);
   const [visitFeedback, setVisitFeedback] = useState<string | null>(null);
-  const [weatherData, setWeatherData] = useState<any>(null);
+  const [communityReviews, setCommunityReviews] = useState<ReturnType<typeof getCommunityContributions>>([]);
 
   // Review Form State
   const [showReviewForm, setShowReviewForm] = useState(false);
@@ -113,33 +113,9 @@ function PlacePage() {
   const [reviewStatus, setReviewStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    const controller = new AbortController();
-    async function fetchWeather() {
-      try {
-        const res = await fetch(`${getApiBaseUrl()}/api/v1/places/${place.slug}/weather`, {
-          signal: controller.signal,
-        });
-        if (res.ok) {
-          const env = await res.json();
-          if (!controller.signal.aborted) {
-            setWeatherData(env.data);
-          }
-        }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
-          console.warn("Weather fetch fallback:", err);
-        }
-      }
-    }
-    fetchWeather();
-    return () => {
-      controller.abort();
-    };
-  }, [place.slug]);
-
-  useEffect(() => {
     const visits = getUserVisits();
     setHasVisited(visits.some((v) => v.placeSlug === place.slug));
+    setCommunityReviews(getCommunityContributions());
   }, [place.slug]);
 
   const handleRecordVisit = () => {
@@ -157,6 +133,7 @@ function PlacePage() {
     if (!reviewContent) return;
     requireAuth(() => {
       submitCommunityContribution("review", place.slug, place.name, reviewTitle || "Explorer Review", reviewContent);
+      setCommunityReviews(getCommunityContributions());
       setReviewStatus("Your review has been submitted to the Operations Moderation Queue for verification.");
       setReviewTitle("");
       setReviewContent("");
@@ -209,7 +186,8 @@ function PlacePage() {
             </div>
 
             <p className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
-              <MapPin className="size-4 text-emerald-500" aria-hidden /> {place.district} District · {place.distanceFromChennai} from Chennai
+              <MapPin className="size-4 text-emerald-500" aria-hidden />
+              <span>{place.district} District · {place.distanceFromChennai} from Chennai</span>
             </p>
             <h1 className="mt-2 text-4xl font-extrabold sm:text-6xl text-white">{place.name}</h1>
             <p className="mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">{place.tagline}</p>
@@ -217,14 +195,16 @@ function PlacePage() {
             {/* Dynamic Controls Row */}
             <div className="mt-6 flex flex-wrap items-center gap-3">
               <span className="glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-mono font-bold text-amber-400">
-                <Star className="size-4 fill-current" aria-hidden /> {place.rating} · {place.reviews} verified reviews
+                <Star className="size-4 fill-current" aria-hidden />
+                <span>{place.rating} · {place.reviews} verified reviews</span>
               </span>
 
               <Link
                 to="/discover"
                 className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition"
               >
-                <Map className="size-4" /> View on Map
+                <Map className="size-4" />
+                <span>View on Map</span>
               </Link>
 
               {/* Explicit "I've Been Here" Visit Button */}
@@ -240,11 +220,13 @@ function PlacePage() {
               >
                 {hasVisited ? (
                   <>
-                    <CheckCircle2 className="size-4 mr-1.5 text-emerald-400" /> Visit Logged (Stamp Unlocked)
+                    <CheckCircle2 className="size-4 mr-1.5 text-emerald-400" />
+                    <span>Visit Logged (Stamp Unlocked)</span>
                   </>
                 ) : (
                   <>
-                    <Award className="size-4 mr-1.5 text-amber-300" /> Log Visit: I've Been Here
+                    <Award className="size-4 mr-1.5 text-amber-300" />
+                    <span>Log Visit: I've Been Here</span>
                   </>
                 )}
               </Button>
@@ -255,7 +237,8 @@ function PlacePage() {
                   target="_blank"
                   rel="noreferrer"
                 >
-                  <Navigation className="size-4" /> Navigate
+                  <Navigation className="size-4" />
+                  <span>Navigate</span>
                 </a>
               </Button>
             </div>
@@ -402,7 +385,7 @@ function PlacePage() {
 
               {/* Live Explorer Reviews List */}
               <div className="space-y-3">
-                {getCommunityContributions()
+                {communityReviews
                   .filter((c) => c.type === "review" && (c.placeSlug === place.slug || c.placeName === place.name))
                   .map((c) => (
                     <div key={c.id} className="rounded-3xl border border-emerald-500/30 bg-card p-5 space-y-2">

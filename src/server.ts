@@ -399,6 +399,24 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     );
   }
 
+  // 1c-ii. Place Weather Endpoint: GET /api/v1/places/:slug/weather
+  if (path.startsWith("/api/v1/places/") && path.endsWith("/weather") && method === "GET") {
+    const slug = path.replace("/api/v1/places/", "").replace("/weather", "");
+    const intel = getPlaceTravelIntelligence(slug);
+    const weather = intel?.liveTelemetry?.weather || {
+      temperatureC: 28,
+      condition: "Pleasant",
+      humidityPercent: 65,
+      windSpeedKmh: 12,
+      uvIndex: 4,
+      advisory: "Clear skies and comfortable exploration conditions.",
+    };
+    return new Response(
+      JSON.stringify({ status: "success", data: weather }),
+      { status: 200, headers: { "Content-Type": "application/json" } }
+    );
+  }
+
   // 1d. Data Quality Audit Endpoint: GET /api/v1/places/audit/data-quality
   if (path === "/api/v1/places/audit/data-quality" && method === "GET") {
     const testSuite = runDataQualityTestSuite();
