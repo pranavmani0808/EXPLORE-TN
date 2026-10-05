@@ -931,15 +931,6 @@ export function FullscreenRouteMap({
             </div>
           `, { className: "custom-mapcn-popup-window" });
 
-          poiMarker.bindTooltip(
-            `<div style="font-weight:700; font-size:11px; color:#fff; background:#0f172a; padding:3px 6px; border-radius:4px; border:1px solid #f59e0b;">${poi.canonicalName || poi.name} (+${poi.detourKm}km detour)</div>`,
-            { direction: "top", offset: [0, -14], opacity: 1 }
-          );
-
-          poiMarker.on("mouseover", () => {
-            poiMarker.openTooltip();
-          });
-
           poiMarker.on("click", () => {
             if (leafletMapRef.current) {
               leafletMapRef.current.flyTo([poi.latitude, poi.longitude], 14, { animate: true, duration: 1 });
@@ -1186,7 +1177,9 @@ export function FullscreenRouteMap({
         });
         marker.setIcon(highlightIcon);
         marker.setZIndexOffset(3000);
-        marker.openTooltip();
+        if (marker.getTooltip && marker.getTooltip()) {
+          marker.openTooltip();
+        }
       }
     } else {
       // Reset all markers back to their default dot icon
