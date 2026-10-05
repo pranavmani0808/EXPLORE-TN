@@ -1174,6 +1174,14 @@ export function FullscreenRouteMap({
           </div>
 
           <div style="display: flex; gap: 6px; margin-top: 6px;">
+            ${selectedOrigin && selectedDestination ? `
+              <button
+                onclick="window.dispatchEvent(new CustomEvent('add-corridor-stop-event', { detail: '${place.id}' }))"
+                style="flex: 1; padding: 5px; border-radius: 6px; background: rgba(245,158,11,0.2); border: 1px solid rgba(245,158,11,0.5); color: #fde047; font-size: 10px; font-weight: 700; cursor: pointer;"
+              >
+                + Stop
+              </button>
+            ` : ''}
             <button
               onclick="window.dispatchEvent(new CustomEvent('set-origin-event', { detail: '${place.id}' }))"
               style="flex: 1; padding: 5px; border-radius: 6px; background: rgba(16,185,129,0.15); border: 1px solid rgba(16,185,129,0.3); color: #a7f3d0; font-size: 10px; font-weight: 600; cursor: pointer;"
@@ -2553,6 +2561,30 @@ export function FullscreenRouteMap({
                         </div>
 
                         <div className="flex items-center gap-1">
+                          {selectedOrigin && selectedDestination && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                if (!waypoints.some((w) => w.id === place.id)) {
+                                  setWaypoints((prev) => [...prev, place]);
+                                  toast.success(`Added ${place.canonicalName || place.name} as En-Route Stop 📍`);
+                                  setStatusMessage(`Added ${place.canonicalName || place.name} as stop`);
+                                } else {
+                                  handleRemoveRecommendedStop(place.id);
+                                  toast.info(`Removed ${place.canonicalName || place.name} from stops`);
+                                }
+                              }}
+                              className={`px-2 py-1.5 min-h-[32px] rounded-lg border text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 ${
+                                waypoints.some((w) => w.id === place.id)
+                                  ? "bg-amber-500/25 text-amber-200 border-amber-500/50"
+                                  : "bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30"
+                              }`}
+                              aria-label={`Add ${place.name} as en-route stop`}
+                              title="Add as intermediate stop along your route"
+                            >
+                              {waypoints.some((w) => w.id === place.id) ? "✓ Stop" : "+ Stop"}
+                            </button>
+                          )}
                           <button
                             type="button"
                             onClick={() => {
