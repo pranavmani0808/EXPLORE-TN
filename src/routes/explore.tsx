@@ -292,7 +292,22 @@ function ExploreByExperiencePage() {
   const [loading, setLoading] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>("arupadai");
   const [searchQuery, setSearchQuery] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState("All Districts");
+  const [visibleCount, setVisibleCount] = useState(18);
+
+  // Debounce search query by 250ms
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(searchQuery);
+    }, 250);
+    return () => clearTimeout(handler);
+  }, [searchQuery]);
+
+  // Reset pagination when category, district or search changes
+  useEffect(() => {
+    setVisibleCount(18);
+  }, [selectedCategory, selectedDistrict, debouncedSearch]);
 
   // Persistent Route Builder Stops State
   const STORAGE_KEY = "explore_tn_user_trip_route";
@@ -573,9 +588,9 @@ function ExploreByExperiencePage() {
         if ((p.district || "").toLowerCase() !== selectedDistrict.toLowerCase()) return false;
       }
 
-      // Search Query
-      if (searchQuery.trim()) {
-        const q = searchQuery.toLowerCase();
+      // Search Query (Debounced for high-speed performance)
+      if (debouncedSearch.trim()) {
+        const q = debouncedSearch.toLowerCase();
         const matchName = (p.name || "").toLowerCase().includes(q);
         const matchDist = (p.district || "").toLowerCase().includes(q);
         const matchCat = (p.category || "").toLowerCase().includes(q);
@@ -585,7 +600,7 @@ function ExploreByExperiencePage() {
 
       return matchCategory;
     });
-  }, [places, selectedCategory, selectedDistrict, searchQuery]);
+  }, [places, selectedCategory, selectedDistrict, debouncedSearch]);
 
   const categoryTiles = useMemo(() => {
     return getLiveCategoryTiles();
@@ -804,7 +819,7 @@ function ExploreByExperiencePage() {
                   </div>
                 ) : (
                   <div className={cn("grid gap-5", isPanelOpen ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")}>
-                    {categoryFilteredPlaces.map((p, idx) => {
+                    {categoryFilteredPlaces.slice(0, visibleCount).map((p, idx) => {
                       const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
                       const isAdded = routeStops.some((s) => s.id === p.id || s.slug === p.slug);
 
@@ -823,7 +838,7 @@ function ExploreByExperiencePage() {
                             <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900">
                               <img
                                 src={img}
-                                alt={p.name}
+                                alt={`Photograph of ${p.name}, ${p.district} District`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 loading="lazy"
                               />
@@ -921,6 +936,18 @@ function ExploreByExperiencePage() {
                           </motion.div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {/* Load More Pagination Trigger */}
+                  {visibleCount < categoryFilteredPlaces.length && (
+                    <div className="flex justify-center pt-6">
+                      <Button
+                        onClick={() => setVisibleCount((prev) => prev + 18)}
+                        className="bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-amber-500/30 font-bold text-xs px-6 py-2 rounded-xl transition"
+                      >
+                        Load More Destinations ({categoryFilteredPlaces.length - visibleCount} remaining)
+                      </Button>
                     </div>
                   )}
                 </div>

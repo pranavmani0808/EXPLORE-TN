@@ -1,5 +1,7 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { createClient } from "@supabase/supabase-js";
+import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
+import { UserSyncPayloadSchema } from "@/lib/security/api-schemas";
 
 const SUPABASE_URL =
   process.env.VITE_SUPABASE_URL ||
@@ -10,27 +12,36 @@ const SUPABASE_SECRET_KEY =
   process.env.SUPABASE_SECRET_KEY ||
   process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
   process.env.SUPABASE_PUBLISHABLE_KEY ||
-  process.env.VITE_SUPABASE_ANON_KEY ||
-  "sb_publishable_7iBDUCQZQoCO6zg6KamalA_kdzdjk-8";
+  process.env.VITE_SUPABASE_ANON_KEY;
 
 // Server-side privileged client with bypass RLS to sync user relational tables
-const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
+const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY || "", {
   auth: { autoRefreshToken: false, persistSession: false },
 });
 
 export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
   POST: async ({ request }) => {
-    try {
-      const body = await request.json().catch(() => ({}));
-      const { user, isSignUp } = body;
+    // Rate limit
+    const clientIp = getClientIp(request);
+    const rateLimit = await checkRateLimit(`route-user-sync:${clientIp}`, { limit: 30, windowMs: 60000 });
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later.", retryAfterSeconds: rateLimit.retryAfterSeconds }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
 
-      if (!user || !user.email) {
+    try {
+      const rawBody = await request.json().catch(() => ({}));
+      const parseResult = UserSyncPayloadSchema.safeParse(rawBody);
+      if (!parseResult.success) {
         return new Response(
-          JSON.stringify({ error: "Missing required user payload" }),
+          JSON.stringify({ error: "Validation Error", details: parseResult.error.format() }),
           { status: 400, headers: { "Content-Type": "application/json" } }
         );
       }
 
+      const { user, isSignUp } = parseResult.data;
       const email = user.email.trim().toLowerCase();
       const userId = user.id;
       const name = user.name || email.split("@")[0] || "Explorer User";

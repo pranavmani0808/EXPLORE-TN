@@ -192,7 +192,13 @@ function AdminOperationsCenter() {
   const [platformName, setPlatformName] = useState(() => {
     return typeof window !== "undefined" ? localStorage.getItem("etn_platform_name") || "ExploreTN — Travel Intelligence Platform" : "ExploreTN — Travel Intelligence Platform";
   });
-  const [mapEngineKey, setMapEngineKey] = useState("pk.eyJ1IjoicHJhbmF2IiwiYSI6ImNseXRzIn0");
+  const [mapEngineKey, setMapEngineKey] = useState(() => {
+    return (
+      (typeof import.meta !== "undefined" && import.meta.env?.VITE_MAPBOX_TOKEN) ||
+      (typeof process !== "undefined" && process.env?.VITE_MAPBOX_TOKEN) ||
+      ""
+    );
+  });
 
   const loadAdminData = async () => {
     setLoading(true);

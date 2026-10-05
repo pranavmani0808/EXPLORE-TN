@@ -1,10 +1,31 @@
 import { createAPIFileRoute } from "@tanstack/react-start/api";
 import { generateVerifiedItinerary } from "@/lib/planner-engine";
+import { checkRateLimit, getClientIp } from "@/lib/security/rate-limiter";
+import { PlannerChatPayloadSchema } from "@/lib/security/api-schemas";
 
 export const APIRoute = createAPIFileRoute("/api/v1/planner/chat")({
   POST: async ({ request }) => {
+    // Rate limit: 25 copilot queries per minute per IP
+    const clientIp = getClientIp(request);
+    const rateLimit = await checkRateLimit(`route-planner-chat:${clientIp}`, { limit: 25, windowMs: 60000 });
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Trip Copilot is busy. Please wait a few seconds before trying again.", retryAfterSeconds: rateLimit.retryAfterSeconds }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     try {
-      const body = await request.json().catch(() => ({}));
+      const rawBody = await request.json().catch(() => ({}));
+      const parseResult = PlannerChatPayloadSchema.safeParse(rawBody);
+      if (!parseResult.success) {
+        return new Response(
+          JSON.stringify({ error: "Validation Error", details: parseResult.error.format() }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      const body = parseResult.data;
       const userMsg: string = body.message || body.user_message || "";
       const cid: string = body.conversationId || body.session_id || `conv-${Date.now().toString(36)}`;
 

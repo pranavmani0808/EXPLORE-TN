@@ -18,6 +18,8 @@ import {
   encryptData,
   sanitizePiiResponse,
 } from "./lib/security";
+import { checkRateLimit, getClientIp } from "./lib/security/rate-limiter";
+import { CreatePlaceSchema, UserSyncPayloadSchema, PlannerChatPayloadSchema } from "./lib/security/api-schemas";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -143,13 +145,30 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
   // 1a-2. User Sync & Verification Endpoint: /api/v1/user/sync
   if (path === "/api/v1/user/sync") {
+    // Rate limit: 30 requests per minute per IP
+    const clientIp = getClientIp(request);
+    const rateLimit = await checkRateLimit(`user-sync:${clientIp}`, { limit: 30, windowMs: 60000 });
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Too many requests. Please try again later.", retryAfterSeconds: rateLimit.retryAfterSeconds }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://ajxnljrhueiiuwavbrra.supabase.co";
     const SUPABASE_SECRET_KEY =
       process.env.SUPABASE_SECRET_KEY ||
       process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
       process.env.SUPABASE_PUBLISHABLE_KEY ||
-      process.env.VITE_SUPABASE_ANON_KEY ||
-      "sb_publishable_7iBDUCQZQoCO6zg6KamalA_kdzdjk-8";
+      process.env.VITE_SUPABASE_ANON_KEY;
+
+    if (!SUPABASE_SECRET_KEY) {
+      return new Response(
+        JSON.stringify({ error: "Supabase service key is not configured on server" }),
+        { status: 500, headers: { "Content-Type": "application/json" } }
+      );
+    }
+
     const { createClient } = await import("@supabase/supabase-js");
     const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
       auth: { autoRefreshToken: false, persistSession: false },
@@ -158,9 +177,9 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     if (method === "GET") {
       try {
         const email = url.searchParams.get("email")?.trim().toLowerCase();
-        if (!email) {
+        if (!email || !email.includes("@")) {
           return new Response(
-            JSON.stringify({ valid: false, message: "Missing email parameter" }),
+            JSON.stringify({ valid: false, message: "Valid email parameter required" }),
             { status: 400, headers: { "Content-Type": "application/json" } }
           );
         }
@@ -221,24 +240,24 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
         );
       } catch (err: any) {
         return new Response(
-          JSON.stringify({ valid: false, error: err?.message }),
-          { status: 200, headers: { "Content-Type": "application/json" } }
+          JSON.stringify({ valid: false, error: "Verification failed" }),
+          { status: 500, headers: { "Content-Type": "application/json" } }
         );
       }
     }
 
     if (method === "POST") {
       try {
-        const body = await request.clone().json().catch(() => ({}));
-        const { user, isSignUp } = body;
-
-        if (!user || !user.email) {
+        const rawBody = await request.clone().json().catch(() => ({}));
+        const parseResult = UserSyncPayloadSchema.safeParse(rawBody);
+        if (!parseResult.success) {
           return new Response(
-            JSON.stringify({ error: "Missing required user payload" }),
+            JSON.stringify({ error: "Validation Error", details: parseResult.error.format() }),
             { status: 400, headers: { "Content-Type": "application/json" } }
           );
         }
 
+        const { user, isSignUp } = parseResult.data;
         const email = user.email.trim().toLowerCase();
         const userId = user.id;
         const name = user.name || email.split("@")[0] || "Explorer User";
@@ -369,14 +388,38 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     const places = await SupabaseDatabaseRepository.getPublicPlaces({ category, district, search });
     return new Response(
       JSON.stringify({ status: "success", count: places.length, data: places }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        },
+      }
     );
   }
 
   if (path === "/api/v1/places" && method === "POST") {
+    // Rate limit write endpoint: 20 creations per hour per IP
+    const clientIp = getClientIp(request);
+    const rateLimit = await checkRateLimit(`create-place:${clientIp}`, { limit: 20, windowMs: 3600000 });
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Rate limit exceeded for creating places", retryAfterSeconds: rateLimit.retryAfterSeconds }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     try {
-      const body = await request.clone().json().catch(() => ({}));
-      const created = await SupabaseDatabaseRepository.createPlace(body);
+      const rawBody = await request.clone().json().catch(() => ({}));
+      const parseResult = CreatePlaceSchema.safeParse(rawBody);
+      if (!parseResult.success) {
+        return new Response(
+          JSON.stringify({ error: "Validation Error", details: parseResult.error.format() }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      const created = await SupabaseDatabaseRepository.createPlace(parseResult.data);
       return new Response(
         JSON.stringify({ status: "success", data: created }),
         { status: 201, headers: { "Content-Type": "application/json" } }
@@ -395,7 +438,13 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     const intel = getPlaceTravelIntelligence(slug);
     return new Response(
       JSON.stringify({ status: "success", data: intel }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
+      {
+        status: 200,
+        headers: {
+          "Content-Type": "application/json",
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        },
+      }
     );
   }
 
@@ -441,8 +490,27 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
   // 2. AI Trip Copilot Endpoint: POST /api/v1/planner/chat
   if (path === "/api/v1/planner/chat" && method === "POST") {
+    // Rate limit: 25 copilot requests per minute per IP
+    const clientIp = getClientIp(request);
+    const rateLimit = await checkRateLimit(`planner-chat:${clientIp}`, { limit: 25, windowMs: 60000 });
+    if (!rateLimit.allowed) {
+      return new Response(
+        JSON.stringify({ error: "Trip Copilot is busy. Please wait a few seconds before trying again.", retryAfterSeconds: rateLimit.retryAfterSeconds }),
+        { status: 429, headers: { "Content-Type": "application/json", "Retry-After": String(rateLimit.retryAfterSeconds) } }
+      );
+    }
+
     try {
-      const body = await request.clone().json().catch(() => ({}));
+      const rawBody = await request.clone().json().catch(() => ({}));
+      const parseResult = PlannerChatPayloadSchema.safeParse(rawBody);
+      if (!parseResult.success) {
+        return new Response(
+          JSON.stringify({ error: "Validation Error", details: parseResult.error.format() }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      const body = parseResult.data;
       const userMsg: string = body.message || body.user_message || "Plan a trip to Madurai";
       const cid: string = body.conversationId || body.session_id || `conv-${Date.now().toString(36)}`;
       const traceId = `tr-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
