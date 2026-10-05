@@ -1540,44 +1540,6 @@ export function FullscreenRouteMap({
             </div>
           </div>
         </motion.div>
-
-        {/* Travel Mode Selector (Drive, Train, Bus, Flight, Bike) - Draggable */}
-        <motion.div
-          drag
-          dragMomentum={false}
-          className="flex items-center gap-1 bg-[#121821]/95 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto shadow-2xl touch-none cursor-grab active:cursor-grabbing"
-        >
-          {[
-            { id: "driving", label: "Drive", icon: Car },
-            { id: "train", label: "Train", icon: Train },
-            { id: "bus", label: "Bus", icon: Bus },
-            { id: "flight", label: "Flight", icon: Plane },
-            { id: "motorcycle", label: "Bike", icon: Bike },
-          ].map((mode) => {
-            const Icon = mode.icon;
-            const isActive = travelMode === mode.id;
-            return (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => {
-                  setTravelMode(mode.id as ExtendedTravelMode);
-                  if (multiModalData) {
-                    const match = multiModalData.options.find((opt) => opt.mode === mode.id);
-                    if (match) setSelectedTransitOptionId(match.id);
-                  }
-                  toast.info(`Switched transit corridor view to ${mode.label} 🧭`);
-                }}
-                className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  isActive ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white hover:bg-white/5"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">{mode.label}</span>
-              </button>
-            );
-          })}
-        </motion.div>
       </header>
 
       {/* Animated Focus Mode Origin Prompt Overlay */}
