@@ -25,6 +25,7 @@ import { COIMBATORE_REGIONAL_PLACES } from "./coimbatore-places";
 import { CHENNAI_EXPANDED_PLACES } from "./chennai-places";
 import { VERIFIED_TN_HILL_PLACES } from "./hill-places";
 import { TREKKING_NATURE_PLACES } from "./trekking-places";
+import { TN_MASTER_PLACES } from "./tn-master-places";
 
 export interface ExplorerPlace {
   id: string;
@@ -1522,7 +1523,8 @@ export const KNOWN_DESTINATIONS: Record<string, ExplorerPlace> = {
   ...COIMBATORE_REGIONAL_PLACES,
   ...CHENNAI_EXPANDED_PLACES,
   ...VERIFIED_TN_HILL_PLACES,
-  ...TREKKING_NATURE_PLACES
+  ...TREKKING_NATURE_PLACES,
+  ...TN_MASTER_PLACES
 };
 
 export const CANONICAL_PLACES: ExplorerPlace[] = Array.from(
