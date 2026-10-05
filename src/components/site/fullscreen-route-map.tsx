@@ -1230,21 +1230,34 @@ export function FullscreenRouteMap({
 
       {/* Top Header Bar */}
       <header className="absolute top-4 left-4 right-4 z-30 flex flex-wrap items-center justify-between pointer-events-none gap-3">
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <motion.div
+          drag
+          dragMomentum={false}
+          className="flex items-center gap-2 pointer-events-auto touch-none"
+        >
           <button
             type="button"
             onClick={onClose}
-            className="flex items-center gap-2 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 hover:border-emerald-500/40 px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-2xl transition cursor-pointer active:scale-95"
+            className="flex items-center gap-2 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 hover:border-emerald-500/40 px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-2xl transition cursor-grab active:cursor-grabbing active:scale-95"
           >
             <ArrowRight className="w-4 h-4 rotate-180 text-emerald-400" /> Back to Explorer
           </button>
-        </div>
+        </motion.div>
 
-        {/* Top Center: Plan Custom Route Corridor */}
-        <div ref={searchContainerRef} className="relative pointer-events-auto flex-1 max-w-md w-full mx-auto flex flex-col gap-2 transition-all duration-300">
+        {/* Top Center: Draggable Plan Custom Route Corridor */}
+        <motion.div
+          drag
+          dragMomentum={false}
+          className="relative pointer-events-auto flex-1 max-w-md w-full mx-auto flex flex-col gap-2 transition-shadow duration-300 touch-none"
+        >
           <div className="bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-2xl p-2.5 shadow-2xl space-y-2">
+            {/* Visual Drag Handle Bar */}
+            <div className="w-full flex items-center justify-center cursor-grab active:cursor-grabbing pb-0.5 pt-0.5 group">
+              <div className="w-10 h-1 rounded-full bg-white/20 group-hover:bg-emerald-400 transition" />
+            </div>
+
             <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-300 uppercase px-1">
-              <span className="flex items-center gap-1.5 text-emerald-400">
+              <span className="flex items-center gap-1.5 text-emerald-400 cursor-grab active:cursor-grabbing">
                 <Navigation className="w-3.5 h-3.5" />
                 Plan Custom Route
               </span>
@@ -1483,10 +1496,14 @@ export function FullscreenRouteMap({
               )}
             </div>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Travel Mode Selector (Drive, Train, Bus, Flight, Bike) */}
-        <div className="flex items-center gap-1 bg-[#121821]/95 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto shadow-2xl">
+        {/* Travel Mode Selector (Drive, Train, Bus, Flight, Bike) - Draggable */}
+        <motion.div
+          drag
+          dragMomentum={false}
+          className="flex items-center gap-1 bg-[#121821]/95 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto shadow-2xl touch-none cursor-grab active:cursor-grabbing"
+        >
           {[
             { id: "driving", label: "Drive", icon: Car },
             { id: "train", label: "Train", icon: Train },
@@ -1517,7 +1534,7 @@ export function FullscreenRouteMap({
               </button>
             );
           })}
-        </div>
+        </motion.div>
       </header>
 
       {/* Animated Focus Mode Origin Prompt Overlay */}
@@ -1680,12 +1697,14 @@ export function FullscreenRouteMap({
         )}
       </AnimatePresence>
 
-      {/* Main Left Explorer Panel */}
-      <aside
+      {/* Main Left Explorer Panel (Draggable) */}
+      <motion.aside
+        drag
+        dragMomentum={false}
         aria-labelledby="explorer-destinations-heading"
         onWheel={(e) => e.stopPropagation()}
         onTouchMove={(e) => e.stopPropagation()}
-        className={`absolute z-40 transition-all duration-300 pointer-events-auto ${
+        className={`absolute z-40 transition-shadow duration-300 pointer-events-auto touch-none ${
           panelState === "hidden"
             ? "-left-96 top-20"
             : panelState === "compact"
@@ -1699,24 +1718,29 @@ export function FullscreenRouteMap({
         </div>
 
         <div className="w-full h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white overscroll-contain">
-          {/* Drag Handle Collapse Button */}
-          <button
-            type="button"
-            aria-expanded={panelState === "expanded"}
-            aria-controls="explorer-places-list"
-            aria-label={panelState === "expanded" ? "Collapse destinations panel" : "Expand destinations panel"}
-            onClick={() => {
-              const next = panelState === "expanded" ? "compact" : "expanded";
-              setPanelState(next);
-              setStatusMessage(next === "expanded" ? "Destinations panel expanded" : "Destinations panel collapsed");
-            }}
-            className="w-full flex flex-col items-center cursor-pointer py-1 group shrink-0 focus-visible:ring-2 focus-visible:ring-emerald-400 rounded-lg min-h-[36px] justify-center"
-          >
-            <div className="w-12 h-1.5 rounded-full bg-white/20 group-hover:bg-emerald-400 transition" />
-            <span className="text-[10px] text-slate-300 uppercase tracking-widest mt-1 font-mono font-semibold">
-              {panelState === "expanded" ? "Click to Collapse" : "Click to Expand"}
-            </span>
-          </button>
+          {/* Header Drag Handle & Collapse Button */}
+          <div className="w-full flex items-center justify-between pb-1 shrink-0">
+            {/* Visual Drag Indicator */}
+            <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono font-bold text-slate-400 cursor-grab active:cursor-grabbing hover:border-emerald-400/50 hover:text-emerald-300 transition select-none">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span>DRAG PANEL</span>
+            </div>
+
+            <button
+              type="button"
+              aria-expanded={panelState === "expanded"}
+              aria-controls="explorer-places-list"
+              aria-label={panelState === "expanded" ? "Collapse destinations panel" : "Expand destinations panel"}
+              onClick={() => {
+                const next = panelState === "expanded" ? "compact" : "expanded";
+                setPanelState(next);
+                setStatusMessage(next === "expanded" ? "Destinations panel expanded" : "Destinations panel collapsed");
+              }}
+              className="text-[10px] text-slate-400 hover:text-white uppercase tracking-widest font-mono font-semibold cursor-pointer px-2 py-0.5 rounded hover:bg-white/10 transition"
+            >
+              {panelState === "expanded" ? "Collapse" : "Expand"}
+            </button>
+          </div>
 
           {/* Panel Header & Breadcrumbs */}
           <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-1 shrink-0">
@@ -2355,10 +2379,14 @@ export function FullscreenRouteMap({
             </div>
           )}
         </div>
-      </aside>
+      </motion.aside>
 
-      {/* Floating Controls (Zoom & Location) */}
-      <div className="absolute right-4 bottom-6 z-50 flex flex-col gap-2 pointer-events-auto">
+      {/* Floating Controls (Zoom & Location) - Draggable */}
+      <motion.div
+        drag
+        dragMomentum={false}
+        className="absolute right-4 bottom-6 z-50 flex flex-col gap-2 pointer-events-auto touch-none cursor-grab active:cursor-grabbing"
+      >
         <button
           type="button"
           onClick={handleUseCurrentLocation}
@@ -2383,7 +2411,7 @@ export function FullscreenRouteMap({
         >
           −
         </button>
-      </div>
+      </motion.div>
     </div>
   );
 }
