@@ -931,7 +931,24 @@ export function FullscreenRouteMap({
             </div>
           `, { className: "custom-mapcn-popup-window" });
 
+          poiMarker.bindTooltip(
+            `<div style="font-weight:700; font-size:11px; color:#fff; background:#0f172a; padding:3px 6px; border-radius:4px; border:1px solid #f59e0b;">${poi.canonicalName || poi.name} (+${poi.detourKm}km detour)</div>`,
+            { direction: "top", offset: [0, -14], opacity: 1 }
+          );
+
+          poiMarker.on("mouseover", () => {
+            poiMarker.openTooltip();
+          });
+
+          poiMarker.on("click", () => {
+            if (leafletMapRef.current) {
+              leafletMapRef.current.flyTo([poi.latitude, poi.longitude], 14, { animate: true, duration: 1 });
+            }
+            poiMarker.openPopup();
+          });
+
           markersRef.current.push(poiMarker);
+          markersByIdRef.current[poi.id] = poiMarker;
         });
       }
 
@@ -1175,6 +1192,17 @@ export function FullscreenRouteMap({
       // Reset all markers back to their default dot icon
       renderMapElements();
     }
+  };
+
+  const handleFocusCorridorPlace = (poi: ExplorerPlace) => {
+    if (leafletMapRef.current) {
+      leafletMapRef.current.flyTo([poi.latitude, poi.longitude], 14, { animate: true, duration: 1 });
+      const marker = markersByIdRef.current[poi.id];
+      if (marker) {
+        marker.openPopup();
+      }
+    }
+    toast.info(`📍 Showing ${poi.canonicalName || poi.name} on map`);
   };
 
 
@@ -2080,14 +2108,23 @@ export function FullscreenRouteMap({
                   <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-amber-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
                     {multiModalData.corridorPlaces.map((poi) => {
                       const isAdded = waypoints.some((w) => w.id === poi.id);
+                      const isHovered = hoveredPlaceId === poi.id;
                       return (
                         <div
                           key={poi.id}
-                          className="w-48 shrink-0 p-2 rounded-xl bg-white/5 border border-white/10 hover:border-amber-400/50 transition flex flex-col justify-between space-y-1.5"
+                          data-testid="corridor-place-card"
+                          onClick={() => handleFocusCorridorPlace(poi)}
+                          onMouseEnter={() => handleSidebarHover(poi)}
+                          onMouseLeave={() => handleSidebarHover(null)}
+                          className={`w-48 shrink-0 p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 group select-none ${
+                            isHovered
+                              ? "bg-amber-500/15 border-amber-400 scale-[1.02] shadow-lg shadow-amber-500/20"
+                              : "bg-white/5 border-white/10 hover:border-amber-400/60 hover:bg-white/10"
+                          }`}
                         >
                           <div>
                             <div className="flex items-center justify-between gap-1">
-                              <span className="text-xs">
+                              <span className="text-xs group-hover:scale-110 transition-transform">
                                 {poi.primaryCategory === "temples"
                                   ? "🛕"
                                   : poi.primaryCategory === "waterfalls"
@@ -2100,19 +2137,20 @@ export function FullscreenRouteMap({
                                 +{poi.detourKm}km detour
                               </span>
                             </div>
-                            <h5 className="font-bold text-white text-[11px] truncate mt-0.5">{poi.canonicalName || poi.name}</h5>
+                            <h5 className="font-bold text-white text-[11px] truncate mt-0.5 group-hover:text-amber-300 transition-colors">
+                              {poi.canonicalName || poi.name}
+                            </h5>
                             <span className="text-[9px] text-slate-400 block truncate">{poi.district} · {poi.highwayNear}</span>
+                            <span className="text-[8px] text-amber-400/80 mt-0.5 flex items-center gap-0.5 opacity-80 group-hover:opacity-100">
+                              <span>👆 Click to view on map</span>
+                            </span>
                           </div>
 
-                          <div className="flex items-center gap-1 pt-1">
+                          <div className="flex items-center gap-1 pt-1" onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
-                              onClick={() => {
-                                if (leafletMapRef.current) {
-                                  leafletMapRef.current.flyTo([poi.latitude, poi.longitude], 13, { animate: true });
-                                }
-                              }}
-                              className="flex-1 py-1 rounded bg-white/10 hover:bg-white/20 text-[9px] font-bold text-slate-200 transition text-center"
+                              onClick={() => handleFocusCorridorPlace(poi)}
+                              className="flex-1 py-1 rounded bg-white/10 hover:bg-amber-500/20 hover:text-amber-200 text-[9px] font-bold text-slate-200 transition text-center"
                             >
                               View Pin
                             </button>

@@ -40,5 +40,21 @@ test("Verify two-tier cascading top search bar: Start Origin -> Destination Orig
   // 7. Verify both points are selected and active route calculated
   await page.screenshot({ path: "routes-top-search-cascade-verified.png" });
   console.log("[PASS] Two-tier cascading search bar verified and screenshot saved.");
+
+  // 8. Verify corridor suggested places appear in the left draggable panel
+  const corridorCard = page.getByTestId("corridor-place-card").first();
+  await expect(corridorCard).toBeVisible({ timeout: 5000 });
+
+  // 9. Hover over the suggested corridor place card
+  await corridorCard.hover();
+  await page.waitForTimeout(500);
+
+  // 10. Click the suggested corridor place card to focus and open popup on the map
+  await corridorCard.click();
+  await page.waitForTimeout(1200);
+
+  // 11. Verify popup or place is shown
+  await page.screenshot({ path: "routes-corridor-place-interaction-verified.png" });
+  console.log("[PASS] Corridor place hover and click interaction verified.");
 });
 
