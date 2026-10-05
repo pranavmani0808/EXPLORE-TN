@@ -278,6 +278,7 @@ export function FullscreenRouteMap({
   const [routeLoading, setRouteLoading] = useState(false);
   const [routeError, setRouteError] = useState<string | null>(null);
   const [segmentData, setSegmentData] = useState<Array<{ distanceKm: number; durationMins: number; polyline: [number, number][] }>>([]);
+  const [flightRoadSegments, setFlightRoadSegments] = useState<{ originRoad?: [number, number][]; destRoad?: [number, number][] }>({});
   const [selectedStopIndex, setSelectedStopIndex] = useState<number>(0);
   const [geoLocating, setGeoLocating] = useState(false);
   const [geoError, setGeoError] = useState<string | null>(null);
@@ -584,6 +585,60 @@ export function FullscreenRouteMap({
     }
 
     const calculateAllSegments = async () => {
+      // If travel mode is flight, fetch real driving road routes for airport transfers
+      if (travelMode === "flight" && activeTransitOption?.flightArc) {
+        const { from, to } = activeTransitOption.flightArc;
+        const originRoadKey = `road:${selectedOrigin.latitude.toFixed(4)},${selectedOrigin.longitude.toFixed(4)}:${from[0].toFixed(4)},${from[1].toFixed(4)}`;
+        const destRoadKey = `road:${to[0].toFixed(4)},${to[1].toFixed(4)}:${selectedDestination.latitude.toFixed(4)},${selectedDestination.longitude.toFixed(4)}`;
+
+        let originPolyline: [number, number][] = [[selectedOrigin.latitude, selectedOrigin.longitude], from];
+        let destPolyline: [number, number][] = [to, [selectedDestination.latitude, selectedDestination.longitude]];
+
+        try {
+          if (ROUTE_LEG_CACHE.has(originRoadKey)) {
+            originPolyline = ROUTE_LEG_CACHE.get(originRoadKey)!.polyline;
+          } else {
+            const origRes = await RouteApiRepository.calculateRoute({
+              requestId: `${requestId}-flight-origin`,
+              origin: { latitude: selectedOrigin.latitude, longitude: selectedOrigin.longitude, label: selectedOrigin.name },
+              destination: { latitude: from[0], longitude: from[1], label: activeTransitOption.originAirport?.name || "Origin Airport" },
+              travelMode: "driving",
+            });
+            if (origRes.geometry?.coordinates?.length) {
+              originPolyline = origRes.geometry.coordinates as [number, number][];
+              ROUTE_LEG_CACHE.set(originRoadKey, { distanceKm: origRes.summary.distanceKm, durationMins: origRes.summary.durationMins, polyline: originPolyline });
+            }
+          }
+        } catch {
+          // Fallback to straight line
+        }
+
+        try {
+          if (ROUTE_LEG_CACHE.has(destRoadKey)) {
+            destPolyline = ROUTE_LEG_CACHE.get(destRoadKey)!.polyline;
+          } else {
+            const destRes = await RouteApiRepository.calculateRoute({
+              requestId: `${requestId}-flight-dest`,
+              origin: { latitude: to[0], longitude: to[1], label: activeTransitOption.destAirport?.name || "Dest Airport" },
+              destination: { latitude: selectedDestination.latitude, longitude: selectedDestination.longitude, label: selectedDestination.name },
+              travelMode: "driving",
+            });
+            if (destRes.geometry?.coordinates?.length) {
+              destPolyline = destRes.geometry.coordinates as [number, number][];
+              ROUTE_LEG_CACHE.set(destRoadKey, { distanceKm: destRes.summary.distanceKm, durationMins: destRes.summary.durationMins, polyline: destPolyline });
+            }
+          }
+        } catch {
+          // Fallback to straight line
+        }
+
+        if (activeRequestIdRef.current === requestId) {
+          setFlightRoadSegments({ originRoad: originPolyline, destRoad: destPolyline });
+          setRouteLoading(false);
+        }
+        return;
+      }
+
       const segments: Array<{ distanceKm: number; durationMins: number; polyline: [number, number][] }> = [];
 
       for (let i = 0; i < stops.length - 1; i++) {
@@ -629,7 +684,7 @@ export function FullscreenRouteMap({
     };
 
     calculateAllSegments();
-  }, [selectedOrigin, selectedDestination, waypoints, travelMode, selectedRouteId, availableRoutes]);
+  }, [selectedOrigin, selectedDestination, waypoints, travelMode, selectedRouteId, availableRoutes, activeTransitOption]);
 
   // Leaflet Map Initialization & Scope Lifecycle
   useEffect(() => {
@@ -816,20 +871,81 @@ export function FullscreenRouteMap({
           lineJoin: "round",
         }).addTo(polylineGroup);
 
-        // Airport transfer road lines
-        L.polyline([[selectedOrigin.latitude, selectedOrigin.longitude], from], {
+        // Airport transfer road lines (Real road geometry from airport to final destination via OSRM)
+        const originRoadPts = flightRoadSegments.originRoad || [[selectedOrigin.latitude, selectedOrigin.longitude], from];
+        const destRoadPts = flightRoadSegments.destRoad || [to, [selectedDestination.latitude, selectedDestination.longitude]];
+
+        // Road route: Origin -> Origin Airport
+        L.polyline(originRoadPts, {
+          color: "#0f172a",
+          weight: 6,
+          opacity: 0.9,
+          lineJoin: "round",
+        }).addTo(polylineGroup);
+        L.polyline(originRoadPts, {
           color: "#f59e0b",
-          weight: 3,
-          dashArray: "4, 6",
-          opacity: 0.85,
+          weight: 4,
+          dashArray: "6, 6",
+          opacity: 0.95,
+          lineJoin: "round",
         }).addTo(polylineGroup);
 
-        L.polyline([to, [selectedDestination.latitude, selectedDestination.longitude]], {
-          color: "#f59e0b",
-          weight: 3,
-          dashArray: "4, 6",
-          opacity: 0.85,
+        // Road route: Arrival Airport -> Final Destination (e.g. Madurai Airport to Virudhunagar)
+        L.polyline(destRoadPts, {
+          color: "#0f172a",
+          weight: 6,
+          opacity: 0.9,
+          lineJoin: "round",
         }).addTo(polylineGroup);
+        L.polyline(destRoadPts, {
+          color: "#10b981", // Emerald road route to destination
+          weight: 4,
+          opacity: 0.95,
+          lineJoin: "round",
+        }).addTo(polylineGroup);
+
+        destRoadPts.forEach((pt) => bounds.extend(pt));
+        originRoadPts.forEach((pt) => bounds.extend(pt));
+
+        // Arrival Airport Transfer Badge / Marker
+        if (activeTransitOption.destAirport) {
+          const destAirport = activeTransitOption.destAirport;
+          const airportIcon = L.divIcon({
+            className: `custom-airport-pin-${destAirport.code}`,
+            html: `
+              <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <div style="
+                  background: #0284c7;
+                  color: #ffffff;
+                  border: 2px solid #38bdf8;
+                  font-weight: 800;
+                  font-size: 10px;
+                  padding: 3px 8px;
+                  border-radius: 9999px;
+                  box-shadow: 0 4px 14px rgba(0,0,0,0.7);
+                  white-space: nowrap;
+                  display: flex;
+                  align-items: center;
+                  gap: 4px;
+                ">
+                  <span>✈️</span>
+                  <span>${destAirport.code} Airport ➔ Road to ${selectedDestination.canonicalName || selectedDestination.name}</span>
+                </div>
+              </div>
+            `,
+            iconSize: [220, 24],
+            iconAnchor: [110, 12],
+          });
+          const airportMarker = L.marker(to, { icon: airportIcon }).addTo(map);
+          airportMarker.bindPopup(`
+            <div style="font-family: system-ui, sans-serif; width: 220px; color: #fff;">
+              <strong style="font-size: 13px; display: block; color: #38bdf8;">${destAirport.name} (${destAirport.code})</strong>
+              <p style="font-size: 11px; margin: 4px 0; color: #94a3b8;">Flight Arrival Hub</p>
+              <p style="font-size: 11px; color: #34d399; font-weight: bold;">🚗 Continues via Highway to ${selectedDestination.canonicalName || selectedDestination.name}</p>
+            </div>
+          `, { className: "custom-mapcn-popup-window" });
+          markersRef.current.push(airportMarker);
+        }
       } else {
         // Road / Train / Bus Polylines
         const routeColor = travelMode === "train" ? "#f59e0b" : travelMode === "bus" ? "#06b6d4" : "#10b981";
@@ -1159,7 +1275,7 @@ export function FullscreenRouteMap({
   // Re-render elements whenever scope, stops, route, or multi-modal mode updates
   useEffect(() => {
     renderMapElements();
-  }, [mapScope, placesInScope, stops, segmentData, selectedStopIndex, travelMode, activeTransitOption, multiModalData]);
+  }, [mapScope, placesInScope, stops, segmentData, flightRoadSegments, selectedStopIndex, travelMode, activeTransitOption, multiModalData]);
 
   // Sidebar hover → highlight marker on map & update bottom-right preview
   const handleSidebarHover = (place: ExplorerPlace | null) => {

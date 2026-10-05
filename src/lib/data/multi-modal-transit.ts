@@ -33,6 +33,8 @@ export interface MultiModalOption {
     from: [number, number];
     to: [number, number];
   };
+  originAirport?: { code: string; name: string; lat: number; lng: number; city: string };
+  destAirport?: { code: string; name: string; lat: number; lng: number; city: string };
 }
 
 export interface CorridorPlace extends ExplorerPlace {
@@ -321,6 +323,8 @@ export function generateMultiModalJourney(
         from: [nearAirportOrig.airport.lat, nearAirportOrig.airport.lng],
         to: [nearAirportDest.airport.lat, nearAirportDest.airport.lng],
       },
+      originAirport: nearAirportOrig.airport,
+      destAirport: nearAirportDest.airport,
       steps: [
         {
           mode: "flight",
