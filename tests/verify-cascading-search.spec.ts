@@ -53,8 +53,18 @@ test("Verify two-tier cascading top search bar: Start Origin -> Destination Orig
   await corridorCard.click();
   await page.waitForTimeout(1200);
 
-  // 11. Verify popup or place is shown
-  await page.screenshot({ path: "routes-corridor-place-interaction-verified.png" });
-  console.log("[PASS] Corridor place hover and click interaction verified.");
+  // 12. Test that previously missing locations now return matching suggestions
+  const testQueries = ["villupuram", "tindivanam", "kachipuram", "nagercoil", "hosur", "trichy", "virudhu"];
+  for (const q of testQueries) {
+    await startInput.fill("");
+    await startInput.fill(q);
+    await page.waitForTimeout(300);
+    const suggestion = page.getByTestId("header-origin-option").first();
+    await expect(suggestion).toBeVisible({ timeout: 4000 });
+    console.log(`[PASS] Search query '${q}' successfully resolved with suggestion:`, await suggestion.textContent());
+  }
+
+  await page.screenshot({ path: "routes-districts-search-verified.png" });
+  console.log("[PASS] All location search queries verified.");
 });
 

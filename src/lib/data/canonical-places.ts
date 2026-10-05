@@ -1740,6 +1740,424 @@ export const GEOGRAPHIC_AREAS: Record<string, GeographicArea> = {
     latitude: 8.0883,
     longitude: 77.5385,
   },
+  nagercoil: {
+    id: "geo-nagercoil",
+    name: "Nagercoil",
+    canonicalName: "Nagercoil City & Kanyakumari HQ",
+    slug: "nagercoil",
+    entityType: "CITY",
+    district: "Kanyakumari",
+    state: "Tamil Nadu",
+    latitude: 8.1833,
+    longitude: 77.4119,
+  },
+  trichy: {
+    id: "geo-trichy",
+    name: "Tiruchirappalli (Trichy)",
+    canonicalName: "Tiruchirappalli (Trichy) District",
+    slug: "tiruchirappalli",
+    entityType: "CITY",
+    district: "Tiruchirappalli",
+    state: "Tamil Nadu",
+    latitude: 10.7905,
+    longitude: 78.7047,
+  },
+  tiruchirappalli: {
+    id: "geo-tiruchirappalli",
+    name: "Tiruchirappalli",
+    canonicalName: "Tiruchirappalli District & Rockfort",
+    slug: "tiruchirappalli",
+    entityType: "CITY",
+    district: "Tiruchirappalli",
+    state: "Tamil Nadu",
+    latitude: 10.7905,
+    longitude: 78.7047,
+  },
+  virudhunagar: {
+    id: "geo-virudhunagar",
+    name: "Virudhunagar",
+    canonicalName: "Virudhunagar District & Srivilliputhur",
+    slug: "virudhunagar",
+    entityType: "DISTRICT",
+    district: "Virudhunagar",
+    state: "Tamil Nadu",
+    latitude: 9.5872,
+    longitude: 77.9624,
+  },
+  srivilliputhur: {
+    id: "geo-srivilliputhur",
+    name: "Srivilliputhur",
+    canonicalName: "Srivilliputhur Andal Temple & Wildlife",
+    slug: "srivilliputhur",
+    entityType: "DESTINATION_AREA",
+    district: "Virudhunagar",
+    state: "Tamil Nadu",
+    latitude: 9.5117,
+    longitude: 77.6322,
+  },
+  villupuram: {
+    id: "geo-villupuram",
+    name: "Villupuram (Viluppuram)",
+    canonicalName: "Villupuram District & Gingee Fort",
+    slug: "viluppuram",
+    entityType: "DISTRICT",
+    district: "Viluppuram",
+    state: "Tamil Nadu",
+    latitude: 11.9401,
+    longitude: 79.4861,
+  },
+  viluppuram: {
+    id: "geo-viluppuram-alt",
+    name: "Viluppuram",
+    canonicalName: "Viluppuram Historic District",
+    slug: "viluppuram",
+    entityType: "DISTRICT",
+    district: "Viluppuram",
+    state: "Tamil Nadu",
+    latitude: 11.9401,
+    longitude: 79.4861,
+  },
+  tindivanam: {
+    id: "geo-tindivanam",
+    name: "Tindivanam",
+    canonicalName: "Tindivanam Junction & Corridor",
+    slug: "tindivanam",
+    entityType: "CITY",
+    district: "Viluppuram",
+    state: "Tamil Nadu",
+    latitude: 12.2319,
+    longitude: 79.6508,
+  },
+  kanchipuram: {
+    id: "geo-kanchipuram",
+    name: "Kanchipuram (Kancheepuram)",
+    canonicalName: "Kanchipuram Temple City & Silk District",
+    slug: "kanchipuram",
+    entityType: "CITY",
+    district: "Kanchipuram",
+    state: "Tamil Nadu",
+    latitude: 12.8342,
+    longitude: 79.7036,
+  },
+  kancheepuram: {
+    id: "geo-kancheepuram-alt",
+    name: "Kancheepuram",
+    canonicalName: "Kancheepuram Ancient Capital",
+    slug: "kanchipuram",
+    entityType: "CITY",
+    district: "Kanchipuram",
+    state: "Tamil Nadu",
+    latitude: 12.8342,
+    longitude: 79.7036,
+  },
+  hosur: {
+    id: "geo-hosur",
+    name: "Hosur",
+    canonicalName: "Hosur Industrial & Hill Gateway City",
+    slug: "hosur",
+    entityType: "CITY",
+    district: "Krishnagiri",
+    state: "Tamil Nadu",
+    latitude: 12.7409,
+    longitude: 77.8253,
+  },
+  krishnagiri: {
+    id: "geo-krishnagiri",
+    name: "Krishnagiri",
+    canonicalName: "Krishnagiri Mango Capital & Fort",
+    slug: "krishnagiri",
+    entityType: "DISTRICT",
+    district: "Krishnagiri",
+    state: "Tamil Nadu",
+    latitude: 12.5266,
+    longitude: 78.2146,
+  },
+  vellore: {
+    id: "geo-vellore",
+    name: "Vellore",
+    canonicalName: "Vellore Fort & Golden Temple City",
+    slug: "vellore",
+    entityType: "CITY",
+    district: "Vellore",
+    state: "Tamil Nadu",
+    latitude: 12.9165,
+    longitude: 79.1325,
+  },
+  tirunelveli: {
+    id: "geo-tirunelveli",
+    name: "Tirunelveli",
+    canonicalName: "Tirunelveli Halwa City & Nellaiappar",
+    slug: "tirunelveli",
+    entityType: "CITY",
+    district: "Tirunelveli",
+    state: "Tamil Nadu",
+    latitude: 8.7139,
+    longitude: 77.7567,
+  },
+  thoothukudi: {
+    id: "geo-thoothukudi",
+    name: "Thoothukudi (Tuticorin)",
+    canonicalName: "Thoothukudi Pearl City & Port",
+    slug: "thoothukudi",
+    entityType: "CITY",
+    district: "Thoothukudi",
+    state: "Tamil Nadu",
+    latitude: 8.7642,
+    longitude: 78.1348,
+  },
+  tuticorin: {
+    id: "geo-tuticorin",
+    name: "Tuticorin",
+    canonicalName: "Tuticorin Port City",
+    slug: "thoothukudi",
+    entityType: "CITY",
+    district: "Thoothukudi",
+    state: "Tamil Nadu",
+    latitude: 8.7642,
+    longitude: 78.1348,
+  },
+  tiruppur: {
+    id: "geo-tiruppur",
+    name: "Tiruppur",
+    canonicalName: "Tiruppur Knitwear Capital",
+    slug: "tiruppur",
+    entityType: "CITY",
+    district: "Tiruppur",
+    state: "Tamil Nadu",
+    latitude: 11.1085,
+    longitude: 77.3411,
+  },
+  erode: {
+    id: "geo-erode",
+    name: "Erode",
+    canonicalName: "Erode Turmeric City",
+    slug: "erode",
+    entityType: "CITY",
+    district: "Erode",
+    state: "Tamil Nadu",
+    latitude: 11.3410,
+    longitude: 77.7172,
+  },
+  dindigul: {
+    id: "geo-dindigul",
+    name: "Dindigul",
+    canonicalName: "Dindigul Rock Fort & Biryani City",
+    slug: "dindigul",
+    entityType: "CITY",
+    district: "Dindigul",
+    state: "Tamil Nadu",
+    latitude: 10.3673,
+    longitude: 77.9803,
+  },
+  tiruvannamalai: {
+    id: "geo-tiruvannamalai",
+    name: "Tiruvannamalai",
+    canonicalName: "Tiruvannamalai Annamalaiyar & Giri Valam",
+    slug: "tiruvannamalai",
+    entityType: "CITY",
+    district: "Tiruvannamalai",
+    state: "Tamil Nadu",
+    latitude: 12.2253,
+    longitude: 79.0747,
+  },
+  cuddalore: {
+    id: "geo-cuddalore",
+    name: "Cuddalore",
+    canonicalName: "Cuddalore District & Pichavaram Mangroves",
+    slug: "cuddalore",
+    entityType: "DISTRICT",
+    district: "Cuddalore",
+    state: "Tamil Nadu",
+    latitude: 11.7480,
+    longitude: 79.7714,
+  },
+  nagapattinam: {
+    id: "geo-nagapattinam",
+    name: "Nagapattinam",
+    canonicalName: "Nagapattinam Coastal Port & Velankanni",
+    slug: "nagapattinam",
+    entityType: "DISTRICT",
+    district: "Nagapattinam",
+    state: "Tamil Nadu",
+    latitude: 10.7672,
+    longitude: 79.8449,
+  },
+  mayiladuthurai: {
+    id: "geo-mayiladuthurai",
+    name: "Mayiladuthurai",
+    canonicalName: "Mayiladuthurai Cauvery Delta & Navagraha",
+    slug: "mayiladuthurai",
+    entityType: "DISTRICT",
+    district: "Mayiladuthurai",
+    state: "Tamil Nadu",
+    latitude: 11.1018,
+    longitude: 79.6517,
+  },
+  karur: {
+    id: "geo-karur",
+    name: "Karur",
+    canonicalName: "Karur Textile Capital & Amaravathi",
+    slug: "karur",
+    entityType: "DISTRICT",
+    district: "Karur",
+    state: "Tamil Nadu",
+    latitude: 10.9601,
+    longitude: 78.0766,
+  },
+  namakkal: {
+    id: "geo-namakkal",
+    name: "Namakkal",
+    canonicalName: "Namakkal Anjaneyar Fort & Poultry Hub",
+    slug: "namakkal",
+    entityType: "DISTRICT",
+    district: "Namakkal",
+    state: "Tamil Nadu",
+    latitude: 11.2189,
+    longitude: 78.1674,
+  },
+  perambalur: {
+    id: "geo-perambalur",
+    name: "Perambalur",
+    canonicalName: "Perambalur Ranjankudi Fort District",
+    slug: "perambalur",
+    entityType: "DISTRICT",
+    district: "Perambalur",
+    state: "Tamil Nadu",
+    latitude: 11.2342,
+    longitude: 78.8821,
+  },
+  pudukkottai: {
+    id: "geo-pudukkottai",
+    name: "Pudukkottai",
+    canonicalName: "Pudukkottai Princely State & Sittanavasal",
+    slug: "pudukkottai",
+    entityType: "DISTRICT",
+    district: "Pudukkottai",
+    state: "Tamil Nadu",
+    latitude: 10.3833,
+    longitude: 78.8167,
+  },
+  sivaganga: {
+    id: "geo-sivaganga",
+    name: "Sivaganga (Chettinad)",
+    canonicalName: "Sivaganga Chettinad Heritage District",
+    slug: "sivaganga",
+    entityType: "DISTRICT",
+    district: "Sivaganga",
+    state: "Tamil Nadu",
+    latitude: 9.8458,
+    longitude: 78.4812,
+  },
+  ramanathapuram: {
+    id: "geo-ramanathapuram",
+    name: "Ramanathapuram",
+    canonicalName: "Ramanathapuram Maritime & Coral District",
+    slug: "ramanathapuram",
+    entityType: "DISTRICT",
+    district: "Ramanathapuram",
+    state: "Tamil Nadu",
+    latitude: 9.3639,
+    longitude: 78.8395,
+  },
+  tenkasi: {
+    id: "geo-tenkasi",
+    name: "Tenkasi (Courtallam)",
+    canonicalName: "Tenkasi Courtallam Spa of South India",
+    slug: "tenkasi",
+    entityType: "DISTRICT",
+    district: "Tenkasi",
+    state: "Tamil Nadu",
+    latitude: 8.9593,
+    longitude: 77.3134,
+  },
+  theni: {
+    id: "geo-theni",
+    name: "Theni (Meghamalai)",
+    canonicalName: "Theni Meghamalai Highwavys District",
+    slug: "theni",
+    entityType: "DISTRICT",
+    district: "Theni",
+    state: "Tamil Nadu",
+    latitude: 10.0104,
+    longitude: 77.4768,
+  },
+  tiruvallur: {
+    id: "geo-tiruvallur",
+    name: "Tiruvallur",
+    canonicalName: "Tiruvallur Veeraraghava & Poondi District",
+    slug: "tiruvallur",
+    entityType: "DISTRICT",
+    district: "Tiruvallur",
+    state: "Tamil Nadu",
+    latitude: 13.1432,
+    longitude: 79.9083,
+  },
+  tiruvarur: {
+    id: "geo-tiruvarur",
+    name: "Tiruvarur",
+    canonicalName: "Tiruvarur Thyagaraja Temple & Chariot",
+    slug: "tiruvarur",
+    entityType: "DISTRICT",
+    district: "Tiruvarur",
+    state: "Tamil Nadu",
+    latitude: 10.7726,
+    longitude: 79.6365,
+  },
+  ranipet: {
+    id: "geo-ranipet",
+    name: "Ranipet",
+    canonicalName: "Ranipet & Walajah Heritage Corridor",
+    slug: "ranipet",
+    entityType: "DISTRICT",
+    district: "Ranipet",
+    state: "Tamil Nadu",
+    latitude: 12.9299,
+    longitude: 79.3326,
+  },
+  tirupathur: {
+    id: "geo-tirupathur",
+    name: "Tirupathur (Yelagiri)",
+    canonicalName: "Tirupathur Yelagiri Hills District",
+    slug: "tirupathur",
+    entityType: "DISTRICT",
+    district: "Tirupathur",
+    state: "Tamil Nadu",
+    latitude: 12.5956,
+    longitude: 78.5684,
+  },
+  kallakurichi: {
+    id: "geo-kallakurichi",
+    name: "Kallakurichi (Kalrayan)",
+    canonicalName: "Kallakurichi Kalrayan Hills District",
+    slug: "kallakurichi",
+    entityType: "DISTRICT",
+    district: "Kallakurichi",
+    state: "Tamil Nadu",
+    latitude: 11.7384,
+    longitude: 78.9632,
+  },
+  chengalpattu: {
+    id: "geo-chengalpattu",
+    name: "Chengalpattu",
+    canonicalName: "Chengalpattu Shore Temple District",
+    slug: "chengalpattu",
+    entityType: "DISTRICT",
+    district: "Chengalpattu",
+    state: "Tamil Nadu",
+    latitude: 12.6841,
+    longitude: 79.9836,
+  },
+  ariyalur: {
+    id: "geo-ariyalur",
+    name: "Ariyalur",
+    canonicalName: "Ariyalur Gangaikonda Cholapuram District",
+    slug: "ariyalur",
+    entityType: "DISTRICT",
+    district: "Ariyalur",
+    state: "Tamil Nadu",
+    latitude: 11.1398,
+    longitude: 79.0768,
+  },
 };
 
 export function getPlacesWithinArea(areaQuery: string): ExplorerPlace[] {
@@ -1826,12 +2244,34 @@ export function searchEntities(query: string): CategorizedSearchResult[] {
     return results;
   }
 
-  const q = query.toLowerCase().trim();
+  const rawQ = query.toLowerCase().trim();
+  // Strip common prefixes or typos e.g. "kachipuram" -> "kanchipuram"
+  const cleanQ = rawQ.replace(/[^a-z0-9]/g, "");
+  const q = rawQ;
   const results: CategorizedSearchResult[] = [];
+  const seenIds = new Set<string>();
 
-  // 1. Check Geographic Areas matching query
+  // 1. Check Geographic Areas matching query (with typo tolerances like kachipuram -> kanchipuram)
   Object.values(GEOGRAPHIC_AREAS).forEach((area) => {
-    if (area.name.toLowerCase().includes(q) || area.canonicalName.toLowerCase().includes(q) || area.slug.includes(q)) {
+    const aName = area.name.toLowerCase();
+    const aCanon = area.canonicalName.toLowerCase();
+    const aSlug = area.slug.toLowerCase();
+    const aClean = aName.replace(/[^a-z0-9]/g, "");
+
+    const isMatch =
+      aName.includes(q) ||
+      aCanon.includes(q) ||
+      aSlug.includes(q) ||
+      aClean.includes(cleanQ) ||
+      (cleanQ.startsWith("kachi") && aName.includes("kanchi")) ||
+      (cleanQ.startsWith("vilu") && aName.includes("vilup")) ||
+      (cleanQ.startsWith("tindi") && aName.includes("tindivanam")) ||
+      (cleanQ.startsWith("nager") && aName.includes("nagercoil")) ||
+      (cleanQ.startsWith("hosur") && aName.includes("hosur")) ||
+      (cleanQ.startsWith("trichy") && (aName.includes("tiruchirappalli") || aName.includes("trichy")));
+
+    if (isMatch && !seenIds.has(area.id)) {
+      seenIds.add(area.id);
       results.push({
         entityType: area.entityType,
         id: area.id,
@@ -1843,13 +2283,19 @@ export function searchEntities(query: string): CategorizedSearchResult[] {
     }
   });
 
-  // 2. Check Specific POIs matching query
+  // 2. Check Specific POIs matching query (name, district, tags, aliases)
   CANONICAL_PLACES.forEach((p) => {
     if (p.placeType === "city") return;
-    const isNameMatch = (p.name || "").toLowerCase().includes(q) || (p.canonicalName || "").toLowerCase().includes(q);
+    const nameLower = (p.name || "").toLowerCase();
+    const canonLower = (p.canonicalName || "").toLowerCase();
+    const distLower = (p.district || "").toLowerCase();
+    const isNameMatch = nameLower.includes(q) || canonLower.includes(q);
+    const isDistMatch = distLower.includes(q) || (cleanQ.length >= 3 && distLower.replace(/[^a-z0-9]/g, "").includes(cleanQ));
     const isTagMatch = (p.tags || []).some((t) => t.toLowerCase().includes(q));
+    const isAliasMatch = (p.aliases || []).some((a) => a.toLowerCase().includes(q));
 
-    if (isNameMatch || isTagMatch) {
+    if ((isNameMatch || isDistMatch || isTagMatch || isAliasMatch) && !seenIds.has(p.id)) {
+      seenIds.add(p.id);
       results.push({
         entityType: "POI",
         id: p.id,
