@@ -3,7 +3,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "motion/react";
 import {
   Compass,
-  Map,
+  Map as MapIcon,
   Search,
   Filter,
   Star,
@@ -979,7 +979,7 @@ function ExploreByExperiencePage() {
             onClick={() => setIsPanelOpen(true)}
             className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950 font-black text-xs shadow-2xl shadow-emerald-500/30 border border-emerald-300 hover:scale-105 transition flex items-center gap-2.5 cursor-pointer"
           >
-            <Map className="size-4" />
+            <MapIcon className="size-4" />
             <span>🗺 My Route · {routeStops.length} {routeStops.length === 1 ? "stop" : "stops"}</span>
           </motion.button>
         )}
