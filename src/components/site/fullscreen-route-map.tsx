@@ -1228,18 +1228,19 @@ export function FullscreenRouteMap({
       {/* 100% Fullscreen Map Container */}
       <div ref={mapContainerRef} className="absolute inset-0 w-full h-full z-0" />
 
+      {/* Permanently Fixed Back to Explorer Button (Moved slightly above) */}
+      <div className="absolute top-2 left-4 z-40 flex items-center gap-2 pointer-events-auto">
+        <button
+          type="button"
+          onClick={onClose}
+          className="flex items-center gap-2 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 hover:border-emerald-500/40 px-3.5 py-2 rounded-full text-xs font-bold text-white shadow-2xl transition cursor-pointer active:scale-95 hover:bg-[#18202c]"
+        >
+          <ArrowRight className="w-4 h-4 rotate-180 text-emerald-400" /> Back to Explorer
+        </button>
+      </div>
+
       {/* Top Header Bar */}
       <header className="absolute top-4 left-4 right-4 z-30 flex flex-wrap items-center justify-between pointer-events-none gap-3">
-        {/* Permanently Fixed Back to Explorer Button */}
-        <div className="flex items-center gap-2 pointer-events-auto">
-          <button
-            type="button"
-            onClick={onClose}
-            className="flex items-center gap-2 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 hover:border-emerald-500/40 px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-2xl transition cursor-pointer active:scale-95 hover:bg-[#18202c]"
-          >
-            <ArrowRight className="w-4 h-4 rotate-180 text-emerald-400" /> Back to Explorer
-          </button>
-        </div>
 
         {/* Top Center: Draggable Plan Custom Route Corridor */}
         <motion.div
