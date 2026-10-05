@@ -1240,163 +1240,181 @@ export function FullscreenRouteMap({
           </button>
         </div>
 
-        {/* Expandable Origin & Destination Header Search Corridor */}
-        <div ref={searchContainerRef} className="relative pointer-events-auto flex-1 max-w-lg flex flex-col gap-2 transition-all duration-300">
-          {/* Top Search Bar: Starting Origin */}
-          <div className="relative">
-            <div className={`flex items-center gap-2 bg-[#121821]/95 backdrop-blur-2xl border px-3.5 py-2 rounded-full shadow-2xl transition-all ${
-              searchFocused === "header-origin" ? "border-emerald-400 ring-1 ring-emerald-400/50" : "border-white/20"
-            }`}>
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 shrink-0" />
-              <input
-                type="text"
-                data-testid="header-start-origin-input"
-                placeholder={selectedOrigin ? `From: ${selectedOrigin.canonicalName || selectedOrigin.name}` : "Enter Start Origin (e.g. Chennai, Madurai)..."}
-                value={headerOriginQuery}
-                onChange={(e) => {
-                  setHeaderOriginQuery(e.target.value);
-                  setSearchFocused("header-origin");
-                }}
-                onFocus={() => setSearchFocused("header-origin")}
-                className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium truncate"
-              />
-              {headerOriginQuery ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    setHeaderOriginQuery("");
-                    setSearchFocused(null);
-                  }}
-                  className="text-slate-400 hover:text-white"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              ) : selectedOrigin ? (
+        {/* Top Center: Plan Custom Route Corridor */}
+        <div ref={searchContainerRef} className="relative pointer-events-auto flex-1 max-w-md w-full mx-auto flex flex-col gap-2 transition-all duration-300">
+          <div className="bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-2xl p-2.5 shadow-2xl space-y-2">
+            <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-300 uppercase px-1">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <Navigation className="w-3.5 h-3.5" />
+                Plan Custom Route
+              </span>
+              {(selectedOrigin || selectedDestination) && (
                 <button
                   type="button"
                   onClick={() => {
                     setSelectedOrigin(null);
+                    setSelectedDestination(null);
+                    setWaypoints([]);
                     setHeaderOriginQuery("");
+                    setHeaderDestQuery("");
+                    setOriginQuery("");
+                    setDestinationQuery("");
+                    toast.info("Cleared route points");
                   }}
-                  title="Clear start origin"
-                  className="text-slate-400 hover:text-rose-400 p-0.5"
+                  className="text-slate-400 hover:text-rose-400 text-[10px] font-bold cursor-pointer transition"
                 >
-                  <X className="w-3.5 h-3.5" />
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={handleUseCurrentLocation}
-                  title="Use My Live GPS Location"
-                  className="text-emerald-400 hover:text-emerald-300 shrink-0 p-0.5"
-                >
-                  <LocateFixed className={`w-3.5 h-3.5 ${geoLocating ? "animate-spin" : ""}`} />
+                  Clear
                 </button>
               )}
             </div>
 
-            {/* Starting Origin Dropdown Suggestions */}
-            {searchFocused === "header-origin" && headerOriginQuery.trim() && (
-              <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-72 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
-                {searchEntities(headerOriginQuery).length === 0 ? (
-                  <div className="p-3 text-xs text-slate-400 text-center">No origin found matching '{headerOriginQuery}'</div>
+            {/* Starting Origin Input */}
+            <div className="relative">
+              <div className={`flex items-center gap-2 bg-white/5 border rounded-xl px-2.5 py-1.5 transition ${
+                searchFocused === "header-origin" ? "border-emerald-400 ring-1 ring-emerald-400/40" : "border-white/15"
+              }`}>
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 shrink-0" />
+                <input
+                  type="text"
+                  data-testid="header-start-origin-input"
+                  placeholder={selectedOrigin ? (selectedOrigin.canonicalName || selectedOrigin.name) : "Enter Start Origin (e.g. Chennai, Madurai)..."}
+                  value={headerOriginQuery}
+                  onChange={(e) => {
+                    setHeaderOriginQuery(e.target.value);
+                    setSearchFocused("header-origin");
+                  }}
+                  onFocus={() => setSearchFocused("header-origin")}
+                  className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium truncate"
+                />
+                {headerOriginQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeaderOriginQuery("");
+                      setSearchFocused(null);
+                    }}
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : selectedOrigin ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedOrigin(null);
+                      setHeaderOriginQuery("");
+                    }}
+                    title="Clear start origin"
+                    className="text-slate-400 hover:text-rose-400 p-0.5"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
                 ) : (
-                  searchEntities(headerOriginQuery).map((item) => {
-                    const targetPlace: ExplorerPlace | null = item.place || (item.area ? {
-                      id: item.area.id,
-                      canonicalName: item.area.name,
-                      name: item.area.name,
-                      slug: item.area.slug,
-                      district: item.area.district,
-                      state: "Tamil Nadu",
-                      country: "India",
-                      latitude: item.area.latitude,
-                      longitude: item.area.longitude,
-                      categories: ["all"],
-                      primaryCategory: "all",
-                      verified: true,
-                    } : null);
-
-                    if (!targetPlace) return null;
-
-                    return (
-                      <button
-                        type="button"
-                        key={item.id}
-                        data-testid="header-origin-option"
-                        onClick={() => {
-                          setSelectedOrigin(targetPlace);
-                          setHeaderOriginQuery("");
-                          setSearchFocused("header-destination"); // Cascade straight into entering destination
-                          toast.success(`Starting origin set to ${targetPlace.canonicalName || targetPlace.name} 📍 Now enter destination!`);
-                        }}
-                        className="w-full text-left p-2 rounded-xl hover:bg-emerald-500/20 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-emerald-500/40 cursor-pointer pointer-events-auto"
-                      >
-                        <div className="flex items-center gap-2 truncate">
-                          <span className="text-sm">📍</span>
-                          <span className="font-bold truncate text-[11px]">{item.name}</span>
-                          <span className="text-[10px] text-slate-400 truncate">{item.sublabel}</span>
-                        </div>
-                        <span className="text-[9px] text-emerald-400 font-bold shrink-0">+ Set Origin</span>
-                      </button>
-                    );
-                  })
+                  <button
+                    type="button"
+                    onClick={handleUseCurrentLocation}
+                    title="Use My Live GPS Location"
+                    className="text-emerald-400 hover:text-emerald-300 shrink-0 p-0.5"
+                  >
+                    <LocateFixed className={`w-3.5 h-3.5 ${geoLocating ? "animate-spin" : ""}`} />
+                  </button>
                 )}
               </div>
-            )}
-          </div>
 
-          {/* Cascading Second Search Bar: Appears automatically when Start Origin is chosen */}
-          <AnimatePresence>
-            {selectedOrigin && (
-              <motion.div
-                initial={{ opacity: 0, y: -10, height: 0 }}
-                animate={{ opacity: 1, y: 0, height: "auto" }}
-                exit={{ opacity: 0, y: -10, height: 0 }}
-                transition={{ duration: 0.25, ease: "easeOut" }}
-                className="relative overflow-visible pointer-events-auto"
-              >
-                <div className={`flex items-center gap-2 bg-[#121821]/95 backdrop-blur-2xl border px-3.5 py-2 rounded-full shadow-2xl transition-all ${
-                  searchFocused === "header-destination" ? "border-sky-400 ring-1 ring-sky-400/50" : "border-white/20"
-                }`}>
-                  <span className="w-2.5 h-2.5 rounded-full bg-sky-400 ring-2 ring-sky-400/30 shrink-0" />
-                  <input
-                    type="text"
-                    data-testid="header-destination-input"
-                    placeholder={selectedDestination ? `To: ${selectedDestination.canonicalName || selectedDestination.name}` : "Where to? Enter Destination (e.g. Kanyakumari, Ooty)..."}
-                    value={headerDestQuery}
-                    onChange={(e) => {
-                      setHeaderDestQuery(e.target.value);
-                      setSearchFocused("header-destination");
+              {/* Starting Origin Dropdown Suggestions */}
+              {searchFocused === "header-origin" && headerOriginQuery.trim() && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+                  {searchEntities(headerOriginQuery).length === 0 ? (
+                    <div className="p-3 text-xs text-slate-400 text-center">No origin found matching '{headerOriginQuery}'</div>
+                  ) : (
+                    searchEntities(headerOriginQuery).map((item) => {
+                      const targetPlace: ExplorerPlace | null = item.place || (item.area ? {
+                        id: item.area.id,
+                        canonicalName: item.area.name,
+                        name: item.area.name,
+                        slug: item.area.slug,
+                        district: item.area.district,
+                        state: "Tamil Nadu",
+                        country: "India",
+                        latitude: item.area.latitude,
+                        longitude: item.area.longitude,
+                        categories: ["all"],
+                        primaryCategory: "all",
+                        verified: true,
+                      } : null);
+
+                      if (!targetPlace) return null;
+
+                      return (
+                        <button
+                          type="button"
+                          key={item.id}
+                          data-testid="header-origin-option"
+                          onClick={() => {
+                            setSelectedOrigin(targetPlace);
+                            setHeaderOriginQuery("");
+                            setSearchFocused("header-destination"); // Smoothly jump to destination input
+                            toast.success(`Starting origin set to ${targetPlace.canonicalName || targetPlace.name} 📍`);
+                          }}
+                          className="w-full text-left p-2 rounded-xl hover:bg-emerald-500/20 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-emerald-500/40 cursor-pointer pointer-events-auto"
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="text-sm">📍</span>
+                            <span className="font-bold truncate text-[11px]">{item.name}</span>
+                            <span className="text-[10px] text-slate-400 truncate">{item.sublabel}</span>
+                          </div>
+                          <span className="text-[9px] text-emerald-400 font-bold shrink-0">+ Set Origin</span>
+                        </button>
+                      );
+                    })
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* End Destination Input with Swap Button */}
+            <div className="relative">
+              <div className={`flex items-center gap-2 bg-white/5 border rounded-xl px-2.5 py-1.5 transition ${
+                searchFocused === "header-destination" ? "border-sky-400 ring-1 ring-sky-400/40" : "border-white/15"
+              }`}>
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 ring-2 ring-sky-400/30 shrink-0" />
+                <input
+                  type="text"
+                  data-testid="header-destination-input"
+                  placeholder={selectedDestination ? (selectedDestination.canonicalName || selectedDestination.name) : "Enter End Destination (e.g. Kanyakumari, Ooty)..."}
+                  value={headerDestQuery}
+                  onChange={(e) => {
+                    setHeaderDestQuery(e.target.value);
+                    setSearchFocused("header-destination");
+                  }}
+                  onFocus={() => setSearchFocused("header-destination")}
+                  className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium truncate"
+                />
+                {headerDestQuery ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setHeaderDestQuery("");
+                      setSearchFocused(null);
                     }}
-                    onFocus={() => setSearchFocused("header-destination")}
-                    autoFocus={!selectedDestination}
-                    className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium truncate"
-                  />
-                  {headerDestQuery ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setHeaderDestQuery("");
-                        setSearchFocused(null);
-                      }}
-                      className="text-slate-400 hover:text-white"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  ) : selectedDestination ? (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSelectedDestination(null);
-                        setHeaderDestQuery("");
-                      }}
-                      title="Clear destination"
-                      className="text-slate-400 hover:text-rose-400 p-0.5"
-                    >
-                      <X className="w-3.5 h-3.5" />
-                    </button>
-                  ) : selectedOrigin && selectedDestination && (
+                    className="text-slate-400 hover:text-white"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : selectedDestination ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSelectedDestination(null);
+                      setHeaderDestQuery("");
+                    }}
+                    title="Clear destination"
+                    className="text-slate-400 hover:text-rose-400 p-0.5"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                ) : (
+                  selectedOrigin && (
                     <button
                       type="button"
                       onClick={() => {
@@ -1410,61 +1428,61 @@ export function FullscreenRouteMap({
                     >
                       <ArrowUpDown className="w-3.5 h-3.5" />
                     </button>
+                  )
+                )}
+              </div>
+
+              {/* Destination Dropdown Suggestions */}
+              {searchFocused === "header-destination" && headerDestQuery.trim() && (
+                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+                  {searchEntities(headerDestQuery).length === 0 ? (
+                    <div className="p-3 text-xs text-slate-400 text-center">No destination found matching '{headerDestQuery}'</div>
+                  ) : (
+                    searchEntities(headerDestQuery).map((item) => {
+                      const targetPlace: ExplorerPlace | null = item.place || (item.area ? {
+                        id: item.area.id,
+                        canonicalName: item.area.name,
+                        name: item.area.name,
+                        slug: item.area.slug,
+                        district: item.area.district,
+                        state: "Tamil Nadu",
+                        country: "India",
+                        latitude: item.area.latitude,
+                        longitude: item.area.longitude,
+                        categories: ["all"],
+                        primaryCategory: "all",
+                        verified: true,
+                      } : null);
+
+                      if (!targetPlace) return null;
+
+                      return (
+                        <button
+                          type="button"
+                          key={item.id}
+                          data-testid="header-destination-option"
+                          onClick={() => {
+                            setSelectedDestination(targetPlace);
+                            setHeaderDestQuery("");
+                            setSearchFocused(null);
+                            toast.success(`Destination set to ${targetPlace.canonicalName || targetPlace.name} 🎯 Route calculated!`);
+                          }}
+                          className="w-full text-left p-2 rounded-xl hover:bg-sky-500/20 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-sky-500/40 cursor-pointer pointer-events-auto"
+                        >
+                          <div className="flex items-center gap-2 truncate">
+                            <span className="text-sm">🎯</span>
+                            <span className="font-bold truncate text-[11px]">{item.name}</span>
+                            <span className="text-[10px] text-slate-400 truncate">{item.sublabel}</span>
+                          </div>
+                          <span className="text-[9px] text-sky-400 font-bold shrink-0">+ Set Destination</span>
+                        </button>
+                      );
+                    })
                   )}
                 </div>
-
-                {/* Destination Dropdown Suggestions */}
-                {searchFocused === "header-destination" && headerDestQuery.trim() && (
-                  <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-72 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
-                    {searchEntities(headerDestQuery).length === 0 ? (
-                      <div className="p-3 text-xs text-slate-400 text-center">No destination found matching '{headerDestQuery}'</div>
-                    ) : (
-                      searchEntities(headerDestQuery).map((item) => {
-                        const targetPlace: ExplorerPlace | null = item.place || (item.area ? {
-                          id: item.area.id,
-                          canonicalName: item.area.name,
-                          name: item.area.name,
-                          slug: item.area.slug,
-                          district: item.area.district,
-                          state: "Tamil Nadu",
-                          country: "India",
-                          latitude: item.area.latitude,
-                          longitude: item.area.longitude,
-                          categories: ["all"],
-                          primaryCategory: "all",
-                          verified: true,
-                        } : null);
-
-                        if (!targetPlace) return null;
-
-                        return (
-                          <button
-                            type="button"
-                            key={item.id}
-                            data-testid="header-destination-option"
-                            onClick={() => {
-                              setSelectedDestination(targetPlace);
-                              setHeaderDestQuery("");
-                              setSearchFocused(null);
-                              toast.success(`Destination set to ${targetPlace.canonicalName || targetPlace.name} 🎯 Route calculated!`);
-                            }}
-                            className="w-full text-left p-2 rounded-xl hover:bg-sky-500/20 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-sky-500/40 cursor-pointer pointer-events-auto"
-                          >
-                            <div className="flex items-center gap-2 truncate">
-                              <span className="text-sm">🎯</span>
-                              <span className="font-bold truncate text-[11px]">{item.name}</span>
-                              <span className="text-[10px] text-slate-400 truncate">{item.sublabel}</span>
-                            </div>
-                            <span className="text-[9px] text-sky-400 font-bold shrink-0">+ Set Destination</span>
-                          </button>
-                        );
-                      })
-                    )}
-                  </div>
-                )}
-              </motion.div>
-            )}
-          </AnimatePresence>
+              )}
+            </div>
+          </div>
         </div>
 
         {/* Travel Mode Selector (Drive, Train, Bus, Flight, Bike) */}
