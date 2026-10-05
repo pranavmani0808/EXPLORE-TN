@@ -28,7 +28,7 @@ import { AppShell } from "@/components/site/app-shell";
 import { PlaceCard } from "@/components/site/place-card";
 import { Button } from "@/components/ui/button";
 import { getPlace, places, type Place } from "@/data/places";
-import { recordPlaceVisit, getUserVisits, submitCommunityContribution } from "@/lib/explorer-activity";
+import { recordPlaceVisit, getUserVisits, submitCommunityContribution, getCommunityContributions } from "@/lib/explorer-activity";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { getApiBaseUrl } from "@/lib/api-client/config";
 import { LiveDestinationIntelligencePanel } from "@/components/site/live-destination-intelligence-panel";
