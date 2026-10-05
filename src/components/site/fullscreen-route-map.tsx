@@ -290,6 +290,7 @@ export function FullscreenRouteMap({
   const polylineGroupRef = useRef<any>(null);
   const activeRequestIdRef = useRef<string>("");
   const [hoveredPlaceId, setHoveredPlaceId] = useState<string | null>(null);
+  const [hoveredPlace, setHoveredPlace] = useState<ExplorerPlace | null>(null);
 
   // Derived list of places in current scope & category filter
   const placesInScope = useMemo(() => {
@@ -869,6 +870,21 @@ export function FullscreenRouteMap({
             opacity: 0.95,
           }).addTo(polylineGroup);
           activeTransitOption.routePolyline.forEach((pt) => bounds.extend(pt));
+        } else if (stops.length > 1) {
+          // Direct fallback connecting stops so the route line is ALWAYS visible on the map
+          const fallbackPoints: [number, number][] = stops.map((s) => [s.latitude, s.longitude]);
+          L.polyline(fallbackPoints, {
+            color: "#0f172a",
+            weight: 7,
+            opacity: 0.85,
+          }).addTo(polylineGroup);
+          L.polyline(fallbackPoints, {
+            color: routeColor,
+            weight: 5,
+            dashArray: "6, 6",
+            opacity: 0.95,
+          }).addTo(polylineGroup);
+          fallbackPoints.forEach((pt) => bounds.extend(pt));
         }
       }
 
@@ -1143,12 +1159,13 @@ export function FullscreenRouteMap({
     renderMapElements();
   }, [mapScope, placesInScope, stops, segmentData, selectedStopIndex, travelMode, activeTransitOption, multiModalData]);
 
-  // Sidebar hover → highlight marker on map
+  // Sidebar hover → highlight marker on map & update bottom-right preview
   const handleSidebarHover = (place: ExplorerPlace | null) => {
     const L = leafletModuleRef.current;
     if (!L) return;
 
     setHoveredPlaceId(place?.id ?? null);
+    setHoveredPlace(place ?? null);
 
     if (place) {
       const marker = markersByIdRef.current[place.id];
@@ -2416,6 +2433,88 @@ export function FullscreenRouteMap({
           )}
         </div>
       </motion.aside>
+
+      {/* Bottom Right Hovered Place Details Preview Card */}
+      <AnimatePresence>
+        {hoveredPlace && (
+          <motion.div
+            initial={{ opacity: 0, y: 15, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 10, scale: 0.95 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="absolute right-20 bottom-6 z-40 w-80 max-w-[calc(100vw-6rem)] p-3.5 rounded-2xl bg-[#0f172a]/95 backdrop-blur-xl border border-amber-500/40 shadow-2xl shadow-black/80 text-white pointer-events-auto"
+          >
+            <div className="flex items-start justify-between gap-2 mb-1.5">
+              <div className="flex items-center gap-1.5 min-w-0">
+                <span className="text-base shrink-0">
+                  {hoveredPlace.primaryCategory === "temples"
+                    ? "🛕"
+                    : hoveredPlace.primaryCategory === "waterfalls"
+                    ? "💧"
+                    : hoveredPlace.primaryCategory === "beaches"
+                    ? "🏖️"
+                    : hoveredPlace.primaryCategory === "heritage"
+                    ? "🏛️"
+                    : hoveredPlace.primaryCategory === "hills"
+                    ? "⛰️"
+                    : hoveredPlace.primaryCategory === "food"
+                    ? "🍲"
+                    : "📍"}
+                </span>
+                <div className="min-w-0">
+                  <h4 className="font-bold text-sm text-amber-300 truncate leading-tight">
+                    {hoveredPlace.canonicalName || hoveredPlace.name}
+                  </h4>
+                  <span className="text-[10px] text-slate-400 block truncate">
+                    {hoveredPlace.district} District
+                    {"detourKm" in hoveredPlace && (hoveredPlace as any).detourKm !== undefined
+                      ? ` · +${(hoveredPlace as any).detourKm}km detour`
+                      : ""}
+                  </span>
+                </div>
+              </div>
+
+              {"detourKm" in hoveredPlace && (hoveredPlace as any).detourKm !== undefined && (
+                <span className="text-[9px] font-mono font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 shrink-0">
+                  +{(hoveredPlace as any).detourKm} km
+                </span>
+              )}
+            </div>
+
+            <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed mb-3">
+              {hoveredPlace.tagline || hoveredPlace.description}
+            </p>
+
+            <div className="flex items-center gap-2 pt-2 border-t border-white/10">
+              <button
+                type="button"
+                onClick={() => handleFocusCorridorPlace(hoveredPlace)}
+                className="flex-1 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-slate-200 text-xs font-bold transition flex items-center justify-center gap-1"
+              >
+                <span>🔍 Zoom to Pin</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!waypoints.some((w) => w.id === hoveredPlace.id)) {
+                    setWaypoints((prev) => [...prev, hoveredPlace]);
+                    toast.success(`Added ${hoveredPlace.name} to route stops 📍`);
+                  } else {
+                    handleRemoveRecommendedStop(hoveredPlace.id);
+                  }
+                }}
+                className={`flex-1 py-1.5 rounded-xl text-xs font-extrabold transition flex items-center justify-center gap-1 ${
+                  waypoints.some((w) => w.id === hoveredPlace.id)
+                    ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
+                    : "bg-emerald-500 hover:bg-emerald-400 text-black shadow-md shadow-emerald-500/25"
+                }`}
+              >
+                {waypoints.some((w) => w.id === hoveredPlace.id) ? "✓ Added" : "+ Add Stop"}
+              </button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Floating Controls (Zoom & Location) - Draggable */}
       <motion.div

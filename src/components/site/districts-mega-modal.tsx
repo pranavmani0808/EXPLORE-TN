@@ -330,7 +330,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                     placeholder={lang === "ta" ? "இடங்களைத் தேடுக..." : "Search spot, district, tags..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-xl border border-zinc-700 bg-zinc-900/90 pl-9 pr-7 py-1.5 min-h-[36px] text-xs text-white placeholder-zinc-400 focus:border-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 transition"
+                    className="w-full rounded-full border border-zinc-800 bg-zinc-900/80 pl-9 pr-7 py-1.5 min-h-[36px] text-xs text-white placeholder-zinc-500 focus:border-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-600 transition"
                   />
                   {searchQuery && (
                     <button
