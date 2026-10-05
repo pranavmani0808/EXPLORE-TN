@@ -224,7 +224,8 @@ export function ThingsToDoSection() {
           {ICONIC_ATTRACTIONS.map((attraction) => (
             <Link
               key={attraction.id}
-              to="/explore"
+              to="/place/$slug"
+              params={{ slug: attraction.slug }}
               className="group flex-shrink-0 w-[260px] sm:w-[280px] md:w-[310px] snap-start focus:outline-none"
             >
               <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-emerald-500/50 group-hover:shadow-2xl">

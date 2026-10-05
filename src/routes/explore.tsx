@@ -251,6 +251,8 @@ export function getLiveCategoryTiles(): CategoryTile[] {
   return Array.from(baseMap.values());
 }
 
+export const CATEGORY_TILES: CategoryTile[] = BASE_CATEGORY_TILES;
+
 const TN_DISTRICTS = [
   "All Districts",
   "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
