@@ -32,6 +32,7 @@ import { Button } from "@/components/ui/button";
 import { places } from "@/data/places";
 import { KolamDivider } from "@/components/site/kolam-divider";
 import { PeakTravelGuide } from "@/components/site/peak-travel-guide";
+import { ThingsToDoSection } from "@/components/site/things-to-do-section";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -274,6 +275,11 @@ function Index() {
           </div>
         </div>
       </section>
+
+      <KolamDivider />
+
+      {/* NEW: THINGS TO DO WHEREVER YOU'RE GOING & ATTRACTIONS YOU CAN'T MISS */}
+      <ThingsToDoSection />
 
       <KolamDivider />
 
