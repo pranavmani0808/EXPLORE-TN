@@ -878,37 +878,44 @@ export function FullscreenRouteMap({
           bounds.extend([poi.latitude, poi.longitude]);
 
           const isAlreadyWaypoint = waypoints.some((w) => w.id === poi.id);
+          const categoryColor =
+            poi.primaryCategory === "temples" ? "#f59e0b" :
+            poi.primaryCategory === "waterfalls" ? "#38bdf8" :
+            poi.primaryCategory === "beaches" ? "#06b6d4" :
+            poi.primaryCategory === "heritage" ? "#a78bfa" :
+            poi.primaryCategory === "hills" ? "#4ade80" :
+            poi.primaryCategory === "food" ? "#fb923c" :
+            "#f59e0b";
+
+          // Sleek route point dot marker (clean point effect, avoids clumsy text labels across the route corridor)
           const corridorPin = L.divIcon({
-            className: `custom-corridor-pin-${poi.id}`,
+            className: `custom-corridor-point-${poi.id}`,
             html: `
-              <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+              <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
+                <span style="position: absolute; width: 22px; height: 22px; border-radius: 50%; background: ${isAlreadyWaypoint ? 'rgba(16,185,129,0.35)' : 'rgba(245,158,11,0.25)'}; animation: ping 2s cubic-bezier(0, 0, 0.2, 1) infinite;"></span>
                 <div style="
-                  background: ${isAlreadyWaypoint ? '#10b981' : '#1e293b'};
-                  color: #ffffff;
-                  border: 1.5px solid ${isAlreadyWaypoint ? '#6ee7b7' : '#f59e0b'};
-                  font-size: 10px;
-                  font-weight: 700;
-                  padding: 2px 7px;
-                  border-radius: 9999px;
-                  box-shadow: 0 3px 10px rgba(0,0,0,0.6);
-                  white-space: nowrap;
+                  width: 14px;
+                  height: 14px;
+                  border-radius: 50%;
+                  background: ${isAlreadyWaypoint ? '#10b981' : categoryColor};
+                  border: 2px solid #ffffff;
+                  box-shadow: 0 0 0 2px ${isAlreadyWaypoint ? 'rgba(16,185,129,0.7)' : 'rgba(245,158,11,0.6)'}, 0 2px 8px rgba(0,0,0,0.6);
                   display: flex;
                   align-items: center;
-                  gap: 3px;
+                  justify-content: center;
+                  transition: transform 0.2s ease;
                 ">
-                  <span>${poi.primaryCategory === 'temples' ? '🛕' : poi.primaryCategory === 'waterfalls' ? '💧' : poi.primaryCategory === 'hills' ? '⛰️' : '📍'}</span>
-                  <span>${poi.canonicalName || poi.name}</span>
-                  <span style="font-size: 8px; color: #fef08a; background: rgba(234,179,8,0.25); padding: 1px 4px; border-radius: 4px;">+${poi.detourKm}km</span>
+                  <div style="width: 4px; height: 4px; border-radius: 50%; background: #ffffff;"></div>
                 </div>
               </div>
             `,
-            iconSize: [110, 24],
-            iconAnchor: [55, 12],
+            iconSize: [24, 24],
+            iconAnchor: [12, 12],
           });
 
           const poiMarker = L.marker([poi.latitude, poi.longitude], {
             icon: corridorPin,
-            zIndexOffset: 500,
+            zIndexOffset: 600,
           }).addTo(map);
 
           poiMarker.bindPopup(`
