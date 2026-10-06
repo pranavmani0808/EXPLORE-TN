@@ -107,6 +107,9 @@ export function DistrictView({ district }: DistrictViewProps) {
 
   // Helper to convert DistrictSpot to Place for the rich details modal
   const handleOpenSpotModal = (spot: DistrictSpot) => {
+    const lat = typeof spot.latitude === "number" ? spot.latitude : (spot as any)?.coordinates?.lat || 0;
+    const lng = typeof spot.longitude === "number" ? spot.longitude : (spot as any)?.coordinates?.lng || 0;
+
     const modalPlace: Place = {
       slug: spot.id,
       name: spot.name,
@@ -121,7 +124,7 @@ export function DistrictView({ district }: DistrictViewProps) {
       bestSeason: "Year-round",
       roadCondition: "Paved and accessible",
       parking: "Available",
-      entryFee: spot.price || "Free",
+      entryFee: (spot as any).price || "Free",
       timings: spot.timings || "Open Daily",
       safety: "Standard travel safety precautions apply",
       weather: "Pleasant",
@@ -130,9 +133,9 @@ export function DistrictView({ district }: DistrictViewProps) {
       nearbyFuel: ["District Central Fuel Station"],
       x: 50,
       y: 50,
-      coords: [spot.coordinates.lat, spot.coordinates.lng],
-      latitude: spot.coordinates.lat,
-      longitude: spot.coordinates.lng,
+      coords: [lat, lng],
+      latitude: lat,
+      longitude: lng,
     };
     setSelectedModalPlace(modalPlace);
     setIsModalOpen(true);
@@ -215,7 +218,7 @@ export function DistrictView({ district }: DistrictViewProps) {
         { label: "Heritage View", color: "#10b981", imageFilter: "sepia(0.2) contrast(1.05)" },
       ],
     }));
-  }, [district.spots]);
+  }, [dynamicSpots]);
 
   // GSAP Entrance & Scroll Animations (Instant text readability & no scroll delays)
   useGSAP(
@@ -237,13 +240,14 @@ export function DistrictView({ district }: DistrictViewProps) {
   const handleSpotFocus = (spot: DistrictSpot) => {
     setActiveSpotId(spot.id);
 
-    // Pulse animation on map element when focused
-    const mapElem = document.getElementById("sticky-district-map");
-    if (mapElem) {
+    // Smoothly scroll the map into viewport so user clearly sees the focused spot
+    const mapSection = document.getElementById("district-map-section");
+    if (mapSection) {
+      mapSection.scrollIntoView({ behavior: "smooth", block: "nearest" });
       gsap.fromTo(
-        mapElem,
-        { scale: 0.99 },
-        { scale: 1, duration: 0.4, ease: "power2.out" }
+        mapSection,
+        { scale: 0.985 },
+        { scale: 1, duration: 0.35, ease: "power2.out" }
       );
     }
   };
