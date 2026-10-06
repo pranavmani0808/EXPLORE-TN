@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { CANONICAL_PLACES, ExplorerPlace, PlaceCategory } from "@/lib/data/canonical-places";
-import { SUPPORTED_ORIGINS, getPlacesForOrigin, TravelOriginCity } from "@/lib/data/travel-origins";
+import { SUPPORTED_ORIGINS, PRIMARY_HUB_ORIGINS, getPlacesForOrigin, TravelOriginCity } from "@/lib/data/travel-origins";
 import {
   MapPin,
   Clock,
@@ -150,13 +150,37 @@ export const RegionalTravelDiscovery: React.FC<RegionalTravelDiscoveryProps> = (
               <select
                 value={selectedOriginId}
                 onChange={(e) => setSelectedOriginId(e.target.value)}
-                className="bg-transparent text-emerald-300 font-extrabold text-base sm:text-lg focus:outline-none cursor-pointer"
+                className="bg-transparent text-emerald-300 font-extrabold text-base sm:text-lg focus:outline-none cursor-pointer max-w-[280px] sm:max-w-md truncate"
               >
-                {Object.values(SUPPORTED_ORIGINS).map((origin) => (
-                  <option key={origin.id} value={origin.id} className="bg-[#121821] text-white">
-                    📍 {origin.name}
-                  </option>
-                ))}
+                <optgroup label="🌟 Major Travel Hubs" className="bg-[#121821] text-amber-400 font-bold">
+                  {Object.values(PRIMARY_HUB_ORIGINS).map((origin) => (
+                    <option key={origin.id} value={origin.id} className="bg-[#121821] text-white">
+                      📍 {origin.name}
+                    </option>
+                  ))}
+                </optgroup>
+
+                <optgroup label="🏛️ 38 Tamil Nadu Districts" className="bg-[#121821] text-emerald-400 font-bold">
+                  {Object.values(SUPPORTED_ORIGINS)
+                    .filter((o) => !PRIMARY_HUB_ORIGINS[o.id] && o.canonicalName.includes("District"))
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((origin) => (
+                      <option key={origin.id} value={origin.id} className="bg-[#121821] text-white">
+                        📍 {origin.name} District
+                      </option>
+                    ))}
+                </optgroup>
+
+                <optgroup label="🏔️ Towns, Hill Stations & Places" className="bg-[#121821] text-sky-400 font-bold">
+                  {Object.values(SUPPORTED_ORIGINS)
+                    .filter((o) => !PRIMARY_HUB_ORIGINS[o.id] && !o.canonicalName.includes("District"))
+                    .sort((a, b) => a.name.localeCompare(b.name))
+                    .map((origin) => (
+                      <option key={origin.id} value={origin.id} className="bg-[#121821] text-white">
+                        📍 {origin.name}
+                      </option>
+                    ))}
+                </optgroup>
               </select>
             </div>
           </h2>
@@ -209,7 +233,7 @@ export const RegionalTravelDiscovery: React.FC<RegionalTravelDiscoveryProps> = (
           {/* Quick Origin Pickers */}
           <div className="flex items-center gap-1 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
             <span className="text-[11px] text-gray-400 font-semibold whitespace-nowrap">Origin:</span>
-            {Object.values(SUPPORTED_ORIGINS).map((origin) => (
+            {Object.values(PRIMARY_HUB_ORIGINS).map((origin) => (
               <button
                 key={origin.id}
                 onClick={() => setSelectedOriginId(origin.id)}

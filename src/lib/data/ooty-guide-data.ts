@@ -363,7 +363,7 @@ export const OOTY_MUST_VISIT_PLACES: OotyMustVisitPlace[] = [
     bestTime: "Morning 07:30 AM – 10:30 AM",
     rating: 4.8,
     reviewsCount: 42000,
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/c/c1/Botanical_Gardens_-_Ootacamund_%28Ooty%29_-_India_03.JPG",
     highlights: ["100+ Year Old Heritage Garden", "20-Million-Year Petrified Fossil Tree Trunk", "Italian Geometric Flower Terraces"],
     verified: true
   },
@@ -468,7 +468,7 @@ export const OOTY_MUST_VISIT_PLACES: OotyMustVisitPlace[] = [
     bestTime: "10:00 AM – 04:00 PM",
     rating: 4.7,
     reviewsCount: 24500,
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=80",
     highlights: ["Live Chocolate & Tea Tasting", "Live CTC Factory Tour", "Steep Tea Garden Viewpoints"],
     verified: true
   },
@@ -657,7 +657,7 @@ export const OOTY_MUST_VISIT_PLACES: OotyMustVisitPlace[] = [
     bestTime: "Morning 09:00 AM – 11:30 AM",
     rating: 4.8,
     reviewsCount: 12500,
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1200&q=80",
     highlights: ["40-Foot Golden Murugan Statue (Batu Caves Replica)", "300 Scenic Hill Steps", "Panoramic 360° Valley Views", "Grand Thaipusam Celebrations"],
     verified: true
   },
@@ -783,7 +783,7 @@ export const OOTY_MUST_VISIT_PLACES: OotyMustVisitPlace[] = [
     bestTime: "09:00 AM – 01:00 PM (May Fruit Show is iconic)",
     rating: 4.8,
     reviewsCount: 28400,
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80",
     highlights: ["Annual May Fruit Show", "Rare Japanese Cherry & Maples", "Natural Valley Contours & Boating Pond"],
     verified: true
   },
@@ -846,7 +846,7 @@ export const OOTY_MUST_VISIT_PLACES: OotyMustVisitPlace[] = [
     bestTime: "10:00 AM – 03:30 PM",
     rating: 4.6,
     reviewsCount: 4900,
-    image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80",
+    image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=80",
     highlights: ["Mandarin Orange Orchards", "Exotic Mangosteen & Spices", "Historic 1871 State Fruit Station"],
     verified: true
   },

@@ -11,7 +11,9 @@ export interface TravelOriginCity {
   popularRegions: string[];
 }
 
-export const SUPPORTED_ORIGINS: Record<string, TravelOriginCity> = {
+import { TAMIL_NADU_DISTRICTS } from "./districts";
+
+export const PRIMARY_HUB_ORIGINS: Record<string, TravelOriginCity> = {
   coimbatore: {
     id: "coimbatore",
     name: "Coimbatore",
@@ -91,6 +93,57 @@ export const SUPPORTED_ORIGINS: Record<string, TravelOriginCity> = {
 };
 
 /**
+ * Compiles all available origin places across Tamil Nadu:
+ * 1. Primary flagship travel hubs
+ * 2. All 38 Tamil Nadu districts
+ * 3. All individual canonical destinations, hill stations, and heritage towns
+ */
+function buildAllSupportedOrigins(): Record<string, TravelOriginCity> {
+  const result: Record<string, TravelOriginCity> = { ...PRIMARY_HUB_ORIGINS };
+
+  // 1. Add all 38 districts as origin hubs
+  for (const [key, d] of Object.entries(TAMIL_NADU_DISTRICTS)) {
+    const normKey = key.toLowerCase();
+    if (!result[normKey]) {
+      const cleanName = d.name.replace(/ District/i, "").trim();
+      result[normKey] = {
+        id: normKey,
+        name: cleanName,
+        canonicalName: `${cleanName} District & Region`,
+        state: "Tamil Nadu",
+        latitude: d.centerCoords[0],
+        longitude: d.centerCoords[1],
+        tagline: d.tagline || `Gateway to ${cleanName} & Surrounding Tamil Nadu Trails`,
+        popularRegions: [d.name]
+      };
+    }
+  }
+
+  // 2. Add all canonical destinations as origin start places
+  for (const p of CANONICAL_PLACES) {
+    if (p.latitude && p.longitude && p.name) {
+      const slug = (p.slug || p.id).toLowerCase();
+      if (!result[slug]) {
+        result[slug] = {
+          id: slug,
+          name: p.name,
+          canonicalName: p.canonicalName || p.name,
+          state: "Tamil Nadu",
+          latitude: p.latitude,
+          longitude: p.longitude,
+          tagline: p.tagline || `Travel routes starting from ${p.name}`,
+          popularRegions: [p.district]
+        };
+      }
+    }
+  }
+
+  return result;
+}
+
+export const SUPPORTED_ORIGINS: Record<string, TravelOriginCity> = buildAllSupportedOrigins();
+
+/**
  * Calculates straight-line distance in kilometers using the Haversine formula
  */
 export function calculateHaversineKm(
@@ -123,9 +176,12 @@ export function getPlacesForOrigin(
   
   return placesList
     .filter((place) => {
+      // Don't show place itself as a destination to its own origin
+      if (place.slug?.toLowerCase() === originId || place.id?.toLowerCase() === originId) return false;
       if (place.travelOrigins && place.travelOrigins.includes(originId)) return true;
       const dist = calculateHaversineKm(origin.latitude, origin.longitude, place.latitude, place.longitude);
-      return dist <= 300;
+      // Accessible distance within Tamil Nadu travel range
+      return dist <= 380;
     })
     .map((place) => {
       const dist = calculateHaversineKm(origin.latitude, origin.longitude, place.latitude, place.longitude);
