@@ -462,7 +462,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
           {/* Saved Places */}
           <Link
-            to="/profile"
+            to="/saved"
             className="hidden sm:flex items-center justify-center size-10 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:border-zinc-700 transition shrink-0"
             title={lang === "ta" ? "சேமித்த இடங்கள்" : "Saved Places"}
           >

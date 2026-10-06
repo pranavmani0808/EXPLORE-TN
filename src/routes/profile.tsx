@@ -20,6 +20,8 @@ import {
   RefreshCw,
   AlertCircle,
   LayoutDashboard,
+  Trash2,
+  Navigation,
 } from "lucide-react";
 import { motion } from "motion/react";
 import { AppShell } from "@/components/site/app-shell";
@@ -30,6 +32,11 @@ import { Progress } from "@/components/ui/progress";
 import { Button } from "@/components/ui/button";
 import { getCurrentAuthUser, subscribeToAuthChanges, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { getUserVisits, getCommunityContributions, PlaceVisit } from "@/lib/explorer-activity";
+import {
+  getSavedPlaces,
+  removeSavedPlace,
+  SavedPlaceItem,
+} from "@/lib/explorer-gamification";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { supabase } from "@/lib/supabase-client";
 import { toast } from "sonner";
@@ -64,6 +71,7 @@ function ProfilePage() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [visits, setVisits] = useState<PlaceVisit[]>([]);
   const [contributionsCount, setContributionsCount] = useState({ photos: 0, reviews: 0 });
+  const [savedPlaces, setSavedPlaces] = useState<SavedPlaceItem[]>([]);
 
   // Explorer Security & Password Management State
   const [activePasswordTab, setActivePasswordTab] = useState<"change" | "forgot">("change");
@@ -165,10 +173,21 @@ function ProfilePage() {
       });
     }
 
+    setSavedPlaces(getSavedPlaces());
+
+    const handleSavedPlacesUpdate = () => {
+      setSavedPlaces(getSavedPlaces());
+    };
+    window.addEventListener("etn_saved_places_updated", handleSavedPlacesUpdate);
+
     const unsubscribe = subscribeToAuthChanges((updatedUser) => {
       setCurrentUser(updatedUser);
+      setSavedPlaces(getSavedPlaces());
     });
-    return () => unsubscribe();
+    return () => {
+      window.removeEventListener("etn_saved_places_updated", handleSavedPlacesUpdate);
+      unsubscribe();
+    };
   }, []);
 
   if (!currentUser) {
@@ -385,25 +404,112 @@ function ProfilePage() {
             </div>
 
             {/* Saved Destinations Card */}
-            <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm space-y-3">
-              <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                <Bookmark className="size-4 text-emerald-600 dark:text-emerald-400" /> Saved Destinations
-              </p>
-
-              <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-3xl text-center space-y-3">
-                <div className="inline-flex size-12 place-items-center rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
-                  <Bookmark className="size-6" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-slate-900 dark:text-white">No saved destinations yet.</h4>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Bookmark places while exploring Tamil Nadu.</p>
-                </div>
-                <Link to="/explore">
-                  <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs rounded-xl mt-1">
-                    Explore Destinations →
-                  </Button>
-                </Link>
+            <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm space-y-4">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                  <Bookmark className="size-4 text-emerald-600 dark:text-emerald-400" /> Saved Destinations
+                </p>
+                {savedPlaces.length > 0 && (
+                  <Link
+                    to="/saved"
+                    className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                  >
+                    <span>View All ({savedPlaces.length})</span>
+                    <ArrowRight className="size-3" />
+                  </Link>
+                )}
               </div>
+
+              {savedPlaces.length === 0 ? (
+                <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-3xl text-center space-y-3">
+                  <div className="inline-flex size-12 place-items-center rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                    <Bookmark className="size-6" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">No saved destinations yet.</h4>
+                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Bookmark places while exploring Tamil Nadu.</p>
+                  </div>
+                  <Link to="/explore">
+                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs rounded-xl mt-1">
+                      Explore Destinations →
+                    </Button>
+                  </Link>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {savedPlaces.slice(0, 4).map((place) => {
+                      const slug = place.id.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                      return (
+                        <div
+                          key={place.id}
+                          className="flex items-center justify-between gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 hover:border-emerald-500/40 transition group"
+                        >
+                          <div className="flex items-center gap-3 min-w-0">
+                            {place.imageUrl ? (
+                              <img
+                                src={place.imageUrl}
+                                alt={place.name}
+                                className="size-11 rounded-xl object-cover shrink-0"
+                              />
+                            ) : (
+                              <div className="size-11 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 grid place-items-center shrink-0">
+                                <Bookmark className="size-5" />
+                              </div>
+                            )}
+                            <div className="min-w-0">
+                              <Link
+                                to="/place/$slug"
+                                params={{ slug }}
+                                className="text-xs font-bold text-slate-900 dark:text-white truncate block hover:text-emerald-500 transition"
+                              >
+                                {place.name}
+                              </Link>
+                              <p className="text-[11px] text-slate-500 dark:text-slate-400 font-mono truncate">
+                                {place.category} • {place.district}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex items-center gap-1 shrink-0">
+                            <Link
+                              to="/routes"
+                              search={{ destination: place.name }}
+                              title="Plan Route"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-emerald-500 hover:bg-emerald-500/10 transition"
+                            >
+                              <Navigation className="size-3.5" />
+                            </Link>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                removeSavedPlace(place.id);
+                                toast.success(`Removed ${place.name} from saved`);
+                              }}
+                              title="Remove"
+                              className="p-1.5 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-500/10 transition cursor-pointer"
+                            >
+                              <Trash2 className="size-3.5" />
+                            </button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="pt-2 flex items-center justify-between">
+                    <Link to="/saved" className="w-full">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="w-full rounded-xl text-xs font-bold border-slate-200 dark:border-white/15"
+                      >
+                        Manage All Saved Places in Saved Page ({savedPlaces.length}) →
+                      </Button>
+                    </Link>
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Explorer Controls: Account Security & Password Management Card */}

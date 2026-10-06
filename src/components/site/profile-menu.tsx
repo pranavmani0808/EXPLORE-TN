@@ -221,7 +221,7 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
     { label: "Profile & Identity", icon: User, to: "/profile" },
     { label: "Explorer Settings", icon: Settings, to: "/settings" },
     { label: "Change Password", icon: Lock, to: "/settings?tab=profile" },
-    { label: "Saved Collections", icon: Bookmark, to: "/explore" },
+    { label: "Saved Collections", icon: Bookmark, to: "/saved" },
     { label: "AI Expeditions", icon: Sparkles, to: "/planner" },
     { label: "Help & Support", icon: HelpCircle, to: "/support" },
   ];

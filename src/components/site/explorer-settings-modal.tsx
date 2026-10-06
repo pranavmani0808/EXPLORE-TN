@@ -609,6 +609,67 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         <div className="text-[10px] text-zinc-400 uppercase">Places Visited</div>
                       </div>
                     </div>
+
+                    {/* SAVED PLACES QUICK PREVIEW */}
+                    <div className="pt-2 border-t border-zinc-800/80">
+                      <div className="flex items-center justify-between mb-2.5">
+                        <div className="flex items-center gap-2">
+                          <Bookmark className="size-3.5 text-emerald-400" />
+                          <span className="text-xs font-bold text-white">Saved Destinations</span>
+                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">
+                            {savedPlaces.length}
+                          </span>
+                        </div>
+                        <a
+                          href="/saved"
+                          className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1"
+                        >
+                          <span>Open Saved Page</span>
+                          <ChevronRight className="size-3" />
+                        </a>
+                      </div>
+
+                      {savedPlaces.length === 0 ? (
+                        <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800 text-center">
+                          <p className="text-xs text-zinc-400">No saved destinations yet. Bookmark places while exploring.</p>
+                        </div>
+                      ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {savedPlaces.slice(0, 4).map((place) => {
+                            const slug = place.id.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                            return (
+                              <div
+                                key={place.id}
+                                className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-zinc-950/70 border border-zinc-800 hover:border-zinc-700 transition"
+                              >
+                                <div className="min-w-0 flex-1">
+                                  <a
+                                    href={`/place/${slug}`}
+                                    className="text-xs font-bold text-zinc-200 hover:text-emerald-400 truncate block"
+                                  >
+                                    {place.name}
+                                  </a>
+                                  <p className="text-[10px] text-zinc-400 truncate font-mono">
+                                    {place.category} • {place.district}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    removeSavedPlace(place.id);
+                                    toast.success(`Removed ${place.name} from saved`);
+                                  }}
+                                  className="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                                  title="Remove"
+                                >
+                                  <Trash2 className="size-3" />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* FORM EDIT DETAILS */}
@@ -985,31 +1046,72 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       </div>
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                      {savedPlaces.map((place) => (
-                        <div
-                          key={place.id}
-                          className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900/90 flex justify-between items-center group"
+                    <div className="space-y-4">
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {savedPlaces.map((place) => {
+                          const slug = place.id.toLowerCase().replace(/[^a-z0-9]+/g, "-");
+                          return (
+                            <div
+                              key={place.id}
+                              className="p-3.5 rounded-2xl border border-zinc-800 bg-zinc-900/90 flex flex-col justify-between gap-3 group hover:border-zinc-700 transition"
+                            >
+                              <div className="flex justify-between items-start gap-2">
+                                <div className="min-w-0">
+                                  <a
+                                    href={`/place/${slug}`}
+                                    onClick={onClose}
+                                    className="font-bold text-white text-sm hover:text-emerald-400 truncate block transition"
+                                  >
+                                    {place.name}
+                                  </a>
+                                  <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+                                    {place.category} • {place.district}
+                                  </p>
+                                </div>
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    removeSavedPlace(place.id);
+                                    toast.success(`Removed ${place.name} from saved collections`);
+                                  }}
+                                  className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer shrink-0"
+                                  title="Remove from saved"
+                                >
+                                  <Trash2 className="size-4" />
+                                </button>
+                              </div>
+
+                              <div className="flex items-center gap-2 pt-2 border-t border-zinc-800 font-mono text-[11px]">
+                                <a
+                                  href={`/place/${slug}`}
+                                  onClick={onClose}
+                                  className="flex-1 py-1.5 text-center rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold transition"
+                                >
+                                  View Place
+                                </a>
+                                <a
+                                  href={`/routes?destination=${encodeURIComponent(place.name)}`}
+                                  onClick={onClose}
+                                  className="flex-1 py-1.5 text-center rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 font-bold border border-emerald-500/20 transition"
+                                >
+                                  Plan Route
+                                </a>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+
+                      <div className="pt-2 text-center">
+                        <a
+                          href="/saved"
+                          onClick={onClose}
+                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
                         >
-                          <div>
-                            <p className="font-bold text-white text-sm">{place.name}</p>
-                            <p className="text-xs text-zinc-400 mt-0.5">
-                              {place.category} • {place.district}
-                            </p>
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              removeSavedPlace(place.id);
-                              toast.success(`Removed ${place.name} from saved collections`);
-                            }}
-                            className="p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
-                            title="Remove from saved"
-                          >
-                            <Trash2 className="size-4" />
-                          </button>
-                        </div>
-                      ))}
+                          <Bookmark className="size-4" />
+                          <span>Open Full Saved Places & Collections Page ({savedPlaces.length}) →</span>
+                        </a>
+                      </div>
                     </div>
                   )}
                 </div>
