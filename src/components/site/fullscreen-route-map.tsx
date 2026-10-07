@@ -54,6 +54,7 @@ import {
   TransitModeType,
 } from "@/lib/data/multi-modal-transit";
 import { useAuthGuard } from "@/lib/auth-guard-context";
+import { getUserHomeLocation } from "@/lib/user-location-manager";
 import { toast } from "sonner";
 
 export type ExtendedTravelMode = "driving" | "flight" | "train" | "bus" | "motorcycle" | "walking" | "cycling";
@@ -210,12 +211,20 @@ export function FullscreenRouteMap({
   });
   const [selectedOrigin, setSelectedOrigin] = useState<ExplorerPlace | null>(() => {
     if (initialOriginPlaceId) return resolvePlaceById(initialOriginPlaceId);
+    // Prioritize User Hometown configured in Explorer Profile / Settings
+    const homeLoc = getUserHomeLocation();
+    if (homeLoc?.name) {
+      try {
+        const homePlace = resolvePlaceById(homeLoc.name);
+        if (homePlace) return homePlace;
+      } catch {}
+    }
     if (initialDestinationPlaceId) {
       const p = resolvePlaceById(initialDestinationPlaceId);
       if (p) {
         const hubs = [
-          { name: "Chennai", lat: 13.0827, lng: 80.2707 },
           { name: "Madurai", lat: 9.9252, lng: 78.1198 },
+          { name: "Chennai", lat: 13.0827, lng: 80.2707 },
           { name: "Coimbatore", lat: 11.0168, lng: 76.9558 },
           { name: "Salem", lat: 11.6643, lng: 78.1460 },
           { name: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
@@ -318,42 +327,53 @@ export function FullscreenRouteMap({
       if (p) {
         setSelectedDestination(p);
         if (!initialOriginPlaceId) {
-          // Find closest major hub to calculate immediate initial route
-          const hubs = [
-            { name: "Chennai", lat: 13.0827, lng: 80.2707 },
-            { name: "Madurai", lat: 9.9252, lng: 78.1198 },
-            { name: "Coimbatore", lat: 11.0168, lng: 76.9558 },
-            { name: "Salem", lat: 11.6643, lng: 78.1460 },
-            { name: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
-          ];
-          // Calculate distance to each hub
-          let closestHub = hubs[0];
-          let minDistance = Infinity;
-          for (const hub of hubs) {
-            const d = Math.hypot(hub.lat - p.latitude, hub.lng - p.longitude);
-            if (d < minDistance) {
-              minDistance = d;
-              closestHub = hub;
-            }
+          // 1. Prioritize user's saved hometown in profile/settings
+          const homeLoc = getUserHomeLocation();
+          let chosenOrigin: ExplorerPlace | null = null;
+          if (homeLoc?.name) {
+            try {
+              chosenOrigin = resolvePlaceById(homeLoc.name);
+            } catch {}
           }
 
-          const defaultOrigin: ExplorerPlace = {
-            id: `geo-${closestHub.name.toLowerCase()}`,
-            canonicalName: closestHub.name,
-            name: closestHub.name,
-            slug: closestHub.name.toLowerCase(),
-            district: closestHub.name,
-            state: "Tamil Nadu",
-            country: "India",
-            latitude: closestHub.lat,
-            longitude: closestHub.lng,
-            categories: ["all"],
-            primaryCategory: "all",
-            verified: true,
-          };
-          setSelectedOrigin(defaultOrigin);
+          if (!chosenOrigin) {
+            // Find closest major hub if no hometown configured
+            const hubs = [
+              { name: "Madurai", lat: 9.9252, lng: 78.1198 },
+              { name: "Chennai", lat: 13.0827, lng: 80.2707 },
+              { name: "Coimbatore", lat: 11.0168, lng: 76.9558 },
+              { name: "Salem", lat: 11.6643, lng: 78.1460 },
+              { name: "Tiruchirappalli", lat: 10.7905, lng: 78.7047 },
+            ];
+            let closestHub = hubs[0];
+            let minDistance = Infinity;
+            for (const hub of hubs) {
+              const d = Math.hypot(hub.lat - p.latitude, hub.lng - p.longitude);
+              if (d < minDistance) {
+                minDistance = d;
+                closestHub = hub;
+              }
+            }
+
+            chosenOrigin = {
+              id: `geo-${closestHub.name.toLowerCase()}`,
+              canonicalName: closestHub.name,
+              name: closestHub.name,
+              slug: closestHub.name.toLowerCase(),
+              district: closestHub.name,
+              state: "Tamil Nadu",
+              country: "India",
+              latitude: closestHub.lat,
+              longitude: closestHub.lng,
+              categories: ["all"],
+              primaryCategory: "all",
+              verified: true,
+            };
+          }
+
+          setSelectedOrigin(chosenOrigin);
           setIsDirectionsFocusMode(false);
-          toast.success(`Generated route from ${closestHub.name} to ${p.canonicalName || p.name} 🚗`);
+          toast.success(`Generated route from ${chosenOrigin.name} to ${p.canonicalName || p.name} 🚗`);
         }
       }
     }

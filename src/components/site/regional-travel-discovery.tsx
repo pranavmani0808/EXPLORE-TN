@@ -1,6 +1,7 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { CANONICAL_PLACES, ExplorerPlace, PlaceCategory } from "@/lib/data/canonical-places";
 import { SUPPORTED_ORIGINS, PRIMARY_HUB_ORIGINS, getPlacesForOrigin, TravelOriginCity } from "@/lib/data/travel-origins";
+import { getUserHomeLocation } from "@/lib/user-location-manager";
 import {
   MapPin,
   Clock,
@@ -32,11 +33,24 @@ interface RegionalTravelDiscoveryProps {
 const DEFAULT_FALLBACK_IMAGE = "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80";
 
 export const RegionalTravelDiscovery: React.FC<RegionalTravelDiscoveryProps> = ({
-  initialOriginId = "coimbatore",
+  initialOriginId,
   onSelectPlaceForPlanner,
   className = ""
 }) => {
-  const [selectedOriginId, setSelectedOriginId] = useState<string>(initialOriginId);
+  const [selectedOriginId, setSelectedOriginId] = useState<string>(() => {
+    if (initialOriginId && SUPPORTED_ORIGINS[initialOriginId]) return initialOriginId;
+    const homeLoc = getUserHomeLocation();
+    if (homeLoc?.name) {
+      const match = Object.values(SUPPORTED_ORIGINS).find(
+        (o) =>
+          o.name.toLowerCase() === homeLoc.name.toLowerCase() ||
+          o.id.toLowerCase() === homeLoc.name.toLowerCase() ||
+          o.district.toLowerCase() === homeLoc.name.toLowerCase()
+      );
+      if (match) return match.id;
+    }
+    return initialOriginId || "madurai";
+  });
   const [maxDistance, setMaxDistance] = useState<number | "all">("all");
   const [tripType, setTripType] = useState<"all" | "day" | "weekend" | "overnight">("all");
   const [selectedCategory, setSelectedCategory] = useState<PlaceCategory | "all">("all");

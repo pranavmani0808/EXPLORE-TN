@@ -36,6 +36,7 @@ import { useAuthGuard } from "@/lib/auth-guard-context";
 import { toast } from "sonner";
 import { PlannerApiRepository, PlannerChatResponseDTO, SuggestedCategoryItem } from "@/lib/api-client/planner";
 import { resolvePlace, searchEntities, CategorizedSearchResult } from "@/lib/data/canonical-places";
+import { getUserHomeLocation } from "@/lib/user-location-manager";
 import {
   Map,
   MapMarker,
@@ -132,7 +133,10 @@ function PlannerPage() {
 
   // Interactive Trip Customizer State
   const [customDays, setCustomDays] = useState<number>(1);
-  const [customOrigin, setCustomOrigin] = useState<string>("");
+  const [customOrigin, setCustomOrigin] = useState<string>(() => {
+    const home = getUserHomeLocation();
+    return home?.name || "";
+  });
   const [customInterests, setCustomInterests] = useState<string[]>([
     "🛕 Temples & Heritage",
     "🍲 Local Tamil Food"
@@ -164,7 +168,7 @@ function PlannerPage() {
   }, []);
 
   const currentDestination = selectedDestination || plannerData?.plannerState?.destination || aiPlanData?.destination?.name || "";
-  const effectiveOrigin = customOrigin || plannerData?.plannerState?.origin || currentDestination || "Local City";
+  const effectiveOrigin = customOrigin || getUserHomeLocation().name || plannerData?.plannerState?.origin || "Madurai";
 
   // Geofence & Dynamic Itinerary Manager Refs
   const geofenceManagerRef = useRef<GeofenceManager | null>(null);
@@ -225,7 +229,10 @@ function PlannerPage() {
 
   const handleSelectDestination = (destName: string) => {
     setSelectedDestination(destName);
-    setCustomOrigin(destName);
+    const userHometown = getUserHomeLocation().name;
+    if (!customOrigin) {
+      setCustomOrigin(userHometown || "Madurai");
+    }
     setShowCustomizer(true);
   };
 
@@ -237,7 +244,8 @@ function PlannerPage() {
     }
     setSelectedDestination(destToUse);
     if (!customOrigin) {
-      setCustomOrigin(destToUse);
+      const userHometown = getUserHomeLocation().name;
+      setCustomOrigin(userHometown || "Madurai");
     }
     setShowCustomizer(true);
   };

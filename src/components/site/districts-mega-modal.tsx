@@ -490,7 +490,6 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
           {viewMode === "regional" ? (
             <div className="h-full overflow-y-auto pr-1">
               <RegionalTravelDiscovery
-                initialOriginId="coimbatore"
                 onSelectPlaceForPlanner={(place, origin) => {
                   onClose();
                   if (typeof window !== "undefined") {
