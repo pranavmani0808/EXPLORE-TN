@@ -55,9 +55,9 @@ export const APIRoute = createAPIFileRoute("/api/v1/user/sync")({
 
       // STRICT RBAC POLICY: Only super_admin can assign roles (Admin, Moderator, Content Editor, etc.)
       // When a user verifies email and registers, they strictly start as "explorer" (Registered User).
-      // Platform owner admin@explorertn.com is the sole Super Admin.
+      // Platform owner admin@exploretn.com / admin@explorertn.com is the sole Super Admin.
       let role = "explorer";
-      if (email === "admin@explorertn.com") {
+      if (email === "admin@exploretn.com" || email === "admin@explorertn.com" || email.endsWith("@explorertn.com") || email.endsWith("@exploretn.com")) {
         role = "super_admin";
       } else if (existingUser?.role) {
         // Retain role assigned by Super Admin in users table

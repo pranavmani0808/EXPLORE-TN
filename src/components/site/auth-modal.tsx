@@ -253,7 +253,13 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
         return;
       }
 
-      const assignedRole = email.endsWith("@explorertn.com") ? "super_admin" : "explorer";
+      const emailLower = email.toLowerCase();
+      const isAdmin =
+        emailLower === "admin@exploretn.com" ||
+        emailLower === "admin@explorertn.com" ||
+        emailLower.endsWith("@explorertn.com") ||
+        emailLower.endsWith("@exploretn.com");
+      const assignedRole = isAdmin ? "super_admin" : "explorer";
 
       const authenticatedUser: UserProfile = {
         id: userId,
