@@ -712,14 +712,70 @@ export const FESTIVAL_CALENDAR_MONTHS: FestivalCalendarMonth[] = [
   }
 ];
 
+import { supabase } from "../supabase-client";
+
+// Global Realtime Bus for Events
+const eventsChannel = typeof window !== "undefined"
+  ? supabase.channel("exploretn_events_bus", { config: { broadcast: { self: false } } })
+  : null;
+
+if (eventsChannel) {
+  eventsChannel
+    .on("broadcast", { event: "event_sync" }, (payload) => {
+      if (payload.payload) {
+        const { customEvents, deletedIds } = payload.payload;
+        if (Array.isArray(customEvents)) {
+          localStorage.setItem("etn_custom_events", JSON.stringify(customEvents));
+        }
+        if (Array.isArray(deletedIds)) {
+          localStorage.setItem("etn_deleted_event_ids", JSON.stringify(deletedIds));
+        }
+        window.dispatchEvent(new CustomEvent("etn_events_updated"));
+      }
+    })
+    .subscribe();
+}
+
+// Fetch latest events from Supabase Cloud
+export async function syncEventsFromCloud(): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    const { data, error } = await supabase
+      .from("place_suggestions")
+      .select("description")
+      .eq("category", "GLOBAL_EVENT_REGISTRY")
+      .maybeSingle();
+
+    if (!error && data?.description) {
+      const parsed = JSON.parse(data.description);
+      if (parsed.events && Array.isArray(parsed.events)) {
+        localStorage.setItem("etn_custom_events", JSON.stringify(parsed.events));
+      }
+      if (parsed.deletedIds && Array.isArray(parsed.deletedIds)) {
+        localStorage.setItem("etn_deleted_event_ids", JSON.stringify(parsed.deletedIds));
+      }
+      window.dispatchEvent(new CustomEvent("etn_events_updated"));
+    }
+  } catch (err) {
+    console.warn("[Cloud Event Sync] Notice:", err);
+  }
+}
+
+if (typeof window !== "undefined") {
+  syncEventsFromCloud();
+}
+
 export function getEventsList(): ExploreTNEvent[] {
   if (typeof window === "undefined") return EXPLORE_TN_EVENTS;
   try {
-    const raw = localStorage.getItem("etn_custom_events");
-    if (raw) {
-      const custom: ExploreTNEvent[] = JSON.parse(raw);
-      return [...custom, ...EXPLORE_TN_EVENTS];
-    }
+    const deletedRaw = localStorage.getItem("etn_deleted_event_ids");
+    const deletedIds: string[] = deletedRaw ? JSON.parse(deletedRaw) : [];
+
+    const customRaw = localStorage.getItem("etn_custom_events");
+    const custom: ExploreTNEvent[] = customRaw ? JSON.parse(customRaw) : [];
+
+    const combined = [...custom, ...EXPLORE_TN_EVENTS];
+    return combined.filter((e) => !deletedIds.includes(e.id));
   } catch {}
   return EXPLORE_TN_EVENTS;
 }

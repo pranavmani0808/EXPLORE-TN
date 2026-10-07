@@ -89,7 +89,15 @@ function EventsPage() {
   const [viewMode, setViewMode] = useState<"list" | "map" | "calendar">("list");
   const [showSuggestModal, setShowSuggestModal] = useState(false);
 
-  const allEvents = useMemo(() => getEventsList(), []);
+  const [allEvents, setAllEvents] = useState(() => getEventsList());
+
+  React.useEffect(() => {
+    const handleEventsChange = () => {
+      setAllEvents(getEventsList());
+    };
+    window.addEventListener("etn_events_updated", handleEventsChange);
+    return () => window.removeEventListener("etn_events_updated", handleEventsChange);
+  }, []);
 
   // Filter events
   const filteredEvents = useMemo(() => {
