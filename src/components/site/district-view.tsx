@@ -46,6 +46,8 @@ import { OotyComprehensiveGuide } from "@/components/site/ooty-guide-components"
 import { KodaiFoodAndTravelGuide } from "@/components/site/kodai-guide-components";
 import { DistrictPlacesCollectionTable } from "@/components/site/district-places-collection-table";
 import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
+import { getEventsForDistrict } from "@/lib/data/events-data";
+import { EventDiscoveryCard } from "@/components/events/event-discovery-card";
 import type { Place } from "@/data/places";
 
 if (typeof window !== "undefined") {
@@ -914,6 +916,41 @@ export function DistrictView({ district }: DistrictViewProps) {
               ))}
             </div>
           </div>
+
+          {/* UPCOMING DISTRICT EVENTS & FESTIVALS SECTION */}
+          {(() => {
+            const districtEvents = getEventsForDistrict(district.slug || district.name);
+            if (districtEvents.length === 0) return null;
+            return (
+              <div className="mt-12 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-zinc-950 via-zinc-900/90 to-zinc-950 p-6 md:p-8 space-y-6">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
+                  <div>
+                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] tracking-wider uppercase font-semibold px-3 py-1 mb-2">
+                      🎫 Experiences & Festivals
+                    </Badge>
+                    <h3 className="font-display text-2xl font-bold text-white tracking-tight">
+                      Upcoming Events & Cultural Celebrations in {district.name}
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-1">
+                      Connect your {district.name} visit with live group trips, temple chariot festivals, and local heritage meets.
+                    </p>
+                  </div>
+                  <a
+                    href={`/events?district=${encodeURIComponent(district.name)}`}
+                    className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 shrink-0"
+                  >
+                    View All {district.name} Events →
+                  </a>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5">
+                  {districtEvents.map((evt) => (
+                    <EventDiscoveryCard key={evt.id} event={evt} />
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* DISTRICT PLACES COLLECTION TABLE (Categorized for all 38 districts) */}
           <div className="mt-12">

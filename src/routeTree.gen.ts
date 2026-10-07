@@ -38,6 +38,8 @@ import { Route as TripPlannerRouteImport } from './routes/trip-planner'
 import { Route as WesternGhatsRouteImport } from './routes/western-ghats'
 import { Route as DistrictsIndexRouteImport } from './routes/districts.index'
 import { Route as DistrictsDistrictSlugRouteImport } from './routes/districts.$districtSlug'
+import { Route as EventsIndexRouteImport } from './routes/events.index'
+import { Route as EventsSlugRouteImport } from './routes/events.$slug'
 import { Route as ExploreCategoryRouteImport } from './routes/explore.$category'
 import { Route as LegalCommunityGuidelinesRouteImport } from './routes/legal.community-guidelines'
 import { Route as LegalCookiesRouteImport } from './routes/legal.cookies'
@@ -200,6 +202,16 @@ const DistrictsDistrictSlugRoute = DistrictsDistrictSlugRouteImport.update({
   path: '/districts/$districtSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EventsIndexRoute = EventsIndexRouteImport.update({
+  id: '/events/',
+  path: '/events/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EventsSlugRoute = EventsSlugRouteImport.update({
+  id: '/events/$slug',
+  path: '/events/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExploreCategoryRoute = ExploreCategoryRouteImport.update({
   id: '/$category',
   path: '/$category',
@@ -311,6 +323,7 @@ export interface FileRoutesByFullPath {
   '/trip-planner': typeof TripPlannerRoute
   '/western-ghats': typeof WesternGhatsRoute
   '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
   '/legal/community-guidelines': typeof LegalCommunityGuidelinesRoute
   '/legal/cookies': typeof LegalCookiesRoute
@@ -328,6 +341,7 @@ export interface FileRoutesByFullPath {
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
   '/trails/pancha-bhoota': typeof TrailsPanchaBhootaRoute
   '/districts/': typeof DistrictsIndexRoute
+  '/events/': typeof EventsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -358,6 +372,7 @@ export interface FileRoutesByTo {
   '/trip-planner': typeof TripPlannerRoute
   '/western-ghats': typeof WesternGhatsRoute
   '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
   '/legal/community-guidelines': typeof LegalCommunityGuidelinesRoute
   '/legal/cookies': typeof LegalCookiesRoute
@@ -375,6 +390,7 @@ export interface FileRoutesByTo {
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
   '/trails/pancha-bhoota': typeof TrailsPanchaBhootaRoute
   '/districts': typeof DistrictsIndexRoute
+  '/events': typeof EventsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -406,6 +422,7 @@ export interface FileRoutesById {
   '/trip-planner': typeof TripPlannerRoute
   '/western-ghats': typeof WesternGhatsRoute
   '/districts/$districtSlug': typeof DistrictsDistrictSlugRoute
+  '/events/$slug': typeof EventsSlugRoute
   '/explore/$category': typeof ExploreCategoryRoute
   '/legal/community-guidelines': typeof LegalCommunityGuidelinesRoute
   '/legal/cookies': typeof LegalCookiesRoute
@@ -423,6 +440,7 @@ export interface FileRoutesById {
   '/trails/arupadai-veedu': typeof TrailsArupadaiVeeduRoute
   '/trails/pancha-bhoota': typeof TrailsPanchaBhootaRoute
   '/districts/': typeof DistrictsIndexRoute
+  '/events/': typeof EventsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -455,6 +473,7 @@ export interface FileRouteTypes {
     | '/trip-planner'
     | '/western-ghats'
     | '/districts/$districtSlug'
+    | '/events/$slug'
     | '/explore/$category'
     | '/legal/community-guidelines'
     | '/legal/cookies'
@@ -472,6 +491,7 @@ export interface FileRouteTypes {
     | '/trails/arupadai-veedu'
     | '/trails/pancha-bhoota'
     | '/districts/'
+    | '/events/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -502,6 +522,7 @@ export interface FileRouteTypes {
     | '/trip-planner'
     | '/western-ghats'
     | '/districts/$districtSlug'
+    | '/events/$slug'
     | '/explore/$category'
     | '/legal/community-guidelines'
     | '/legal/cookies'
@@ -519,6 +540,7 @@ export interface FileRouteTypes {
     | '/trails/arupadai-veedu'
     | '/trails/pancha-bhoota'
     | '/districts'
+    | '/events'
   id:
     | '__root__'
     | '/'
@@ -549,6 +571,7 @@ export interface FileRouteTypes {
     | '/trip-planner'
     | '/western-ghats'
     | '/districts/$districtSlug'
+    | '/events/$slug'
     | '/explore/$category'
     | '/legal/community-guidelines'
     | '/legal/cookies'
@@ -566,6 +589,7 @@ export interface FileRouteTypes {
     | '/trails/arupadai-veedu'
     | '/trails/pancha-bhoota'
     | '/districts/'
+    | '/events/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -597,6 +621,7 @@ export interface RootRouteChildren {
   TripPlannerRoute: typeof TripPlannerRoute
   WesternGhatsRoute: typeof WesternGhatsRoute
   DistrictsDistrictSlugRoute: typeof DistrictsDistrictSlugRoute
+  EventsSlugRoute: typeof EventsSlugRoute
   LegalCommunityGuidelinesRoute: typeof LegalCommunityGuidelinesRoute
   LegalCookiesRoute: typeof LegalCookiesRoute
   LegalDisclaimerRoute: typeof LegalDisclaimerRoute
@@ -612,6 +637,7 @@ export interface RootRouteChildren {
   TrailsArupadaiVeeduRoute: typeof TrailsArupadaiVeeduRoute
   TrailsPanchaBhootaRoute: typeof TrailsPanchaBhootaRoute
   DistrictsIndexRoute: typeof DistrictsIndexRoute
+  EventsIndexRoute: typeof EventsIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -819,6 +845,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DistrictsDistrictSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/events/': {
+      id: '/events/'
+      path: '/events'
+      fullPath: '/events/'
+      preLoaderRoute: typeof EventsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/events/$slug': {
+      id: '/events/$slug'
+      path: '/events/$slug'
+      fullPath: '/events/$slug'
+      preLoaderRoute: typeof EventsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/explore/$category': {
       id: '/explore/$category'
       path: '/$category'
@@ -986,6 +1026,7 @@ const rootRouteChildren: RootRouteChildren = {
   TripPlannerRoute: TripPlannerRoute,
   WesternGhatsRoute: WesternGhatsRoute,
   DistrictsDistrictSlugRoute: DistrictsDistrictSlugRoute,
+  EventsSlugRoute: EventsSlugRoute,
   LegalCommunityGuidelinesRoute: LegalCommunityGuidelinesRoute,
   LegalCookiesRoute: LegalCookiesRoute,
   LegalDisclaimerRoute: LegalDisclaimerRoute,
@@ -1001,6 +1042,7 @@ const rootRouteChildren: RootRouteChildren = {
   TrailsArupadaiVeeduRoute: TrailsArupadaiVeeduRoute,
   TrailsPanchaBhootaRoute: TrailsPanchaBhootaRoute,
   DistrictsIndexRoute: DistrictsIndexRoute,
+  EventsIndexRoute: EventsIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

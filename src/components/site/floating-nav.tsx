@@ -28,6 +28,7 @@ import {
   Star,
   Home,
   User,
+  CalendarDays,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -432,6 +433,16 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <Users className="size-4 text-zinc-400 shrink-0" />
             <span className="whitespace-nowrap">{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
           </Link>
+
+          {/* 5. Events & Festivals */}
+          <Link
+            to="/events"
+            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-zinc-300 whitespace-nowrap transition-all duration-200 hover:bg-zinc-800/80 hover:text-white hover:scale-[1.02] shrink-0 border border-transparent hover:border-zinc-800/60"
+            activeProps={{ className: "bg-emerald-500/15 text-emerald-400 font-bold border border-emerald-500/30" }}
+          >
+            <CalendarDays className="size-4 text-emerald-400 shrink-0" />
+            <span className="whitespace-nowrap">{lang === "ta" ? "நிகழ்வுகள் & திருவிழாக்கள்" : "Events"}</span>
+          </Link>
         </div>
 
         {/* Right Utility Section & Primary Action CTA */}
@@ -533,6 +544,14 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             >
               <Users className="size-4 text-zinc-400" />
               <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+            </Link>
+            <Link
+              to="/events"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30"
+            >
+              <CalendarDays className="size-4 text-emerald-400" />
+              <span>{lang === "ta" ? "நிகழ்வுகள் & திருவிழாக்கள்" : "Events"}</span>
             </Link>
             <Link
               to="/settings"

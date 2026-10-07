@@ -33,6 +33,9 @@ import {
   SavedPlaceItem,
   SavedRouteItem,
 } from "@/lib/explorer-gamification";
+import { getSavedEventIds } from "@/lib/events-state-manager";
+import { getEventsList } from "@/lib/data/events-data";
+import { EventDiscoveryCard } from "@/components/events/event-discovery-card";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/saved")({
@@ -66,7 +69,8 @@ const CATEGORY_TABS = [
 function SavedPlacesPage() {
   const [savedPlaces, setSavedPlaces] = useState<SavedPlaceItem[]>([]);
   const [savedRoutes, setSavedRoutes] = useState<SavedRouteItem[]>([]);
-  const [activeTab, setActiveTab] = useState<"places" | "routes">("places");
+  const [savedEventIds, setSavedEventIds] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<"places" | "routes" | "events">("places");
   const [selectedCategory, setSelectedCategory] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
@@ -75,6 +79,7 @@ function SavedPlacesPage() {
   const loadData = () => {
     setSavedPlaces(getSavedPlaces());
     setSavedRoutes(getSavedRoutes());
+    setSavedEventIds(getSavedEventIds());
   };
 
   useEffect(() => {
@@ -86,13 +91,18 @@ function SavedPlacesPage() {
     const handleRoutesUpdate = () => {
       setSavedRoutes(getSavedRoutes());
     };
+    const handleEventsUpdate = () => {
+      setSavedEventIds(getSavedEventIds());
+    };
 
     window.addEventListener("etn_saved_places_updated", handlePlacesUpdate);
     window.addEventListener("etn_saved_routes_updated", handleRoutesUpdate);
+    window.addEventListener("etn_saved_events_updated", handleEventsUpdate);
 
     return () => {
       window.removeEventListener("etn_saved_places_updated", handlePlacesUpdate);
       window.removeEventListener("etn_saved_routes_updated", handleRoutesUpdate);
+      window.removeEventListener("etn_saved_events_updated", handleEventsUpdate);
     };
   }, []);
 
@@ -248,6 +258,28 @@ function SavedPlacesPage() {
                 }`}
               >
                 {savedRoutes.length}
+              </span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setActiveTab("events")}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
+                activeTab === "events"
+                  ? "bg-emerald-500 text-slate-950 shadow-md font-black"
+                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+              }`}
+            >
+              <Calendar className="size-4" />
+              <span>Saved Events & Festivals</span>
+              <span
+                className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
+                  activeTab === "events"
+                    ? "bg-slate-950/20 text-slate-950"
+                    : "bg-white/10 text-slate-300"
+                }`}
+              >
+                {savedEventIds.length}
               </span>
             </button>
           </div>
@@ -551,6 +583,39 @@ function SavedPlacesPage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* TAB 3: SAVED EVENTS & FESTIVALS */}
+        {activeTab === "events" && (
+          <div className="space-y-6">
+            {savedEventIds.length === 0 ? (
+              <div className="text-center py-20 bg-white dark:bg-[#121821] rounded-3xl border border-dashed border-slate-300 dark:border-white/10 p-8 space-y-4">
+                <div className="size-16 rounded-full bg-emerald-500/10 text-emerald-500 flex items-center justify-center mx-auto">
+                  <Calendar className="size-8" />
+                </div>
+                <h3 className="font-display font-bold text-lg text-slate-900 dark:text-white">
+                  No saved events or festivals yet
+                </h3>
+                <p className="text-sm text-slate-500 dark:text-slate-400 max-w-md mx-auto">
+                  Explore group trips, music concerts, temple festivals, and marathons happening across Tamil Nadu and bookmark them to your personal schedule.
+                </p>
+                <Link to="/events">
+                  <Button className="rounded-xl bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6">
+                    <Sparkles className="size-4 mr-2" />
+                    Discover Tamil Nadu Events →
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {getEventsList()
+                  .filter((e) => savedEventIds.includes(e.id))
+                  .map((evt) => (
+                    <EventDiscoveryCard key={evt.id} event={evt} />
+                  ))}
               </div>
             )}
           </div>
