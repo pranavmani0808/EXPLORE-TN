@@ -80,48 +80,48 @@
   --radius: 1rem;
 
   /* Premium Apple + Linear + Airbnb + Notion Light Mode Theme */
-  --background: #F6F8FA;
-  --foreground: #111827;
+  --background: #FFFFFF;
+  --foreground: #172536;
   --surface: #FFFFFF;
   --surface-2: #F8FAFC;
   --card: #FFFFFF;
   --card-foreground: #111827;
   --popover: #FFFFFF;
   --popover-foreground: #111827;
-  --primary: #059669;
+  --primary: #1676B8;
   --primary-foreground: #FFFFFF;
   --secondary: #F8FAFC;
   --secondary-foreground: #111827;
   --muted: #F3F4F6;
   --muted-foreground: #4B5563;
-  --accent: #ECFDF5;
-  --accent-foreground: #047857;
+  --accent: #EAF5FD;
+  --accent-foreground: #145B8F;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
   --border: #E5E7EB;
   --input: #E5E7EB;
-  --ring: #059669;
+  --ring: #1676B8;
 
-  --forest: #059669;
+  --forest: #1676B8;
   --forest-foreground: #FFFFFF;
-  --ocean: #0284C7;
+  --ocean: #278CCB;
   --ocean-foreground: #FFFFFF;
   --sand: #F3F4F6;
   --sand-foreground: #374151;
   --stone: #9CA3AF;
   --sunset: #F97316;
   --sunset-foreground: #FFFFFF;
-  --emerald-glow: #10B981;
+  --emerald-glow: #49A7DD;
   --gold: #F59E0B;
   --gold-foreground: #111827;
 
   --gradient-hero: linear-gradient(
-    160deg,
-    #0F172A 0%,
-    #059669 60%,
-    #0284C7 100%
+    145deg,
+    #eff8fe 0%,
+    #dceffc 58%,
+    #f8fcff 100%
   );
-  --gradient-brand: linear-gradient(120deg, #059669, #10B981);
+  --gradient-brand: linear-gradient(120deg, #1676B8, #49A7DD);
   --gradient-fade: linear-gradient(to bottom, transparent 20%, rgba(3, 20, 23, 0.75) 75%, #0B0F14 100%);
 }
 
@@ -340,6 +340,117 @@
 
 .leaflet-container a.leaflet-popup-close-button:hover {
   color: #ffffff !important;
+}
+
+/* Public travel experience: calm white surfaces, sky-blue accents, and readable navigation. */
+.site-shell {
+  background: #fff;
+  color: #172536;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] {
+  color: #172536;
+  background-color: rgba(255, 255, 255, 0.96);
+  border-color: #dbeaf5;
+  box-shadow: 0 8px 26px rgba(28, 79, 117, 0.09);
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-white"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-zinc-100"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-zinc-200"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-zinc-300"] {
+  color: #26384a !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-zinc-400"] {
+  color: #607286 !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-emerald-400"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-emerald-300"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="text-amber-400"] {
+  color: #176b9f !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="border-zinc-800"] {
+  border-color: #dce9f3 !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="bg-zinc-950"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="bg-zinc-900"],
+.site-shell header nav[aria-label="Main Navigation"] [class*="bg-[#09090b]"] {
+  background-color: #fff !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="bg-emerald-500"] {
+  background-color: #d9effc !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="bg-gradient-to-r"] {
+  background-image: none !important;
+  background-color: #eff8fe !important;
+}
+
+.site-shell header > div[class*="bg-[#09090b]"] {
+  color: #172536 !important;
+  background-color: rgba(255, 255, 255, 0.98) !important;
+  border-color: #dbeaf5 !important;
+  box-shadow: 0 12px 34px rgba(28, 79, 117, 0.12) !important;
+}
+
+.site-shell header > div[class*="bg-[#09090b]"] [class*="bg-zinc-900"] {
+  background-color: #f5faff !important;
+  border-color: #dbeaf5 !important;
+}
+
+.site-shell header > div[class*="bg-[#09090b]"] [class*="text-zinc-200"],
+.site-shell header > div[class*="bg-[#09090b]"] [class*="text-white"] {
+  color: #26384a !important;
+}
+
+.site-shell nav[aria-label="Mobile Bottom Bar"] {
+  background-color: rgba(255, 255, 255, 0.97);
+  border-color: #dbeaf5;
+  box-shadow: 0 6px 22px rgba(28, 79, 117, 0.12);
+}
+
+.site-shell nav[aria-label="Mobile Bottom Bar"] [class*="text-emerald-400"] {
+  color: #176b9f !important;
+}
+
+.site-shell nav[aria-label="Mobile Bottom Bar"] [class*="text-zinc-400"] {
+  color: #607286 !important;
+}
+
+/* Bring existing destination and planner screens into the same light visual system. */
+.site-shell :is([class*="bg-zinc-950"], [class*="bg-zinc-900"], [class*="bg-[#09090b]"]) {
+  background-color: #fff !important;
+  border-color: #dce9f3 !important;
+  box-shadow: 0 4px 16px rgba(28, 79, 117, 0.06);
+}
+
+.site-shell :is([class*="bg-zinc-950"], [class*="bg-zinc-900"], [class*="bg-[#09090b]"]):is([class*="text-white"], [class*="text-zinc-100"], [class*="text-zinc-200"], [class*="text-zinc-300"]) {
+  color: #26384a !important;
+}
+
+.site-shell :is([class*="bg-zinc-950"], [class*="bg-zinc-900"], [class*="bg-[#09090b]"]) :is([class*="text-white"], [class*="text-zinc-100"], [class*="text-zinc-200"], [class*="text-zinc-300"]) {
+  color: #26384a !important;
+}
+
+.site-shell :is([class*="bg-zinc-950"], [class*="bg-zinc-900"], [class*="bg-[#09090b]"]) :is([class*="text-zinc-400"], [class*="text-slate-400"]) {
+  color: #607286 !important;
+}
+
+.site-shell [class*="border-zinc-800"] {
+  border-color: #dce9f3 !important;
+}
+
+.site-shell header nav[aria-label="Main Navigation"] [class*="bg-emerald-500"] [class*="text-zinc-950"] {
+  color: #145b8f !important;
+}
+
+.site-shell :focus-visible {
+  outline-color: #1676b8 !important;
 }
 
 /* ETN Minimal Tooltip — strip Leaflet default styling, show our custom pill */

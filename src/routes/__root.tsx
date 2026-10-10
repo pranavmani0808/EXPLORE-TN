@@ -120,7 +120,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>
@@ -141,7 +141,7 @@ function RootComponent() {
         <GsapGlobalProvider>
           <RouteLoadingBar />
           <UxStateListeners />
-          <Toaster position="top-right" theme="dark" richColors />
+          <Toaster position="top-right" theme="light" richColors />
           <Outlet />
           <CookieBanner />
         </GsapGlobalProvider>

@@ -6,7 +6,7 @@ import { cn } from "@/lib/utils";
 export function AppShell({ children, className }: { children: ReactNode; className?: string }) {
   const [searchOpen, setSearchOpen] = useState(false);
   return (
-    <div className={cn("min-h-screen bg-background", className)}>
+    <div className={cn("site-shell min-h-screen bg-background", className)}>
       <FloatingNav onSearch={() => setSearchOpen(true)} />
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
       <main className="pb-24 sm:pb-0">{children}</main>

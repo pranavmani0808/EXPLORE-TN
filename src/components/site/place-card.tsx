@@ -32,7 +32,7 @@ export function PlaceCard({
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-60px" }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="group relative overflow-hidden rounded-3xl border border-border bg-card shadow-elevate"
+      className="group relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-lg"
     >
       <Link to="/place/$slug" params={{ slug: place.slug }} className="block">
         <div className={cn("relative overflow-hidden", size === "lg" ? "h-80" : "h-56")}>
@@ -41,30 +41,30 @@ export function PlaceCard({
             category={place.category}
             alt={place.name}
             loading="lazy"
-            className="size-full object-cover transition-transform duration-700 group-hover:scale-110"
+            className="size-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/25 to-transparent" />
-          <span className="glass absolute left-3 top-3 rounded-full px-3 py-1 text-xs font-medium">
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/55 via-transparent to-transparent" />
+          <span className="absolute left-3 top-3 rounded-full border border-white/70 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-700 shadow-sm">
             {categoryLabel}
           </span>
           {hasRating && (
-            <span className="glass absolute right-3 top-3 flex items-center gap-1 rounded-full px-3 py-1 text-xs font-medium text-amber-400">
+            <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full border border-white/70 bg-white/95 px-3 py-1 text-xs font-semibold text-slate-800 shadow-sm">
               <Star className="size-3 fill-current" aria-hidden /> {place.rating}
               {place.reviews ? ` (${place.reviews})` : ""}
             </span>
           )}
         </div>
-        <div className="relative -mt-10 space-y-1.5 p-5">
-          <h3 className="font-display text-lg font-semibold leading-tight text-foreground group-hover:text-emerald-400 transition-colors">
+        <div className="space-y-1.5 p-5">
+          <h3 className="font-display text-lg font-semibold leading-tight text-slate-900 group-hover:text-sky-800 transition-colors">
             {place.name}
           </h3>
-          <p className="flex items-center gap-1 text-xs text-zinc-400">
-            <MapPin className="size-3 shrink-0 text-emerald-400" aria-hidden />
+          <p className="flex items-center gap-1 text-xs text-slate-600">
+            <MapPin className="size-3 shrink-0 text-sky-700" aria-hidden />
             <span>{place.district}</span>
           </p>
-          <p className="line-clamp-2 pt-0.5 text-xs text-zinc-400 leading-relaxed">{place.tagline}</p>
+          <p className="line-clamp-2 pt-0.5 text-xs leading-relaxed text-slate-600">{place.tagline}</p>
           <div className="flex items-center justify-end pt-2">
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-sky-800 group-hover:text-sky-950 transition-colors">
               Explore{" "}
               <ArrowUpRight
                 className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"
