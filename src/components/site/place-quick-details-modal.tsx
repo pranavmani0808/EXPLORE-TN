@@ -41,6 +41,7 @@ export interface PlaceQuickDetailsModalProps {
   onToggleTrip?: (place: Place) => void;
   isAddedToTrip?: boolean;
   onSelectPlace?: (place: Place) => void;
+  layoutId?: string;
   nearbySuggestions?: {
     name: string;
     slug?: string;
@@ -58,10 +59,12 @@ export function PlaceQuickDetailsModal({
   onToggleTrip,
   isAddedToTrip = false,
   onSelectPlace,
+  layoutId,
   nearbySuggestions,
 }: PlaceQuickDetailsModalProps) {
   if (!place || !isOpen) return null;
 
+  const cardLayoutId = layoutId || `expandable-event-card-${place.slug || place.name}`;
   const intel = getPlaceTravelIntelligence(place.slug);
   const hillIntel = getPoiHillIntelligence(place.slug);
 
@@ -124,20 +127,25 @@ export function PlaceQuickDetailsModal({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/80 backdrop-blur-md"
+            className="fixed inset-0 bg-slate-900/60 backdrop-blur-md"
           />
 
           {/* Modal Container */}
           <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+            layoutId={cardLayoutId}
+            initial={{ opacity: 0, scale: 0.95 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.95 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
             className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-sky-100 shadow-2xl text-slate-800 font-sans"
           >
             {/* Header Hero Image */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
-              <img
+            <motion.div
+              layoutId={`image-container-${cardLayoutId}`}
+              className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100 shrink-0"
+            >
+              <motion.img
+                layoutId={`image-${cardLayoutId}`}
                 src={place.image}
                 alt={place.name}
                 className="size-full object-cover"
@@ -176,7 +184,7 @@ export function PlaceQuickDetailsModal({
                   {place.name}
                 </h2>
               </div>
-            </div>
+            </motion.div>
 
             {/* Modal Body Content */}
             <div className="p-5 sm:p-7 space-y-6">

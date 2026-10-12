@@ -827,8 +827,11 @@ function ExploreByExperiencePage() {
                       const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
                       const isAdded = routeStops.some((s) => s.id === p.id || s.slug === p.slug);
 
+                      const layoutId = `expandable-event-card-${p.slug || p.id}`;
+
                       return (
-                        <div
+                        <motion.div
+                          layoutId={layoutId}
                           key={p.id || p.slug}
                           className={cn(
                             "group transform-gpu rounded-2xl border bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between",
@@ -837,8 +840,12 @@ function ExploreByExperiencePage() {
                         >
                           <div>
                             {/* Image Preview */}
-                            <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                              <img
+                            <motion.div
+                              layoutId={`image-container-${layoutId}`}
+                              className="relative aspect-[16/10] overflow-hidden bg-slate-100"
+                            >
+                              <motion.img
+                                layoutId={`image-${layoutId}`}
                                 src={img}
                                 alt={`Photograph of ${p.name}, ${p.district} District`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
@@ -858,7 +865,7 @@ function ExploreByExperiencePage() {
                                 <Star className="size-3 fill-amber-400 text-amber-500" />
                                 <span>{p.rating || 4.8}</span>
                               </div>
-                            </div>
+                            </motion.div>
 
                             {/* Body Content */}
                             <div className="p-4 space-y-1.5">
@@ -898,45 +905,45 @@ function ExploreByExperiencePage() {
                                 </>
                               )}
                             </button>
-                              <button
-                                type="button"
-                                onClick={() => {
-                                  const legacyPlace = getPlace(p.slug || p.id) || {
-                                    slug: p.slug || p.id,
-                                    name: p.name || p.display_name || p.id,
-                                    district: p.district || "Tamil Nadu",
-                                    category: p.category || "hills",
-                                    image: img,
-                                    tagline: p.tagline || "",
-                                    story: p.description || "",
-                                    rating: p.rating || 4.8,
-                                    reviews: p.reviewsCount || 120,
-                                    difficulty: "Easy",
-                                    bestSeason: "Year-round",
-                                    roadCondition: "State Highway",
-                                    parking: "Available",
-                                    entryFee: "Free",
-                                    timings: "Open daily",
-                                    safety: "Safe",
-                                    weather: "24°C",
-                                    tips: [],
-                                    nearbyFood: [],
-                                    nearbyFuel: [],
-                                    x: 0,
-                                    y: 0,
-                                    coords: [p.latitude || 10.1, p.longitude || 77.5],
-                                    latitude: p.latitude || 10.1,
-                                    longitude: p.longitude || 77.5,
-                                  };
-                                  setSelectedModalPlace(legacyPlace as Place);
-                                }}
-                                className="py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition border border-slate-200 cursor-pointer"
-                              >
-                                Details
-                              </button>
-                            </div>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                const legacyPlace = getPlace(p.slug || p.id) || {
+                                  slug: p.slug || p.id,
+                                  name: p.name || p.display_name || p.id,
+                                  district: p.district || "Tamil Nadu",
+                                  category: p.category || "hills",
+                                  image: img,
+                                  tagline: p.tagline || "",
+                                  story: p.description || "",
+                                  rating: p.rating || 4.8,
+                                  reviews: p.reviewsCount || 120,
+                                  difficulty: "Easy",
+                                  bestSeason: "Year-round",
+                                  roadCondition: "State Highway",
+                                  parking: "Available",
+                                  entryFee: "Free",
+                                  timings: "Open daily",
+                                  safety: "Safe",
+                                  weather: "24°C",
+                                  tips: [],
+                                  nearbyFood: [],
+                                  nearbyFuel: [],
+                                  x: 0,
+                                  y: 0,
+                                  coords: [p.latitude || 10.1, p.longitude || 77.5],
+                                  latitude: p.latitude || 10.1,
+                                  longitude: p.longitude || 77.5,
+                                };
+                                setSelectedModalPlace(legacyPlace as Place);
+                              }}
+                              className="py-2 px-3.5 rounded-xl bg-slate-50 hover:bg-sky-50 hover:border-sky-300 hover:text-sky-700 text-xs font-bold text-slate-700 transition border border-slate-200 cursor-pointer shadow-sm active:scale-95"
+                            >
+                              Details
+                            </button>
                           </div>
-                        );
+                        </motion.div>
+                      );
                       })}
                     </AnimatedGroup>
                   )}
