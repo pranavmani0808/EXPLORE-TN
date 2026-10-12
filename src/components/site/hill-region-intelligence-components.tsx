@@ -86,7 +86,7 @@ export function DestinationHillIntelligenceCard({ intel }: { intel: HillDestinat
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-border/60 pb-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-emerald-500 bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
+            <span className="text-[10px] font-mono font-bold uppercase tracking-widest text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
               REGION HILL INTELLIGENCE
             </span>
             <DataTrustBadge verification={intel.verification} />
@@ -96,25 +96,25 @@ export function DestinationHillIntelligenceCard({ intel }: { intel: HillDestinat
           </h2>
           <div className="flex flex-wrap items-center gap-2 mt-1 font-mono text-xs">
             <span className="text-muted-foreground flex items-center gap-1">
-              <MapPin className="size-3 text-emerald-500" /> {intel.district}
+              <MapPin className="size-3 text-sky-600" /> {intel.district}
             </span>
             {intel.region && (
-              <span className="bg-purple-500/10 text-purple-300 border border-purple-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full font-bold">
                 🏔️ Region: {intel.region}
               </span>
             )}
             {intel.altitude && (
-              <span className="bg-blue-500/10 text-blue-300 border border-blue-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full font-bold">
                 📏 Altitude: {intel.altitude}
               </span>
             )}
             {intel.hairpinBends !== undefined && (
-              <span className="bg-amber-500/10 text-amber-300 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="bg-amber-50 text-amber-700 border border-amber-200 px-2.5 py-0.5 rounded-full font-bold">
                 🔄 Hairpins: {intel.hairpinBends} Bends
               </span>
             )}
             {intel.bestTimeToVisit && (
-              <span className="bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-bold">
+              <span className="bg-sky-50 text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full font-bold">
                 📅 Best Time: {intel.bestTimeToVisit}
               </span>
             )}
@@ -122,7 +122,7 @@ export function DestinationHillIntelligenceCard({ intel }: { intel: HillDestinat
         </div>
 
         <div className="flex items-center gap-2 shrink-0">
-          <Badge variant="outline" className="bg-emerald-500/10 text-emerald-400 border-emerald-500/30 px-3 py-1 font-mono text-xs font-bold">
+          <Badge variant="outline" className="bg-sky-50 text-sky-700 border-sky-200 px-3 py-1 font-mono text-xs font-bold">
             {intel.accessibility}
           </Badge>
         </div>
@@ -130,10 +130,10 @@ export function DestinationHillIntelligenceCard({ intel }: { intel: HillDestinat
 
       {/* Highlights Tag Cloud if present */}
       {intel.highlights && intel.highlights.length > 0 && (
-        <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-          <span className="text-[11px] font-mono font-bold text-amber-400 mr-1 uppercase">Highlights:</span>
+        <div className="flex flex-wrap items-center gap-1.5 p-3 rounded-2xl bg-slate-50 border border-slate-200">
+          <span className="text-[11px] font-mono font-bold text-sky-700 mr-1 uppercase">Highlights:</span>
           {intel.highlights.map((h, i) => (
-            <span key={i} className="text-xs px-2.5 py-1 rounded-xl bg-zinc-800/80 border border-zinc-700/60 text-zinc-200 font-medium">
+            <span key={i} className="text-xs px-2.5 py-1 rounded-xl bg-white border border-slate-200 text-slate-700 font-medium shadow-sm">
               ✨ {h}
             </span>
           ))}
@@ -607,9 +607,9 @@ export function MapFacilityLayerToggle({
   };
 
   return (
-    <div className="p-3 rounded-2xl bg-background/90 backdrop-blur-md border border-border shadow-xl space-y-2 font-sans">
-      <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-        <SlidersHorizontal className="size-3 text-emerald-500" /> Interactive Map Facilities Overlays
+    <div className="p-3 rounded-2xl bg-white border border-slate-200 shadow-sm space-y-2 font-sans">
+      <p className="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+        <SlidersHorizontal className="size-3 text-sky-600" /> Interactive Map Facilities Overlays
       </p>
       <div className="flex flex-wrap gap-1.5">
         {toggles.map((t) => {
@@ -621,8 +621,8 @@ export function MapFacilityLayerToggle({
               onClick={() => toggleItem(t.key)}
               className={`px-2.5 py-1 rounded-xl text-xs font-bold transition flex items-center gap-1.5 border cursor-pointer ${
                 isActive
-                  ? "bg-emerald-600 text-white border-emerald-600 shadow-sm"
-                  : "bg-accent/40 text-muted-foreground hover:text-foreground border-border/40"
+                  ? "bg-sky-600 text-white border-sky-600 shadow-sm"
+                  : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
               }`}
             >
               <span>{t.icon}</span>

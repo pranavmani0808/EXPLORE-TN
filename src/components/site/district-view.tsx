@@ -355,60 +355,60 @@ export function DistrictView({ district }: DistrictViewProps) {
               <DestinationHillIntelligenceCard intel={hillDestinationIntel} />
             )}
 
-            <div className="gsap-hero-center-card bg-zinc-900/90 border border-amber-500/40 rounded-3xl p-6 md:p-8 shadow-2xl backdrop-blur-md space-y-5">
+            <div className="gsap-hero-center-card bg-white border border-sky-100 rounded-3xl p-6 md:p-8 shadow-xl space-y-5">
               <div>
-                <h3 className="text-xs font-bold uppercase tracking-wider text-amber-400">District Overview</h3>
-                <p className="mt-1 text-lg sm:text-xl font-extrabold text-white leading-relaxed">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-sky-700">District Overview</h3>
+                <p className="mt-1 text-lg sm:text-xl font-extrabold text-slate-900 leading-relaxed">
                   {district.tagline}
                 </p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-zinc-800/80">
-                <h4 className="text-sm font-bold text-amber-300 flex items-center gap-1.5">
-                  <Landmark className="size-4 text-amber-400" />
+              <div className="space-y-3 pt-3 border-t border-slate-100">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <Landmark className="size-4 text-sky-600" />
                   <span>Heritage & History</span>
                 </h4>
-                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {district.overview.history}
                 </p>
               </div>
 
-              <div className="space-y-3 pt-3 border-t border-zinc-800/80">
-                <h4 className="text-sm font-bold text-amber-300 flex items-center gap-1.5">
-                  <Sparkles className="size-4 text-emerald-400" />
+              <div className="space-y-3 pt-3 border-t border-slate-100">
+                <h4 className="text-sm font-bold text-slate-900 flex items-center gap-1.5">
+                  <Sparkles className="size-4 text-sky-600" />
                   <span>Culture & Craft Legacy</span>
                 </h4>
-                <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                   {district.overview.culture}
                 </p>
               </div>
 
               {/* Nicknames */}
               <div className="pt-2 flex flex-wrap items-center gap-2">
-                <span className="text-xs font-semibold text-zinc-400">Nicknames:</span>
+                <span className="text-xs font-semibold text-slate-500">Nicknames:</span>
                 {district.overview.nicknames.map((nickname, nIdx) => (
-                  <Badge key={nIdx} variant="outline" className="bg-zinc-800/80 border-zinc-700 text-zinc-200 text-xs">
+                  <Badge key={nIdx} variant="outline" className="bg-slate-50 border-slate-200 text-slate-700 text-xs">
                     {nickname}
                   </Badge>
                 ))}
               </div>
 
               {/* Stat Pills */}
-              <div className="flex flex-wrap items-center justify-start gap-3 pt-3 border-t border-zinc-800/80">
-                <div className="gsap-stat-pill rounded-full border border-amber-500/30 bg-zinc-900/90 px-4 py-1.5 text-xs font-bold text-amber-300 flex items-center gap-1.5 backdrop-blur-md">
-                  <Landmark className="size-3.5 text-amber-400" />
+              <div className="flex flex-wrap items-center justify-start gap-3 pt-3 border-t border-slate-100">
+                <div className="gsap-stat-pill rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-bold text-sky-700 flex items-center gap-1.5">
+                  <Landmark className="size-3.5 text-sky-600" />
                   <span>{counts.temples} Temples</span>
                 </div>
-                <div className="gsap-stat-pill rounded-full border border-emerald-500/30 bg-zinc-900/90 px-4 py-1.5 text-xs font-bold text-emerald-400 flex items-center gap-1.5 backdrop-blur-md">
-                  <Sparkles className="size-3.5 text-emerald-400" />
+                <div className="gsap-stat-pill rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-bold text-sky-700 flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-sky-600" />
                   <span>{counts.tourist} Tourist Spots</span>
                 </div>
-                <div className="gsap-stat-pill rounded-full border border-orange-500/30 bg-zinc-900/90 px-4 py-1.5 text-xs font-bold text-orange-400 flex items-center gap-1.5 backdrop-blur-md">
-                  <Utensils className="size-3.5 text-orange-400" />
+                <div className="gsap-stat-pill rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-bold text-sky-700 flex items-center gap-1.5">
+                  <Utensils className="size-3.5 text-sky-600" />
                   <span>{counts.food} Food Legends</span>
                 </div>
-                <div className="gsap-stat-pill rounded-full border border-purple-500/30 bg-zinc-900/90 px-4 py-1.5 text-xs font-bold text-purple-300 flex items-center gap-1.5 backdrop-blur-md">
-                  <ShoppingBag className="size-3.5 text-purple-300" />
+                <div className="gsap-stat-pill rounded-full border border-sky-200 bg-sky-50 px-4 py-1.5 text-xs font-bold text-sky-700 flex items-center gap-1.5">
+                  <ShoppingBag className="size-3.5 text-sky-600" />
                   <span>{counts.thrift} Bazaars</span>
                 </div>
               </div>
@@ -416,50 +416,50 @@ export function DistrictView({ district }: DistrictViewProps) {
 
             {/* Administrative & Demographics Profile Card */}
             {district.adminDetails && (
-              <div className="bg-zinc-900/90 border border-sky-500/30 rounded-3xl p-6 shadow-2xl backdrop-blur-md space-y-5">
-                <div className="flex items-center justify-between border-b border-zinc-800 pb-3">
+              <div className="bg-white border border-sky-100 rounded-3xl p-6 shadow-xl space-y-5">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-3">
                   <div className="flex items-center gap-2.5">
-                    <span className="grid size-9 place-items-center rounded-xl bg-sky-500/20 text-sky-400 font-extrabold text-xs border border-sky-500/30">
+                    <span className="grid size-9 place-items-center rounded-xl bg-sky-50 text-sky-600 font-extrabold text-xs border border-sky-200">
                       {district.adminDetails.code}
                     </span>
                     <div>
-                      <h4 className="font-extrabold text-base text-white flex items-center gap-2">
+                      <h4 className="font-extrabold text-base text-slate-900 flex items-center gap-2">
                         Administrative & Demographics
                       </h4>
-                      <p className="text-xs text-zinc-400">Official Government Statistics & Civic Divisions</p>
+                      <p className="text-xs text-slate-500">Official Government Statistics & Civic Divisions</p>
                     </div>
                   </div>
-                  <Badge variant="outline" className="border-sky-500/40 bg-sky-500/10 text-sky-300 text-xs font-bold px-3 py-1">
+                  <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700 text-xs font-bold px-3 py-1">
                     HQ: {district.adminDetails.headquarters}
                   </Badge>
                 </div>
 
                 {/* Key Admin Metrics Grid */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Total Area</div>
-                    <div className="text-sm sm:text-base font-black text-amber-300">
-                      {district.adminDetails.areaKm2.toLocaleString()} <span className="text-xs font-medium text-zinc-400">km²</span>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Total Area</div>
+                    <div className="text-sm sm:text-base font-black text-sky-700">
+                      {district.adminDetails.areaKm2.toLocaleString()} <span className="text-xs font-medium text-slate-500">km²</span>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Population</div>
-                    <div className="text-sm sm:text-base font-black text-sky-300">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Population</div>
+                    <div className="text-sm sm:text-base font-black text-slate-900">
                       {district.adminDetails.population.toLocaleString()}
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Pop. Density</div>
-                    <div className="text-sm sm:text-base font-black text-emerald-400">
-                      {district.adminDetails.popDensityPerKm2.toLocaleString()} <span className="text-[10px] font-normal text-zinc-400">/km²</span>
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Pop. Density</div>
+                    <div className="text-sm sm:text-base font-black text-sky-600">
+                      {district.adminDetails.popDensityPerKm2.toLocaleString()} <span className="text-[10px] font-normal text-slate-500">/km²</span>
                     </div>
                   </div>
 
-                  <div className="bg-zinc-950/70 border border-zinc-800 rounded-2xl p-3 text-center space-y-0.5">
-                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-zinc-400">Established</div>
-                    <div className="text-xs sm:text-sm font-bold text-zinc-200">
+                  <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 text-center space-y-0.5">
+                    <div className="text-[10px] uppercase tracking-wider font-extrabold text-slate-500">Established</div>
+                    <div className="text-xs sm:text-sm font-bold text-slate-700">
                       {district.adminDetails.established}
                     </div>
                   </div>
@@ -468,9 +468,9 @@ export function DistrictView({ district }: DistrictViewProps) {
                 {/* Predecessor & Divisions */}
                 <div className="space-y-3 pt-2">
                   {district.adminDetails.predecessor !== "None" && (
-                    <div className="text-xs text-zinc-300 flex items-center gap-2">
-                      <span className="font-bold text-zinc-400">Formed From:</span>
-                      <Badge variant="outline" className="border-zinc-700 bg-zinc-800/80 text-zinc-200 text-xs">
+                    <div className="text-xs text-slate-600 flex items-center gap-2">
+                      <span className="font-bold text-slate-500">Formed From:</span>
+                      <Badge variant="outline" className="border-slate-200 bg-slate-50 text-slate-700 text-xs">
                         {district.adminDetails.predecessor} District
                       </Badge>
                     </div>
@@ -478,13 +478,13 @@ export function DistrictView({ district }: DistrictViewProps) {
 
                   {/* Revenue Divisions */}
                   <div className="space-y-1.5">
-                    <div className="text-xs font-bold text-sky-300 flex items-center gap-1.5">
-                      <Layers className="size-3.5 text-sky-400" />
+                    <div className="text-xs font-bold text-sky-700 flex items-center gap-1.5">
+                      <Layers className="size-3.5 text-sky-600" />
                       <span>Revenue Divisions ({district.adminDetails.revenueDivisions.length})</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {district.adminDetails.revenueDivisions.map((div, dIdx) => (
-                        <span key={dIdx} className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-500/10 text-sky-300 border border-sky-500/20">
+                        <span key={dIdx} className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-50 text-sky-700 border border-sky-200">
                           {div}
                         </span>
                       ))}
@@ -493,13 +493,13 @@ export function DistrictView({ district }: DistrictViewProps) {
 
                   {/* Taluks */}
                   <div className="space-y-1.5 pt-1">
-                    <div className="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
-                      <Building2 className="size-3.5 text-emerald-400" />
+                    <div className="text-xs font-bold text-slate-700 flex items-center gap-1.5">
+                      <Building2 className="size-3.5 text-sky-600" />
                       <span>Taluks ({district.adminDetails.taluks.length})</span>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
                       {district.adminDetails.taluks.map((taluk, tIdx) => (
-                        <span key={tIdx} className="px-2 py-0.5 rounded text-[11px] font-medium bg-zinc-800 text-zinc-200 border border-zinc-700">
+                        <span key={tIdx} className="px-2 py-0.5 rounded text-[11px] font-medium bg-slate-50 text-slate-700 border border-slate-200">
                           {taluk}
                         </span>
                       ))}
@@ -508,22 +508,22 @@ export function DistrictView({ district }: DistrictViewProps) {
 
                   {/* Lok Sabha & Assembly Constituencies */}
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-                    <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
-                      <div className="text-[11px] font-bold text-purple-300 flex items-center gap-1">
-                        <Vote className="size-3 text-purple-400" />
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                      <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                        <Vote className="size-3 text-sky-600" />
                         <span>Lok Sabha Constituencies ({district.adminDetails.lokSabhaConstituencies.length})</span>
                       </div>
-                      <div className="text-xs text-zinc-300">
+                      <div className="text-xs text-slate-600">
                         {district.adminDetails.lokSabhaConstituencies.join(", ")}
                       </div>
                     </div>
 
-                    <div className="p-3 bg-zinc-950/60 rounded-xl border border-zinc-800 space-y-1">
-                      <div className="text-[11px] font-bold text-amber-300 flex items-center gap-1">
-                        <FileText className="size-3 text-amber-400" />
+                    <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
+                      <div className="text-[11px] font-bold text-slate-700 flex items-center gap-1">
+                        <FileText className="size-3 text-sky-600" />
                         <span>Assembly Constituencies ({district.adminDetails.assemblyConstituencies.length})</span>
                       </div>
-                      <div className="text-xs text-zinc-300 line-clamp-2" title={district.adminDetails.assemblyConstituencies.join(", ")}>
+                      <div className="text-xs text-slate-600 line-clamp-2" title={district.adminDetails.assemblyConstituencies.join(", ")}>
                         {district.adminDetails.assemblyConstituencies.join(", ")}
                       </div>
                     </div>
@@ -535,18 +535,18 @@ export function DistrictView({ district }: DistrictViewProps) {
 
           {/* RIGHT COLUMN (5 COLS): STICKY BOUNDARY-LOCKED MAP */}
           <div className="lg:col-span-5 sticky top-[140px] space-y-4">
-            <div id="district-map-section" className="transform-gpu rounded-3xl border border-zinc-800 bg-zinc-900/95 p-4 shadow-2xl space-y-3">
-              <div className="flex items-center justify-between border-b border-zinc-800 pb-2.5">
+            <div id="district-map-section" className="transform-gpu rounded-3xl border border-sky-100 bg-white p-4 shadow-xl space-y-3">
+              <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                 <div className="flex items-center gap-2">
-                  <span className="grid size-7 place-items-center rounded-lg bg-emerald-500/20 text-emerald-400 font-bold">
+                  <span className="grid size-7 place-items-center rounded-lg bg-sky-50 text-sky-600 font-bold border border-sky-100">
                     <Map className="size-4" />
                   </span>
                   <div>
-                    <h4 className="font-display font-bold text-sm text-white">{district.name} Boundary Map</h4>
-                    <p className="text-[10px] text-zinc-400">Centered at [{district.centerCoords.join(", ")}]</p>
+                    <h4 className="font-display font-bold text-sm text-slate-900">{district.name} Boundary Map</h4>
+                    <p className="text-[10px] text-slate-500">Centered at [{district.centerCoords.join(", ")}]</p>
                   </div>
                 </div>
-                <Badge variant="outline" className="border-emerald-500/30 text-emerald-400 text-[10px]">
+                <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700 text-[10px] font-bold">
                   Live GIS Pins
                 </Badge>
               </div>
@@ -555,7 +555,7 @@ export function DistrictView({ district }: DistrictViewProps) {
               <MapFacilityLayerToggle state={facilityFilters} onChange={setFacilityFilters} />
 
               {/* Leaflet Map Frame */}
-              <div className="h-[440px] w-full rounded-2xl overflow-hidden border border-zinc-800 relative">
+              <div className="h-[440px] w-full rounded-2xl overflow-hidden border border-slate-200 relative shadow-inner">
                 {isMounted ? (
                   <DistrictExplorerMap
                     spots={dynamicSpots}
@@ -568,15 +568,15 @@ export function DistrictView({ district }: DistrictViewProps) {
                     className="size-full"
                   />
                 ) : (
-                  <div className="size-full bg-zinc-950 flex items-center justify-center text-zinc-500 font-mono text-xs">
+                  <div className="size-full bg-slate-50 flex items-center justify-center text-slate-400 font-mono text-xs">
                     Loading {district.name} Boundary Map...
                   </div>
                 )}
               </div>
 
-              <div className="flex items-center justify-between text-[11px] text-zinc-400 pt-1">
+              <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
                 <span>📍 Boundary Locked</span>
-                <span className="text-amber-400 font-semibold">{dynamicSpots.length} Spots Mapped</span>
+                <span className="text-sky-700 font-semibold">{dynamicSpots.length} Spots Mapped</span>
               </div>
             </div>
           </div>

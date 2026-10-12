@@ -321,58 +321,58 @@ export function DistrictExplorerMap({
         </span>
       </div>
 
-      {/* Map Style Selector Controls (Google Roadmap / Satellite / Terrain / Dark Mapcn) */}
-      <div className="absolute top-3 right-3 z-[900] flex items-center gap-1 rounded-xl border border-zinc-800/80 bg-zinc-950/90 p-1 backdrop-blur-md text-[10px] shadow-lg">
+      {/* Map Style Selector Controls (Google Roadmap / Satellite / Terrain / Light Map) */}
+      <div className="absolute top-3 right-3 z-[900] flex items-center gap-1 rounded-xl border border-slate-200/90 bg-white/95 p-1 backdrop-blur-md text-[10px] shadow-md">
         <button
           onClick={() => setMapStyle("google-roadmap")}
-          className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "google-roadmap" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+          className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+            mapStyle === "google-roadmap" ? "bg-sky-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           }`}
         >
           🗺️ Google Map
         </button>
         <button
           onClick={() => setMapStyle("google-satellite")}
-          className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "google-satellite" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+          className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+            mapStyle === "google-satellite" ? "bg-sky-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           }`}
         >
           🛰️ Satellite
         </button>
         <button
           onClick={() => setMapStyle("google-terrain")}
-          className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "google-terrain" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+          className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+            mapStyle === "google-terrain" ? "bg-sky-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           }`}
         >
           ⛰️ Topo Terrain
         </button>
         <button
           onClick={() => setMapStyle("osm")}
-          className={`px-2.5 py-1 rounded-lg font-semibold transition ${
-            mapStyle === "osm" ? "bg-emerald-400 text-zinc-950 font-extrabold shadow-sm" : "text-zinc-300 hover:text-white hover:bg-zinc-800"
+          className={`px-2.5 py-1 rounded-lg font-bold transition cursor-pointer ${
+            mapStyle === "osm" ? "bg-sky-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-slate-100"
           }`}
         >
-          🌙 Dark Mapcn
+          🌙 Night Map
         </button>
       </div>
 
-      {/* Compact Floating Mapcn Card Popup (Sleek & Non-Intrusive) */}
+      {/* Compact Floating Map Card Popup (Sleek & Non-Intrusive) */}
       {activeOrHoveredSpot && !isPopupDismissed && (
-        <div className="absolute bottom-4 left-4 z-[1000] w-72 md:w-80 rounded-2xl border border-zinc-700/80 bg-zinc-950/95 p-3.5 text-zinc-100 shadow-2xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2">
+        <div className="absolute bottom-4 left-4 z-[1000] w-72 md:w-80 rounded-2xl border border-sky-100 bg-white/95 p-3.5 text-slate-800 shadow-xl backdrop-blur-md animate-in fade-in slide-in-from-bottom-2">
           <div className="flex items-start justify-between gap-2">
-            <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-300 text-[10px] uppercase tracking-wider">
+            <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700 text-[10px] uppercase tracking-wider font-bold">
               {getCategoryIconSymbol(activeOrHoveredSpot.category)} {activeOrHoveredSpot.categoryLabel}
             </Badge>
 
             <div className="flex items-center gap-2">
-              <div className="flex items-center gap-1 text-xs font-bold text-amber-400">
-                <Star className="size-3.5 fill-amber-400 text-amber-400" />
+              <div className="flex items-center gap-1 text-xs font-bold text-amber-500">
+                <Star className="size-3.5 fill-amber-400 text-amber-500" />
                 <span>{activeOrHoveredSpot.rating}</span>
               </div>
               <button
                 onClick={() => setIsPopupDismissed(true)}
-                className="rounded-full p-1 text-zinc-400 hover:bg-zinc-800 hover:text-white transition"
+                className="rounded-full p-1 text-slate-400 hover:bg-slate-100 hover:text-slate-700 transition cursor-pointer"
                 title="Dismiss overlay"
               >
                 <X className="size-3.5" />
@@ -380,16 +380,16 @@ export function DistrictExplorerMap({
             </div>
           </div>
 
-          <h4 className="mt-1.5 font-display text-sm font-bold text-white line-clamp-1">{activeOrHoveredSpot.name}</h4>
-          <p className="mt-0.5 text-[11px] text-zinc-300 line-clamp-2 leading-tight">{activeOrHoveredSpot.tagline}</p>
+          <h4 className="mt-1.5 font-display text-sm font-bold text-slate-900 line-clamp-1">{activeOrHoveredSpot.name}</h4>
+          <p className="mt-0.5 text-[11px] text-slate-600 line-clamp-2 leading-tight">{activeOrHoveredSpot.tagline}</p>
 
-          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-zinc-400 pt-1.5 border-t border-zinc-800/80">
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-500 pt-1.5 border-t border-slate-100">
             <span className="flex items-center gap-1">
-              <MapPin className="size-3 text-emerald-400" />
+              <MapPin className="size-3 text-sky-600" />
               {activeOrHoveredSpot.address.split(",")[0]}
             </span>
             <span className="flex items-center gap-1">
-              <Clock className="size-3 text-sky-400" />
+              <Clock className="size-3 text-sky-600" />
               {activeOrHoveredSpot.timings}
             </span>
           </div>
@@ -397,7 +397,7 @@ export function DistrictExplorerMap({
           {activeOrHoveredSpot.mustTry && (
             <div className="mt-1.5 flex flex-wrap gap-1">
               {activeOrHoveredSpot.mustTry.slice(0, 2).map((item, idx) => (
-                <span key={idx} className="rounded bg-zinc-800/90 px-1.5 py-0.5 text-[9px] text-amber-300">
+                <span key={idx} className="rounded bg-sky-50 px-1.5 py-0.5 text-[9px] font-medium text-sky-700 border border-sky-100">
                   • {item}
                 </span>
               ))}
@@ -407,18 +407,18 @@ export function DistrictExplorerMap({
       )}
 
       {/* Floating Map Category Legend */}
-      <div className="absolute bottom-4 right-4 z-[900] flex items-center gap-3 rounded-xl border border-zinc-800/80 bg-zinc-950/85 px-3 py-1.5 backdrop-blur-md text-[10px]">
-        <div className="flex items-center gap-1.5 text-amber-300">
-          <span>🛕</span> <span className="font-medium text-zinc-200">Temples</span>
+      <div className="absolute bottom-4 right-4 z-[900] flex items-center gap-3 rounded-xl border border-slate-200 bg-white/90 px-3 py-1.5 backdrop-blur-md text-[10px] shadow-sm">
+        <div className="flex items-center gap-1.5 text-amber-600">
+          <span>🛕</span> <span className="font-bold text-slate-700">Temples</span>
         </div>
-        <div className="flex items-center gap-1.5 text-emerald-300">
-          <span>🏛️</span> <span className="font-medium text-zinc-200">Tourist</span>
+        <div className="flex items-center gap-1.5 text-sky-600">
+          <span>🏛️</span> <span className="font-bold text-slate-700">Tourist</span>
         </div>
-        <div className="flex items-center gap-1.5 text-orange-300">
-          <span>🍲</span> <span className="font-medium text-zinc-200">Food</span>
+        <div className="flex items-center gap-1.5 text-orange-600">
+          <span>🍲</span> <span className="font-bold text-slate-700">Food</span>
         </div>
-        <div className="flex items-center gap-1.5 text-purple-300">
-          <span>🛍️</span> <span className="font-medium text-zinc-200">Thrift Streets</span>
+        <div className="flex items-center gap-1.5 text-purple-600">
+          <span>🛍️</span> <span className="font-bold text-slate-700">Thrift Streets</span>
         </div>
       </div>
     </div>
