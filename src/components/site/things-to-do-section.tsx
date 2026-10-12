@@ -1,9 +1,11 @@
 import React, { useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, ChevronLeft, MapPin, Sparkles, Compass, Mountain, Landmark, Waves } from "lucide-react";
+import { ChevronRight, ChevronLeft, MapPin, Sparkles, Mountain, Landmark, Waves } from "lucide-react";
+import { FaCloud } from "react-icons/fa";
+import { BsBookmarkStarFill } from "react-icons/bs";
+import { VscSparkleFilled } from "react-icons/vsc";
 import { SafeImage } from "@/components/ui/safe-image";
-import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
-import { MinimalCarousel, type CarouselCard } from "@/components/watermelon/minimal-carousel";
+import { MinimalCarousel, type CarouselCard } from "@/components/ui/minimal-carousel";
 
 export interface DestinationHub {
   name: string;
@@ -141,19 +143,50 @@ export function ThingsToDoSection() {
     }
   };
 
-  const hubCarouselCards: CarouselCard[] = DESTINATION_HUBS.map((hub) => ({
-    id: hub.name.toLowerCase().replace(/\s+/g, "-"),
-    title: hub.name,
-    value: hub.activitiesCount,
-    image: hub.image,
-    route: hub.route,
-    tagline: hub.tagline,
-    icon: hub.name === "Ooty" || hub.name === "Kodaikanal" 
-      ? Mountain 
-      : hub.name === "Mahabalipuram" || hub.name === "Rameswaram"
-      ? Waves
-      : Landmark,
-  }));
+  const hubCarouselCards: CarouselCard[] = [
+    {
+      id: "ooty",
+      title: "Ooty",
+      value: "52 Activities · Nilgiris",
+      color: "bg-[#0284c7]",
+      icon: Mountain,
+    },
+    {
+      id: "kodaikanal",
+      title: "Kodaikanal",
+      value: "44 Activities · Dindigul",
+      color: "bg-[#0ea5e9]",
+      icon: FaCloud,
+    },
+    {
+      id: "madurai",
+      title: "Madurai",
+      value: "68 Activities · Heritage",
+      color: "bg-[#3b82f6]",
+      icon: Landmark,
+    },
+    {
+      id: "rameswaram",
+      title: "Rameswaram",
+      value: "36 Activities · Coastal",
+      color: "bg-[#0284c7]",
+      icon: Waves,
+    },
+    {
+      id: "mahabalipuram",
+      title: "Mahabalipuram",
+      value: "29 Activities · UNESCO",
+      color: "bg-[#0369a1]",
+      icon: VscSparkleFilled,
+    },
+    {
+      id: "thanjavur",
+      title: "Thanjavur",
+      value: "41 Activities · Chola",
+      color: "bg-[#1d4ed8]",
+      icon: BsBookmarkStarFill,
+    },
+  ];
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
@@ -171,17 +204,27 @@ export function ThingsToDoSection() {
             </p>
           </div>
           <span className="text-[11px] font-mono font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-            Tap hubs to switch
+            Tap hubs to expand
           </span>
         </div>
 
-        {/* Watermelon Minimal Carousel */}
+        {/* Minimal Carousel Component */}
         <MinimalCarousel
           cards={hubCarouselCards}
-          onActionClick={(card) => {
-            if (card.route) {
-              navigate({ to: card.route });
-            }
+          onCopyClick={(card) => {
+            const districtRoutes: Record<string, string> = {
+              ooty: "/districts/the-nilgiris",
+              kodaikanal: "/districts/dindigul",
+              madurai: "/districts/madurai",
+              rameswaram: "/districts/ramanathapuram",
+              mahabalipuram: "/districts/chengalpattu",
+              thanjavur: "/districts/thanjavur",
+            };
+            const targetRoute = districtRoutes[card.id] || "/explore";
+            navigate({ to: targetRoute });
+          }}
+          onCustomizeClick={(card) => {
+            navigate({ to: "/explore" });
           }}
         />
       </div>
