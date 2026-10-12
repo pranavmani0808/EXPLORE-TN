@@ -199,22 +199,22 @@ export function TripRouteBuilderPanel({
         html: `
           <div style="position: relative; display: flex; align-items: center; justify-content: center; cursor: pointer;">
             <div style="
-              background: ${isStart ? '#10b981' : isEnd ? '#f59e0b' : '#3b82f6'};
-              color: #09090b;
-              font-weight: 900;
+              background: ${isStart ? '#0284c7' : isEnd ? '#0369a1' : '#38bdf8'};
+              color: #ffffff;
+              font-weight: 800;
               font-size: 11px;
               font-family: system-ui, sans-serif;
               border: 2px solid #ffffff;
               border-radius: 9999px;
               padding: 4px 10px;
-              box-shadow: 0 4px 14px rgba(0,0,0,0.6);
+              box-shadow: 0 4px 14px rgba(2,132,199,0.35);
               display: flex;
               align-items: center;
               gap: 6px;
               white-space: nowrap;
               transition: transform 0.2s ease;
             ">
-              <span style="display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: rgba(9,9,11,0.9); color: #ffffff; font-size: 10px;">${numBadge}</span>
+              <span style="display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; border-radius: 50%; background: #ffffff; color: #0284c7; font-weight: 900; font-size: 10px;">${numBadge}</span>
               <span>${place.name || place.canonicalName}</span>
             </div>
           </div>
@@ -242,14 +242,14 @@ export function TripRouteBuilderPanel({
 
       // Outer casing border
       const casing = L.polyline(latLngs, {
-        color: "#09090b",
-        weight: 7,
-        opacity: 0.9,
+        color: "#ffffff",
+        weight: 6,
+        opacity: 0.95,
       });
 
       // Inner polyline
       const line = L.polyline(latLngs, {
-        color: "#10b981",
+        color: "#0284c7",
         weight: 4,
         opacity: 1,
         dashArray: "8, 8",
@@ -303,19 +303,19 @@ export function TripRouteBuilderPanel({
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, x: 40 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="flex flex-col h-full rounded-3xl border border-zinc-800 bg-zinc-950 overflow-hidden shadow-2xl relative"
+      className="flex flex-col h-full rounded-3xl border border-sky-100 bg-white overflow-hidden shadow-2xl relative"
     >
       {/* Top Panel Header */}
-      <div className="flex items-center justify-between px-5 py-4 bg-zinc-900/90 border-b border-zinc-800 shrink-0">
+      <div className="flex items-center justify-between px-5 py-4 bg-slate-50/80 border-b border-slate-100 shrink-0">
         <div className="flex items-center gap-2.5">
-          <span className="grid size-8 place-items-center rounded-xl bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 font-extrabold text-xs">
+          <span className="grid size-8 place-items-center rounded-xl bg-sky-50 border border-sky-200 text-sky-600 font-extrabold text-xs">
             {stops.length}
           </span>
           <div>
-            <h3 className="font-display text-base font-extrabold text-white tracking-tight leading-none">
+            <h3 className="font-display text-base font-extrabold text-slate-900 tracking-tight leading-none">
               Your Trip
             </h3>
-            <p className="text-[11px] text-zinc-400 font-mono mt-0.5">
+            <p className="text-[11px] text-slate-500 font-mono mt-0.5">
               {stops.length === 0
                 ? "No places added yet"
                 : stops.length === 1
@@ -329,7 +329,7 @@ export function TripRouteBuilderPanel({
           {stops.length > 0 && (
             <button
               onClick={onClearRoute}
-              className="text-xs text-zinc-400 hover:text-rose-400 font-medium transition px-2 py-1 rounded-lg hover:bg-zinc-800"
+              className="text-xs text-slate-500 hover:text-rose-600 font-medium transition px-2 py-1 rounded-lg hover:bg-slate-100"
               title="Clear all stops"
             >
               Clear
@@ -337,7 +337,7 @@ export function TripRouteBuilderPanel({
           )}
           <button
             onClick={onClose}
-            className="grid size-7 place-items-center rounded-lg bg-zinc-800 text-zinc-400 hover:text-white transition"
+            className="grid size-7 place-items-center rounded-lg bg-slate-100 text-slate-500 hover:text-slate-900 transition"
             title="Minimize Panel"
           >
             <X className="size-4" />
@@ -346,15 +346,15 @@ export function TripRouteBuilderPanel({
       </div>
 
       {/* Map Canvas (Top Split) */}
-      <div className="relative h-64 sm:h-72 w-full bg-zinc-900 shrink-0 border-b border-zinc-800">
+      <div className="relative h-64 sm:h-72 w-full bg-slate-100 shrink-0 border-b border-slate-200">
         <div ref={mapContainerRef} className="size-full" />
         {/* Floating Quick Summary Badge Over Map */}
         {stops.length >= 2 && (
-          <div className="absolute top-3 left-3 z-10 rounded-full bg-zinc-950/90 border border-zinc-700/80 px-3.5 py-1.5 text-xs font-mono font-bold text-white shadow-xl backdrop-blur-md flex items-center gap-2">
-            <Navigation className="size-3.5 text-emerald-400" />
+          <div className="absolute top-3 left-3 z-10 rounded-full bg-white/95 border border-sky-200 px-3.5 py-1.5 text-xs font-mono font-bold text-slate-900 shadow-lg backdrop-blur-md flex items-center gap-2">
+            <Navigation className="size-3.5 text-sky-600" />
             <span>{totalDistanceKm} km</span>
-            <span className="text-zinc-500">·</span>
-            <Clock className="size-3.5 text-amber-400" />
+            <span className="text-slate-300">·</span>
+            <Clock className="size-3.5 text-amber-600" />
             <span>{totalDurationStr}</span>
           </div>
         )}
@@ -364,51 +364,51 @@ export function TripRouteBuilderPanel({
       <div className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {stops.length === 0 ? (
           <div className="text-center py-10 px-4 space-y-3">
-            <div className="inline-flex p-3 rounded-2xl bg-amber-500/10 text-amber-400 border border-amber-500/20">
+            <div className="inline-flex p-3 rounded-2xl bg-amber-50 text-amber-600 border border-amber-200">
               <Compass className="size-6" />
             </div>
-            <h4 className="text-sm font-bold text-white">Your route is currently empty</h4>
-            <p className="text-xs text-zinc-400 max-w-xs mx-auto leading-relaxed">
-              Browse destinations on the left and click <strong className="text-emerald-400">+ Add to Map</strong> to build your customized Tamil Nadu trip.
+            <h4 className="text-sm font-bold text-slate-900">Your route is currently empty</h4>
+            <p className="text-xs text-slate-500 max-w-xs mx-auto leading-relaxed">
+              Browse destinations on the left and click <strong className="text-sky-600">+ Add to Map</strong> to build your customized Tamil Nadu trip.
             </p>
           </div>
         ) : stops.length === 1 ? (
           <div className="space-y-4">
             {/* Single Destination View */}
-            <div className="p-4 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 space-y-3">
+            <div className="p-4 rounded-2xl border border-sky-200 bg-sky-50/60 space-y-3">
               <div className="flex items-center gap-3">
-                <span className="grid size-7 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-black text-xs">
+                <span className="grid size-7 place-items-center rounded-full bg-sky-500 text-white font-black text-xs shadow-xs">
                   1
                 </span>
                 <div>
-                  <h4 className="font-bold text-sm text-white">{stops[0].name || stops[0].canonicalName}</h4>
-                  <p className="text-xs text-emerald-300 font-mono">{stops[0].district} District</p>
+                  <h4 className="font-bold text-sm text-slate-900">{stops[0].name || stops[0].canonicalName}</h4>
+                  <p className="text-xs text-sky-700 font-mono">{stops[0].district} District</p>
                 </div>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed">
+              <p className="text-xs text-slate-600 leading-relaxed">
                 📍 Added to your trip. Select a second destination to calculate road distance and estimated travel time.
               </p>
-              <div className="text-[11px] font-mono text-zinc-400 bg-zinc-900/80 p-2.5 rounded-xl border border-zinc-800">
+              <div className="text-[11px] font-mono text-slate-500 bg-white p-2.5 rounded-xl border border-slate-200">
                 Add a starting point or second stop to calculate route distance.
               </div>
             </div>
 
             {/* Contextual Information Drawer */}
-            <div className="p-3.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 space-y-2 text-xs">
-              <h5 className="font-bold text-zinc-200 flex items-center gap-1.5 text-xs">
-                <Info className="size-3.5 text-emerald-400" /> Destination Intelligence
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 space-y-2 text-xs">
+              <h5 className="font-bold text-slate-800 flex items-center gap-1.5 text-xs">
+                <Info className="size-3.5 text-sky-600" /> Destination Intelligence
               </h5>
               {(() => {
                 const info = getVerifiedContextualInfo(stops[0]);
                 return (
-                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-zinc-300">
-                    <div><span className="text-zinc-500 block">Opening Hours:</span> {info.openingHours}</div>
-                    <div><span className="text-zinc-500 block">Entry Fee:</span> {info.entryFee}</div>
-                    <div><span className="text-zinc-500 block">Elevation:</span> {info.elevation}</div>
-                    <div><span className="text-zinc-500 block">Weather:</span> {info.weather}</div>
-                    <div className="col-span-2"><span className="text-zinc-500 block">Parking:</span> {info.parkingInfo}</div>
+                  <div className="grid grid-cols-2 gap-2 pt-1 text-[11px] text-slate-600">
+                    <div><span className="text-slate-400 block">Opening Hours:</span> {info.openingHours}</div>
+                    <div><span className="text-slate-400 block">Entry Fee:</span> {info.entryFee}</div>
+                    <div><span className="text-slate-400 block">Elevation:</span> {info.elevation}</div>
+                    <div><span className="text-slate-400 block">Weather:</span> {info.weather}</div>
+                    <div className="col-span-2"><span className="text-slate-400 block">Parking:</span> {info.parkingInfo}</div>
                     {info.ghatInfo && (
-                      <div className="col-span-2 text-amber-400 font-semibold"><span className="text-zinc-500 block">Ghat Pass:</span> {info.ghatInfo}</div>
+                      <div className="col-span-2 text-amber-700 font-semibold"><span className="text-slate-400 block">Ghat Pass:</span> {info.ghatInfo}</div>
                     )}
                   </div>
                 );
@@ -426,22 +426,22 @@ export function TripRouteBuilderPanel({
 
                 return (
                   <React.Fragment key={place.id || place.slug}>
-                    <div className="group rounded-2xl border border-zinc-800 bg-zinc-900/90 p-3.5 transition-all hover:border-zinc-700 space-y-2">
+                    <div className="group rounded-2xl border border-slate-200 bg-white p-3.5 transition-all hover:border-sky-300 shadow-xs space-y-2">
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3 min-w-0">
-                          <span className="grid size-6 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-black text-xs shrink-0">
+                          <span className="grid size-6 place-items-center rounded-full bg-sky-500 text-white font-black text-xs shrink-0 shadow-xs">
                             {idx + 1}
                           </span>
                           {place.image && (
                             <img
                               src={place.image}
                               alt={place.name}
-                              className="size-10 rounded-xl object-cover shrink-0 border border-zinc-800"
+                              className="size-10 rounded-xl object-cover shrink-0 border border-slate-100"
                             />
                           )}
                           <div className="min-w-0">
-                            <h4 className="font-bold text-xs text-white truncate">{place.name || place.canonicalName}</h4>
-                            <p className="text-[11px] text-zinc-400 font-mono truncate">{place.district}</p>
+                            <h4 className="font-bold text-xs text-slate-900 truncate">{place.name || place.canonicalName}</h4>
+                            <p className="text-[11px] text-slate-500 font-mono truncate">{place.district}</p>
                           </div>
                         </div>
 
@@ -449,7 +449,7 @@ export function TripRouteBuilderPanel({
                           <button
                             onClick={() => handleMoveUp(idx)}
                             disabled={idx === 0}
-                            className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+                            className="p-1 text-slate-400 hover:text-slate-850 disabled:opacity-30 disabled:pointer-events-none"
                             title="Move Up"
                           >
                             <ArrowUp className="size-3.5" />
@@ -457,21 +457,21 @@ export function TripRouteBuilderPanel({
                           <button
                             onClick={() => handleMoveDown(idx)}
                             disabled={idx === stops.length - 1}
-                            className="p-1 text-zinc-400 hover:text-white disabled:opacity-30 disabled:pointer-events-none"
+                            className="p-1 text-slate-400 hover:text-slate-850 disabled:opacity-30 disabled:pointer-events-none"
                             title="Move Down"
                           >
                             <ArrowDown className="size-3.5" />
                           </button>
                           <button
                             onClick={() => setExpandedStopId(isExpanded ? null : place.id)}
-                            className="p-1 text-zinc-400 hover:text-emerald-400 transition"
+                            className="p-1 text-slate-400 hover:text-sky-600 transition"
                             title="View Info"
                           >
                             {isExpanded ? <ChevronDown className="size-3.5" /> : <ChevronRight className="size-3.5" />}
                           </button>
                           <button
                             onClick={() => onRemoveStop(place.id)}
-                            className="p-1 text-zinc-400 hover:text-rose-400 transition"
+                            className="p-1 text-slate-400 hover:text-rose-600 transition"
                             title="Remove Stop"
                           >
                             <X className="size-3.5" />
@@ -485,14 +485,14 @@ export function TripRouteBuilderPanel({
                           initial={{ opacity: 0, height: 0 }}
                           animate={{ opacity: 1, height: "auto" }}
                           exit={{ opacity: 0, height: 0 }}
-                          className="pt-2 border-t border-zinc-800 text-[11px] text-zinc-300 space-y-1.5"
+                          className="pt-2 border-t border-slate-100 text-[11px] text-slate-600 space-y-1.5"
                         >
                           <div className="grid grid-cols-2 gap-2">
-                            <div><span className="text-zinc-500 block">Hours:</span> {info.openingHours}</div>
-                            <div><span className="text-zinc-500 block">Entry:</span> {info.entryFee}</div>
-                            <div className="col-span-2"><span className="text-zinc-500 block">Parking:</span> {info.parkingInfo}</div>
+                            <div><span className="text-slate-400 block">Hours:</span> {info.openingHours}</div>
+                            <div><span className="text-slate-400 block">Entry:</span> {info.entryFee}</div>
+                            <div className="col-span-2"><span className="text-slate-400 block">Parking:</span> {info.parkingInfo}</div>
                             {info.ghatInfo && (
-                              <div className="col-span-2 text-amber-400 font-semibold"><span className="text-zinc-500 block">Ghat Pass:</span> {info.ghatInfo}</div>
+                              <div className="col-span-2 text-amber-700 font-semibold"><span className="text-slate-400 block">Ghat Pass:</span> {info.ghatInfo}</div>
                             )}
                           </div>
                         </motion.div>
@@ -501,12 +501,12 @@ export function TripRouteBuilderPanel({
 
                     {/* Distance & Travel Time to Next Stop */}
                     {nextSegment && (
-                      <div className="flex items-center justify-center gap-2 py-1 text-[11px] font-mono text-emerald-400">
-                        <span className="h-4 w-px bg-emerald-500/30" />
-                        <span className="rounded-full bg-emerald-500/10 border border-emerald-500/30 px-3 py-0.5 font-bold">
+                      <div className="flex items-center justify-center gap-2 py-1 text-[11px] font-mono text-sky-600">
+                        <span className="h-4 w-px bg-sky-200" />
+                        <span className="rounded-full bg-sky-50 border border-sky-200 px-3 py-0.5 font-bold">
                           ↓ {nextSegment.distanceStr} · {nextSegment.durationStr}
                         </span>
-                        <span className="h-4 w-px bg-emerald-500/30" />
+                        <span className="h-4 w-px bg-sky-200" />
                       </div>
                     )}
                   </React.Fragment>
@@ -515,32 +515,32 @@ export function TripRouteBuilderPanel({
             </div>
 
             {/* Total Summary */}
-            <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-between text-xs font-mono text-white">
+            <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between text-xs font-mono text-slate-900 shadow-xs">
               <div>
-                <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Total Route Metrics</p>
-                <p className="text-sm font-extrabold text-emerald-400 mt-0.5">{totalDistanceKm} km · {totalDurationStr}</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Total Route Metrics</p>
+                <p className="text-sm font-extrabold text-sky-600 mt-0.5">{totalDistanceKm} km · {totalDurationStr}</p>
               </div>
               <div className="text-right">
-                <p className="text-[10px] text-zinc-400 uppercase tracking-wider">Stops Count</p>
-                <p className="text-sm font-extrabold text-amber-400 mt-0.5">{stops.length} Locations</p>
+                <p className="text-[10px] text-slate-500 uppercase tracking-wider font-semibold">Stops Count</p>
+                <p className="text-sm font-extrabold text-amber-600 mt-0.5">{stops.length} Locations</p>
               </div>
             </div>
 
             {/* Optimization Option for 3+ Stops */}
             {stops.length >= 3 && (
-              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/30 space-y-2">
+              <div className="p-3.5 rounded-2xl bg-amber-50 border border-amber-200 space-y-2">
                 <div className="flex items-center justify-between text-xs">
-                  <span className="font-extrabold text-amber-300 flex items-center gap-1.5">
-                    <Wand2 className="size-3.5" /> Optimize Route Order
+                  <span className="font-extrabold text-amber-800 flex items-center gap-1.5">
+                    <Wand2 className="size-3.5 text-amber-600" /> Optimize Route Order
                   </span>
                   <button
                     onClick={handleOptimize}
-                    className="px-3 py-1 rounded-xl bg-amber-400 hover:bg-amber-300 text-zinc-950 font-extrabold text-xs transition cursor-pointer"
+                    className="px-3 py-1 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs transition cursor-pointer"
                   >
                     Optimize
                   </button>
                 </div>
-                <p className="text-[11px] text-zinc-300 leading-snug">
+                <p className="text-[11px] text-slate-600 leading-snug">
                   Rearranges stops to minimize driving distance while keeping your start point fixed.
                 </p>
               </div>
@@ -551,7 +551,7 @@ export function TripRouteBuilderPanel({
 
       {/* Action Footer */}
       {stops.length > 0 && (
-        <div className="p-4 bg-zinc-900/90 border-t border-zinc-800 shrink-0 flex items-center gap-2">
+        <div className="p-4 bg-slate-50/80 border-t border-slate-100 shrink-0 flex items-center gap-2">
           <Link
             to="/routes"
             data-testid="panel-plan-route-btn"
@@ -566,7 +566,7 @@ export function TripRouteBuilderPanel({
                     destination: stops[0]?.id,
                   }
             }
-            className="flex-1 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs text-center transition shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+            className="flex-1 py-3 px-4 rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs text-center transition shadow-md shadow-sky-500/20 flex items-center justify-center gap-2 cursor-pointer"
           >
             <span>Plan Route</span>
             <ArrowRight className="size-4" />
