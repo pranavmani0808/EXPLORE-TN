@@ -124,7 +124,7 @@ function EventDetailPage() {
 
   return (
     <AppShell>
-      <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans pb-24">
+      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-24">
         {/* HERO BANNER SECTION */}
         <section className="relative w-full h-[360px] sm:h-[460px] overflow-hidden bg-zinc-950">
           <img
@@ -138,7 +138,7 @@ function EventDetailPage() {
           <div className="absolute top-6 inset-x-4 sm:inset-x-8 max-w-7xl mx-auto flex items-center justify-between z-10">
             <Link
               to="/events"
-              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-700 text-xs font-semibold text-zinc-300 hover:text-white backdrop-blur-md transition"
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-zinc-950/80 border border-zinc-700 text-xs font-semibold text-zinc-300 hover:text-slate-900 backdrop-blur-md transition"
             >
               ← Back to Events
             </Link>
@@ -147,7 +147,7 @@ function EventDetailPage() {
               <button
                 type="button"
                 onClick={handleShare}
-                className="size-9 rounded-full bg-zinc-950/80 border border-zinc-700 flex items-center justify-center text-zinc-300 hover:text-white backdrop-blur-md transition cursor-pointer"
+                className="size-9 rounded-full bg-zinc-950/80 border border-zinc-700 flex items-center justify-center text-zinc-300 hover:text-slate-900 backdrop-blur-md transition cursor-pointer"
                 title="Share event"
               >
                 <Share2 className="size-4" />
@@ -158,7 +158,7 @@ function EventDetailPage() {
                 className={`size-9 rounded-full border flex items-center justify-center backdrop-blur-md transition cursor-pointer ${
                   isSaved
                     ? "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-md shadow-emerald-500/30"
-                    : "bg-zinc-950/80 text-zinc-300 border-zinc-700 hover:text-white"
+                    : "bg-zinc-950/80 text-zinc-300 border-zinc-700 hover:text-slate-900"
                 }`}
                 title={isSaved ? "Saved" : "Save to bucket list"}
               >
@@ -187,7 +187,7 @@ function EventDetailPage() {
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-display text-white tracking-tight drop-shadow-lg">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-display text-slate-900 tracking-tight drop-shadow-lg">
               {event.title}
             </h1>
 
@@ -216,7 +216,7 @@ function EventDetailPage() {
           <div className="lg:col-span-2 space-y-8">
             {/* Overview Section */}
             <section className="space-y-4 rounded-3xl bg-zinc-900/60 border border-zinc-800/80 p-6 sm:p-8">
-              <h2 className="font-display font-bold text-xl text-white">About the Experience</h2>
+              <h2 className="font-display font-bold text-xl text-slate-900">About the Experience</h2>
               <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
                 {event.fullDescription}
               </p>
@@ -230,7 +230,7 @@ function EventDetailPage() {
                     <span className="text-[10px] uppercase font-bold tracking-wider text-emerald-400 font-mono">
                       Curated Road Expedition
                     </span>
-                    <h2 className="font-display font-bold text-xl text-white">
+                    <h2 className="font-display font-bold text-xl text-slate-900">
                       Group Trip Itinerary & Inclusions
                     </h2>
                   </div>
@@ -256,7 +256,7 @@ function EventDetailPage() {
                         <span className="px-2 py-0.5 rounded-md bg-emerald-500 text-zinc-950 text-xs font-black">
                           DAY {day.day}
                         </span>
-                        <h4 className="font-bold text-sm text-white">{day.title}</h4>
+                        <h4 className="font-bold text-sm text-slate-900">{day.title}</h4>
                       </div>
                       <p className="text-xs text-zinc-300 leading-relaxed">{day.description}</p>
                       <div className="flex flex-wrap gap-2 pt-1">
@@ -308,15 +308,15 @@ function EventDetailPage() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-zinc-300 bg-zinc-950 p-4 rounded-2xl border border-zinc-800">
                   <div className="space-y-1">
                     <span className="text-zinc-500 font-semibold">🚍 Transportation:</span>
-                    <p className="font-medium text-white">{event.groupTrip.transportation}</p>
+                    <p className="font-medium text-slate-900">{event.groupTrip.transportation}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-zinc-500 font-semibold">🏨 Accommodation:</span>
-                    <p className="font-medium text-white">{event.groupTrip.accommodation}</p>
+                    <p className="font-medium text-slate-900">{event.groupTrip.accommodation}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-zinc-500 font-semibold">📍 Assembly Point:</span>
-                    <p className="font-medium text-white">{event.groupTrip.meetingPoint}</p>
+                    <p className="font-medium text-slate-900">{event.groupTrip.meetingPoint}</p>
                   </div>
                   <div className="space-y-1">
                     <span className="text-zinc-500 font-semibold">⚠️ Cancellation:</span>
@@ -333,7 +333,7 @@ function EventDetailPage() {
                   <span className="text-[10px] uppercase font-bold tracking-wider text-amber-400 font-mono">
                     Living Tamil Heritage
                   </span>
-                  <h2 className="font-display font-bold text-xl text-white">
+                  <h2 className="font-display font-bold text-xl text-slate-900">
                     Cultural Significance & Travel Guide
                   </h2>
                 </div>
@@ -401,7 +401,7 @@ function EventDetailPage() {
                   <span className="text-[10px] uppercase font-bold tracking-wider text-teal-400 font-mono">
                     Seasonal Destination Guide
                   </span>
-                  <h2 className="font-display font-bold text-xl text-white">
+                  <h2 className="font-display font-bold text-xl text-slate-900">
                     Festive Street Routes, Lights & Local Cuisine
                   </h2>
                 </div>
@@ -445,7 +445,7 @@ function EventDetailPage() {
                   <span className="text-[10px] uppercase tracking-wider font-bold text-emerald-400 font-mono">
                     ExploreTN Destination Integration
                   </span>
-                  <h4 className="font-display font-bold text-base text-white">
+                  <h4 className="font-display font-bold text-base text-slate-900">
                     Visiting {event.district} for this event?
                   </h4>
                   <p className="text-xs text-zinc-400">
@@ -472,7 +472,7 @@ function EventDetailPage() {
                   Access & Participation
                 </span>
                 <div className="flex items-baseline justify-between mt-1">
-                  <span className="text-2xl font-black text-white font-mono">
+                  <span className="text-2xl font-black text-slate-900 font-mono">
                     {event.priceDisplay}
                   </span>
                   <span className="text-xs text-zinc-400">
@@ -486,7 +486,7 @@ function EventDetailPage() {
                 {event.totalCapacity && (
                   <div className="flex items-center justify-between text-zinc-300">
                     <span>Available Capacity:</span>
-                    <strong className="text-white font-mono">
+                    <strong className="text-slate-900 font-mono">
                       {event.availableSeats ?? event.totalCapacity} / {event.totalCapacity}
                     </strong>
                   </div>
@@ -540,7 +540,7 @@ function EventDetailPage() {
                     className="size-11 rounded-2xl object-cover border border-zinc-700 shrink-0"
                   />
                   <div className="space-y-0.5 min-w-0">
-                    <p className="font-bold text-sm text-white flex items-center gap-1.5">
+                    <p className="font-bold text-sm text-slate-900 flex items-center gap-1.5">
                       <span className="truncate">{event.organizer.name}</span>
                       {event.organizer.verified && (
                         <ShieldCheck className="size-3.5 text-emerald-400 shrink-0" />
@@ -567,7 +567,7 @@ function EventDetailPage() {
         {/* RELATED EVENTS SECTION */}
         {relatedEvents.length > 0 && (
           <section className="max-w-7xl mx-auto px-4 sm:px-8 pt-16 space-y-6">
-            <h2 className="font-display font-bold text-2xl text-white">
+            <h2 className="font-display font-bold text-2xl text-slate-900">
               More Experiences in {event.district} & Tamil Nadu
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -591,7 +591,7 @@ function EventDetailPage() {
                   setShowBookingModal(false);
                   setIsBookingSuccess(false);
                 }}
-                className="absolute top-5 right-5 text-zinc-400 hover:text-white p-1 rounded-lg hover:bg-slate-800 transition"
+                className="absolute top-5 right-5 text-zinc-400 hover:text-slate-900 p-1 rounded-lg hover:bg-slate-800 transition"
               >
                 <X className="size-5" />
               </button>
@@ -599,7 +599,7 @@ function EventDetailPage() {
               {isBookingSuccess ? (
                 <div className="text-center py-6 space-y-4">
                   <CheckCircle2 className="size-14 text-emerald-400 mx-auto" />
-                  <h3 className="font-display font-bold text-xl text-white">Booking Confirmed!</h3>
+                  <h3 className="font-display font-bold text-xl text-slate-900">Booking Confirmed!</h3>
                   <p className="text-xs text-zinc-300 leading-relaxed">
                     You have successfully secured your spot for <strong>{event.title}</strong>. A confirmation summary has been saved to your ExploreTN account profile.
                   </p>
@@ -623,7 +623,7 @@ function EventDetailPage() {
                     <span className="text-[11px] font-mono font-bold text-emerald-400 uppercase">
                       Confirm Participation
                     </span>
-                    <h3 className="font-display font-bold text-xl text-white mt-1">
+                    <h3 className="font-display font-bold text-xl text-slate-900 mt-1">
                       {event.title}
                     </h3>
                     <p className="text-xs text-zinc-400 mt-1">
@@ -640,17 +640,17 @@ function EventDetailPage() {
                         <button
                           type="button"
                           onClick={() => setTicketCount(Math.max(1, ticketCount - 1))}
-                          className="size-8 rounded-lg bg-zinc-800 border border-zinc-700 text-white font-bold"
+                          className="size-8 rounded-lg bg-zinc-800 border border-zinc-700 text-slate-900 font-bold"
                         >
                           -
                         </button>
-                        <span className="font-mono text-base font-bold text-white w-8 text-center">
+                        <span className="font-mono text-base font-bold text-slate-900 w-8 text-center">
                           {ticketCount}
                         </span>
                         <button
                           type="button"
                           onClick={() => setTicketCount(ticketCount + 1)}
-                          className="size-8 rounded-lg bg-zinc-800 border border-zinc-700 text-white font-bold"
+                          className="size-8 rounded-lg bg-zinc-800 border border-zinc-700 text-slate-900 font-bold"
                         >
                           +
                         </button>
@@ -670,7 +670,7 @@ function EventDetailPage() {
                         value={userName}
                         onChange={(e) => setUserName(e.target.value)}
                         placeholder="Your Name"
-                        className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-white focus:border-emerald-400 focus:outline-none"
+                        className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-slate-900 focus:border-emerald-400 focus:outline-none"
                       />
                     </div>
 
@@ -682,7 +682,7 @@ function EventDetailPage() {
                         value={userEmail}
                         onChange={(e) => setUserEmail(e.target.value)}
                         placeholder="you@domain.com"
-                        className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-white focus:border-emerald-400 focus:outline-none"
+                        className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-slate-900 focus:border-emerald-400 focus:outline-none"
                       />
                     </div>
 
@@ -693,7 +693,7 @@ function EventDetailPage() {
                         value={userPhone}
                         onChange={(e) => setUserPhone(e.target.value)}
                         placeholder="+91 98765 43210"
-                        className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-white focus:border-emerald-400 focus:outline-none"
+                        className="w-full p-2.5 rounded-xl bg-zinc-950 border border-zinc-800 text-slate-900 focus:border-emerald-400 focus:outline-none"
                       />
                     </div>
 

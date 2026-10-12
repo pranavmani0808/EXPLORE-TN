@@ -79,27 +79,27 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: -10 }}
           transition={{ type: "spring", stiffness: 300, damping: 25 }}
-          className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-[#121821]/90 backdrop-blur-[24px] border border-white/15 shadow-[0_20px_60px_rgba(0,0,0,0.6)] text-white z-10"
+          className="relative w-full max-w-2xl overflow-hidden rounded-3xl bg-white/95 backdrop-blur-[24px] border border-sky-200 shadow-[0_20px_60px_rgba(0,0,0,0.6)] text-slate-900 z-10"
         >
           {/* Spotlight Search Header Input */}
-          <div className="flex items-center gap-3 px-6 py-4 border-b border-white/10 bg-white/5">
-            <Search className="size-5 text-emerald-400 shrink-0" />
+          <div className="flex items-center gap-3 px-6 py-4 border-b border-slate-200 bg-slate-50">
+            <Search className="size-5 text-sky-600 shrink-0" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search waterfalls, routes, tea estates, districts..."
-              className="w-full bg-transparent text-base font-medium text-white placeholder-[#A1A8B3] focus:outline-none"
+              className="w-full bg-transparent text-base font-medium text-slate-900 placeholder-[#A1A8B3] focus:outline-none"
               autoFocus
             />
-            <kbd className="hidden md:inline-flex items-center rounded bg-white/10 px-2 py-0.5 text-[10px] font-mono text-slate-300 border border-white/10">
+            <kbd className="hidden md:inline-flex items-center rounded bg-white/10 px-2 py-0.5 text-[10px] font-mono text-slate-600 border border-slate-200">
               {isMac ? "⌘K" : "Ctrl K"}
             </kbd>
             <div className="flex items-center gap-2">
-              <Mic className="size-5 text-[#A1A8B3] hover:text-emerald-400 cursor-pointer transition-colors" />
+              <Mic className="size-5 text-[#A1A8B3] hover:text-sky-600 cursor-pointer transition-colors" />
               <button
                 onClick={() => onOpenChange(false)}
-                className="size-7 grid place-items-center rounded-full bg-white/10 text-slate-300 hover:text-white hover:bg-white/20 transition-colors"
+                className="size-7 grid place-items-center rounded-full bg-white/10 text-slate-600 hover:text-slate-900 hover:bg-white/20 transition-colors"
               >
                 <X className="size-4" />
               </button>
@@ -111,8 +111,8 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
             {/* Quick Suggestions before typing */}
             {!query.trim() && (
               <div>
-                <p className="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-2.5 flex items-center gap-1.5">
-                  <Sparkles className="size-3.5 text-emerald-400" /> Quick Suggestions
+                <p className="text-xs font-bold uppercase tracking-wider text-sky-600 mb-2.5 flex items-center gap-1.5">
+                  <Sparkles className="size-3.5 text-sky-600" /> Quick Suggestions
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {quickSuggestions.map((qs) => (
@@ -122,7 +122,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                         onOpenChange(false);
                         navigate({ to: "/routes", search: { area: qs.targetArea } });
                       }}
-                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/30 text-xs font-bold text-emerald-300 hover:bg-emerald-500/20 hover:border-emerald-500/50 transition cursor-pointer"
+                      className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-sky-500/10 border border-sky-500/30 text-xs font-bold text-emerald-300 hover:bg-sky-500/20 hover:border-sky-500/50 transition cursor-pointer"
                     >
                       <span>{qs.icon}</span>
                       <span>{qs.label}</span>
@@ -135,14 +135,14 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
             {query.trim() && (
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <p className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-2">
+                  <p className="text-xs font-mono font-bold uppercase tracking-wider text-sky-600 flex items-center gap-2">
                     <Server className="size-3.5" /> LIVE BACKEND SEARCH RESULTS
                   </p>
-                  <span className="text-[10px] font-mono text-slate-400">{backendSuggestions.length} Matches Found</span>
+                  <span className="text-[10px] font-mono text-slate-500">{backendSuggestions.length} Matches Found</span>
                 </div>
 
                 {isSearching ? (
-                  <p className="text-xs text-emerald-400 font-mono py-4 text-center animate-pulse">
+                  <p className="text-xs text-sky-600 font-mono py-4 text-center animate-pulse">
                     Searching canonical database for "{query}"...
                   </p>
                 ) : backendSuggestions.length > 0 ? (
@@ -154,17 +154,17 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                       return (
                         <div
                           key={s.id}
-                          className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/30 transition gap-3"
+                          className="flex flex-col sm:flex-row sm:items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-white/10 hover:border-sky-500/30 transition gap-3"
                         >
                           <div className="space-y-1">
                             <div className="flex items-center gap-2">
-                              <MapPin className="size-4 text-emerald-400 shrink-0" />
-                              <span className="font-bold text-sm text-white">{s.name}</span>
+                              <MapPin className="size-4 text-sky-600 shrink-0" />
+                              <span className="font-bold text-sm text-slate-900">{s.name}</span>
                             </div>
-                            <div className="flex items-center gap-2 text-xs text-slate-400 pl-6">
+                            <div className="flex items-center gap-2 text-xs text-slate-500 pl-6">
                               <span>{s.district}, {s.state || "Tamil Nadu"}</span>
                               <span>•</span>
-                              <span className="text-emerald-400 font-medium">{categories.slice(0, 3).join(" • ")}</span>
+                              <span className="text-sky-600 font-medium">{categories.slice(0, 3).join(" • ")}</span>
                             </div>
                           </div>
 
@@ -173,7 +173,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                               to={`/place/$slug`}
                               params={{ slug }}
                               onClick={() => onOpenChange(false)}
-                              className="px-3 py-1.5 rounded-xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 font-bold text-xs border border-emerald-500/30 transition"
+                              className="px-3 py-1.5 rounded-xl bg-sky-500/20 hover:bg-sky-500/30 text-sky-600 font-bold text-xs border border-sky-500/30 transition"
                             >
                               View Details
                             </Link>
@@ -192,10 +192,10 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                     })}
                   </div>
                 ) : (
-                  <div className="py-8 text-center space-y-2 bg-white/5 rounded-2xl border border-white/10">
-                    <p className="text-sm font-semibold text-slate-300">No canonical places found matching "{query}"</p>
-                    <p className="text-xs text-slate-400">
-                      Try searching for <span className="text-emerald-400 font-mono">"vallichunai"</span>, <span className="text-emerald-400 font-mono">"piranmalai"</span>, <span className="text-emerald-400 font-mono">"mathoor"</span>, or <span className="text-emerald-400 font-mono">"sivaganga"</span>.
+                  <div className="py-8 text-center space-y-2 bg-slate-50 rounded-2xl border border-slate-200">
+                    <p className="text-sm font-semibold text-slate-600">No canonical places found matching "{query}"</p>
+                    <p className="text-xs text-slate-500">
+                      Try searching for <span className="text-sky-600 font-mono">"vallichunai"</span>, <span className="text-sky-600 font-mono">"piranmalai"</span>, <span className="text-sky-600 font-mono">"mathoor"</span>, or <span className="text-sky-600 font-mono">"sivaganga"</span>.
                     </p>
                   </div>
                 )}
@@ -217,10 +217,10 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                         onOpenChange(false);
                         navigate({ to: "/routes", search: { area: spot.targetArea } });
                       }}
-                      className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 hover:bg-white/10 hover:border-emerald-500/40 transition cursor-pointer group text-left w-full"
+                      className="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 border border-slate-200 hover:bg-white/10 hover:border-sky-500/40 transition cursor-pointer group text-left w-full"
                     >
                       <span className="text-lg">{spot.icon}</span>
-                      <span className="font-semibold text-sm text-slate-200 group-hover:text-white">{spot.label}</span>
+                      <span className="font-semibold text-sm text-slate-200 group-hover:text-slate-900">{spot.label}</span>
                     </button>
                   ))}
                 </div>
@@ -231,7 +231,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
             {!query.trim() && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-[#A1A8B3] mb-3 flex items-center gap-2">
-                  <Clock className="size-4 text-emerald-400" /> Recent
+                  <Clock className="size-4 text-sky-600" /> Recent
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {recentSearches.map((rec) => (
@@ -242,9 +242,9 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                         onOpenChange(false);
                         navigate({ to: "/routes", search: { area: rec } });
                       }}
-                      className="px-4 py-2 rounded-full bg-white/5 border border-white/10 text-xs font-semibold text-slate-300 hover:text-white hover:bg-white/10 hover:border-emerald-500/40 transition flex items-center gap-1.5 cursor-pointer"
+                      className="px-4 py-2 rounded-full bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-white/10 hover:border-sky-500/40 transition flex items-center gap-1.5 cursor-pointer"
                     >
-                      <Clock className="size-3 text-slate-400" /> {rec}
+                      <Clock className="size-3 text-slate-500" /> {rec}
                     </button>
                   ))}
                 </div>
@@ -255,7 +255,7 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
             {!query.trim() && (
               <div>
                 <p className="text-xs font-bold uppercase tracking-wider text-[#A1A8B3] mb-3 flex items-center gap-2">
-                  <Sparkles className="size-4 text-emerald-400" /> AI Suggestions
+                  <Sparkles className="size-4 text-sky-600" /> AI Suggestions
                 </p>
                 <div className="space-y-2">
                   {aiSuggestions.map((sug) => (
@@ -266,16 +266,16 @@ export function SearchPanel({ open, onOpenChange }: { open: boolean; onOpenChang
                         onOpenChange(false);
                         navigate({ to: "/routes", search: { area: sug.targetArea } });
                       }}
-                      className="flex items-center justify-between p-3.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 hover:bg-emerald-500/20 hover:border-emerald-500/40 transition cursor-pointer text-left w-full"
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-sky-500/10 border border-sky-500/20 hover:bg-sky-500/20 hover:border-sky-500/40 transition cursor-pointer text-left w-full"
                     >
                       <div className="flex items-center gap-2.5">
-                        <Sparkles className="size-4 text-emerald-400 shrink-0" />
+                        <Sparkles className="size-4 text-sky-600 shrink-0" />
                         <div>
-                          <p className="font-bold text-sm text-white">{sug.label}</p>
-                          <p className="text-xs text-slate-400">{sug.blurb}</p>
+                          <p className="font-bold text-sm text-slate-900">{sug.label}</p>
+                          <p className="text-xs text-slate-500">{sug.blurb}</p>
                         </div>
                       </div>
-                      <span className="text-xs font-bold text-emerald-400">Explore →</span>
+                      <span className="text-xs font-bold text-sky-600">Explore →</span>
                     </button>
                   ))}
                 </div>

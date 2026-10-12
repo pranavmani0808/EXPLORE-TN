@@ -121,12 +121,12 @@ function UserSecurityCenterPage() {
 
   return (
     <AppShell>
-      <div className="min-h-screen bg-[#09090b] text-white py-12 px-4 sm:px-6 lg:px-8">
+      <div className="min-h-screen bg-slate-50 text-slate-900 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}
           <div className="flex items-center justify-between border-b border-zinc-800 pb-6">
             <div>
-              <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+              <h1 className="text-2xl font-bold text-slate-900 flex items-center gap-2">
                 <ShieldCheck className="w-7 h-7 text-sky-500" />
                 Security & Privacy Controls
               </h1>
@@ -144,7 +144,7 @@ function UserSecurityCenterPage() {
             <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
               <div className="flex items-center gap-2">
                 <Lock className="w-5 h-5 text-blue-400" />
-                <h2 className="text-lg font-bold text-white">Change Security Password</h2>
+                <h2 className="text-lg font-bold text-slate-900">Change Security Password</h2>
               </div>
 
               <form onSubmit={handlePasswordChange} className="space-y-3">
@@ -154,7 +154,7 @@ function UserSecurityCenterPage() {
                     type="password"
                     value={currentPassword}
                     onChange={(e) => setCurrentPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                     placeholder="••••••••"
                   />
                 </div>
@@ -165,7 +165,7 @@ function UserSecurityCenterPage() {
                     type="password"
                     value={newPassword}
                     onChange={(e) => setNewPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                     placeholder="••••••••"
                   />
                 </div>
@@ -176,7 +176,7 @@ function UserSecurityCenterPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-blue-500"
+                    className="w-full bg-zinc-950 border border-zinc-700 rounded-lg p-2.5 text-sm text-slate-900 focus:outline-none focus:border-blue-500"
                     placeholder="••••••••"
                   />
                 </div>
@@ -184,7 +184,7 @@ function UserSecurityCenterPage() {
                 <Button
                   type="submit"
                   disabled={isUpdatingPassword}
-                  className="w-full bg-blue-600 hover:bg-blue-500 text-white font-semibold mt-2"
+                  className="w-full bg-blue-600 hover:bg-blue-500 text-slate-900 font-semibold mt-2"
                 >
                   {isUpdatingPassword ? "Updating..." : "Update Password"}
                 </Button>
@@ -196,7 +196,7 @@ function UserSecurityCenterPage() {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <Smartphone className="w-5 h-5 text-sky-500" />
-                  <h2 className="text-lg font-bold text-white">Active Device Sessions</h2>
+                  <h2 className="text-lg font-bold text-slate-900">Active Device Sessions</h2>
                 </div>
                 <Button onClick={handleRevokeOtherSessions} variant="outline" size="sm" className="text-xs text-red-400 border-red-500/30">
                   Revoke Others
@@ -207,7 +207,7 @@ function UserSecurityCenterPage() {
                 {activeSessions.map((session) => (
                   <div key={session.id} className="bg-zinc-950 p-3 rounded-lg border border-zinc-800 flex items-start justify-between">
                     <div>
-                      <div className="text-xs font-semibold text-white flex items-center gap-1.5">
+                      <div className="text-xs font-semibold text-slate-900 flex items-center gap-1.5">
                         {session.device}
                         {session.current && (
                           <span className="text-[10px] bg-sky-500/20 text-sky-500 px-1.5 py-0.2 rounded">Current</span>
@@ -226,7 +226,7 @@ function UserSecurityCenterPage() {
           <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6 space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h2 className="text-lg font-bold text-white flex items-center gap-2">
+                <h2 className="text-lg font-bold text-slate-900 flex items-center gap-2">
                   <Key className="w-5 h-5 text-amber-400" /> PII Data Privacy & Export
                 </h2>
                 <p className="text-xs text-zinc-400">
@@ -238,7 +238,7 @@ function UserSecurityCenterPage() {
                 <Button onClick={() => setShowPiiPreview(!showPiiPreview)} variant="outline" size="sm" className="text-xs border-zinc-700">
                   {showPiiPreview ? "Hide Masked PII" : "Preview Masked PII"}
                 </Button>
-                <Button onClick={handleExportData} size="sm" className="bg-sky-600 hover:bg-sky-500 text-white gap-1.5 text-xs">
+                <Button onClick={handleExportData} size="sm" className="bg-sky-600 hover:bg-sky-500 text-slate-900 gap-1.5 text-xs">
                   <Download className="w-3.5 h-3.5" /> Export Data JSON
                 </Button>
               </div>

@@ -123,9 +123,9 @@ export function LocationMiniExplorer({
         <button
           type="button"
           onClick={() => setPanelState("expanded")}
-          className="bg-[#121821]/95 backdrop-blur-2xl border border-white/15 px-4 py-2.5 rounded-full text-xs font-bold text-white shadow-2xl transition flex items-center gap-2 hover:border-emerald-500/40 cursor-pointer"
+          className="bg-white/95 backdrop-blur-2xl border border-sky-200 px-4 py-2.5 rounded-full text-xs font-bold text-slate-900 shadow-2xl transition flex items-center gap-2 hover:border-sky-500/40 cursor-pointer"
         >
-          <Compass className="w-4 h-4 text-emerald-400" />
+          <Compass className="w-4 h-4 text-sky-600" />
           <span>Explore {location.name} ({selectedIds.length} Selected)</span>
         </button>
       </div>
@@ -136,9 +136,9 @@ export function LocationMiniExplorer({
   if (panelState === "compact") {
     return (
       <div className="fixed bottom-6 right-6 z-40 w-80 sm:w-96 pointer-events-auto animate-in slide-in-from-bottom duration-300">
-        <div className="bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 text-white shadow-2xl flex items-center justify-between">
+        <div className="bg-white/95 backdrop-blur-2xl border border-sky-200 rounded-3xl p-4 text-slate-900 shadow-2xl flex items-center justify-between">
           <div>
-            <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-400 font-mono">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-sky-600 font-mono">
               <MapPin className="w-3.5 h-3.5" /> {location.canonicalName || location.name}
             </div>
             <p className="text-[11px] text-slate-400 mt-0.5">
@@ -150,7 +150,7 @@ export function LocationMiniExplorer({
             <button
               type="button"
               onClick={() => setPanelState("expanded")}
-              className="px-3 py-1.5 rounded-full bg-emerald-500 text-black text-xs font-extrabold shadow-md hover:bg-emerald-400 transition cursor-pointer flex items-center gap-1"
+              className="px-3 py-1.5 rounded-full bg-sky-500 text-black text-xs font-extrabold shadow-md hover:bg-emerald-400 transition cursor-pointer flex items-center gap-1"
             >
               <ChevronUp className="w-3.5 h-3.5" /> Expand
             </button>
@@ -158,7 +158,7 @@ export function LocationMiniExplorer({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded-full text-slate-400 hover:text-white transition"
+                className="p-1 rounded-full text-slate-400 hover:text-slate-900 transition"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -172,7 +172,7 @@ export function LocationMiniExplorer({
   // STATE 2 — EXPANDED
   return (
     <aside className="fixed bottom-6 right-6 z-40 w-80 sm:w-[400px] h-[65vh] sm:h-[70vh] max-h-[640px] pointer-events-auto animate-in slide-in-from-bottom duration-300 font-sans">
-      <div className="h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white">
+      <div className="h-full bg-white/95 backdrop-blur-2xl border border-sky-200 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-slate-900">
         {/* Drag Handle Bar */}
         <div
           onClick={() => setPanelState("compact")}
@@ -185,12 +185,12 @@ export function LocationMiniExplorer({
         </div>
 
         {/* Sticky Location Header */}
-        <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-1">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3 mt-1">
           <div>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-400 font-mono font-bold uppercase tracking-wider">
+            <div className="flex items-center gap-1.5 text-xs text-sky-600 font-mono font-bold uppercase tracking-wider">
               <MapPin className="w-3.5 h-3.5" /> Location Mini-Explorer
             </div>
-            <h3 className="text-base font-black text-white leading-tight mt-0.5">
+            <h3 className="text-base font-black text-slate-900 leading-tight mt-0.5">
               {location.canonicalName || location.name}
             </h3>
             <p className="text-[10px] text-slate-400">
@@ -202,7 +202,7 @@ export function LocationMiniExplorer({
             <button
               type="button"
               onClick={() => setPanelState("compact")}
-              className="p-1 rounded-full text-slate-400 hover:text-white transition cursor-pointer"
+              className="p-1 rounded-full text-slate-400 hover:text-slate-900 transition cursor-pointer"
               title="Collapse"
             >
               <ChevronDown className="w-4 h-4" />
@@ -211,7 +211,7 @@ export function LocationMiniExplorer({
               <button
                 type="button"
                 onClick={onClose}
-                className="p-1 rounded-full text-slate-400 hover:text-white transition cursor-pointer"
+                className="p-1 rounded-full text-slate-400 hover:text-slate-900 transition cursor-pointer"
                 title="Close"
               >
                 <X className="w-4 h-4" />
@@ -221,14 +221,14 @@ export function LocationMiniExplorer({
         </div>
 
         {/* Horizontal Category Chips */}
-        <div className="py-2.5 border-b border-white/10 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+        <div className="py-2.5 border-b border-slate-200 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
           <button
             type="button"
             onClick={() => setActiveCategory("all")}
             className={`px-3 py-1 rounded-full text-xs font-bold transition whitespace-nowrap cursor-pointer ${
               activeCategory === "all"
-                ? "bg-emerald-500 text-black shadow-md"
-                : "bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10"
+                ? "bg-sky-500 text-black shadow-md"
+                : "bg-white/5 text-slate-300 hover:text-slate-900 hover:bg-white/10 border border-slate-200"
             }`}
           >
             All ({nearbyPlaces.length})
@@ -240,8 +240,8 @@ export function LocationMiniExplorer({
               onClick={() => setActiveCategory(cat)}
               className={`px-3 py-1 rounded-full text-xs font-bold capitalize transition whitespace-nowrap cursor-pointer ${
                 activeCategory === cat
-                  ? "bg-emerald-500 text-black shadow-md"
-                  : "bg-white/5 text-slate-300 hover:text-white hover:bg-white/10 border border-white/10"
+                  ? "bg-sky-500 text-black shadow-md"
+                  : "bg-white/5 text-slate-300 hover:text-slate-900 hover:bg-white/10 border border-slate-200"
               }`}
             >
               {cat.replace("-", " ")}
@@ -261,10 +261,10 @@ export function LocationMiniExplorer({
                 onClick={() => onSelectPlaceOnMap?.(place)}
                 className={`p-2.5 rounded-2xl border transition cursor-pointer ${
                   isFocused
-                    ? "bg-emerald-500/20 border-emerald-500/50"
+                    ? "bg-sky-500/20 border-sky-500/50"
                     : isAdded
-                    ? "bg-white/10 border-emerald-500/30"
-                    : "bg-white/5 border-white/10 hover:bg-white/10"
+                    ? "bg-white/10 border-sky-500/30"
+                    : "bg-white/5 border-slate-200 hover:bg-white/10"
                 }`}
               >
                 <div className="flex items-center gap-2.5">
@@ -274,8 +274,8 @@ export function LocationMiniExplorer({
 
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center justify-between gap-1">
-                      <h4 className="text-xs font-bold text-white truncate">{place.canonicalName || place.name}</h4>
-                      <span className="text-[9px] text-emerald-400 font-mono shrink-0 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                      <h4 className="text-xs font-bold text-slate-900 truncate">{place.canonicalName || place.name}</h4>
+                      <span className="text-[9px] text-sky-600 font-mono shrink-0 bg-sky-500/10 px-1.5 py-0.5 rounded border border-sky-500/20">
                         {distKm === 0 ? "Hub" : `${distKm} km`}
                       </span>
                     </div>
@@ -290,7 +290,7 @@ export function LocationMiniExplorer({
                   </div>
                 </div>
 
-                <div className="mt-2 flex items-center justify-between pt-2 border-t border-white/10">
+                <div className="mt-2 flex items-center justify-between pt-2 border-t border-slate-200">
                   <span className="text-[10px] text-slate-400 font-mono truncate max-w-[180px]">
                     {place.district}
                   </span>
@@ -305,13 +305,13 @@ export function LocationMiniExplorer({
                     }}
                     className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition flex items-center gap-1 cursor-pointer ${
                       isAdded
-                        ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                        : "bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold shadow-md"
+                        ? "bg-sky-500/20 text-emerald-300 border border-sky-500/40"
+                        : "bg-sky-500 hover:bg-emerald-400 text-black font-extrabold shadow-md"
                     }`}
                   >
                     {isAdded ? (
                       <>
-                        <Check className="w-3 h-3 text-emerald-400" /> Added
+                        <Check className="w-3 h-3 text-sky-600" /> Added
                       </>
                     ) : (
                       <>
@@ -326,7 +326,7 @@ export function LocationMiniExplorer({
         </div>
 
         {/* Sticky Bottom Build Trip Action Bar */}
-        <div className="pt-3 border-t border-white/10 space-y-2 shrink-0">
+        <div className="pt-3 border-t border-slate-200 space-y-2 shrink-0">
           <div className="flex items-center justify-between text-xs">
             <span className="text-slate-300 font-medium">Origin:</span>
             <select
@@ -339,19 +339,19 @@ export function LocationMiniExplorer({
                   setCustomOriginId(e.target.value);
                 }
               }}
-              className="bg-white/10 border border-white/15 rounded-lg px-2 py-1 text-[11px] text-white focus:outline-none cursor-pointer"
+              className="bg-white/10 border border-sky-200 rounded-lg px-2 py-1 text-[11px] text-slate-900 focus:outline-none cursor-pointer"
             >
-              <option value="current" className="bg-[#121821] text-white">📍 Live GPS Location</option>
-              <option value="chennai" className="bg-[#121821] text-white">📍 Chennai</option>
-              <option value="coimbatore" className="bg-[#121821] text-white">📍 Coimbatore</option>
-              <option value="madurai" className="bg-[#121821] text-white">📍 Madurai</option>
-              <option value="puducherry" className="bg-[#121821] text-white">📍 Puducherry</option>
+              <option value="current" className="bg-white text-slate-900">📍 Live GPS Location</option>
+              <option value="chennai" className="bg-white text-slate-900">📍 Chennai</option>
+              <option value="coimbatore" className="bg-white text-slate-900">📍 Coimbatore</option>
+              <option value="madurai" className="bg-white text-slate-900">📍 Madurai</option>
+              <option value="puducherry" className="bg-white text-slate-900">📍 Puducherry</option>
             </select>
           </div>
 
           <Button
             onClick={handleBuildTrip}
-            className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold py-2.5 text-xs shadow-lg shadow-emerald-500/20 flex items-center justify-center gap-2 cursor-pointer"
+            className="w-full rounded-2xl bg-sky-500 hover:bg-emerald-600 text-black font-extrabold py-2.5 text-xs shadow-lg shadow-sky-500/20 flex items-center justify-center gap-2 cursor-pointer"
           >
             <Sparkles className="w-3.5 h-3.5" /> Build My Trip ({selectedIds.length} Places) <ArrowRight className="w-3.5 h-3.5" />
           </Button>

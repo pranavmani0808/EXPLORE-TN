@@ -164,20 +164,20 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
     return (
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-5 font-sans">
         <nav
-          className="mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-5 rounded-full px-6 transition-all duration-300 backdrop-blur-[24px] bg-[#09090b]/90 border border-zinc-800 shadow-[0_12px_40px_rgba(0,0,0,0.4)]"
+          className="mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-5 rounded-full px-6 transition-all duration-300 backdrop-blur-[24px] bg-white/95 border border-sky-100 shadow-[0_12px_40px_rgba(15,23,42,0.1)]"
           aria-label="Admin Navigation"
         >
           {/* Left: Brand Logo & Admin Badge */}
           <div className="flex items-center gap-3 shrink-0">
             <Link to="/admin" className="flex items-center gap-2.5" aria-label="ExploreTN Admin Home">
-              <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500 text-zinc-950 font-black shadow-lg shadow-emerald-500/25">
-                <Shield className="size-6 text-zinc-950" aria-hidden />
+              <span className="grid size-10 place-items-center rounded-2xl bg-sky-500 text-white font-black shadow-md shadow-sky-500/25">
+                <Shield className="size-6 text-white" aria-hidden />
               </span>
-              <span className="font-display text-xl font-extrabold tracking-tight text-white">
-                Explore<span className="text-emerald-400">TN</span>
+              <span className="font-display text-xl font-extrabold tracking-tight text-slate-900">
+                Explore<span className="text-sky-600">TN</span>
               </span>
             </Link>
-            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-emerald-500/10 border border-emerald-500/25 px-3 py-1 text-[11px] font-mono font-bold text-emerald-400">
+            <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-sky-50 border border-sky-200 px-3 py-1 text-[11px] font-mono font-bold text-sky-700">
               <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
               ADMIN CONTROL CENTER
             </span>
@@ -503,17 +503,17 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
       {/* Structured Mobile Drawer */}
       {open && (
-        <div className="mx-auto mt-3 max-w-[1400px] rounded-3xl p-5 lg:hidden border border-zinc-800 bg-[#09090b]/98 backdrop-blur-2xl text-white space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl">
-          <div className="text-[10px] font-mono font-bold text-amber-400 uppercase tracking-wider mb-2">
+        <div className="mx-auto mt-3 max-w-[1400px] rounded-3xl p-5 lg:hidden border border-slate-200 bg-white/98 backdrop-blur-2xl text-slate-900 space-y-4 max-h-[85vh] overflow-y-auto shadow-2xl">
+          <div className="text-[10px] font-mono font-bold text-sky-600 uppercase tracking-wider mb-2">
             {lang === "ta" ? "பயண வழிசெலுத்தல்" : "TRAVEL NAVIGATION"}
           </div>
           <div className="grid grid-cols-2 gap-2">
             <Link
               to="/madurai"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 hover:border-sky-300"
             >
-              <Landmark className="size-4 text-amber-400" />
+              <Landmark className="size-4 text-sky-600" />
               <span>{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
             </Link>
             <Link

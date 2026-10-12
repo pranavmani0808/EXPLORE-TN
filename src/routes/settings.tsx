@@ -24,7 +24,7 @@ function SettingsPageRoute() {
 
   return (
     <AppShell>
-      <div className="min-h-screen bg-[#09090b] py-12 px-4">
+      <div className="min-h-screen bg-slate-50 py-12 px-4">
         <ExplorerSettingsModal
           isOpen={true}
           onClose={() => navigate({ to: "/" })}

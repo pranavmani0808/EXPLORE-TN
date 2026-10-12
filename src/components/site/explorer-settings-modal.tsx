@@ -426,30 +426,30 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
 
   return (
     <AnimatePresence>
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-3 sm:p-6 backdrop-blur-md font-sans text-slate-100">
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-3 sm:p-6 backdrop-blur-md font-sans text-slate-100">
         <motion.div
           initial={{ opacity: 0, scale: 0.96 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.96 }}
-          className="relative flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-zinc-800 bg-[#09090b] shadow-2xl"
+          className="relative flex h-[90vh] w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-2xl"
         >
           {/* Left Sidebar Navigation */}
-          <div className="w-64 border-r border-zinc-800/80 bg-[#0c0d12] p-4 flex flex-col justify-between hidden md:flex">
+          <div className="w-64 border-r border-slate-200/80 bg-slate-50 p-4 flex flex-col justify-between hidden md:flex">
             <div className="space-y-6">
               <div className="flex items-center gap-2.5 px-2">
-                <span className="grid size-9 place-items-center rounded-2xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-400">
+                <span className="grid size-9 place-items-center rounded-2xl bg-sky-500/15 border border-sky-500/30 text-sky-600">
                   <Sliders className="size-5" />
                 </span>
                 <div>
-                  <h3 className="font-extrabold text-sm text-white leading-tight">Settings</h3>
-                  <p className="text-[11px] font-mono text-emerald-400">Explorer Controls</p>
+                  <h3 className="font-extrabold text-sm text-slate-900 leading-tight">Settings</h3>
+                  <p className="text-[11px] font-mono text-sky-600">Explorer Controls</p>
                 </div>
               </div>
 
               <div className="space-y-4 max-h-[calc(90vh-160px)] overflow-y-auto pr-1">
                 {sidebarGroups.map((group) => (
                   <div key={group.title} className="space-y-1">
-                    <div className="px-2 text-[10px] font-extrabold font-mono uppercase tracking-wider text-zinc-500">
+                    <div className="px-2 text-[10px] font-extrabold font-mono uppercase tracking-wider text-slate-400">
                       {group.title}
                     </div>
                     {group.items.map((item) => {
@@ -461,8 +461,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           onClick={() => setActiveTab(item.id)}
                           className={`flex w-full items-center justify-between rounded-xl px-3 py-2 text-xs font-bold transition cursor-pointer ${
                             isActive
-                              ? "bg-emerald-500 text-zinc-950 shadow-md shadow-emerald-500/20"
-                              : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                              ? "bg-sky-500 text-slate-900 shadow-md shadow-sky-500/20"
+                              : "text-slate-500 hover:bg-slate-100 hover:text-slate-900"
                           }`}
                         >
                           <div className="flex items-center gap-2.5">
@@ -478,14 +478,14 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
             </div>
 
             {/* User Quick Switch Footer */}
-            <div className="pt-3 border-t border-zinc-800/80 flex items-center justify-between px-2 text-xs">
+            <div className="pt-3 border-t border-slate-200/80 flex items-center justify-between px-2 text-xs">
               <div className="flex items-center gap-2">
-                <span className="grid size-7 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-bold font-mono text-xs">
+                <span className="grid size-7 place-items-center rounded-full bg-sky-500 text-slate-900 font-bold font-mono text-xs">
                   {name ? name[0].toUpperCase() : (currentUser ? currentUser.name[0].toUpperCase() : "G")}
                 </span>
                 <div className="truncate max-w-[110px]">
-                  <p className="font-bold text-white truncate">{name || currentUser?.name || "Guest Explorer"}</p>
-                  <p className="text-[10px] text-zinc-400 truncate">{email || currentUser?.email || "Not signed in"}</p>
+                  <p className="font-bold text-slate-900 truncate">{name || currentUser?.name || "Guest Explorer"}</p>
+                  <p className="text-[10px] text-slate-500 truncate">{email || currentUser?.email || "Not signed in"}</p>
                 </div>
               </div>
               <button
@@ -495,7 +495,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   window.location.href = "/";
                 }}
                 title="Log Out"
-                className="text-zinc-400 hover:text-rose-400 transition"
+                className="text-slate-500 hover:text-rose-400 transition"
               >
                 <LogOut className="size-4" />
               </button>
@@ -503,9 +503,9 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
           </div>
 
           {/* Right Content Panel */}
-          <div className="flex-1 flex flex-col justify-between overflow-hidden bg-[#09090b]">
+          <div className="flex-1 flex flex-col justify-between overflow-hidden bg-white">
             {/* Top Modal Navigation Header */}
-            <div className="flex items-center justify-between border-b border-zinc-800 px-4 sm:px-6 py-3.5 gap-2">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3.5 gap-2">
               <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 max-w-[calc(100vw-140px)] sm:max-w-md">
                 {/* Mobile scrollable tab pill strip */}
                 <div className="flex md:hidden items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
@@ -516,15 +516,15 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       onClick={() => setActiveTab(i.id)}
                       className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
                         activeTab === i.id
-                          ? "bg-emerald-500 text-zinc-950 shadow"
-                          : "bg-zinc-900 text-zinc-400 border border-zinc-800"
+                          ? "bg-sky-500 text-slate-900 shadow"
+                          : "bg-slate-100 text-slate-500 border border-slate-200"
                       }`}
                     >
                       {i.label}
                     </button>
                   ))}
                 </div>
-                <h2 className="hidden md:block text-lg font-bold text-white capitalize">
+                <h2 className="hidden md:block text-lg font-bold text-slate-900 capitalize">
                   {activeTab.replace(/_/g, " ")}
                 </h2>
               </div>
@@ -535,7 +535,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   onClick={() => {
                     window.dispatchEvent(new CustomEvent("etn_open_onboarding"));
                   }}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black transition text-xs font-bold"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-600 hover:bg-sky-500 hover:text-black transition text-xs font-bold"
                 >
                   <Sparkles className="size-3.5" />
                   <span className="hidden sm:inline">Interactive Setup Wizard</span>
@@ -543,7 +543,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                 </button>
                 <button
                   onClick={onClose}
-                  className="grid size-8 place-items-center rounded-full bg-zinc-900 border border-zinc-800 text-zinc-400 hover:text-white transition cursor-pointer"
+                  className="grid size-8 place-items-center rounded-full bg-slate-100 border border-slate-200 text-slate-500 hover:text-slate-900 transition cursor-pointer"
                 >
                   <X className="size-4" />
                 </button>
@@ -556,35 +556,35 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {activeTab === "profile" && (
                 <div className="space-y-6 max-w-3xl">
                   {/* TAMIL NADU EXPLORER IDENTITY CARD */}
-                  <div className="rounded-3xl border border-emerald-500/30 bg-gradient-to-r from-emerald-950/40 via-zinc-900/90 to-zinc-900 p-6 backdrop-blur-2xl shadow-xl space-y-4">
+                  <div className="rounded-3xl border border-sky-200 bg-gradient-to-r from-sky-50 via-white to-sky-50/50 p-6 shadow-md space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-4">
                         <div className="relative">
-                          <span className="grid size-16 place-items-center rounded-2xl bg-emerald-500 text-zinc-950 font-black text-2xl shadow-lg shadow-emerald-500/30 font-mono">
+                          <span className="grid size-16 place-items-center rounded-2xl bg-sky-500 text-white font-black text-2xl shadow-lg shadow-sky-500/20 font-mono">
                             {name ? name[0].toUpperCase() : (currentUser ? currentUser.name[0].toUpperCase() : "G")}
                           </span>
-                          <span className="absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full bg-amber-400 text-zinc-950 font-bold text-[10px]">
+                          <span className="absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full bg-amber-400 text-slate-900 font-bold text-[10px]">
                             ★
                           </span>
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
-                            <h3 className="text-xl font-black text-white">{name || currentUser?.name || "Guest Explorer"}</h3>
-                            <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 text-[10px] font-mono font-bold">
+                            <h3 className="text-xl font-black text-slate-900">{name || currentUser?.name || "Guest Explorer"}</h3>
+                            <span className="px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-600 border border-sky-500/30 text-[10px] font-mono font-bold">
                               Tamil Nadu Explorer
                             </span>
                           </div>
-                          <p className="text-xs text-zinc-400 mt-0.5">@{username || "guest"} • {homeLocation || "Tamil Nadu"}</p>
+                          <p className="text-xs text-slate-500 mt-0.5">@{username || "guest"} • {homeLocation || "Tamil Nadu"}</p>
                           <p className="text-xs text-slate-300 mt-1 italic">"{bio}"</p>
                         </div>
                       </div>
 
-                      <div className="text-right border-t sm:border-t-0 sm:border-l border-zinc-800 pt-3 sm:pt-0 sm:pl-4">
-                        <div className="text-xs font-mono text-zinc-400">EXPLORER LEVEL</div>
+                      <div className="text-right border-t sm:border-t-0 sm:border-l border-slate-200 pt-3 sm:pt-0 sm:pl-4">
+                        <div className="text-xs font-mono text-slate-500">EXPLORER LEVEL</div>
                         <div className="text-xl font-black text-amber-400 font-mono">
                           Level {stats.level} {stats.rankTitle}
                         </div>
-                        <div className="text-[11px] text-emerald-400 font-mono font-bold">
+                        <div className="text-[11px] text-sky-600 font-mono font-bold">
                           {stats.xpEarned} XP Earned
                         </div>
                       </div>
@@ -592,37 +592,37 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
 
                     {/* EXPLORER STATS GRID */}
                     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-2 font-mono">
-                      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
-                        <div className="text-xl font-black text-emerald-400">{stats.districtsExplored}</div>
-                        <div className="text-[10px] text-zinc-400 uppercase">Districts Explored</div>
+                      <div className="rounded-2xl border border-slate-200 bg-slate-100/80 p-3.5 text-center">
+                        <div className="text-xl font-black text-sky-600">{stats.districtsExplored}</div>
+                        <div className="text-[10px] text-slate-500 uppercase">Districts Explored</div>
                       </div>
-                      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-100/80 p-3.5 text-center">
                         <div className="text-xl font-black text-amber-400">{stats.hillStations}</div>
-                        <div className="text-[10px] text-zinc-400 uppercase">Hill Stations</div>
+                        <div className="text-[10px] text-slate-500 uppercase">Hill Stations</div>
                       </div>
-                      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-100/80 p-3.5 text-center">
                         <div className="text-xl font-black text-sky-400">{stats.waterfalls}</div>
-                        <div className="text-[10px] text-zinc-400 uppercase">Waterfalls</div>
+                        <div className="text-[10px] text-slate-500 uppercase">Waterfalls</div>
                       </div>
-                      <div className="rounded-2xl border border-zinc-800 bg-zinc-900/80 p-3.5 text-center">
+                      <div className="rounded-2xl border border-slate-200 bg-slate-100/80 p-3.5 text-center">
                         <div className="text-xl font-black text-purple-400">{stats.placesVisited}</div>
-                        <div className="text-[10px] text-zinc-400 uppercase">Places Visited</div>
+                        <div className="text-[10px] text-slate-500 uppercase">Places Visited</div>
                       </div>
                     </div>
 
                     {/* SAVED PLACES QUICK PREVIEW */}
-                    <div className="pt-2 border-t border-zinc-800/80">
+                    <div className="pt-2 border-t border-slate-200/80">
                       <div className="flex items-center justify-between mb-2.5">
                         <div className="flex items-center gap-2">
-                          <Bookmark className="size-3.5 text-emerald-400" />
-                          <span className="text-xs font-bold text-white">Saved Destinations</span>
-                          <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 text-[10px] font-mono font-bold">
+                          <Bookmark className="size-3.5 text-sky-600" />
+                          <span className="text-xs font-bold text-slate-900">Saved Destinations</span>
+                          <span className="px-2 py-0.5 rounded-full bg-sky-500/20 text-sky-600 text-[10px] font-mono font-bold">
                             {savedPlaces.length}
                           </span>
                         </div>
                         <a
                           href="/saved"
-                          className="text-[11px] font-mono text-emerald-400 hover:text-emerald-300 font-bold flex items-center gap-1"
+                          className="text-[11px] font-mono text-sky-600 hover:text-sky-600 font-bold flex items-center gap-1"
                         >
                           <span>Open Saved Page</span>
                           <ChevronRight className="size-3" />
@@ -630,8 +630,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       </div>
 
                       {savedPlaces.length === 0 ? (
-                        <div className="p-3.5 rounded-2xl bg-zinc-950/60 border border-zinc-800 text-center">
-                          <p className="text-xs text-zinc-400">No saved destinations yet. Bookmark places while exploring.</p>
+                        <div className="p-3.5 rounded-2xl bg-slate-50/60 border border-slate-200 text-center">
+                          <p className="text-xs text-slate-500">No saved destinations yet. Bookmark places while exploring.</p>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -640,16 +640,16 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             return (
                               <div
                                 key={place.id}
-                                className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-zinc-950/70 border border-zinc-800 hover:border-zinc-700 transition"
+                                className="flex items-center justify-between gap-2 p-2.5 rounded-xl bg-slate-50/70 border border-slate-200 hover:border-slate-300 transition"
                               >
                                 <div className="min-w-0 flex-1">
                                   <a
                                     href={`/place/${slug}`}
-                                    className="text-xs font-bold text-zinc-200 hover:text-emerald-400 truncate block"
+                                    className="text-xs font-bold text-slate-700 hover:text-sky-600 truncate block"
                                   >
                                     {place.name}
                                   </a>
-                                  <p className="text-[10px] text-zinc-400 truncate font-mono">
+                                  <p className="text-[10px] text-slate-500 truncate font-mono">
                                     {place.category} • {place.district}
                                   </p>
                                 </div>
@@ -659,7 +659,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                                     removeSavedPlace(place.id);
                                     toast.success(`Removed ${place.name} from saved`);
                                   }}
-                                  className="p-1 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                                  className="p-1 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
                                   title="Remove"
                                 >
                                   <Trash2 className="size-3" />
@@ -676,75 +676,75 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   <form onSubmit={handleSaveProfile} className="space-y-4 text-xs">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-zinc-400 mb-1 font-bold">Full Name *</label>
+                        <label className="block text-slate-500 mb-1 font-bold">Full Name *</label>
                         <input
                           type="text"
                           required
                           value={name}
                           onChange={(e) => setName(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none font-bold"
+                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none font-bold"
                         />
                       </div>
                       <div>
-                        <label className="block text-zinc-400 mb-1 font-bold">Username</label>
+                        <label className="block text-slate-500 mb-1 font-bold">Username</label>
                         <input
                           type="text"
                           value={username}
                           onChange={(e) => setUsername(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-zinc-400 mb-1 font-bold">Email Address</label>
+                        <label className="block text-slate-500 mb-1 font-bold">Email Address</label>
                         <input
                           type="email"
                           value={email}
                           onChange={(e) => setEmail(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-zinc-400 mb-1 font-bold">Phone Number</label>
+                        <label className="block text-slate-500 mb-1 font-bold">Phone Number</label>
                         <input
                           type="text"
                           value={phone}
                           onChange={(e) => setPhone(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <div>
-                        <label className="block text-zinc-400 mb-1 font-bold">Home Location</label>
+                        <label className="block text-slate-500 mb-1 font-bold">Home Location</label>
                         <input
                           type="text"
                           value={homeLocation}
                           onChange={(e) => setHomeLocation(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                         />
                       </div>
                       <div>
-                        <label className="block text-zinc-400 mb-1 font-bold">Emergency Contact</label>
+                        <label className="block text-slate-500 mb-1 font-bold">Emergency Contact</label>
                         <input
                           type="text"
                           value={emergencyContact}
                           onChange={(e) => setEmergencyContact(e.target.value)}
-                          className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                          className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="block text-zinc-400 mb-1 font-bold">Bio</label>
+                      <label className="block text-slate-500 mb-1 font-bold">Bio</label>
                       <textarea
                         rows={3}
                         value={bio}
                         onChange={(e) => setBio(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                       />
                     </div>
 
@@ -761,43 +761,43 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             el.scrollIntoView({ behavior: "smooth", block: "center" });
                           }
                         }}
-                        className="bg-zinc-800 hover:bg-zinc-700 text-white border border-zinc-700 hover:border-emerald-500/50 font-bold px-5 flex items-center justify-center gap-2 cursor-pointer transition shadow-md"
+                        className="bg-white hover:bg-slate-50 text-slate-800 border border-slate-200 hover:border-sky-400 font-bold px-5 flex items-center justify-center gap-2 cursor-pointer transition shadow-sm"
                       >
-                        <Key className="size-4 text-emerald-400" />
+                        <Key className="size-4 text-sky-600" />
                         <span>Change Password</span>
                       </Button>
 
-                      <Button type="submit" className="bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold px-6 shadow-lg shadow-emerald-500/20 cursor-pointer">
+                      <Button type="submit" className="bg-sky-500 hover:bg-sky-600 text-white font-bold px-6 shadow-md shadow-sky-500/20 cursor-pointer">
                         Save Profile Changes
                       </Button>
                     </div>
                   </form>
 
                   {/* EXPLORER CONTROLS: ACCOUNT SECURITY & PASSWORD MANAGEMENT */}
-                  <div id="password-settings-section" className="mt-8 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-5 space-y-4 scroll-mt-6">
-                    <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+                  <div id="password-settings-section" className="mt-8 rounded-2xl border border-slate-200 bg-slate-100/60 p-5 space-y-4 scroll-mt-6">
+                    <div className="flex items-center justify-between border-b border-slate-200/80 pb-3">
                       <div>
-                        <h4 className="text-sm font-bold text-white flex items-center gap-2">
-                          <Lock className="size-4 text-emerald-400" /> Account Security & Password Settings
+                        <h4 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                          <Lock className="size-4 text-sky-600" /> Account Security & Password Settings
                         </h4>
-                        <p className="text-zinc-400 text-[11px] mt-0.5 font-mono">
+                        <p className="text-slate-500 text-[11px] mt-0.5 font-mono">
                           Change your password with your old password or request a reset link.
                         </p>
                       </div>
-                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
+                      <span className="text-[10px] font-mono px-2.5 py-0.5 rounded-full bg-sky-500/10 text-sky-600 border border-sky-500/20 font-bold">
                         Secure Vault
                       </span>
                     </div>
 
                     {/* Mode Tabs */}
-                    <div className="grid grid-cols-2 p-1 bg-zinc-950 border border-zinc-800 rounded-xl text-xs font-bold font-mono">
+                    <div className="grid grid-cols-2 p-1 bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold font-mono">
                       <button
                         type="button"
                         onClick={() => { setActivePasswordTab("change"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
                         className={`py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
                           activePasswordTab === "change"
-                            ? "bg-emerald-500 text-black shadow-md font-black"
-                            : "text-zinc-400 hover:text-white"
+                            ? "bg-sky-500 text-black shadow-md font-black"
+                            : "text-slate-500 hover:text-slate-900"
                         }`}
                       >
                         <Key className="size-3.5" /> Change Password
@@ -807,8 +807,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         onClick={() => { setActivePasswordTab("forgot"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
                         className={`py-2 rounded-lg transition cursor-pointer flex items-center justify-center gap-1.5 ${
                           activePasswordTab === "forgot"
-                            ? "bg-emerald-500 text-black shadow-md font-black"
-                            : "text-zinc-400 hover:text-white"
+                            ? "bg-sky-500 text-black shadow-md font-black"
+                            : "text-slate-500 hover:text-slate-900"
                         }`}
                       >
                         <RefreshCw className="size-3.5" /> Forgot Password
@@ -819,47 +819,47 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                     {activePasswordTab === "change" && (
                       <form onSubmit={handleUpdatePasswordWithOld} className="space-y-3 pt-1">
                         <div>
-                          <label className="block text-zinc-400 mb-1 font-bold">Current (Old) Password</label>
+                          <label className="block text-slate-500 mb-1 font-bold">Current (Old) Password</label>
                           <div className="relative">
-                            <Lock className="absolute left-3.5 top-3 size-4 text-zinc-500" />
+                            <Lock className="absolute left-3.5 top-3 size-4 text-slate-400" />
                             <input
                               type="password"
                               required
                               value={oldPassword}
                               onChange={(e) => setOldPassword(e.target.value)}
                               placeholder="••••••••••••"
-                              className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-3 py-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                              className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 py-2.5 text-slate-900 focus:border-sky-500 focus:outline-none"
                             />
                           </div>
                         </div>
 
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           <div>
-                            <label className="block text-zinc-400 mb-1 font-bold">New Password</label>
+                            <label className="block text-slate-500 mb-1 font-bold">New Password</label>
                             <div className="relative">
-                              <Key className="absolute left-3.5 top-3 size-4 text-zinc-500" />
+                              <Key className="absolute left-3.5 top-3 size-4 text-slate-400" />
                               <input
                                 type="password"
                                 required
                                 value={newPassword}
                                 onChange={(e) => setNewPassword(e.target.value)}
                                 placeholder="Min 6 characters"
-                                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-3 py-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 py-2.5 text-slate-900 focus:border-sky-500 focus:outline-none"
                               />
                             </div>
                           </div>
 
                           <div>
-                            <label className="block text-zinc-400 mb-1 font-bold">Confirm New Password</label>
+                            <label className="block text-slate-500 mb-1 font-bold">Confirm New Password</label>
                             <div className="relative">
-                              <Key className="absolute left-3.5 top-3 size-4 text-zinc-500" />
+                              <Key className="absolute left-3.5 top-3 size-4 text-slate-400" />
                               <input
                                 type="password"
                                 required
                                 value={confirmPassword}
                                 onChange={(e) => setConfirmPassword(e.target.value)}
                                 placeholder="Repeat new password"
-                                className="w-full rounded-xl border border-zinc-800 bg-zinc-950 pl-10 pr-3 py-2.5 text-white focus:border-emerald-500 focus:outline-none"
+                                className="w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 py-2.5 text-slate-900 focus:border-sky-500 focus:outline-none"
                               />
                             </div>
                           </div>
@@ -869,12 +869,12 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           <div
                             className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
                               passwordStatusMsg.type === "success"
-                                ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400"
+                                ? "bg-sky-500/10 border border-sky-500/30 text-sky-600"
                                 : "bg-rose-500/10 border border-rose-500/30 text-rose-400"
                             }`}
                           >
                             {passwordStatusMsg.type === "success" ? (
-                              <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+                              <CheckCircle2 className="size-4 shrink-0 text-sky-600" />
                             ) : (
                               <AlertCircle className="size-4 shrink-0 text-rose-400" />
                             )}
@@ -885,7 +885,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         <Button
                           type="submit"
                           disabled={isUpdatingPassword}
-                          className="w-full h-10 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-bold text-xs rounded-xl cursor-pointer"
+                          className="w-full h-10 bg-sky-500 hover:bg-sky-600 text-slate-900 font-bold text-xs rounded-xl cursor-pointer"
                         >
                           {isUpdatingPassword ? "Verifying & Updating..." : "Update Password Using Old Password"}
                         </Button>
@@ -895,18 +895,18 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                     {/* SECTION B: FORGOT PASSWORD RECOVERY VIA EMAIL */}
                     {activePasswordTab === "forgot" && (
                       <div className="space-y-3 pt-1">
-                        <div className="p-3 bg-zinc-950 border border-zinc-800 rounded-xl space-y-1">
-                          <p className="text-xs text-zinc-300 font-mono">
-                            Registered Email: <strong className="text-emerald-400">{email || currentUser?.email}</strong>
+                        <div className="p-3 bg-slate-50 border border-slate-200 rounded-xl space-y-1">
+                          <p className="text-xs text-slate-600 font-mono">
+                            Registered Email: <strong className="text-sky-600">{email || currentUser?.email}</strong>
                           </p>
-                          <p className="text-[11px] text-zinc-400">
+                          <p className="text-[11px] text-slate-500">
                             Forgot your password? Click below to send a secure recovery link directly to your email inbox.
                           </p>
                         </div>
 
                         {resetEmailStatus && (
-                          <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-medium flex items-center gap-2">
-                            <CheckCircle2 className="size-4 shrink-0 text-emerald-400" />
+                          <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-600 text-xs font-medium flex items-center gap-2">
+                            <CheckCircle2 className="size-4 shrink-0 text-sky-600" />
                             <span>{resetEmailStatus}</span>
                           </div>
                         )}
@@ -915,7 +915,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           type="button"
                           onClick={handleSendForgotPasswordEmail}
                           disabled={isSendingResetEmail}
-                          className="w-full h-10 bg-amber-500 hover:bg-amber-400 text-zinc-950 font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-2"
+                          className="w-full h-10 bg-amber-500 hover:bg-amber-400 text-slate-900 font-bold text-xs rounded-xl cursor-pointer flex items-center justify-center gap-2"
                         >
                           <Key className="size-4" />
                           <span>{isSendingResetEmail ? "Sending Reset Link..." : "Send Password Reset Link to Email"}</span>
@@ -930,8 +930,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {activeTab === "preferences" && (
                 <div className="space-y-6 max-w-3xl text-xs">
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">Travel Style</h3>
-                    <p className="text-zinc-400 mb-3">Controls how AI Trip Copilot plans your daily pace and itinerary complexity.</p>
+                    <h3 className="text-base font-bold text-slate-900 mb-1">Travel Style</h3>
+                    <p className="text-slate-500 mb-3">Controls how AI Trip Copilot plans your daily pace and itinerary complexity.</p>
                     <div className="grid grid-cols-3 gap-3">
                       {(["Relaxed", "Balanced", "Adventure"] as const).map((style) => (
                         <button
@@ -940,8 +940,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           onClick={() => setTravelStyle(style)}
                           className={`p-4 rounded-2xl border text-center font-bold transition cursor-pointer ${
                             travelStyle === style
-                              ? "border-emerald-500 bg-emerald-950/30 text-emerald-400"
-                              : "border-zinc-800 bg-zinc-900 text-zinc-300"
+                              ? "border-sky-500 bg-sky-100/30 text-sky-600"
+                              : "border-slate-200 bg-slate-100 text-slate-600"
                           }`}
                         >
                           {style}
@@ -951,7 +951,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">Preferred Transport</h3>
+                    <h3 className="text-base font-bold text-slate-900 mb-1">Preferred Transport</h3>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {["Car", "Bike", "Public transport", "Walking"].map((t) => {
                         const checked = transportMode.includes(t);
@@ -962,8 +962,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             onClick={() => toggleTransport(t)}
                             className={`px-4 py-2 rounded-xl border font-bold text-xs transition cursor-pointer ${
                               checked
-                                ? "border-emerald-500 bg-emerald-500/15 text-emerald-400"
-                                : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                                ? "border-sky-500 bg-sky-500/15 text-sky-600"
+                                : "border-slate-200 bg-slate-100 text-slate-500"
                             }`}
                           >
                             {checked ? "☑" : "☐"} {t}
@@ -974,7 +974,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   </div>
 
                   <div>
-                    <h3 className="text-base font-bold text-white mb-1">Interest Themes (11 Categories)</h3>
+                    <h3 className="text-base font-bold text-slate-900 mb-1">Interest Themes (11 Categories)</h3>
                     <div className="flex flex-wrap gap-2 mt-2">
                       {[
                         "Beaches",
@@ -997,8 +997,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             onClick={() => toggleInterest(interest)}
                             className={`px-3.5 py-1.5 rounded-full border text-xs font-bold transition cursor-pointer ${
                               isSel
-                                ? "border-emerald-500 bg-emerald-500 text-zinc-950"
-                                : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                                ? "border-sky-500 bg-sky-500 text-slate-900"
+                                : "border-slate-200 bg-slate-100 text-slate-500"
                             }`}
                           >
                             {isSel ? "✓ " : "+ "} {interest}
@@ -1015,22 +1015,22 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                 <div className="space-y-6 max-w-3xl">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-base font-bold text-white">My Collections & Favorites</h3>
-                      <p className="text-xs text-zinc-400">Places and attractions you have bookmarked across Tamil Nadu</p>
+                      <h3 className="text-base font-bold text-slate-900">My Collections & Favorites</h3>
+                      <p className="text-xs text-slate-500">Places and attractions you have bookmarked across Tamil Nadu</p>
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 text-xs font-mono font-bold">
+                    <span className="px-3 py-1 rounded-full bg-sky-500/20 text-sky-600 text-xs font-mono font-bold">
                       {savedPlaces.length} Saved
                     </span>
                   </div>
 
                   {savedPlaces.length === 0 ? (
-                    <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 text-center space-y-4">
+                    <div className="rounded-3xl border border-slate-200 bg-slate-100/50 p-8 text-center space-y-4">
                       <div className="grid size-14 place-items-center rounded-2xl bg-zinc-800 text-amber-400 mx-auto">
                         <Bookmark className="size-7" />
                       </div>
                       <div className="max-w-md mx-auto">
-                        <h4 className="text-sm font-bold text-white">No saved places or collections yet</h4>
-                        <p className="text-xs text-zinc-400 mt-1">
+                        <h4 className="text-sm font-bold text-slate-900">No saved places or collections yet</h4>
+                        <p className="text-xs text-slate-500 mt-1">
                           Click the bookmark icon on any destination, hill station, or waterfall across ExploreTN to save it here!
                         </p>
                       </div>
@@ -1038,7 +1038,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         <a
                           href="/explore"
                           onClick={onClose}
-                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
+                          className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-slate-900 hover:bg-sky-600 transition"
                         >
                           <Compass className="size-4" />
                           <span>Explore Places & Destinations →</span>
@@ -1053,18 +1053,18 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           return (
                             <div
                               key={place.id}
-                              className="p-3.5 rounded-2xl border border-zinc-800 bg-zinc-900/90 flex flex-col justify-between gap-3 group hover:border-zinc-700 transition"
+                              className="p-3.5 rounded-2xl border border-slate-200 bg-slate-100/90 flex flex-col justify-between gap-3 group hover:border-slate-300 transition"
                             >
                               <div className="flex justify-between items-start gap-2">
                                 <div className="min-w-0">
                                   <a
                                     href={`/place/${slug}`}
                                     onClick={onClose}
-                                    className="font-bold text-white text-sm hover:text-emerald-400 truncate block transition"
+                                    className="font-bold text-slate-900 text-sm hover:text-sky-600 truncate block transition"
                                   >
                                     {place.name}
                                   </a>
-                                  <p className="text-xs text-zinc-400 mt-0.5 font-mono">
+                                  <p className="text-xs text-slate-500 mt-0.5 font-mono">
                                     {place.category} • {place.district}
                                   </p>
                                 </div>
@@ -1074,25 +1074,25 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                                     removeSavedPlace(place.id);
                                     toast.success(`Removed ${place.name} from saved collections`);
                                   }}
-                                  className="p-1.5 rounded-lg text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer shrink-0"
+                                  className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition cursor-pointer shrink-0"
                                   title="Remove from saved"
                                 >
                                   <Trash2 className="size-4" />
                                 </button>
                               </div>
 
-                              <div className="flex items-center gap-2 pt-2 border-t border-zinc-800 font-mono text-[11px]">
+                              <div className="flex items-center gap-2 pt-2 border-t border-slate-200 font-mono text-[11px]">
                                 <a
                                   href={`/place/${slug}`}
                                   onClick={onClose}
-                                  className="flex-1 py-1.5 text-center rounded-xl bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold transition"
+                                  className="flex-1 py-1.5 text-center rounded-xl bg-zinc-800 hover:bg-zinc-700 text-slate-700 font-bold transition"
                                 >
                                   View Place
                                 </a>
                                 <a
                                   href={`/routes?destination=${encodeURIComponent(place.name)}`}
                                   onClick={onClose}
-                                  className="flex-1 py-1.5 text-center rounded-xl bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-400 font-bold border border-emerald-500/20 transition"
+                                  className="flex-1 py-1.5 text-center rounded-xl bg-sky-500/15 hover:bg-sky-500/25 text-sky-600 font-bold border border-sky-500/20 transition"
                                 >
                                   Plan Route
                                 </a>
@@ -1106,7 +1106,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         <a
                           href="/saved"
                           onClick={onClose}
-                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition"
+                          className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-slate-900 hover:bg-sky-600 transition"
                         >
                           <Bookmark className="size-4" />
                           <span>Open Full Saved Places & Collections Page ({savedPlaces.length}) →</span>
@@ -1122,11 +1122,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-zinc-400 mb-1 font-bold">Default Trip Duration</label>
+                      <label className="block text-slate-500 mb-1 font-bold">Default Trip Duration</label>
                       <select
                         value={defaultDuration}
                         onChange={(e) => setDefaultDuration(Number(e.target.value))}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white font-mono"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 font-mono"
                       >
                         <option value={1}>1 Day</option>
                         <option value={2}>2 Days</option>
@@ -1137,11 +1137,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                     </div>
 
                     <div>
-                      <label className="block text-zinc-400 mb-1 font-bold">Default Travel Mode</label>
+                      <label className="block text-slate-500 mb-1 font-bold">Default Travel Mode</label>
                       <select
                         value={defaultMode}
                         onChange={(e) => setDefaultMode(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white font-mono"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900 font-mono"
                       >
                         <option value="Car">Car / SUV</option>
                         <option value="Bike">Motorcycle</option>
@@ -1151,7 +1151,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-white mb-2">Avoid Parameters</h4>
+                    <h4 className="font-bold text-slate-900 mb-2">Avoid Parameters</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {["Toll roads", "Unpaved roads", "Difficult ghat roads", "Highways"].map((opt) => {
                         const checked = aiAvoidOptions.includes(opt);
@@ -1161,7 +1161,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             type="button"
                             onClick={() => toggleAiAvoid(opt)}
                             className={`p-3 rounded-xl border text-left font-bold transition cursor-pointer ${
-                              checked ? "border-amber-500 bg-amber-500/10 text-amber-300" : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                              checked ? "border-amber-500 bg-amber-500/10 text-amber-300" : "border-slate-200 bg-slate-100 text-slate-500"
                             }`}
                           >
                             {checked ? "☑" : "☐"} Avoid {opt}
@@ -1172,7 +1172,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-white mb-2">Prefer Parameters</h4>
+                    <h4 className="font-bold text-slate-900 mb-2">Prefer Parameters</h4>
                     <div className="grid grid-cols-2 gap-2">
                       {["Scenic routes", "Tourist attractions", "Food stops", "Viewpoints", "Less crowded places"].map((opt) => {
                         const checked = aiPreferOptions.includes(opt);
@@ -1182,7 +1182,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             type="button"
                             onClick={() => toggleAiPrefer(opt)}
                             className={`p-3 rounded-xl border text-left font-bold transition cursor-pointer ${
-                              checked ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                              checked ? "border-sky-500 bg-sky-500/10 text-sky-600" : "border-slate-200 bg-slate-100 text-slate-500"
                             }`}
                           >
                             {checked ? "☑" : "☐"} Prefer {opt}
@@ -1199,22 +1199,22 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="text-base font-bold text-white">Upcoming & Saved Trips</h3>
-                      <p className="text-zinc-400">Custom routes and itineraries created with AI Trip Copilot</p>
+                      <h3 className="text-base font-bold text-slate-900">Upcoming & Saved Trips</h3>
+                      <p className="text-slate-500">Custom routes and itineraries created with AI Trip Copilot</p>
                     </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 font-mono font-bold">
+                    <span className="px-3 py-1 rounded-full bg-sky-500/20 text-sky-600 font-mono font-bold">
                       {savedRoutes.length} Trips
                     </span>
                   </div>
 
                   {savedRoutes.length === 0 ? (
-                    <div className="rounded-3xl border border-zinc-800 bg-zinc-900/50 p-8 text-center space-y-4">
-                      <div className="grid size-14 place-items-center rounded-2xl bg-zinc-800 text-emerald-400 mx-auto">
+                    <div className="rounded-3xl border border-slate-200 bg-slate-100/50 p-8 text-center space-y-4">
+                      <div className="grid size-14 place-items-center rounded-2xl bg-zinc-800 text-sky-600 mx-auto">
                         <RouteIcon className="size-7" />
                       </div>
                       <div className="max-w-md mx-auto">
-                        <h4 className="text-sm font-bold text-white">No saved trips or custom routes</h4>
-                        <p className="text-xs text-zinc-400 mt-1">
+                        <h4 className="text-sm font-bold text-slate-900">No saved trips or custom routes</h4>
+                        <p className="text-xs text-slate-500 mt-1">
                           Generate a personalized itinerary using AI Trip Planner or save a route from Trails & Routes to see it here!
                         </p>
                       </div>
@@ -1222,7 +1222,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         <a
                           href="/planner"
                           onClick={onClose}
-                          className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-zinc-950 hover:bg-emerald-400 transition shadow-md shadow-emerald-500/20"
+                          className="inline-flex items-center gap-2 rounded-xl bg-sky-500 px-5 py-2.5 text-xs font-bold text-slate-900 hover:bg-sky-600 transition shadow-md shadow-sky-500/20"
                         >
                           <Sparkles className="size-4" />
                           <span>Plan My First Trip with AI →</span>
@@ -1234,16 +1234,16 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       {savedRoutes.map((trip) => (
                         <div
                           key={trip.id}
-                          className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center"
+                          className="p-4 rounded-2xl border border-slate-200 bg-slate-100 flex justify-between items-center"
                         >
                           <div>
-                            <p className="font-bold text-white text-sm">{trip.title}</p>
-                            <p className="text-zinc-400 mt-0.5">
+                            <p className="font-bold text-slate-900 text-sm">{trip.title}</p>
+                            <p className="text-slate-500 mt-0.5">
                               {trip.date} • {trip.stops} stops {trip.district ? `• ${trip.district}` : ""}
                             </p>
                           </div>
                           <div className="flex items-center gap-3">
-                            <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-400 font-mono font-bold text-[10px]">
+                            <span className="px-3 py-1 rounded-full bg-sky-500/15 text-sky-600 font-mono font-bold text-[10px]">
                               {trip.status}
                             </span>
                             <button
@@ -1252,7 +1252,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                                 removeSavedRoute(trip.id);
                                 toast.success(`Removed trip ${trip.title}`);
                               }}
-                              className="p-2 rounded-xl text-zinc-500 hover:text-rose-400 hover:bg-rose-500/10 transition"
+                              className="p-2 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition"
                               title="Delete route"
                             >
                               <Trash2 className="size-4" />
@@ -1269,7 +1269,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {activeTab === "map_prefs" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div>
-                    <h3 className="text-base font-bold text-white mb-2">Default Map View</h3>
+                    <h3 className="text-base font-bold text-slate-900 mb-2">Default Map View</h3>
                     <div className="grid grid-cols-3 gap-3">
                       {(["Standard", "Satellite", "Terrain"] as const).map((style) => (
                         <button
@@ -1277,7 +1277,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           type="button"
                           onClick={() => setMapStyle(style)}
                           className={`p-4 rounded-2xl border text-center font-bold transition cursor-pointer ${
-                            mapStyle === style ? "border-emerald-500 bg-emerald-950/30 text-emerald-400" : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                            mapStyle === style ? "border-sky-500 bg-sky-100/30 text-sky-600" : "border-slate-200 bg-slate-100 text-slate-500"
                           }`}
                         >
                           {style}
@@ -1291,7 +1291,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {/* TAB 8: SAFETY ALERTS */}
               {activeTab === "safety_alerts" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
-                  <h3 className="text-base font-bold text-white">Safety Alert Subscriptions</h3>
+                  <h3 className="text-base font-bold text-slate-900">Safety Alert Subscriptions</h3>
                   <div className="grid grid-cols-2 gap-2">
                     {[
                       "Ghat road warnings",
@@ -1308,7 +1308,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           type="button"
                           onClick={() => toggleSafetyAlert(alertItem)}
                           className={`p-3.5 rounded-2xl border text-left font-bold transition cursor-pointer ${
-                            checked ? "border-emerald-500 bg-emerald-500/10 text-emerald-400" : "border-zinc-800 bg-zinc-900 text-zinc-400"
+                            checked ? "border-sky-500 bg-sky-500/10 text-sky-600" : "border-slate-200 bg-slate-100 text-slate-500"
                           }`}
                         >
                           {checked ? "☑" : "☐"} {alertItem}
@@ -1323,17 +1323,17 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {activeTab === "location_privacy" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div>
-                    <h3 className="text-base font-bold text-white">Device Location & Privacy Settings</h3>
-                    <p className="text-zinc-400 text-xs mt-0.5">
+                    <h3 className="text-base font-bold text-slate-900">Device Location & Privacy Settings</h3>
+                    <p className="text-slate-500 text-xs mt-0.5">
                       Configure your starting origin, live GPS detection, and location sharing preferences for routes and weather alerts.
                     </p>
                   </div>
 
                   {/* Location Access Toggle */}
-                  <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-100 flex justify-between items-center">
                     <div>
-                      <p className="font-bold text-white">Allow Device Location Access</p>
-                      <p className="text-zinc-400 text-[11px]">Used for nearby places, start origin routing, and ghat safety warnings.</p>
+                      <p className="font-bold text-slate-900">Allow Device Location Access</p>
+                      <p className="text-slate-500 text-[11px]">Used for nearby places, start origin routing, and ghat safety warnings.</p>
                     </div>
                     <button
                       type="button"
@@ -1345,8 +1345,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       }}
                       className={`px-4 py-1.5 rounded-full font-bold transition text-xs cursor-pointer ${
                         userLoc.enabled
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/40"
-                          : "bg-zinc-800 text-zinc-400 border border-zinc-700"
+                          ? "bg-sky-500/20 text-sky-600 border border-sky-500/40"
+                          : "bg-zinc-800 text-slate-500 border border-slate-300"
                       }`}
                     >
                       {userLoc.enabled ? "✓ Enabled" : "Disabled"}
@@ -1354,11 +1354,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                   </div>
 
                   {/* Current Base Location Input & Live GPS Detection */}
-                  <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 space-y-4">
+                  <div className="p-4 rounded-2xl border border-slate-200 bg-slate-100 space-y-4">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
-                        <p className="font-bold text-white">Current Base Location</p>
-                        <p className="text-zinc-400 text-[11px]">Used as the default starting origin for district routes and AI trip planning.</p>
+                        <p className="font-bold text-slate-900">Current Base Location</p>
+                        <p className="text-slate-500 text-[11px]">Used as the default starting origin for district routes and AI trip planning.</p>
                       </div>
                       <button
                         type="button"
@@ -1376,7 +1376,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             setIsDetectingGps(false);
                           }
                         }}
-                        className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-500 text-zinc-950 font-bold hover:bg-emerald-400 transition text-xs cursor-pointer shrink-0"
+                        className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-sky-500 text-slate-900 font-bold hover:bg-sky-600 transition text-xs cursor-pointer shrink-0"
                       >
                         <MapPin className="size-3.5" />
                         <span>{isDetectingGps ? "Detecting Live GPS..." : "Detect Live GPS Location"}</span>
@@ -1389,7 +1389,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         value={baseCityInput}
                         onChange={(e) => setBaseCityInput(e.target.value)}
                         placeholder="e.g. Madurai, Tamil Nadu or Chennai, Tamil Nadu"
-                        className="flex-1 rounded-xl border border-zinc-800 bg-zinc-950 p-3 text-white focus:border-emerald-500 focus:outline-none"
+                        className="flex-1 rounded-xl border border-slate-200 bg-slate-50 p-3 text-slate-900 focus:border-sky-500 focus:outline-none"
                       />
                       <button
                         type="button"
@@ -1398,16 +1398,16 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                           setUserLoc(getStoredUserLocation());
                           toast.success(`Base location updated to ${baseCityInput}`);
                         }}
-                        className="px-4 py-3 rounded-xl bg-zinc-800 text-emerald-400 border border-emerald-500/30 font-bold hover:bg-zinc-700 transition"
+                        className="px-4 py-3 rounded-xl bg-zinc-800 text-sky-600 border border-sky-500/30 font-bold hover:bg-zinc-700 transition"
                       >
                         Save Base City
                       </button>
                     </div>
 
                     {userLoc.coords && (
-                      <div className="pt-2 border-t border-zinc-800/80 flex items-center justify-between text-[11px] font-mono text-zinc-400">
+                      <div className="pt-2 border-t border-slate-200/80 flex items-center justify-between text-[11px] font-mono text-slate-500">
                         <span>LATITUDE / LONGITUDE</span>
-                        <span className="text-emerald-400 font-bold">
+                        <span className="text-sky-600 font-bold">
                           {userLoc.coords.lat.toFixed(4)}° N, {userLoc.coords.lng.toFixed(4)}° E
                         </span>
                       </div>
@@ -1420,8 +1420,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {activeTab === "security" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div>
-                    <h3 className="text-base font-bold text-white">Active Device Sessions</h3>
-                    <p className="text-zinc-400 text-xs mt-0.5">
+                    <h3 className="text-base font-bold text-slate-900">Active Device Sessions</h3>
+                    <p className="text-slate-500 text-xs mt-0.5">
                       Devices currently authenticated to your ExploreTN account detected via HTTP User-Agent headers.
                     </p>
                   </div>
@@ -1430,18 +1430,18 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                     {sessions.map((session) => (
                       <div
                         key={session.id}
-                        className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center"
+                        className="p-4 rounded-2xl border border-slate-200 bg-slate-100 flex justify-between items-center"
                       >
                         <div className="flex items-center gap-3">
                           {session.deviceType === "desktop" ? (
-                            <Laptop className="size-5 text-emerald-400" />
+                            <Laptop className="size-5 text-sky-600" />
                           ) : (
-                            <Smartphone className="size-5 text-zinc-400" />
+                            <Smartphone className="size-5 text-slate-500" />
                           )}
                           <div>
-                            <p className="font-bold text-white flex items-center gap-2">
+                            <p className="font-bold text-slate-900 flex items-center gap-2">
                               <span>{session.deviceName}</span>
-                              <span className="text-[10px] text-zinc-400 font-sans font-normal">({session.browser})</span>
+                              <span className="text-[10px] text-slate-500 font-sans font-normal">({session.browser})</span>
                             </p>
                             <p className="text-slate-400 text-[11px]">
                               {session.location} • {session.lastActive}
@@ -1450,7 +1450,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                         </div>
 
                         {session.isCurrentSession ? (
-                          <span className="text-emerald-400 font-bold px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-[10px]">
+                          <span className="text-sky-600 font-bold px-3 py-1 rounded-full bg-sky-500/15 border border-sky-500/30 text-[10px]">
                             Current Session
                           </span>
                         ) : (
@@ -1475,7 +1475,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {/* TAB 11: NOTIFICATIONS */}
               {activeTab === "notifications" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
-                  <h3 className="text-base font-bold text-white">Granular Notification Channels</h3>
+                  <h3 className="text-base font-bold text-slate-900">Granular Notification Channels</h3>
                   <div className="flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input type="checkbox" checked={channels.push} onChange={(e) => setChannels({ ...channels, push: e.target.checked })} />
@@ -1494,11 +1494,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <label className="block text-zinc-400 mb-1 font-bold">Display Language</label>
+                      <label className="block text-slate-500 mb-1 font-bold">Display Language</label>
                       <select
                         value={language}
                         onChange={(e) => setLanguage(e.target.value)}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900"
                       >
                         <option value="English">English</option>
                         <option value="Tamil">தமிழ் (Tamil)</option>
@@ -1506,11 +1506,11 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                     </div>
 
                     <div>
-                      <label className="block text-zinc-400 mb-1 font-bold">Distance Units</label>
+                      <label className="block text-slate-500 mb-1 font-bold">Distance Units</label>
                       <select
                         value={unitDistance}
                         onChange={(e) => setUnitDistance(e.target.value as any)}
-                        className="w-full rounded-xl border border-zinc-800 bg-zinc-900 p-3 text-white"
+                        className="w-full rounded-xl border border-slate-200 bg-white p-3 text-slate-900"
                       >
                         <option value="Kilometers">Kilometers (km)</option>
                         <option value="Miles">Miles (mi)</option>
@@ -1524,8 +1524,8 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
               {activeTab === "connected_accounts" && (
                 <div className="space-y-6 max-w-3xl text-xs font-sans">
                   <div>
-                    <h3 className="text-base font-bold text-white">Social & External Accounts</h3>
-                    <p className="text-zinc-400 text-xs mt-0.5">
+                    <h3 className="text-base font-bold text-slate-900">Social & External Accounts</h3>
+                    <p className="text-slate-500 text-xs mt-0.5">
                       Connect your Google or Apple accounts to enable 1-click login and cross-device sync.
                     </p>
                   </div>
@@ -1540,12 +1540,12 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       );
 
                       return (
-                        <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
+                        <div className="p-4 rounded-2xl border border-slate-200 bg-slate-100 flex justify-between items-center">
                           <div className="flex items-center gap-3">
-                            <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-white font-bold">G</span>
+                            <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-slate-900 font-bold">G</span>
                             <div>
-                              <p className="font-bold text-white">Google Account</p>
-                              <p className="text-zinc-400 text-[11px]">
+                              <p className="font-bold text-slate-900">Google Account</p>
+                              <p className="text-slate-500 text-[11px]">
                                 {isGoogleConnected && currentUser?.email
                                   ? `Linked to ${currentUser.email}`
                                   : "Not connected"}
@@ -1553,7 +1553,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             </div>
                           </div>
                           {isGoogleConnected ? (
-                            <span className="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[11px]">
+                            <span className="px-4 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-600 font-bold text-[11px]">
                               ✓ Connected
                             </span>
                           ) : (
@@ -1563,7 +1563,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                                 const { triggerGoogleSignIn } = await import("@/lib/google-auth");
                                 await triggerGoogleSignIn();
                               }}
-                              className="px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-white font-bold text-[11px] hover:bg-white hover:text-black transition cursor-pointer"
+                              className="px-4 py-1.5 rounded-full bg-white/10 border border-white/20 text-slate-900 font-bold text-[11px] hover:bg-white hover:text-black transition cursor-pointer"
                             >
                               Connect Google
                             </button>
@@ -1577,12 +1577,12 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                       const isAppleConnected = Boolean(currentUser?.authProvider === "apple");
 
                       return (
-                        <div className="p-4 rounded-2xl border border-zinc-800 bg-zinc-900 flex justify-between items-center">
+                        <div className="p-4 rounded-2xl border border-slate-200 bg-slate-100 flex justify-between items-center">
                           <div className="flex items-center gap-3">
-                            <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-white font-bold"></span>
+                            <span className="grid size-9 place-items-center rounded-xl bg-white/10 text-slate-900 font-bold"></span>
                             <div>
-                              <p className="font-bold text-white">Apple ID</p>
-                              <p className="text-zinc-400 text-[11px]">
+                              <p className="font-bold text-slate-900">Apple ID</p>
+                              <p className="text-slate-500 text-[11px]">
                                 {isAppleConnected && currentUser?.email
                                   ? `Linked to ${currentUser.email}`
                                   : "Not connected"}
@@ -1590,7 +1590,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                             </div>
                           </div>
                           {isAppleConnected ? (
-                            <span className="px-4 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 font-bold text-[11px]">
+                            <span className="px-4 py-1.5 rounded-full bg-sky-500/15 border border-sky-500/30 text-sky-600 font-bold text-[11px]">
                               ✓ Connected
                             </span>
                           ) : (
@@ -1599,7 +1599,7 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
                               onClick={() => {
                                 toast.info("Apple Sign-In is coming soon in an upcoming update.");
                               }}
-                              className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-zinc-400 font-medium text-[11px] hover:text-white transition cursor-pointer"
+                              className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-slate-500 font-medium text-[11px] hover:text-slate-900 transition cursor-pointer"
                             >
                               Not Connected
                             </button>
@@ -1613,24 +1613,24 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
 
               {/* TAB 14: PAYMENTS & BOOKINGS */}
               {activeTab === "payments" && (
-                <div className="p-8 text-center border border-dashed border-zinc-800 rounded-3xl bg-zinc-900/60 text-xs">
+                <div className="p-8 text-center border border-dashed border-slate-200 rounded-3xl bg-slate-100/60 text-xs">
                   <CreditCard className="size-8 text-zinc-600 mx-auto mb-2" />
-                  <p className="font-bold text-zinc-300">Payments & Booking Engine</p>
-                  <p className="text-zinc-500 mt-1">Stays & activity reservations system launching in upcoming release.</p>
+                  <p className="font-bold text-slate-600">Payments & Booking Engine</p>
+                  <p className="text-slate-400 mt-1">Stays & activity reservations system launching in upcoming release.</p>
                 </div>
               )}
 
               {/* TAB 15: HELP & SUPPORT */}
               {activeTab === "help" && (
-                <div className="p-8 text-center border border-zinc-800 rounded-3xl bg-zinc-900/60 text-xs space-y-3">
-                  <HelpCircle className="size-8 text-emerald-400 mx-auto" />
-                  <p className="font-bold text-white">Need assistance with your ExploreTN trip?</p>
+                <div className="p-8 text-center border border-slate-200 rounded-3xl bg-slate-100/60 text-xs space-y-3">
+                  <HelpCircle className="size-8 text-sky-600 mx-auto" />
+                  <p className="font-bold text-slate-900">Need assistance with your ExploreTN trip?</p>
                   <Button
                     onClick={() => {
                       onClose();
                       window.location.href = "/support";
                     }}
-                    className="bg-emerald-500 text-zinc-950 font-bold"
+                    className="bg-sky-500 text-slate-900 font-bold"
                   >
                     Contact Travel Helpdesk
                   </Button>

@@ -341,26 +341,26 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           animate={{ opacity: 1, scale: 1, y: 0 }}
           exit={{ opacity: 0, scale: 0.95, y: 10 }}
           transition={{ duration: 0.2, ease: "easeOut" }}
-          className="relative w-full max-w-md bg-[#121821] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl text-white overflow-hidden"
+          className="relative w-full max-w-md bg-white border border-sky-200 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-900 overflow-hidden"
         >
           {/* Close button */}
           <button
             type="button"
             onClick={onClose}
-            className="absolute top-5 right-5 p-2 rounded-full text-slate-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            className="absolute top-5 right-5 p-2 rounded-full text-slate-500 hover:text-slate-900 hover:bg-white/10 transition cursor-pointer"
           >
             <X className="size-5" />
           </button>
 
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="inline-flex size-12 place-items-center rounded-2xl bg-emerald-500 text-black font-black shadow-lg shadow-emerald-500/20 mb-3">
+            <div className="inline-flex size-12 place-items-center rounded-2xl bg-sky-500 text-white font-black shadow-lg shadow-sky-500/20 mb-3">
               <Compass className="size-6 text-black" />
             </div>
-            <h2 className="text-2xl font-black tracking-tight text-white">
+            <h2 className="text-2xl font-black tracking-tight text-slate-900">
               {authMode === "signin" ? "Sign in to ExplorerTN" : "Create Explorer Account"}
             </h2>
-            <p className="mt-1.5 text-xs text-slate-300 font-sans leading-relaxed">
+            <p className="mt-1.5 text-xs text-slate-600 font-sans leading-relaxed">
               {promptMessage || "Save places, build personal trips, and unlock trails across Tamil Nadu."}
             </p>
           </div>
@@ -376,26 +376,26 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           </button>
 
           <div className="relative flex items-center justify-center my-4">
-            <div className="border-t border-white/10 w-full" />
-            <span className="bg-[#121821] px-3 text-[11px] font-mono text-slate-400 uppercase shrink-0">
+            <div className="border-t border-slate-200 w-full" />
+            <span className="bg-white px-3 text-[11px] font-mono text-slate-500 uppercase shrink-0">
               or continue with email
             </span>
           </div>
 
           {/* Mode Switcher Tabs */}
           {authMode !== "forgot_password" ? (
-            <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl mb-5 text-xs font-bold">
+            <div className="grid grid-cols-2 p-1 bg-slate-50 border border-slate-200 rounded-2xl mb-5 text-xs font-bold">
               <button
                 type="button"
                 onClick={() => { setAuthMode("signin"); setError(null); setSuccessMessage(null); }}
-                className={`py-2 rounded-xl transition cursor-pointer ${authMode === "signin" ? "bg-emerald-500 text-black shadow-md font-black" : "text-slate-400 hover:text-white"}`}
+                className={`py-2 rounded-xl transition cursor-pointer ${authMode === "signin" ? "bg-sky-500 text-white shadow-md font-black" : "text-slate-500 hover:text-slate-900"}`}
               >
                 Sign In
               </button>
               <button
                 type="button"
                 onClick={() => { setAuthMode("signup"); setError(null); setSuccessMessage(null); }}
-                className={`py-2 rounded-xl transition cursor-pointer ${authMode === "signup" ? "bg-emerald-500 text-black shadow-md font-black" : "text-slate-400 hover:text-white"}`}
+                className={`py-2 rounded-xl transition cursor-pointer ${authMode === "signup" ? "bg-sky-500 text-white shadow-md font-black" : "text-slate-500 hover:text-slate-900"}`}
               >
                 New Account
               </button>
@@ -403,7 +403,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           ) : (
             <div className="p-2.5 bg-amber-500/10 border border-amber-500/20 rounded-2xl mb-5 text-center">
               <h3 className="text-xs font-black text-amber-400 uppercase tracking-wider">Account Password Recovery</h3>
-              <p className="text-[11px] text-slate-300 mt-0.5">Enter your email and we'll send you a password reset link.</p>
+              <p className="text-[11px] text-slate-600 mt-0.5">Enter your email and we'll send you a password reset link.</p>
             </div>
           )}
 
@@ -411,54 +411,54 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           <form onSubmit={handleSubmit} className="space-y-3.5">
             {authMode === "signup" && (
               <div>
-                <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Full Name</label>
+                <label className="text-[10px] font-mono uppercase text-slate-500 font-bold">Full Name</label>
                 <div className="relative mt-1">
-                  <User className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                  <User className="absolute left-3.5 top-2.5 size-4 text-slate-500" />
                   <input
                     type="text"
                     required
                     placeholder="Santhosh Kumar"
                     value={form.fullName}
                     onChange={(e) => setForm({ ...form, fullName: e.target.value })}
-                    className="w-full h-10 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full h-10 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-sky-500"
                   />
                 </div>
               </div>
             )}
 
             <div>
-              <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Email Address</label>
+              <label className="text-[10px] font-mono uppercase text-slate-500 font-bold">Email Address</label>
               <div className="relative mt-1">
-                <Mail className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                <Mail className="absolute left-3.5 top-2.5 size-4 text-slate-500" />
                 <input
                   type="email"
                   required
                   placeholder="explorer@domain.com"
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
-                  className="w-full h-10 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                  className="w-full h-10 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-sky-500"
                 />
               </div>
             </div>
 
             {authMode === "email_verification" && (
               <div className="space-y-3">
-                <div className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl text-left space-y-1.5">
-                  <p className="text-xs text-emerald-400 font-bold flex items-center gap-1.5">
+                <div className="p-3.5 bg-sky-500/10 border border-sky-500/30 rounded-2xl text-left space-y-1.5">
+                  <p className="text-xs text-sky-600 font-bold flex items-center gap-1.5">
                     <CheckCircle2 className="size-4 shrink-0" />
                     Confirmation sent to {form.email}
                   </p>
-                  <p className="text-[11px] text-slate-300 leading-relaxed">
-                    Check your email and click <strong className="text-white">"Confirm email address"</strong> to instantly activate your account.
+                  <p className="text-[11px] text-slate-600 leading-relaxed">
+                    Check your email and click <strong className="text-slate-900">"Confirm email address"</strong> to instantly activate your account.
                   </p>
-                  <p className="text-[10px] text-slate-400">
+                  <p className="text-[10px] text-slate-500">
                     If you received a 6-digit verification code instead, you can also enter it below:
                   </p>
                 </div>
 
                 <div>
                   <div className="flex items-center justify-between mb-1">
-                    <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Verification Code (Optional)</label>
+                    <label className="text-[10px] font-mono uppercase text-slate-500 font-bold">Verification Code (Optional)</label>
                     <button
                       type="button"
                       onClick={async () => {
@@ -474,7 +474,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
                           setError("Failed to resend confirmation email. Please wait a moment.");
                         }
                       }}
-                      className="text-[10px] font-mono text-emerald-400 hover:underline cursor-pointer"
+                      className="text-[10px] font-mono text-sky-600 hover:underline cursor-pointer"
                     >
                       Resend Email ↻
                     </button>
@@ -485,7 +485,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
                     placeholder="123456"
                     value={form.otpCode}
                     onChange={(e) => setForm({ ...form, otpCode: e.target.value })}
-                    className="w-full h-11 bg-white/5 border border-white/10 rounded-xl text-center font-mono text-lg tracking-[0.4em] text-white placeholder-slate-600 focus:outline-none focus:border-emerald-500 mt-1"
+                    className="w-full h-11 bg-slate-50 border border-slate-200 rounded-xl text-center font-mono text-lg tracking-[0.4em] text-slate-900 placeholder-slate-600 focus:outline-none focus:border-sky-500 mt-1"
                   />
                 </div>
               </div>
@@ -494,24 +494,24 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             {authMode !== "forgot_password" && authMode !== "email_verification" && (
               <div>
                 <div className="flex items-center justify-between mb-1">
-                  <label className="text-[10px] font-mono uppercase text-slate-400 font-bold">Password</label>
+                  <label className="text-[10px] font-mono uppercase text-slate-500 font-bold">Password</label>
                   <button
                     type="button"
                     onClick={() => { setAuthMode("forgot_password"); setError(null); setSuccessMessage(null); }}
-                    className="text-[10px] font-mono text-emerald-400 hover:underline cursor-pointer"
+                    className="text-[10px] font-mono text-sky-600 hover:underline cursor-pointer"
                   >
                     Forgot Password?
                   </button>
                 </div>
                 <div className="relative">
-                  <Lock className="absolute left-3.5 top-2.5 size-4 text-slate-400" />
+                  <Lock className="absolute left-3.5 top-2.5 size-4 text-slate-500" />
                   <input
                     type="password"
                     required
                     placeholder="••••••••"
                     value={form.password}
                     onChange={(e) => setForm({ ...form, password: e.target.value })}
-                    className="w-full h-10 pl-10 pr-4 bg-white/5 border border-white/10 rounded-xl text-xs text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full h-10 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-500 focus:outline-none focus:border-sky-500"
                   />
                 </div>
               </div>
@@ -524,8 +524,8 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             )}
 
             {successMessage && (
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-400 text-xs font-medium flex items-start gap-2">
-                <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-emerald-400" />
+              <div className="p-3 bg-sky-500/10 border border-sky-500/30 rounded-xl text-sky-600 text-xs font-medium flex items-start gap-2">
+                <CheckCircle2 className="size-4 shrink-0 mt-0.5 text-sky-600" />
                 <span>{successMessage}</span>
               </div>
             )}
@@ -533,7 +533,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             <Button
               type="submit"
               disabled={loading}
-              className="w-full h-11 bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs rounded-2xl shadow-lg shadow-emerald-500/20 cursor-pointer mt-2 flex items-center justify-center gap-2"
+              className="w-full h-11 bg-sky-500 hover:bg-sky-600 text-black font-black text-xs rounded-2xl shadow-lg shadow-sky-500/20 cursor-pointer mt-2 flex items-center justify-center gap-2"
             >
               {loading ? (
                 <Loader2 className="size-4 animate-spin" />
@@ -557,14 +557,14 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           </form>
 
           {/* Footer note */}
-          <div className="mt-5 text-center text-[11px] text-slate-400 font-mono">
+          <div className="mt-5 text-center text-[11px] text-slate-500 font-mono">
             {authMode === "forgot_password" ? (
               <p>
                 Remembered your password?{" "}
                 <button
                   type="button"
                   onClick={() => { setAuthMode("signin"); setError(null); setSuccessMessage(null); }}
-                  className="text-emerald-400 font-bold hover:underline cursor-pointer"
+                  className="text-sky-600 font-bold hover:underline cursor-pointer"
                 >
                   Sign in
                 </button>
@@ -576,7 +576,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
                   <button
                     type="button"
                     onClick={() => { setAuthMode("signup"); setError(null); setSuccessMessage(null); }}
-                    className="text-emerald-400 font-bold hover:underline cursor-pointer"
+                    className="text-sky-600 font-bold hover:underline cursor-pointer"
                   >
                     Create account
                   </button>
@@ -599,7 +599,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
                   <button
                     type="button"
                     onClick={() => { setAuthMode("signin"); setError(null); setSuccessMessage(null); }}
-                    className="text-emerald-400 font-bold hover:underline cursor-pointer"
+                    className="text-sky-600 font-bold hover:underline cursor-pointer"
                   >
                     Sign in
                   </button>
