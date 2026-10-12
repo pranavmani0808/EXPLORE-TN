@@ -136,43 +136,43 @@ function EventsPage() {
 
   return (
     <AppShell>
-      <div className="min-h-screen bg-[#09090b] text-zinc-100 font-sans pb-24">
+      <div className="min-h-screen bg-slate-50 text-slate-800 font-sans pb-24">
         {/* HERO BANNER SECTION */}
-        <section className="relative overflow-hidden border-b border-zinc-800 bg-gradient-to-b from-emerald-950/40 via-zinc-950 to-[#09090b] py-14 sm:py-20 px-4 sm:px-6">
-          <div className="absolute top-0 right-1/4 size-96 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-          <div className="absolute bottom-0 left-10 size-80 rounded-full bg-teal-500/10 blur-3xl pointer-events-none" />
+        <section className="relative overflow-hidden border-b border-sky-100 bg-gradient-to-b from-sky-100/60 via-white to-slate-50 py-14 sm:py-20 px-4 sm:px-6">
+          <div className="absolute top-0 right-1/4 size-96 rounded-full bg-sky-400/10 blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-10 size-80 rounded-full bg-blue-400/10 blur-3xl pointer-events-none" />
 
           <div className="relative z-10 max-w-6xl mx-auto space-y-5 text-center">
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-500/15 border border-emerald-500/30 text-emerald-300 text-xs font-bold uppercase tracking-wider shadow-sm">
-              <Sparkles className="size-3.5 text-emerald-400 animate-pulse" />
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-sky-100 border border-sky-200 text-sky-800 text-xs font-bold uppercase tracking-wider shadow-sm">
+              <Sparkles className="size-3.5 text-sky-600 animate-pulse" />
               <span>ExploreTN Experiences & Festivals Hub</span>
             </div>
 
-            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black font-display text-white tracking-tight leading-tight">
+            <h1 className="text-3xl sm:text-5xl md:text-6xl font-black font-display text-slate-900 tracking-tight leading-tight">
               Discover What's Happening <br className="hidden sm:inline" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 via-teal-300 to-amber-300">
+              <span className="text-sky-600">
                 Across Tamil Nadu
               </span>
             </h1>
 
-            <p className="max-w-2xl mx-auto text-sm sm:text-base text-zinc-400 leading-relaxed">
+            <p className="max-w-2xl mx-auto text-sm sm:text-base text-slate-600 leading-relaxed">
               Find trips, concerts, festivals, marathons, cultural celebrations, workshops and experiences happening across Tamil Nadu. Explore not only by places, but by living moments.
             </p>
 
             {/* Quick Stats Pill */}
-            <div className="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-zinc-400">
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800">
-                <span className="size-2 rounded-full bg-emerald-400" />
-                <strong className="text-white">{allEvents.length}</strong> Curated Experiences
+            <div className="pt-2 flex flex-wrap items-center justify-center gap-3 text-xs text-slate-600">
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm">
+                <span className="size-2 rounded-full bg-sky-500" />
+                <strong className="text-slate-900">{allEvents.length}</strong> Curated Experiences
               </span>
-              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-zinc-900 border border-zinc-800">
-                <span className="size-2 rounded-full bg-amber-400" />
+              <span className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-white border border-slate-200 shadow-sm">
+                <span className="size-2 rounded-full bg-amber-500" />
                 All 38 Districts Connected
               </span>
               <button
                 type="button"
                 onClick={() => setShowSuggestModal(true)}
-                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition cursor-pointer font-semibold"
+                className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 hover:bg-sky-100 transition cursor-pointer font-semibold shadow-sm"
               >
                 <PlusCircle className="size-3.5" /> Suggest a Festival
               </button>
@@ -181,23 +181,23 @@ function EventsPage() {
         </section>
 
         {/* CONTROLS BAR: SEARCH, LOCATION, VIEW TOGGLE */}
-        <section className="sticky top-16 z-30 bg-zinc-950/95 backdrop-blur-xl border-b border-zinc-800/90 py-3.5 px-4 sm:px-6 shadow-xl">
+        <section className="sticky top-16 z-30 bg-white/95 backdrop-blur-xl border-b border-sky-100 py-3.5 px-4 sm:px-6 shadow-sm">
           <div className="max-w-7xl mx-auto space-y-3">
             <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3">
               {/* Search Bar */}
               <div className="relative flex-1">
-                <Search className="size-4 text-zinc-400 absolute left-3.5 top-3" />
+                <Search className="size-4 text-slate-400 absolute left-3.5 top-3" />
                 <input
                   type="text"
                   placeholder="Search events, trips, festivals, music, marathons..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-9 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs sm:text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-400 focus:ring-1 focus:ring-emerald-400 transition"
+                  className="w-full pl-10 pr-9 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs sm:text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white focus:ring-1 focus:ring-sky-500 transition"
                 />
                 {searchQuery && (
                   <button
                     onClick={() => setSearchQuery("")}
-                    className="absolute right-3 top-3 text-zinc-400 hover:text-white"
+                    className="absolute right-3 top-3 text-slate-400 hover:text-slate-700"
                   >
                     <X className="size-4" />
                   </button>
@@ -207,14 +207,14 @@ function EventsPage() {
               {/* Location Dropdown */}
               <div className="flex items-center gap-2">
                 <div className="relative shrink-0">
-                  <MapPin className="size-3.5 text-emerald-400 absolute left-3 top-3 pointer-events-none" />
+                  <MapPin className="size-3.5 text-sky-600 absolute left-3 top-3 pointer-events-none" />
                   <select
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="pl-8 pr-8 py-2 rounded-xl bg-zinc-900 border border-zinc-800 text-xs font-semibold text-zinc-200 focus:outline-none focus:border-emerald-400 cursor-pointer appearance-none"
+                    className="pl-8 pr-8 py-2 rounded-xl bg-slate-50 border border-slate-200 text-xs font-semibold text-slate-700 focus:outline-none focus:border-sky-500 cursor-pointer appearance-none"
                   >
                     {LOCATIONS.map((loc) => (
-                      <option key={loc} value={loc} className="bg-zinc-900 text-white">
+                      <option key={loc} value={loc} className="bg-white text-slate-900">
                         {loc}
                       </option>
                     ))}
@@ -222,40 +222,38 @@ function EventsPage() {
                 </div>
 
                 {/* View Mode Toggle: List, Map, Calendar */}
-                <div className="flex items-center bg-zinc-900 rounded-xl p-1 border border-zinc-800 shrink-0">
+                <div className="flex items-center bg-slate-100 rounded-xl p-1 border border-slate-200 shrink-0">
                   <button
                     type="button"
                     onClick={() => setViewMode("list")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
                       viewMode === "list"
-                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm"
-                        : "text-zinc-400 hover:text-white"
+                        ? "bg-white text-sky-700 shadow-sm font-bold"
+                        : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
                     <List className="size-3.5" />
                     <span>Cards</span>
                   </button>
-
                   <button
                     type="button"
                     onClick={() => setViewMode("map")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
                       viewMode === "map"
-                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm"
-                        : "text-zinc-400 hover:text-white"
+                        ? "bg-white text-sky-700 shadow-sm font-bold"
+                        : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
                     <Map className="size-3.5" />
                     <span>Map View</span>
                   </button>
-
                   <button
                     type="button"
                     onClick={() => setViewMode("calendar")}
                     className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition cursor-pointer ${
                       viewMode === "calendar"
-                        ? "bg-emerald-500 text-zinc-950 font-bold shadow-sm"
-                        : "text-zinc-400 hover:text-white"
+                        ? "bg-white text-sky-700 shadow-sm font-bold"
+                        : "text-slate-600 hover:text-slate-900"
                     }`}
                   >
                     <Calendar className="size-3.5" />
@@ -276,8 +274,8 @@ function EventsPage() {
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`px-3 py-1.5 rounded-xl font-semibold whitespace-nowrap transition-all duration-200 cursor-pointer flex items-center gap-1.5 border shrink-0 ${
                       isSelected
-                        ? "bg-emerald-500 text-zinc-950 border-emerald-400 font-extrabold shadow-md shadow-emerald-500/20"
-                        : "bg-zinc-900/80 text-zinc-300 border-zinc-800 hover:border-zinc-700 hover:text-white"
+                        ? "bg-sky-500 text-white border-sky-400 font-extrabold shadow-sm shadow-sky-500/20"
+                        : "bg-white text-slate-700 border-slate-200 hover:border-sky-300 hover:text-sky-700"
                     }`}
                   >
                     <span>{cat.icon}</span>

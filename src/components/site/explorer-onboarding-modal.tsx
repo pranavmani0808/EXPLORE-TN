@@ -244,35 +244,35 @@ export function ExplorerOnboardingModal({
   };
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-black/80 backdrop-blur-md font-sans">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 bg-slate-900/40 backdrop-blur-sm font-sans">
       <motion.div
         initial={{ opacity: 0, scale: 0.95, y: 15 }}
         animate={{ opacity: 1, scale: 1, y: 0 }}
         exit={{ opacity: 0, scale: 0.95, y: 15 }}
         transition={{ duration: 0.25, ease: "easeOut" }}
-        className="relative w-full max-w-2xl rounded-3xl bg-[#09090b] border border-zinc-800 shadow-[0_25px_80px_rgba(0,0,0,0.8)] text-white overflow-hidden flex flex-col max-h-[90vh]"
+        className="relative w-full max-w-2xl rounded-3xl bg-white border border-sky-100 shadow-[0_25px_80px_rgba(2,132,199,0.12)] text-slate-800 overflow-hidden flex flex-col max-h-[90vh]"
       >
         {/* Top Header & Progress Stepper */}
-        <div className="p-5 sm:p-6 border-b border-zinc-800 bg-gradient-to-r from-emerald-950/60 via-zinc-900 to-amber-950/60">
+        <div className="p-5 sm:p-6 border-b border-sky-100 bg-gradient-to-r from-sky-50 via-white to-blue-50">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500 text-zinc-950 font-black shadow-lg shadow-emerald-500/25">
+              <span className="grid size-10 place-items-center rounded-2xl bg-sky-500 text-white font-black shadow-lg shadow-sky-500/25">
                 <Compass className="size-6" />
               </span>
               <div>
-                <h2 className="text-base sm:text-lg font-extrabold text-white flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-extrabold text-slate-900 flex items-center gap-2">
                   <span>Welcome to ExploreTN</span>
-                  <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-400 rounded-full border border-emerald-500/30">
+                  <span className="px-2 py-0.5 text-[10px] font-mono font-bold bg-sky-100 text-sky-700 rounded-full border border-sky-200">
                     Step {step} of 4
                   </span>
                 </h2>
-                <p className="text-xs text-zinc-400">Set up your explorer profile & travel preferences</p>
+                <p className="text-xs text-slate-500">Set up your explorer profile & travel preferences</p>
               </div>
             </div>
 
             <button
               onClick={onClose}
-              className="grid size-8 place-items-center rounded-full bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 transition"
+              className="grid size-8 place-items-center rounded-full bg-slate-100 text-slate-400 hover:text-slate-700 hover:bg-slate-200 transition"
               title="Close setup modal"
             >
               <X className="size-4" />
@@ -285,7 +285,7 @@ export function ExplorerOnboardingModal({
               <div
                 key={s}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  s <= step ? "bg-emerald-500 shadow-sm shadow-emerald-500/50" : "bg-zinc-800"
+                  s <= step ? "bg-sky-500 shadow-sm shadow-sky-500/50" : "bg-slate-200"
                 }`}
               />
             ))}
@@ -302,92 +302,92 @@ export function ExplorerOnboardingModal({
               transition={{ duration: 0.2 }}
               className="space-y-4"
             >
-              <div className="border-b border-zinc-800 pb-3">
-                <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                  <User className="size-4" />
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-sky-700 flex items-center gap-2">
+                  <User className="size-4 text-sky-600" />
                   <span>Step 1: Your Explorer Identity</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
-                  Tell us who you are so AI Trip Copilot can personalize your itineraries.
+                <p className="text-xs text-slate-500 mt-1">
+                  Tell us who you are so the route planner can personalize your travel itineraries.
                 </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">Full Name *</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Full Name *</label>
                   <input
                     type="text"
                     value={name}
                     onChange={(e) => setName(e.target.value)}
                     placeholder="e.g. Pranav Mani"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">Explorer Username</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Explorer Username</label>
                   <input
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="e.g. ghat_explorer_99"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">Email Address</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="e.g. yourname@gmail.com"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">Phone Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
                   <input
                     type="tel"
                     value={phone}
                     onChange={(e) => setPhone(e.target.value)}
                     placeholder="e.g. +91 98765 43210"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">Home Location / Base City</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Home Location / Base City</label>
                   <input
                     type="text"
                     value={homeLocation}
                     onChange={(e) => setHomeLocation(e.target.value)}
                     placeholder="e.g. Chennai, Coimbatore, Madurai..."
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold text-zinc-300 mb-1">Emergency Contact Number</label>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Emergency Contact Number</label>
                   <input
                     type="tel"
                     value={emergencyContact}
                     onChange={(e) => setEmergencyContact(e.target.value)}
                     placeholder="e.g. +91 98765 00000"
-                    className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500"
+                    className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-1">Explorer Bio & Travel Vision</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Explorer Bio & Travel Vision</label>
                 <textarea
                   rows={2}
                   value={bio}
                   onChange={(e) => setBio(e.target.value)}
                   placeholder="Share a short line about your favorite travel style in Tamil Nadu..."
-                  className="w-full rounded-xl bg-zinc-900 border border-zinc-800 px-3.5 py-2.5 text-xs text-white placeholder-zinc-500 focus:outline-none focus:border-emerald-500 resize-none"
+                  className="w-full rounded-xl bg-slate-50 border border-slate-200 px-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500 focus:bg-white resize-none"
                 />
               </div>
             </motion.div>
@@ -401,19 +401,19 @@ export function ExplorerOnboardingModal({
               transition={{ duration: 0.2 }}
               className="space-y-5"
             >
-              <div className="border-b border-zinc-800 pb-3">
-                <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                  <Compass className="size-4" />
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-sky-700 flex items-center gap-2">
+                  <Compass className="size-4 text-sky-600" />
                   <span>Step 2: Travel Style & Preferred Transport</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   How do you like to explore Tamil Nadu's ghat roads, heritage sites, and trails?
                 </p>
               </div>
 
               {/* Travel Style Selector */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">Overall Travel Style</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Overall Travel Style</label>
                 <div className="grid grid-cols-3 gap-3">
                   {[
                     { style: "Relaxed", desc: "Leisurely pace, frequent rest stops, luxury resorts" },
@@ -426,12 +426,12 @@ export function ExplorerOnboardingModal({
                       onClick={() => setTravelStyle(item.style as any)}
                       className={`flex flex-col items-start p-3.5 rounded-2xl border text-left transition ${
                         travelStyle === item.style
-                          ? "bg-emerald-500/15 border-emerald-500 text-white"
-                          : "bg-zinc-900/80 border-zinc-800 text-zinc-300 hover:border-zinc-700"
+                          ? "bg-sky-50 border-sky-500 text-sky-950 shadow-sm"
+                          : "bg-slate-50 border-slate-200 text-slate-700 hover:border-sky-300 hover:bg-white"
                       }`}
                     >
-                      <span className="text-xs font-extrabold text-emerald-400 mb-1">{item.style}</span>
-                      <span className="text-[10px] text-zinc-400 leading-relaxed">{item.desc}</span>
+                      <span className="text-xs font-extrabold text-sky-600 mb-1">{item.style}</span>
+                      <span className="text-[10px] text-slate-500 leading-relaxed">{item.desc}</span>
                     </button>
                   ))}
                 </div>
@@ -439,7 +439,7 @@ export function ExplorerOnboardingModal({
 
               {/* Preferred Transport Mode */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">
+                <label className="block text-xs font-semibold text-slate-700 mb-2">
                   Preferred Transport Modes (Select all that apply)
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
@@ -458,8 +458,8 @@ export function ExplorerOnboardingModal({
                         onClick={() => toggleTransport(t.mode)}
                         className={`flex items-center gap-2.5 p-3 rounded-xl border text-xs font-bold transition ${
                           selected
-                            ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                            : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                            ? "bg-sky-100 border-sky-500 text-sky-700"
+                            : "bg-slate-50 border-slate-200 text-slate-600 hover:border-sky-300 hover:bg-white"
                         }`}
                       >
                         <Icon className="size-4" />
@@ -472,7 +472,7 @@ export function ExplorerOnboardingModal({
 
               {/* Trip Pace */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">Trip Pace Preference</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Trip Pace Preference</label>
                 <div className="grid grid-cols-3 gap-2.5">
                   {(["Slow", "Moderate", "Fast"] as const).map((pace) => (
                     <button
@@ -481,8 +481,8 @@ export function ExplorerOnboardingModal({
                       onClick={() => setTripPace(pace)}
                       className={`p-2.5 rounded-xl border text-xs font-bold transition ${
                         tripPace === pace
-                          ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                          : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                          ? "bg-sky-100 border-sky-500 text-sky-700"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-sky-300 hover:bg-white"
                       }`}
                     >
                       {pace} Pace
@@ -501,12 +501,12 @@ export function ExplorerOnboardingModal({
               transition={{ duration: 0.2 }}
               className="space-y-4"
             >
-              <div className="border-b border-zinc-800 pb-3">
-                <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                  <Heart className="size-4" />
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-sky-700 flex items-center gap-2">
+                  <Heart className="size-4 text-sky-600" />
                   <span>Step 3: Favorite Categories & Interest Themes</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Select the types of destinations you enjoy visiting across Tamil Nadu's 38 districts.
                 </p>
               </div>
@@ -521,8 +521,8 @@ export function ExplorerOnboardingModal({
                       onClick={() => toggleInterest(item.label)}
                       className={`flex items-center gap-2.5 p-3 rounded-2xl border text-xs font-bold transition ${
                         isSelected
-                          ? "bg-emerald-500/20 border-emerald-500 text-emerald-300 shadow-sm"
-                          : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                          ? "bg-sky-50 border-sky-500 text-sky-700 shadow-sm"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-sky-300 hover:bg-white"
                       }`}
                     >
                       <span className="text-base">{item.icon}</span>
@@ -542,12 +542,12 @@ export function ExplorerOnboardingModal({
               transition={{ duration: 0.2 }}
               className="space-y-5"
             >
-              <div className="border-b border-zinc-800 pb-3">
-                <h3 className="text-sm font-bold text-emerald-400 flex items-center gap-2">
-                  <Sparkles className="size-4" />
-                  <span>Step 4: AI Trip Planner & Safety Alerts</span>
+              <div className="border-b border-slate-100 pb-3">
+                <h3 className="text-sm font-bold text-sky-700 flex items-center gap-2">
+                  <Compass className="size-4 text-sky-600" />
+                  <span>Step 4: Route Preferences & Safety Alerts</span>
                 </h3>
-                <p className="text-xs text-zinc-400 mt-1">
+                <p className="text-xs text-slate-500 mt-1">
                   Configure default routing rules, avoiding ghat hazards, and safety push warnings.
                 </p>
               </div>
@@ -555,8 +555,8 @@ export function ExplorerOnboardingModal({
               {/* Default Trip Duration */}
               <div>
                 <div className="flex items-center justify-between mb-2">
-                  <label className="text-xs font-semibold text-zinc-300">Default Trip Duration</label>
-                  <span className="text-xs font-mono font-bold text-emerald-400">
+                  <label className="text-xs font-semibold text-slate-700">Default Trip Duration</label>
+                  <span className="text-xs font-mono font-bold text-sky-600">
                     {defaultTripDuration} {defaultTripDuration === 1 ? "Day" : "Days"}
                   </span>
                 </div>
@@ -566,13 +566,13 @@ export function ExplorerOnboardingModal({
                   max={7}
                   value={defaultTripDuration}
                   onChange={(e) => setDefaultTripDuration(parseInt(e.target.value))}
-                  className="w-full accent-emerald-500 bg-zinc-900 cursor-pointer"
+                  className="w-full accent-sky-500 bg-slate-200 cursor-pointer"
                 />
               </div>
 
               {/* Avoid Parameters */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">Avoid Parameters</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Avoid Parameters</label>
                 <div className="grid grid-cols-2 gap-2">
                   {["Toll roads", "Difficult ghat roads", "Unpaved roads", "Highways"].map((opt) => (
                     <button
@@ -581,8 +581,8 @@ export function ExplorerOnboardingModal({
                       onClick={() => toggleAvoid(opt)}
                       className={`p-2.5 rounded-xl border text-xs font-bold transition text-left ${
                         avoidOptions.includes(opt)
-                          ? "bg-amber-500/15 border-amber-500 text-amber-300"
-                          : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                          ? "bg-amber-50 border-amber-400 text-amber-700"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-white"
                       }`}
                     >
                       {avoidOptions.includes(opt) ? "✓ Avoid " : "+ Avoid "} {opt}
@@ -593,7 +593,7 @@ export function ExplorerOnboardingModal({
 
               {/* Prefer Parameters */}
               <div>
-                <label className="block text-xs font-semibold text-zinc-300 mb-2">Prefer Parameters</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-2">Prefer Parameters</label>
                 <div className="grid grid-cols-2 gap-2">
                   {["Scenic routes", "Viewpoints", "Food stops", "Less crowded places"].map((opt) => (
                     <button
@@ -602,8 +602,8 @@ export function ExplorerOnboardingModal({
                       onClick={() => togglePrefer(opt)}
                       className={`p-2.5 rounded-xl border text-xs font-bold transition text-left ${
                         preferOptions.includes(opt)
-                          ? "bg-emerald-500/20 border-emerald-500 text-emerald-400"
-                          : "bg-zinc-900 border-zinc-800 text-zinc-400 hover:border-zinc-700"
+                          ? "bg-sky-50 border-sky-500 text-sky-700"
+                          : "bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-white"
                       }`}
                     >
                       {preferOptions.includes(opt) ? "✓ Prefer " : "+ Prefer "} {opt}
@@ -613,19 +613,19 @@ export function ExplorerOnboardingModal({
               </div>
 
               {/* Ghat Safety Warnings */}
-              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800">
+              <div className="flex items-center justify-between p-3.5 rounded-2xl bg-sky-50/50 border border-sky-100">
                 <div className="flex items-center gap-3">
-                  <Shield className="size-5 text-emerald-400 shrink-0" />
+                  <Shield className="size-5 text-sky-600 shrink-0" />
                   <div>
-                    <h4 className="text-xs font-bold text-white">Ghat Road Safety Alerts</h4>
-                    <p className="text-[10px] text-zinc-400">Hairpin bend, landslide & weather push alerts</p>
+                    <h4 className="text-xs font-bold text-slate-900">Ghat Road Safety Alerts</h4>
+                    <p className="text-[10px] text-slate-500">Hairpin bend, landslide & weather push alerts</p>
                   </div>
                 </div>
                 <input
                   type="checkbox"
                   checked={safetyAlertsEnabled}
                   onChange={(e) => setSafetyAlertsEnabled(e.target.checked)}
-                  className="size-4 accent-emerald-500 rounded cursor-pointer"
+                  className="size-4 accent-sky-500 rounded cursor-pointer"
                 />
               </div>
             </motion.div>
@@ -633,12 +633,12 @@ export function ExplorerOnboardingModal({
         </div>
 
         {/* Footer Navigation Buttons */}
-        <div className="p-4 sm:p-5 border-t border-zinc-800 bg-zinc-950 flex items-center justify-between">
+        <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50 flex items-center justify-between">
           {step > 1 ? (
             <button
               type="button"
               onClick={() => setStep((s) => s - 1)}
-              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-zinc-300 hover:text-white bg-zinc-900 border border-zinc-800 rounded-xl transition"
+              className="flex items-center gap-1.5 px-4 py-2 text-xs font-bold text-slate-700 hover:text-slate-900 bg-white border border-slate-200 rounded-xl transition shadow-sm"
             >
               <ChevronLeft className="size-4" />
               <span>Previous</span>
@@ -647,7 +647,7 @@ export function ExplorerOnboardingModal({
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-300 transition"
+              className="px-4 py-2 text-xs font-semibold text-slate-500 hover:text-slate-700 transition"
             >
               Skip Setup
             </button>
@@ -657,7 +657,7 @@ export function ExplorerOnboardingModal({
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-extrabold text-zinc-950 bg-emerald-500 hover:bg-emerald-400 rounded-xl transition shadow-md shadow-emerald-500/20"
+              className="flex items-center gap-1.5 px-5 py-2.5 text-xs font-extrabold text-white bg-sky-600 hover:bg-sky-500 rounded-xl transition shadow-md shadow-sky-500/20"
             >
               <span>Next Step</span>
               <ChevronRight className="size-4" />
@@ -666,7 +666,7 @@ export function ExplorerOnboardingModal({
             <button
               type="button"
               onClick={handleFinish}
-              className="flex items-center gap-2 px-6 py-2.5 text-xs font-black text-zinc-950 bg-emerald-400 hover:bg-emerald-300 rounded-xl transition shadow-lg shadow-emerald-400/30"
+              className="flex items-center gap-2 px-6 py-2.5 text-xs font-black text-white bg-sky-500 hover:bg-sky-400 rounded-xl transition shadow-lg shadow-sky-500/30"
             >
               <Check className="size-4" />
               <span>Save & Complete Setup</span>

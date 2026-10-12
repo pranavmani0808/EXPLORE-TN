@@ -133,34 +133,34 @@ export function PlaceQuickDetailsModal({
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
             transition={{ type: "spring", damping: 25, stiffness: 300 }}
-            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-zinc-950 border border-zinc-800 shadow-2xl text-zinc-100 font-sans"
+            className="relative z-10 w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white border border-sky-100 shadow-2xl text-slate-800 font-sans"
           >
             {/* Header Hero Image */}
-            <div className="relative aspect-[16/9] w-full overflow-hidden bg-zinc-900">
+            <div className="relative aspect-[16/9] w-full overflow-hidden bg-slate-100">
               <img
                 src={place.image}
                 alt={place.name}
                 className="size-full object-cover"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/40 to-transparent" />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-slate-900/30 to-transparent" />
 
               {/* Close Button */}
               <button
                 type="button"
                 onClick={onClose}
-                className="absolute top-3 right-3 grid size-9 place-items-center rounded-full bg-zinc-950/80 text-zinc-300 hover:text-white hover:bg-zinc-900 border border-zinc-700 transition cursor-pointer"
+                className="absolute top-3 right-3 grid size-9 place-items-center rounded-full bg-white/90 text-slate-700 hover:text-slate-900 hover:bg-white border border-slate-200 shadow-sm transition cursor-pointer"
               >
                 <X className="size-5" />
               </button>
 
               {/* Top Badges */}
               <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2">
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 backdrop-blur-md">
+                <span className="text-[10px] font-mono font-bold uppercase tracking-wider px-3 py-1 rounded-full bg-sky-500 text-white shadow-sm backdrop-blur-md">
                   {getCategoryLabel(place.category)}
                 </span>
                 {place.rating && (
-                  <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/30 backdrop-blur-md flex items-center gap-1">
-                    <Star className="size-3 fill-amber-400 text-amber-400" />
+                  <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded-full bg-white/90 text-slate-800 border border-slate-200 shadow-sm backdrop-blur-md flex items-center gap-1">
+                    <Star className="size-3 fill-amber-400 text-amber-500" />
                     <span>{place.rating} ({place.reviews || 120})</span>
                   </span>
                 )}
@@ -168,8 +168,8 @@ export function PlaceQuickDetailsModal({
 
               {/* Title & Location Header inside Image bottom */}
               <div className="absolute bottom-4 left-4 right-4 space-y-1">
-                <p className="flex items-center gap-1.5 text-xs font-bold text-amber-400 font-mono">
-                  <MapPin className="size-3.5 text-amber-400 shrink-0" />
+                <p className="flex items-center gap-1.5 text-xs font-bold text-sky-300 font-mono">
+                  <MapPin className="size-3.5 text-sky-300 shrink-0" />
                   <span>{locationString}</span>
                 </p>
                 <h2 className="text-2xl sm:text-3xl font-extrabold font-serif text-white tracking-tight leading-tight">
@@ -181,18 +181,18 @@ export function PlaceQuickDetailsModal({
             {/* Modal Body Content */}
             <div className="p-5 sm:p-7 space-y-6">
               {/* Tagline / Story */}
-              <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed bg-zinc-900/60 p-4 rounded-2xl border border-zinc-800/80">
+              <p className="text-xs sm:text-sm text-slate-600 leading-relaxed bg-slate-50 p-4 rounded-2xl border border-slate-200">
                 {place.tagline || place.story}
               </p>
 
               {/* 🅿️ VEHICLE PARKING BREAKDOWN (CAR, BIKE, VAN, BUS) */}
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
-                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                    <ParkingCircle className="size-4 text-emerald-400" /> Vehicle Parking Availability
+                  <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 flex items-center gap-1.5">
+                    <ParkingCircle className="size-4 text-sky-600" /> Vehicle Parking Availability
                   </h3>
                   {intel?.parking?.parkingFeeDetails && (
-                    <span className="text-[11px] font-mono font-bold text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-md border border-amber-500/20">
+                    <span className="text-[11px] font-mono font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-md border border-sky-200">
                       💰 {intel.parking.parkingFeeDetails}
                     </span>
                   )}
@@ -200,131 +200,131 @@ export function PlaceQuickDetailsModal({
 
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {/* Car Parking */}
-                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400">
-                      <Car className="size-3.5 text-blue-400 shrink-0" />
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                      <Car className="size-3.5 text-sky-600 shrink-0" />
                       <span>Car</span>
                     </div>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-xs font-bold text-slate-900">
                       {intel?.parking?.carParking ?? "Available"}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-mono">
+                    <p className="text-[10px] text-slate-500 font-mono">
                       {intel?.parking?.capacityCars || "50+ Capacity"}
                     </p>
                   </div>
 
                   {/* Bike Parking */}
-                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400">
-                      <Bike className="size-3.5 text-emerald-400 shrink-0" />
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                      <Bike className="size-3.5 text-sky-600 shrink-0" />
                       <span>Bike</span>
                     </div>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-xs font-bold text-slate-900">
                       {intel?.parking?.bikeParking ?? "Available"}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-mono">
+                    <p className="text-[10px] text-slate-500 font-mono">
                       {intel?.parking?.capacityBikes || "150+ Capacity"}
                     </p>
                   </div>
 
                   {/* Van / Traveller Parking */}
-                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400">
-                      <Bus className="size-3.5 text-purple-400 shrink-0" />
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                      <Bus className="size-3.5 text-sky-600 shrink-0" />
                       <span>Van / Traveller</span>
                     </div>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-xs font-bold text-slate-900">
                       {intel?.parking?.vanParking || "Available"}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-mono">
+                    <p className="text-[10px] text-slate-500 font-mono">
                       {intel?.parking?.capacityVans || "Tourist Van Bay"}
                     </p>
                   </div>
 
                   {/* Tourist Bus Parking */}
-                  <div className="p-3 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-zinc-400">
-                      <Bus className="size-3.5 text-amber-400 shrink-0" />
+                  <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                    <div className="flex items-center gap-1.5 text-[11px] font-bold text-slate-500">
+                      <Bus className="size-3.5 text-sky-600 shrink-0" />
                       <span>Tourist Bus</span>
                     </div>
-                    <p className="text-xs font-bold text-white">
+                    <p className="text-xs font-bold text-slate-900">
                       {intel?.parking?.busParking || (isWaterfall ? "Limited" : "Available")}
                     </p>
-                    <p className="text-[10px] text-zinc-400 font-mono">
+                    <p className="text-[10px] text-slate-500 font-mono">
                       {intel?.parking?.capacityBuses || "Gate Bus Stand"}
                     </p>
                   </div>
                 </div>
 
                 {intel?.parking?.parkingNotes && (
-                  <p className="text-[11px] text-zinc-400 bg-zinc-900/40 p-2.5 rounded-xl border border-zinc-800/60 font-mono">
-                    📍 <strong className="text-zinc-300">Distance & Advisory:</strong> {intel.parking.parkingNotes} ({intel.parking.parkingDistance})
+                  <p className="text-[11px] text-slate-600 bg-sky-50/50 p-2.5 rounded-xl border border-sky-100 font-mono">
+                    📍 <strong className="text-slate-800">Distance & Advisory:</strong> {intel.parking.parkingNotes} ({intel.parking.parkingDistance})
                   </p>
                 )}
               </div>
 
               {/* ⏰ TIMINGS & BEST TIME TO VISIT */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-emerald-400">
-                    <Clock className="size-4" />
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-sky-700">
+                    <Clock className="size-4 text-sky-600" />
                     <span>Operating Hours / Timings</span>
                   </div>
-                  <p className="text-xs font-bold text-white pt-1">
+                  <p className="text-xs font-bold text-slate-900 pt-1">
                     {place.timings || intel?.beforeYouGo?.timings || "06:00 AM – 06:00 PM Daily"}
                   </p>
-                  <p className="text-[11px] text-zinc-400 font-mono">
+                  <p className="text-[11px] text-slate-500 font-mono">
                     Ticket/Entry: {place.entryFee || intel?.beforeYouGo?.entryFeeDetails || "Free"}
                   </p>
                 </div>
 
-                <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 space-y-1">
-                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-amber-400">
-                    <Calendar className="size-4" />
+                <div className="p-4 rounded-2xl bg-slate-50 border border-slate-200 space-y-1">
+                  <div className="flex items-center gap-1.5 text-xs font-mono font-bold text-sky-700">
+                    <Calendar className="size-4 text-sky-600" />
                     <span>Best Time to Visit</span>
                   </div>
-                  <p className="text-xs font-bold text-white pt-1">
+                  <p className="text-xs font-bold text-slate-900 pt-1">
                     {intel?.beforeYouGo?.bestTimeToArrive || "07:00 AM – 09:30 AM"}
                   </p>
-                  <p className="text-[11px] text-zinc-400 font-mono">
+                  <p className="text-[11px] text-slate-500 font-mono">
                     Best Season: {place.bestSeason || "Year-round"}
                   </p>
                 </div>
               </div>
 
-              {/* 🚽 BATHROOM & 🍿 FOOD SHOP AVAILABILITY HIGHLIGHTS (CATEGORY SPECIFIC) */}
+              {/* 🚽 BATHROOM & 🍿 FOOD SHOP AVAILABILITY HIGHLIGHTS */}
               <div className="space-y-3">
-                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-400 flex items-center gap-1.5">
-                  <Sparkles className="size-4 text-emerald-400" /> On-Site Facilities & Amenities
+                <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 flex items-center gap-1.5">
+                  <Sparkles className="size-4 text-sky-600" /> On-Site Facilities & Amenities
                 </h3>
 
                 <div className="space-y-2.5">
-                  {/* Restroom & Changing Rooms (Highlighted for Falls, Beach, Lake) */}
+                  {/* Restroom & Changing Rooms */}
                   <div className={`p-4 rounded-2xl border ${
                     isWaterBody
-                      ? "bg-blue-500/10 border-blue-500/30 text-blue-200"
-                      : "bg-zinc-900 border-zinc-800 text-zinc-200"
+                      ? "bg-sky-50 border-sky-200 text-sky-900"
+                      : "bg-slate-50 border-slate-200 text-slate-800"
                   }`}>
                     <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl bg-blue-500/20 text-blue-400 shrink-0">
+                      <div className="p-2 rounded-xl bg-sky-100 text-sky-600 shrink-0">
                         <Bath className="size-5" />
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white">
+                          <span className="text-xs font-bold text-slate-900">
                             Bathroom & Changing Facilities
                           </span>
                           {isWaterBody && (
-                            <span className="text-[10px] font-mono font-bold bg-blue-500/20 text-blue-300 px-2 py-0.5 rounded border border-blue-500/40">
+                            <span className="text-[10px] font-mono font-bold bg-sky-100 text-sky-700 px-2 py-0.5 rounded border border-sky-200">
                               ESSENTIAL FOR WATER SPOTS
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-300 leading-snug">
+                        <p className="text-xs text-slate-600 leading-snug">
                           {intel?.facilities?.restrooms?.details || (isWaterBody ? "🚽 Restrooms & Changing Rooms: Clean pay-and-use toilets & dedicated changing stalls available near entrance." : "🚽 Restrooms: Public pay-and-use clean restrooms available near main entrance.")}
                         </p>
                         {intel?.facilities?.restrooms?.changingRoomsAvailable && (
-                          <p className="text-[11px] font-bold text-emerald-400 font-mono pt-0.5">
+                          <p className="text-[11px] font-bold text-sky-600 font-mono pt-0.5">
                             ✓ Dedicated dress changing stalls available
                           </p>
                         )}
@@ -332,28 +332,28 @@ export function PlaceQuickDetailsModal({
                     </div>
                   </div>
 
-                  {/* Food Shops & Refreshment Stalls (Highlighted for View Points) */}
+                  {/* Food Shops & Refreshment Stalls */}
                   <div className={`p-4 rounded-2xl border ${
                     isViewPoint
-                      ? "bg-amber-500/10 border-amber-500/30 text-amber-200"
-                      : "bg-zinc-900 border-zinc-800 text-zinc-200"
+                      ? "bg-amber-50 border-amber-200 text-amber-900"
+                      : "bg-slate-50 border-slate-200 text-slate-800"
                   }`}>
                     <div className="flex items-start gap-3">
-                      <div className="p-2 rounded-xl bg-amber-500/20 text-amber-400 shrink-0">
+                      <div className="p-2 rounded-xl bg-amber-100 text-amber-600 shrink-0">
                         <Store className="size-5" />
                       </div>
                       <div className="space-y-1">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-bold text-white">
+                          <span className="text-xs font-bold text-slate-900">
                             Food Shops & Refreshment Availability
                           </span>
                           {isViewPoint && (
-                            <span className="text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/40">
+                            <span className="text-[10px] font-mono font-bold bg-amber-100 text-amber-700 px-2 py-0.5 rounded border border-amber-200">
                               VANTAGE POINT STALLS
                             </span>
                           )}
                         </div>
-                        <p className="text-xs text-zinc-300 leading-snug">
+                        <p className="text-xs text-slate-600 leading-snug">
                           {intel?.facilities?.foodShops?.details || "🍿 Food & Refreshments: Local tea stalls, fresh snacks & eateries available nearby."}
                         </p>
                       </div>
@@ -362,11 +362,11 @@ export function PlaceQuickDetailsModal({
 
                   {/* Temple / Spiritual Guidelines */}
                   {isTemple && intel?.beforeYouGo?.dressCodeEtiquette && (
-                    <div className="p-4 rounded-2xl bg-purple-500/10 border border-purple-500/30 text-purple-200 space-y-1">
-                      <p className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Footprints className="size-4 text-purple-400" /> Temple Dress Code & Etiquette
+                    <div className="p-4 rounded-2xl bg-purple-50 border border-purple-200 text-purple-900 space-y-1">
+                      <p className="text-xs font-bold text-purple-900 flex items-center gap-1.5">
+                        <Footprints className="size-4 text-purple-600" /> Temple Dress Code & Etiquette
                       </p>
-                      <p className="text-xs text-zinc-300">
+                      <p className="text-xs text-purple-700">
                         {intel.beforeYouGo.dressCodeEtiquette}
                       </p>
                     </div>
@@ -374,15 +374,15 @@ export function PlaceQuickDetailsModal({
 
                   {/* Road Condition Badge */}
                   {intel?.roadCondition && (
-                    <div className="p-3.5 rounded-2xl bg-zinc-900 border border-zinc-800 flex items-center justify-between gap-3 text-xs">
+                    <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-3 text-xs">
                       <div className="flex items-center gap-2">
-                        <RouteIcon className="size-4 text-emerald-400 shrink-0" />
-                        <span className="text-zinc-300 font-medium">
-                          Road Access: <strong className="text-white">{intel.roadCondition.roadType}</strong> ({intel.roadCondition.condition})
+                        <RouteIcon className="size-4 text-sky-600 shrink-0" />
+                        <span className="text-slate-600 font-medium">
+                          Road Access: <strong className="text-slate-900">{intel.roadCondition.roadType}</strong> ({intel.roadCondition.condition})
                         </span>
                       </div>
                       {intel.hillGhatSafety?.isHillGhatRoad && (
-                        <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30 shrink-0">
+                        <span className="text-[10px] font-mono font-bold px-2.5 py-1 rounded bg-sky-100 text-sky-700 border border-sky-200 shrink-0">
                           🏔️ {intel.hillGhatSafety.hairpinBends || 12} Hairpin Bends
                         </span>
                       )}
@@ -393,12 +393,12 @@ export function PlaceQuickDetailsModal({
 
               {/* 🗺️ NEARBY PLACE SUGGESTIONS & CONNECTED STOPS */}
               {computedNearby && computedNearby.length > 0 && (
-                <div className="space-y-3 pt-1 border-t border-zinc-800/60">
+                <div className="space-y-3 pt-1 border-t border-slate-100">
                   <div className="flex items-center justify-between">
-                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-amber-400 flex items-center gap-1.5">
-                      <Compass className="size-4 text-amber-400" /> Nearby Places & Suggested Stops
+                    <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 flex items-center gap-1.5">
+                      <Compass className="size-4 text-sky-600" /> Nearby Places & Suggested Stops
                     </h3>
-                    <span className="text-[10px] text-zinc-500 font-mono">
+                    <span className="text-[10px] text-slate-400 font-mono">
                       Within radius
                     </span>
                   </div>
@@ -407,29 +407,29 @@ export function PlaceQuickDetailsModal({
                     {computedNearby.map((item, idx) => (
                       <div
                         key={idx}
-                        className="group flex items-center gap-3 p-2.5 rounded-2xl bg-zinc-900/90 border border-zinc-800 hover:border-amber-500/40 hover:bg-zinc-800/80 transition-all text-left"
+                        className="group flex items-center gap-3 p-2.5 rounded-2xl bg-slate-50 border border-slate-200 hover:border-sky-300 hover:bg-white transition-all text-left shadow-sm"
                       >
                         {item.image && (
                           <img
                             src={item.image}
                             alt={item.name}
-                            className="size-12 rounded-xl object-cover shrink-0 border border-zinc-800 group-hover:scale-105 transition-transform"
+                            className="size-12 rounded-xl object-cover shrink-0 border border-slate-200 group-hover:scale-105 transition-transform"
                             loading="lazy"
                           />
                         )}
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center justify-between gap-1">
-                            <p className="text-xs font-bold text-white group-hover:text-amber-300 transition-colors truncate">
+                            <p className="text-xs font-bold text-slate-900 group-hover:text-sky-600 transition-colors truncate">
                               {item.name}
                             </p>
                             {item.distance && (
-                              <span className="text-[10px] font-mono font-semibold text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20 shrink-0">
+                              <span className="text-[10px] font-mono font-semibold text-sky-700 bg-sky-100 px-1.5 py-0.5 rounded border border-sky-200 shrink-0">
                                 {item.distance}
                               </span>
                             )}
                           </div>
                           {item.description && (
-                            <p className="text-[10px] text-zinc-400 truncate mt-0.5">
+                            <p className="text-[10px] text-slate-500 truncate mt-0.5">
                               {item.description}
                             </p>
                           )}
@@ -438,7 +438,7 @@ export function PlaceQuickDetailsModal({
                               to="/place/$slug"
                               params={{ slug: item.slug }}
                               onClick={onClose}
-                              className="inline-flex items-center gap-1 text-[10px] font-bold text-amber-400 hover:underline mt-1"
+                              className="inline-flex items-center gap-1 text-[10px] font-bold text-sky-600 hover:underline mt-1"
                             >
                               <span>Explore Spot</span>
                               <ExternalLink className="size-2.5" />
@@ -452,14 +452,14 @@ export function PlaceQuickDetailsModal({
               )}
 
               {/* FOOTER ACTIONS ROW */}
-              <div className="pt-4 border-t border-zinc-800/80 flex flex-col sm:flex-row items-center gap-3">
+              <div className="pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center gap-3">
                 {onToggleTrip && (
                   <Button
                     onClick={() => onToggleTrip(place)}
                     className={`w-full sm:w-auto flex-1 h-11 rounded-2xl font-black text-xs transition cursor-pointer ${
                       isAddedToTrip
-                        ? "bg-emerald-500 text-zinc-950 hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
-                        : "bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border border-zinc-700"
+                        ? "bg-sky-600 text-white hover:bg-sky-700 shadow-md shadow-sky-600/20"
+                        : "bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200"
                     }`}
                   >
                     {isAddedToTrip ? (
@@ -478,16 +478,16 @@ export function PlaceQuickDetailsModal({
                   href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(`${place.name} ${place.district}`)}`}
                   target="_blank"
                   rel="noreferrer"
-                  className="w-full sm:w-auto h-11 px-4 rounded-2xl bg-zinc-900 hover:bg-zinc-800 text-zinc-200 border border-zinc-800 text-xs font-bold inline-flex items-center justify-center gap-2 transition"
+                  className="w-full sm:w-auto h-11 px-4 rounded-2xl bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 text-xs font-bold inline-flex items-center justify-center gap-2 transition shadow-sm"
                 >
-                  <Navigation className="size-3.5 text-emerald-400" />
+                  <Navigation className="size-3.5 text-sky-600" />
                   <span>Navigate</span>
                 </a>
 
                 <Link
                   to="/place/$slug"
                   params={{ slug: place.slug }}
-                  className="w-full sm:w-auto h-11 px-5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold inline-flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/20"
+                  className="w-full sm:w-auto h-11 px-5 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-extrabold inline-flex items-center justify-center gap-2 transition shadow-md shadow-sky-600/20"
                 >
                   <span>Open Full Guide</span>
                   <ExternalLink className="size-3.5" />

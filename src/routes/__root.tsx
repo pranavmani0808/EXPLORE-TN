@@ -20,17 +20,20 @@ import { RouteLoadingBar } from "../components/site/route-loading-bar";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100 font-sans">
-      <div className="max-w-md text-center space-y-4">
-        <h1 className="text-8xl font-black text-emerald-400 tracking-tight">404</h1>
-        <h2 className="text-xl font-bold text-white">Destination Off the Map</h2>
-        <p className="text-xs text-slate-400">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 text-slate-800 font-sans">
+      <div className="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl border border-sky-100 shadow-xl text-center space-y-4">
+        <div className="size-16 mx-auto rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 shadow-sm">
+          <span className="text-3xl">🧭</span>
+        </div>
+        <h1 className="text-6xl font-black text-sky-600 tracking-tight">404</h1>
+        <h2 className="text-xl font-extrabold text-slate-900">Destination Off the Map</h2>
+        <p className="text-xs text-slate-500 leading-relaxed">
           The trail or route page you're looking for doesn't exist or has been relocated in Tamil Nadu.
         </p>
         <div className="pt-4">
           <Link
             to="/"
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-6 py-3 text-xs font-black text-black transition-colors hover:bg-emerald-400 shadow-lg shadow-emerald-500/20"
+            className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-6 py-3 text-xs font-bold text-white transition-all hover:bg-sky-500 shadow-md shadow-sky-600/20"
           >
             Go Back Home →
           </Link>
@@ -48,27 +51,30 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 text-slate-100 font-sans">
-      <div className="max-w-md text-center space-y-4">
-        <h1 className="text-2xl font-black text-rose-400 tracking-tight">
-          System Signal Interrupted (500)
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 text-slate-800 font-sans">
+      <div className="max-w-md w-full bg-white p-8 sm:p-10 rounded-3xl border border-sky-100 shadow-xl text-center space-y-4">
+        <div className="size-16 mx-auto rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center text-sky-600 shadow-sm">
+          <span className="text-3xl">🗺️</span>
+        </div>
+        <h1 className="text-xl font-extrabold text-slate-900 tracking-tight">
+          Route Loading Interrupted
         </h1>
-        <p className="text-xs text-slate-400">
-          Something went wrong loading this route. You can try refreshing or return to the main map.
+        <p className="text-xs text-slate-500 leading-relaxed">
+          We encountered a temporary hiccup loading this page. You can retry refreshing or return to the main map.
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-xl bg-emerald-500 px-5 py-2.5 text-xs font-bold text-black transition-colors hover:bg-emerald-400"
+            className="inline-flex items-center justify-center rounded-xl bg-sky-600 px-5 py-2.5 text-xs font-bold text-white transition-all hover:bg-sky-500 shadow-md shadow-sky-600/20 cursor-pointer"
           >
             Try Again
           </button>
           <a
             href="/"
-            className="inline-flex items-center justify-center rounded-xl border border-slate-700 bg-slate-900 px-5 py-2.5 text-xs font-bold text-slate-200 transition-colors hover:bg-slate-800"
+            className="inline-flex items-center justify-center rounded-xl border border-slate-200 bg-slate-50 px-5 py-2.5 text-xs font-bold text-slate-700 transition-colors hover:bg-slate-100 hover:text-slate-900"
           >
             Go Home
           </a>
@@ -120,7 +126,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
 
 function RootShell({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" className="dark">
+    <html lang="en">
       <head>
         <HeadContent />
       </head>

@@ -102,15 +102,15 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
           onClick={toggleMobile}
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="flex h-10 items-center gap-2 rounded-full border border-zinc-800 bg-zinc-900/90 px-3 py-1.5 text-xs font-bold text-zinc-200 hover:border-zinc-700 hover:text-white transition cursor-pointer shadow-md"
+          className="flex h-10 items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-bold text-slate-700 hover:border-sky-300 hover:text-sky-700 transition cursor-pointer shadow-sm"
           aria-label="Account Settings & Profile"
           title="Account & Explorer Profile"
         >
-          <div className="grid size-7 place-items-center rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+          <div className="grid size-7 place-items-center rounded-full bg-sky-100 text-sky-600 border border-sky-200">
             <User className="size-4" />
           </div>
-          <span className="hidden sm:inline font-semibold text-zinc-200">Account</span>
-          <ChevronRight className={`size-3.5 text-zinc-400 transition-transform ${isOpen ? "rotate-90 text-emerald-400" : ""}`} />
+          <span className="hidden sm:inline font-semibold text-slate-700">Account</span>
+          <ChevronRight className={`size-3.5 text-slate-400 transition-transform ${isOpen ? "rotate-90 text-sky-600" : ""}`} />
         </motion.button>
 
         {/* Floating Account Dropdown Menu */}
@@ -121,17 +121,17 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.96, y: -8 }}
               transition={{ duration: 0.18, ease: "easeOut" }}
-              className="absolute right-0 top-full mt-2.5 w-[300px] origin-top-right rounded-[22px] bg-[#09090b]/98 p-4 backdrop-blur-2xl border border-zinc-800 shadow-2xl text-white overflow-hidden space-y-3 z-50"
+              className="absolute right-0 top-full mt-2.5 w-[300px] origin-top-right rounded-[22px] bg-white p-4 backdrop-blur-2xl border border-sky-100 shadow-2xl text-slate-800 overflow-hidden space-y-3 z-50"
             >
               {/* Account Banner */}
-              <div className="rounded-2xl bg-gradient-to-r from-emerald-950/70 via-zinc-900 to-amber-950/70 p-3 border border-emerald-500/30">
+              <div className="rounded-2xl bg-gradient-to-r from-sky-100 via-sky-50 to-blue-50 p-3 border border-sky-200">
                 <div className="flex items-center gap-3">
-                  <div className="grid size-10 place-items-center rounded-xl bg-emerald-500 text-zinc-950 font-black shadow-md">
+                  <div className="grid size-10 place-items-center rounded-xl bg-sky-500 text-white font-black shadow-md">
                     <User className="size-5" />
                   </div>
                   <div>
-                    <h4 className="text-xs font-extrabold text-white">Explorer Account</h4>
-                    <p className="text-[10px] text-zinc-400">Save trips, custom routes & preferences</p>
+                    <h4 className="text-xs font-extrabold text-slate-900">Explorer Account</h4>
+                    <p className="text-[10px] text-slate-500">Save trips, custom routes & preferences</p>
                   </div>
                 </div>
               </div>
@@ -144,9 +144,9 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
                     setIsOpen(false);
                     openAuthModal("Sign in to save your trip plans, preferences, and personal collections.");
                   }}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-zinc-900 border border-zinc-800 px-3 py-2.5 text-xs font-bold text-zinc-200 hover:bg-zinc-800 hover:text-white transition cursor-pointer"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-slate-100 border border-slate-200 px-3 py-2.5 text-xs font-bold text-slate-700 hover:bg-slate-200 hover:text-slate-900 transition cursor-pointer"
                 >
-                  <LogIn className="size-3.5 text-emerald-400" />
+                  <LogIn className="size-3.5 text-sky-600" />
                   <span>Sign In</span>
                 </button>
                 <button
@@ -155,7 +155,7 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
                     setIsOpen(false);
                     openAuthModal("Create an account to save your personalized AI route plans and unlock trails.");
                   }}
-                  className="flex items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-3 py-2.5 text-xs font-extrabold text-zinc-950 hover:bg-emerald-400 transition cursor-pointer shadow-md shadow-emerald-500/20"
+                  className="flex items-center justify-center gap-1.5 rounded-xl bg-sky-500 px-3 py-2.5 text-xs font-extrabold text-white hover:bg-sky-600 transition cursor-pointer shadow-md shadow-sky-500/20"
                 >
                   <UserPlus className="size-3.5" />
                   <span>Sign Up</span>
@@ -163,41 +163,41 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
               </div>
 
               {/* Account Direct Links */}
-              <div className="space-y-1 pt-2 border-t border-zinc-800/80">
+              <div className="space-y-1 pt-2 border-t border-slate-100">
                 <Link
                   to="/settings"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition"
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Settings className="size-4 text-emerald-400" />
+                    <Settings className="size-4 text-sky-600" />
                     <span>Explorer Account Settings</span>
                   </div>
-                  <ChevronRight className="size-3.5 text-zinc-500" />
+                  <ChevronRight className="size-3.5 text-slate-400" />
                 </Link>
 
                 <Link
                   to="/profile"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition"
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                 >
                   <div className="flex items-center gap-2.5">
-                    <User className="size-4 text-amber-400" />
+                    <User className="size-4 text-sky-600" />
                     <span>Tamil Nadu Explorer Identity</span>
                   </div>
-                  <ChevronRight className="size-3.5 text-zinc-500" />
+                  <ChevronRight className="size-3.5 text-slate-400" />
                 </Link>
 
                 <Link
                   to="/planner"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-zinc-300 hover:bg-zinc-900 hover:text-white transition"
+                  className="flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                 >
                   <div className="flex items-center gap-2.5">
-                    <Sparkles className="size-4 text-emerald-400" />
+                    <Sparkles className="size-4 text-sky-600" />
                     <span>AI Trip Planner</span>
                   </div>
-                  <ChevronRight className="size-3.5 text-zinc-500" />
+                  <ChevronRight className="size-3.5 text-slate-400" />
                 </Link>
               </div>
             </motion.div>

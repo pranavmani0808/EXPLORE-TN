@@ -79,50 +79,50 @@
 :root {
   --radius: 1rem;
 
-  /* Premium Apple + Linear + Airbnb + Notion Light Mode Theme */
-  --background: #F6F8FA;
-  --foreground: #111827;
+  /* Fresh White & Light Sky Blue Theme (Airbnb / Coastal Escape Style) */
+  --background: #F8FAFC;
+  --foreground: #0F172A;
   --surface: #FFFFFF;
-  --surface-2: #F8FAFC;
+  --surface-2: #F0F9FF;
   --card: #FFFFFF;
-  --card-foreground: #111827;
+  --card-foreground: #0F172A;
   --popover: #FFFFFF;
-  --popover-foreground: #111827;
-  --primary: #059669;
+  --popover-foreground: #0F172A;
+  --primary: #0284C7;
   --primary-foreground: #FFFFFF;
-  --secondary: #F8FAFC;
-  --secondary-foreground: #111827;
-  --muted: #F3F4F6;
-  --muted-foreground: #4B5563;
-  --accent: #ECFDF5;
-  --accent-foreground: #047857;
+  --secondary: #E0F2FE;
+  --secondary-foreground: #0369A1;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #E0F2FE;
+  --accent-foreground: #0284C7;
   --destructive: #EF4444;
   --destructive-foreground: #FFFFFF;
-  --border: #E5E7EB;
-  --input: #E5E7EB;
-  --ring: #059669;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #38BDF8;
 
-  --forest: #059669;
+  --forest: #0EA5E9;
   --forest-foreground: #FFFFFF;
   --ocean: #0284C7;
   --ocean-foreground: #FFFFFF;
-  --sand: #F3F4F6;
-  --sand-foreground: #374151;
-  --stone: #9CA3AF;
+  --sand: #F8FAFC;
+  --sand-foreground: #334155;
+  --stone: #94A3B8;
   --sunset: #F97316;
   --sunset-foreground: #FFFFFF;
-  --emerald-glow: #10B981;
+  --emerald-glow: #38BDF8;
   --gold: #F59E0B;
-  --gold-foreground: #111827;
+  --gold-foreground: #0F172A;
 
   --gradient-hero: linear-gradient(
     160deg,
-    #0F172A 0%,
-    #059669 60%,
-    #0284C7 100%
+    #F0F9FF 0%,
+    #E0F2FE 50%,
+    #BAE6FD 100%
   );
-  --gradient-brand: linear-gradient(120deg, #059669, #10B981);
-  --gradient-fade: linear-gradient(to bottom, transparent 20%, rgba(3, 20, 23, 0.75) 75%, #0B0F14 100%);
+  --gradient-brand: linear-gradient(120deg, #0284C7, #38BDF8);
+  --gradient-fade: linear-gradient(to bottom, transparent 20%, rgba(240, 249, 255, 0.75) 75%, #F8FAFC 100%);
 }
 
 .dark {

@@ -1424,9 +1424,9 @@ export function FullscreenRouteMap({
         <button
           type="button"
           onClick={onClose}
-          className="flex items-center gap-2 bg-[#121821]/90 backdrop-blur-2xl border border-white/15 hover:border-emerald-500/40 px-3.5 py-2 rounded-full text-xs font-bold text-white shadow-2xl transition cursor-pointer active:scale-95 hover:bg-[#18202c]"
+          className="flex items-center gap-2 bg-white/95 backdrop-blur-2xl border border-sky-100 hover:border-sky-300 px-3.5 py-2 rounded-full text-xs font-bold text-slate-800 shadow-lg transition cursor-pointer active:scale-95 hover:bg-sky-50"
         >
-          <ArrowRight className="w-4 h-4 rotate-180 text-emerald-400" /> Back to Explorer
+          <ArrowRight className="w-4 h-4 rotate-180 text-sky-600" /> Back to Explorer
         </button>
       </div>
 
@@ -1439,15 +1439,15 @@ export function FullscreenRouteMap({
           dragMomentum={false}
           className="relative pointer-events-auto flex-1 max-w-md w-full mx-auto flex flex-col gap-2 transition-shadow duration-300 touch-none"
         >
-          <div className="bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-2xl p-2.5 shadow-2xl space-y-2">
+          <div className="bg-white/95 backdrop-blur-2xl border border-sky-100 rounded-2xl p-2.5 shadow-xl space-y-2">
             {/* Visual Drag Handle Bar */}
             <div className="w-full flex items-center justify-center cursor-grab active:cursor-grabbing pb-0.5 pt-0.5 group">
-              <div className="w-10 h-1 rounded-full bg-white/20 group-hover:bg-emerald-400 transition" />
+              <div className="w-10 h-1 rounded-full bg-slate-200 group-hover:bg-sky-400 transition" />
             </div>
 
-            <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-300 uppercase px-1">
-              <span className="flex items-center gap-1.5 text-emerald-400 cursor-grab active:cursor-grabbing">
-                <Navigation className="w-3.5 h-3.5" />
+            <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-500 uppercase px-1">
+              <span className="flex items-center gap-1.5 text-sky-700 cursor-grab active:cursor-grabbing">
+                <Navigation className="w-3.5 h-3.5 text-sky-600" />
                 Plan Custom Route
               </span>
               {(selectedOrigin || selectedDestination) && (
@@ -1463,7 +1463,7 @@ export function FullscreenRouteMap({
                     setDestinationQuery("");
                     toast.info("Cleared route points");
                   }}
-                  className="text-slate-400 hover:text-rose-400 text-[10px] font-bold cursor-pointer transition"
+                  className="text-slate-400 hover:text-rose-500 text-[10px] font-bold cursor-pointer transition"
                 >
                   Clear
                 </button>
@@ -1472,10 +1472,10 @@ export function FullscreenRouteMap({
 
             {/* Starting Origin Input */}
             <div className="relative">
-              <div className={`flex items-center gap-2 bg-white/5 border rounded-xl px-2.5 py-1.5 transition ${
-                searchFocused === "header-origin" ? "border-emerald-400 ring-1 ring-emerald-400/40" : "border-white/15"
+              <div className={`flex items-center gap-2 bg-slate-50 border rounded-xl px-2.5 py-1.5 transition ${
+                searchFocused === "header-origin" ? "border-sky-500 ring-1 ring-sky-500/40 bg-white" : "border-slate-200"
               }`}>
-                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 ring-2 ring-emerald-400/30 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-500/30 shrink-0" />
                 <input
                   type="text"
                   data-testid="header-start-origin-input"
@@ -1486,7 +1486,7 @@ export function FullscreenRouteMap({
                     setSearchFocused("header-origin");
                   }}
                   onFocus={() => setSearchFocused("header-origin")}
-                  className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium truncate"
+                  className="w-full bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium truncate"
                 />
                 {headerOriginQuery ? (
                   <button
@@ -1495,7 +1495,7 @@ export function FullscreenRouteMap({
                       setHeaderOriginQuery("");
                       setSearchFocused(null);
                     }}
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-slate-700"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1507,7 +1507,7 @@ export function FullscreenRouteMap({
                       setHeaderOriginQuery("");
                     }}
                     title="Clear start origin"
-                    className="text-slate-400 hover:text-rose-400 p-0.5"
+                    className="text-slate-400 hover:text-rose-500 p-0.5"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1516,7 +1516,7 @@ export function FullscreenRouteMap({
                     type="button"
                     onClick={handleUseCurrentLocation}
                     title="Use My Live GPS Location"
-                    className="text-emerald-400 hover:text-emerald-300 shrink-0 p-0.5"
+                    className="text-sky-600 hover:text-sky-700 shrink-0 p-0.5"
                   >
                     <LocateFixed className={`w-3.5 h-3.5 ${geoLocating ? "animate-spin" : ""}`} />
                   </button>
@@ -1525,7 +1525,7 @@ export function FullscreenRouteMap({
 
               {/* Starting Origin Dropdown Suggestions */}
               {searchFocused === "header-origin" && headerOriginQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-white/98 border border-sky-100 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
                   {searchEntities(headerOriginQuery).length === 0 ? (
                     <div className="p-3 text-xs text-slate-400 text-center">No origin found matching '{headerOriginQuery}'</div>
                   ) : (
@@ -1558,14 +1558,14 @@ export function FullscreenRouteMap({
                             setSearchFocused("header-destination"); // Smoothly jump to destination input
                             toast.success(`Starting origin set to ${targetPlace.canonicalName || targetPlace.name} 📍`);
                           }}
-                          className="w-full text-left p-2 rounded-xl hover:bg-emerald-500/20 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-emerald-500/40 cursor-pointer pointer-events-auto"
+                          className="w-full text-left p-2 rounded-xl hover:bg-sky-50 text-xs text-slate-800 flex items-center justify-between gap-2 transition border border-transparent hover:border-sky-200 cursor-pointer pointer-events-auto"
                         >
                           <div className="flex items-center gap-2 truncate">
                             <span className="text-sm">📍</span>
-                            <span className="font-bold truncate text-[11px]">{item.name}</span>
+                            <span className="font-bold truncate text-[11px] text-slate-900">{item.name}</span>
                             <span className="text-[10px] text-slate-400 truncate">{item.sublabel}</span>
                           </div>
-                          <span className="text-[9px] text-emerald-400 font-bold shrink-0">+ Set Origin</span>
+                          <span className="text-[9px] text-sky-600 font-bold shrink-0">+ Set Origin</span>
                         </button>
                       );
                     })
@@ -1576,10 +1576,10 @@ export function FullscreenRouteMap({
 
             {/* End Destination Input with Swap Button */}
             <div className="relative">
-              <div className={`flex items-center gap-2 bg-white/5 border rounded-xl px-2.5 py-1.5 transition ${
-                searchFocused === "header-destination" ? "border-sky-400 ring-1 ring-sky-400/40" : "border-white/15"
+              <div className={`flex items-center gap-2 bg-slate-50 border rounded-xl px-2.5 py-1.5 transition ${
+                searchFocused === "header-destination" ? "border-sky-500 ring-1 ring-sky-500/40 bg-white" : "border-slate-200"
               }`}>
-                <span className="w-2.5 h-2.5 rounded-full bg-sky-400 ring-2 ring-sky-400/30 shrink-0" />
+                <span className="w-2.5 h-2.5 rounded-full bg-sky-500 ring-2 ring-sky-500/30 shrink-0" />
                 <input
                   type="text"
                   data-testid="header-destination-input"
@@ -1590,7 +1590,7 @@ export function FullscreenRouteMap({
                     setSearchFocused("header-destination");
                   }}
                   onFocus={() => setSearchFocused("header-destination")}
-                  className="w-full bg-transparent text-xs text-white placeholder-slate-400 focus:outline-none font-medium truncate"
+                  className="w-full bg-transparent text-xs text-slate-900 placeholder-slate-400 focus:outline-none font-medium truncate"
                 />
                 {headerDestQuery ? (
                   <button
@@ -1599,7 +1599,7 @@ export function FullscreenRouteMap({
                       setHeaderDestQuery("");
                       setSearchFocused(null);
                     }}
-                    className="text-slate-400 hover:text-white"
+                    className="text-slate-400 hover:text-slate-700"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1611,7 +1611,7 @@ export function FullscreenRouteMap({
                       setHeaderDestQuery("");
                     }}
                     title="Clear destination"
-                    className="text-slate-400 hover:text-rose-400 p-0.5"
+                    className="text-slate-400 hover:text-rose-500 p-0.5"
                   >
                     <X className="w-3.5 h-3.5" />
                   </button>
@@ -1626,7 +1626,7 @@ export function FullscreenRouteMap({
                         toast.success("Swapped start & destination ⇄");
                       }}
                       title="Swap start and destination"
-                      className="text-slate-400 hover:text-sky-300 shrink-0 p-0.5"
+                      className="text-slate-400 hover:text-sky-600 shrink-0 p-0.5"
                     >
                       <ArrowUpDown className="w-3.5 h-3.5" />
                     </button>
@@ -1636,7 +1636,7 @@ export function FullscreenRouteMap({
 
               {/* Destination Dropdown Suggestions */}
               {searchFocused === "header-destination" && headerDestQuery.trim() && (
-                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#121821]/95 border border-white/20 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
+                <div className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-white/98 border border-sky-100 rounded-2xl max-h-64 overflow-y-auto shadow-2xl p-2 backdrop-blur-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden pointer-events-auto">
                   {searchEntities(headerDestQuery).length === 0 ? (
                     <div className="p-3 text-xs text-slate-400 text-center">No destination found matching '{headerDestQuery}'</div>
                   ) : (
@@ -1669,14 +1669,14 @@ export function FullscreenRouteMap({
                             setSearchFocused(null);
                             toast.success(`Destination set to ${targetPlace.canonicalName || targetPlace.name} 🎯 Route calculated!`);
                           }}
-                          className="w-full text-left p-2 rounded-xl hover:bg-sky-500/20 text-xs text-white flex items-center justify-between gap-2 transition border border-transparent hover:border-sky-500/40 cursor-pointer pointer-events-auto"
+                          className="w-full text-left p-2 rounded-xl hover:bg-sky-50 text-xs text-slate-800 flex items-center justify-between gap-2 transition border border-transparent hover:border-sky-200 cursor-pointer pointer-events-auto"
                         >
                           <div className="flex items-center gap-2 truncate">
                             <span className="text-sm">🎯</span>
-                            <span className="font-bold truncate text-[11px]">{item.name}</span>
+                            <span className="font-bold truncate text-[11px] text-slate-900">{item.name}</span>
                             <span className="text-[10px] text-slate-400 truncate">{item.sublabel}</span>
                           </div>
-                          <span className="text-[9px] text-sky-400 font-bold shrink-0">+ Set Destination</span>
+                          <span className="text-[9px] text-sky-600 font-bold shrink-0">+ Set Destination</span>
                         </button>
                       );
                     })
@@ -1691,7 +1691,7 @@ export function FullscreenRouteMap({
         <motion.div
           drag
           dragMomentum={false}
-          className="flex items-center gap-1 bg-[#121821]/95 backdrop-blur-2xl border border-white/15 p-1 rounded-full pointer-events-auto shadow-2xl touch-none cursor-grab active:cursor-grabbing"
+          className="flex items-center gap-1 bg-white/95 backdrop-blur-2xl border border-sky-100 p-1 rounded-full pointer-events-auto shadow-xl touch-none cursor-grab active:cursor-grabbing"
         >
           {[
             { id: "driving", label: "Drive", icon: Car },
@@ -1715,7 +1715,7 @@ export function FullscreenRouteMap({
                   toast.info(`Switched transit corridor view to ${mode.label} 🧭`);
                 }}
                 className={`px-3 py-1.5 rounded-full text-xs font-bold transition flex items-center gap-1.5 cursor-pointer ${
-                  isActive ? "bg-emerald-500 text-black shadow-lg" : "text-slate-300 hover:text-white hover:bg-white/5"
+                  isActive ? "bg-sky-600 text-white shadow-sm" : "text-slate-600 hover:text-slate-900 hover:bg-sky-50"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -1908,16 +1908,16 @@ export function FullscreenRouteMap({
           {statusMessage}
         </div>
 
-        <div className="w-full h-full bg-[#121821]/95 backdrop-blur-2xl border border-white/15 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-white overscroll-contain">
+        <div className="w-full h-full bg-white/95 backdrop-blur-2xl border border-sky-100 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-slate-800 overscroll-contain">
           {/* Header Drag Handle & Collapse Button */}
           <div className="w-full flex items-center justify-between pb-1 shrink-0">
             {/* Visual Drag Indicator Handle */}
             <div
               onPointerDown={(e) => dragControls.start(e)}
-              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono font-bold text-slate-400 cursor-grab active:cursor-grabbing hover:border-emerald-400/50 hover:text-emerald-300 transition select-none touch-none"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-50 border border-slate-200 text-[9px] font-mono font-bold text-slate-500 cursor-grab active:cursor-grabbing hover:border-sky-400 hover:text-sky-600 transition select-none touch-none"
               title="Drag to move panel"
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse" />
               <span>DRAG PANEL</span>
             </div>
 
@@ -1931,40 +1931,40 @@ export function FullscreenRouteMap({
                 setPanelState(next);
                 setStatusMessage(next === "expanded" ? "Destinations panel expanded" : "Destinations panel collapsed");
               }}
-              className="text-[10px] text-slate-400 hover:text-white uppercase tracking-widest font-mono font-semibold cursor-pointer px-2 py-0.5 rounded hover:bg-white/10 transition"
+              className="text-[10px] text-slate-500 hover:text-slate-800 uppercase tracking-widest font-mono font-semibold cursor-pointer px-2 py-0.5 rounded hover:bg-slate-100 transition"
             >
               {panelState === "expanded" ? "Collapse" : "Expand"}
             </button>
           </div>
 
           {/* Panel Header & Breadcrumbs */}
-          <div className="flex items-center justify-between border-b border-white/10 pb-3 mt-1 shrink-0">
+          <div className="flex items-center justify-between border-b border-slate-100 pb-3 mt-1 shrink-0">
             <div>
-              <nav aria-label="Breadcrumb" className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1">
+              <nav aria-label="Breadcrumb" className="text-[10px] font-mono font-bold text-sky-600 uppercase tracking-widest flex items-center gap-1">
                 <button
                   type="button"
                   onClick={() => {
                     setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] });
                     setStatusMessage("Reset scope to All Tamil Nadu");
                   }}
-                  className="cursor-pointer hover:underline text-emerald-400 font-bold focus-visible:ring-2 focus-visible:ring-emerald-400 rounded px-1 py-0.5"
+                  className="cursor-pointer hover:underline text-sky-600 font-bold focus-visible:ring-2 focus-visible:ring-sky-400 rounded px-1 py-0.5"
                 >
                   Tamil Nadu
                 </button>
                 {mapScope.areaName !== "Tamil Nadu" && (
                   <>
-                    <span aria-hidden="true">/</span>
-                    <span className="text-white font-extrabold">{mapScope.areaName}</span>
+                    <span aria-hidden="true" className="text-slate-300">/</span>
+                    <span className="text-slate-900 font-extrabold">{mapScope.areaName}</span>
                   </>
                 )}
                 {mapScope.selectedPOI && (
                   <>
-                    <span aria-hidden="true">/</span>
-                    <span className="text-sky-300 font-extrabold truncate max-w-[120px] inline-block">{mapScope.selectedPOI.canonicalName || mapScope.selectedPOI.name}</span>
+                    <span aria-hidden="true" className="text-slate-300">/</span>
+                    <span className="text-sky-600 font-extrabold truncate max-w-[120px] inline-block">{mapScope.selectedPOI.canonicalName || mapScope.selectedPOI.name}</span>
                   </>
                 )}
               </nav>
-              <h2 id="explorer-destinations-heading" className="text-sm font-extrabold text-white uppercase tracking-wider mt-0.5">
+              <h2 id="explorer-destinations-heading" className="text-sm font-extrabold text-slate-900 uppercase tracking-wider mt-0.5">
                 {mapScope.areaName.toUpperCase()} DESTINATIONS ({placesInScope.length})
               </h2>
             </div>
@@ -1978,7 +1978,7 @@ export function FullscreenRouteMap({
                 setPanelState(next);
                 setStatusMessage(next === "expanded" ? "Destinations panel expanded" : "Destinations panel collapsed");
               }}
-              className="p-1.5 min-w-[36px] min-h-[36px] grid place-items-center rounded-full text-slate-300 hover:text-white hover:bg-white/10 transition focus-visible:ring-2 focus-visible:ring-emerald-400"
+              className="p-1.5 min-w-[36px] min-h-[36px] grid place-items-center rounded-full text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition focus-visible:ring-2 focus-visible:ring-sky-400"
             >
               {panelState === "expanded" ? (
                 <ChevronDown className="w-4 h-4" aria-hidden="true" />
@@ -1989,12 +1989,12 @@ export function FullscreenRouteMap({
           </div>
 
           {/* Category Filter Pills Bar */}
-          <div className="flex flex-col gap-1.5 shrink-0 border-b border-white/10 pb-2.5 pt-1.5">
+          <div className="flex flex-col gap-1.5 shrink-0 border-b border-slate-100 pb-2.5 pt-1.5">
             {/* Category pills row */}
             <div
               role="toolbar"
               aria-label="Filter destinations by category"
-              className="flex items-center gap-1.5 overflow-x-auto pb-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
+              className="flex items-center gap-1.5 overflow-x-auto pb-1.5 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-sky-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
             >
               {[
                 { id: "all", label: "All" },
@@ -2018,10 +2018,10 @@ export function FullscreenRouteMap({
                       setSelectedDistrict(null);
                       setStatusMessage(`Category filter set to ${cat.label}`);
                     }}
-                    className={`px-3 py-1.5 min-h-[32px] rounded-full text-xs font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                    className={`px-3 py-1.5 min-h-[32px] rounded-full text-xs font-bold shrink-0 transition focus-visible:ring-2 focus-visible:ring-sky-400 ${
                       isSelected
-                        ? "bg-emerald-500 text-black shadow-md font-extrabold"
-                        : "bg-white/5 border border-white/15 text-slate-200 hover:text-white hover:bg-white/10"
+                        ? "bg-sky-600 text-white shadow-sm font-extrabold"
+                        : "bg-slate-50 border border-slate-200 text-slate-600 hover:text-slate-900 hover:bg-slate-100"
                     }`}
                   >
                     {cat.label}
@@ -2480,10 +2480,10 @@ export function FullscreenRouteMap({
           {panelState === "expanded" && (
             <div
               id="explorer-places-list"
-              className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
+              className="flex-1 min-h-0 overflow-y-auto overscroll-contain py-2 space-y-2 pr-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-sky-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent"
             >
               {placesInScope.length === 0 ? (
-                <div className="p-6 text-center text-xs text-slate-300 bg-white/5 border border-white/15 rounded-2xl my-2 space-y-2">
+                <div className="p-6 text-center text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-2xl my-2 space-y-2">
                   <p>No verified tourist places found in {mapScope.areaName} for this category filter.</p>
                   <button
                     type="button"
@@ -2492,7 +2492,7 @@ export function FullscreenRouteMap({
                       setMapScope({ type: "ALL_TAMIL_NADU", areaName: "Tamil Nadu", selectedArea: GEOGRAPHIC_AREAS["tamil-nadu"] });
                       setStatusMessage("Reset to All Tamil Nadu Destinations");
                     }}
-                    className="text-emerald-400 font-bold underline cursor-pointer block mx-auto text-xs py-1 min-h-[36px]"
+                    className="text-sky-600 font-bold underline cursor-pointer block mx-auto text-xs py-1 min-h-[36px]"
                   >
                     Reset to All Tamil Nadu Destinations
                   </button>
@@ -2510,10 +2510,10 @@ export function FullscreenRouteMap({
                       onMouseLeave={() => handleSidebarHover(null)}
                       className={`group p-3 rounded-2xl border transition-all flex flex-col gap-2.5 ${
                         isSelected
-                          ? "bg-emerald-500/20 border-emerald-500/60 shadow-lg"
+                          ? "bg-sky-50 border-sky-500 shadow-sm ring-1 ring-sky-500"
                           : hoveredPlaceId === place.id
-                          ? "bg-white/10 border-white/30 shadow-md"
-                          : "bg-white/5 border-white/15 hover:bg-white/10 hover:border-white/30"
+                          ? "bg-sky-50/50 border-sky-300 shadow-sm"
+                          : "bg-white border-slate-200 hover:border-sky-300 hover:bg-slate-50"
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">
@@ -2526,20 +2526,20 @@ export function FullscreenRouteMap({
                             }
                             setStatusMessage(`Focused map on ${place.canonicalName || place.name}`);
                           }}
-                          className="space-y-1 min-w-0 flex-1 text-left cursor-pointer rounded-lg p-0.5 focus-visible:ring-2 focus-visible:ring-emerald-400"
+                          className="space-y-1 min-w-0 flex-1 text-left cursor-pointer rounded-lg p-0.5 focus-visible:ring-2 focus-visible:ring-sky-400"
                           aria-label={`Focus map on ${place.canonicalName || place.name}, ${place.district} District`}
                         >
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm" aria-hidden="true">{categoryIcon}</span>
-                            <h4 className="font-bold text-white text-xs truncate group-hover:text-emerald-300 transition-colors">
+                            <h4 className="font-bold text-slate-900 text-xs truncate group-hover:text-sky-600 transition-colors">
                               {place.canonicalName || place.name}
                             </h4>
                           </div>
-                          <p className="text-[11px] text-slate-200 line-clamp-1 leading-snug">
+                          <p className="text-[11px] text-slate-500 line-clamp-1 leading-snug">
                             {place.tagline || place.description}
                           </p>
-                          <div className="flex items-center gap-2 text-[10px] text-slate-300 font-mono pt-0.5">
-                            <span className="text-emerald-400 font-bold uppercase">{place.primaryCategory}</span>
+                          <div className="flex items-center gap-2 text-[10px] text-slate-400 font-mono pt-0.5">
+                            <span className="text-sky-600 font-bold uppercase">{place.primaryCategory}</span>
                             <span aria-hidden="true">•</span>
                             <span>{place.district} District</span>
                             <span aria-hidden="true">•</span>
@@ -2549,12 +2549,12 @@ export function FullscreenRouteMap({
                       </div>
 
                       {/* Action Buttons Row — Directions, Save, +Origin, +Dest */}
-                      <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-white/10">
+                      <div className="flex items-center justify-between gap-1.5 pt-1.5 border-t border-slate-100">
                         <div className="flex items-center gap-1.5">
                           <button
                             type="button"
                             onClick={() => handleGetDirections(place)}
-                            className="px-2.5 py-1.5 min-h-[32px] rounded-lg bg-blue-500/20 hover:bg-blue-500/35 text-blue-200 border border-blue-500/40 text-[11px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-blue-400"
+                            className="px-2.5 py-1.5 min-h-[32px] rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-[11px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
                             aria-label={`Get directions to ${place.canonicalName || place.name}`}
                           >
                             <Navigation className="w-3.5 h-3.5" aria-hidden="true" />
@@ -2568,14 +2568,14 @@ export function FullscreenRouteMap({
                               toggleSavePlace(place);
                               setStatusMessage(isSaved ? `Removed ${place.name} from saved places` : `Saved ${place.name} to collection`);
                             }}
-                            className={`px-2.5 py-1.5 min-h-[32px] rounded-lg text-[11px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer border focus-visible:ring-2 focus-visible:ring-emerald-400 ${
+                            className={`px-2.5 py-1.5 min-h-[32px] rounded-lg text-[11px] font-bold flex items-center gap-1 transition active:scale-95 cursor-pointer border focus-visible:ring-2 focus-visible:ring-sky-400 ${
                               isSaved
-                                ? "bg-emerald-500/30 text-emerald-200 border-emerald-500/60"
-                                : "bg-white/10 hover:bg-white/20 text-slate-200 border-white/20"
+                                ? "bg-sky-100 text-sky-700 border-sky-300"
+                                : "bg-slate-50 hover:bg-slate-100 text-slate-600 border-slate-200"
                             }`}
                             aria-label={isSaved ? `Remove ${place.name} from saved places` : `Save ${place.name}`}
                           >
-                            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? "fill-emerald-400 text-emerald-400" : ""}`} aria-hidden="true" />
+                            <Bookmark className={`w-3.5 h-3.5 ${isSaved ? "fill-sky-500 text-sky-600" : ""}`} aria-hidden="true" />
                             {isSaved ? "Saved" : "Save"}
                           </button>
                         </div>
@@ -2596,8 +2596,8 @@ export function FullscreenRouteMap({
                               }}
                               className={`px-2 py-1.5 min-h-[32px] rounded-lg border text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400 ${
                                 waypoints.some((w) => w.id === place.id)
-                                  ? "bg-amber-500/25 text-amber-200 border-amber-500/50"
-                                  : "bg-amber-500/15 hover:bg-amber-500/25 text-amber-300 border-amber-500/30"
+                                  ? "bg-amber-100 text-amber-800 border-amber-300"
+                                  : "bg-amber-50 hover:bg-amber-100 text-amber-700 border-amber-200"
                               }`}
                               aria-label={`Add ${place.name} as en-route stop`}
                               title="Add as intermediate stop along your route"
@@ -2612,7 +2612,7 @@ export function FullscreenRouteMap({
                               toast.success(`Set ${place.canonicalName || place.name} as Route Origin ✓`);
                               setStatusMessage(`Set ${place.canonicalName || place.name} as Route Origin`);
                             }}
-                            className="px-2 py-1.5 min-h-[32px] rounded-lg bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-200 border border-emerald-500/30 text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400"
+                            className="px-2 py-1.5 min-h-[32px] rounded-lg bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
                             aria-label={`Set ${place.name} as Route Origin`}
                           >
                             + Origin
@@ -2624,7 +2624,7 @@ export function FullscreenRouteMap({
                               toast.success(`Set ${place.canonicalName || place.name} as Route Destination ✓`);
                               setStatusMessage(`Set ${place.canonicalName || place.name} as Route Destination`);
                             }}
-                            className="px-2 py-1.5 min-h-[32px] rounded-lg bg-sky-500/15 hover:bg-sky-500/25 text-sky-200 border border-sky-500/30 text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
+                            className="px-2 py-1.5 min-h-[32px] rounded-lg bg-sky-600 hover:bg-sky-700 text-white border border-sky-600 text-[10px] font-bold transition active:scale-95 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400 shadow-sm"
                             aria-label={`Set ${place.name} as Route Destination`}
                           >
                             + Dest

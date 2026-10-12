@@ -27,8 +27,8 @@ export const PEAK_SEASONS_CONFIG: SeasonConfig[] = [
     startMonth: 4,
     endMonth: 6,
     labelForOther: "Best for Summer Escapes",
-    color: "from-amber-500/20 via-orange-500/10 to-transparent border-amber-500/30",
-    badgeColor: "bg-amber-500/20 text-amber-300 border-amber-500/30",
+    color: "from-sky-50 via-sky-100/50 to-white border-sky-200",
+    badgeColor: "bg-sky-100 text-sky-800 border-sky-200",
     icon: Sun,
     temp: "Hills: 12°C — 20°C",
     tagline: "Cloud forest ridge treks, 70-hairpin passes & cool tea estates",
@@ -47,8 +47,8 @@ export const PEAK_SEASONS_CONFIG: SeasonConfig[] = [
     startMonth: 7,
     endMonth: 9,
     labelForOther: "Best for Monsoons",
-    color: "from-cyan-500/20 via-blue-500/10 to-transparent border-cyan-500/30",
-    badgeColor: "bg-cyan-500/20 text-cyan-300 border-cyan-500/30",
+    color: "from-sky-100/70 via-blue-50 to-white border-sky-200",
+    badgeColor: "bg-sky-100 text-sky-800 border-sky-300",
     icon: CloudRain,
     temp: "Ghats: 18°C — 26°C",
     tagline: "Roaring Western Ghats cascades & lush rubber estate rain trails",
@@ -68,8 +68,8 @@ export const PEAK_SEASONS_CONFIG: SeasonConfig[] = [
     endMonth: 3,
     isCrossYear: true,
     labelForOther: "Best for Winter & Heritage",
-    color: "from-indigo-500/20 via-blue-500/10 to-transparent border-indigo-500/30",
-    badgeColor: "bg-indigo-500/20 text-indigo-300 border-indigo-500/30",
+    color: "from-blue-50 via-sky-50 to-white border-sky-200",
+    badgeColor: "bg-blue-100 text-blue-800 border-blue-200",
     icon: Snowflake,
     temp: "Plains & Coast: 16°C — 28°C",
     tagline: "Cool mornings, clear coastal waters & pleasant temple walks",
@@ -88,14 +88,14 @@ export function PeakTravelGuide() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
-      <div className="rounded-4xl bg-card border border-border p-6 sm:p-10 shadow-xl space-y-8">
+      <div className="rounded-4xl bg-white border border-sky-100 p-6 sm:p-10 shadow-xl space-y-8">
         {/* Section Header */}
-        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-border/60 pb-6">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-100 pb-6">
           <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
+            <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full text-xs font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200 mb-2">
               <Calendar className="size-3.5" /> PEAK TRAVEL CALENDAR
             </div>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-foreground">
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-slate-900">
               Peak Travel Seasons in Tamil Nadu
             </h2>
             <p className="text-sm text-muted-foreground mt-1 max-w-xl">
@@ -140,16 +140,16 @@ export function PeakTravelGuide() {
                     </span>
                   </div>
 
-                  <h3 className="text-xl font-bold font-display text-foreground">{season.season}</h3>
-                  <p className="text-xs font-semibold text-emerald-500 dark:text-emerald-400 mt-0.5">{season.monthsLabel}</p>
-                  <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{season.tagline}</p>
+                  <h3 className="text-xl font-bold font-display text-slate-900">{season.season}</h3>
+                  <p className="text-xs font-semibold text-sky-600 mt-0.5">{season.monthsLabel}</p>
+                  <p className="text-xs text-slate-600 mt-2 leading-relaxed">{season.tagline}</p>
 
                   {/* Highlights List */}
-                  <div className="mt-4 space-y-1.5 pt-3 border-t border-border/40">
-                    <p className="text-xs font-mono font-bold text-muted-foreground">Seasonal Highlights:</p>
+                  <div className="mt-4 space-y-1.5 pt-3 border-t border-slate-200/60">
+                    <p className="text-xs font-mono font-bold text-slate-500">Seasonal Highlights:</p>
                     {season.highlights.map((h) => (
-                      <div key={h} className="flex items-center gap-2 text-xs text-foreground font-medium">
-                        <Sparkles className="size-3 text-amber-400 shrink-0" />
+                      <div key={h} className="flex items-center gap-2 text-xs text-slate-800 font-medium">
+                        <Sparkles className="size-3 text-sky-500 shrink-0" />
                         <span>{h}</span>
                       </div>
                     ))}
@@ -157,18 +157,18 @@ export function PeakTravelGuide() {
                 </div>
 
                 {/* Recommended Spots */}
-                <div className="pt-4 border-t border-border/40 space-y-2">
-                  <p className="text-xs font-mono font-bold text-muted-foreground">Top Destinations:</p>
+                <div className="pt-4 border-t border-slate-200/60 space-y-2">
+                  <p className="text-xs font-mono font-bold text-slate-500">Top Destinations:</p>
                   <div className="space-y-1">
                     {season.destinations.map((spot) => (
                       <Link
                         key={spot.name}
                         to="/place/$slug"
                         params={{ slug: spot.slug }}
-                        className="flex items-center justify-between text-xs font-semibold hover:text-emerald-400 transition py-2 px-2.5 rounded-xl hover:bg-zinc-800/60 border border-transparent hover:border-zinc-700/50 min-h-[36px]"
+                        className="flex items-center justify-between text-xs font-semibold hover:text-sky-600 transition py-2 px-2.5 rounded-xl hover:bg-sky-50 border border-transparent hover:border-sky-200 min-h-[36px]"
                       >
-                        <span className="leading-tight flex-1 text-left font-medium">{spot.name}</span>
-                        <span className="text-[11px] text-muted-foreground font-mono shrink-0 ml-2">
+                        <span className="leading-tight flex-1 text-left font-medium text-slate-800">{spot.name}</span>
+                        <span className="text-[11px] text-slate-500 font-mono shrink-0 ml-2">
                           {spot.district}
                         </span>
                       </Link>

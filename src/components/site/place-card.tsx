@@ -55,16 +55,16 @@ export function PlaceCard({
           )}
         </div>
         <div className="relative -mt-10 space-y-1.5 p-5">
-          <h3 className="font-display text-lg font-semibold leading-tight text-foreground group-hover:text-emerald-400 transition-colors">
+          <h3 className="font-display text-lg font-semibold leading-tight text-slate-900 group-hover:text-sky-600 transition-colors">
             {place.name}
           </h3>
-          <p className="flex items-center gap-1 text-xs text-zinc-400">
-            <MapPin className="size-3 shrink-0 text-emerald-400" aria-hidden />
+          <p className="flex items-center gap-1 text-xs text-slate-500">
+            <MapPin className="size-3 shrink-0 text-sky-500" aria-hidden />
             <span>{place.district}</span>
           </p>
-          <p className="line-clamp-2 pt-0.5 text-xs text-zinc-400 leading-relaxed">{place.tagline}</p>
+          <p className="line-clamp-2 pt-0.5 text-xs text-slate-500 leading-relaxed">{place.tagline}</p>
           <div className="flex items-center justify-end pt-2">
-            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-400 group-hover:text-emerald-300 transition-colors">
+            <span className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 group-hover:text-sky-700 transition-colors">
               Explore{" "}
               <ArrowUpRight
                 className="size-3.5 transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5"

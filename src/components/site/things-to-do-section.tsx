@@ -2,6 +2,7 @@ import React, { useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { ChevronRight, ChevronLeft, MapPin, Sparkles } from "lucide-react";
 import { SafeImage } from "@/components/ui/safe-image";
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 
 export interface DestinationHub {
   name: string;
@@ -139,45 +140,48 @@ export function ThingsToDoSection() {
   };
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-12 sm:px-6 font-sans">
+    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
       {/* ─────────────────────────────────────────────────────────── */}
       {/* ROW 1: Things to do wherever you're going                   */}
       {/* ─────────────────────────────────────────────────────────── */}
-      <div className="mb-14">
-        <div className="mb-6">
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-display">
+      <div className="mb-8">
+        <div className="mb-4">
+          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
             Things to do wherever you're going
           </h2>
-          <p className="mt-1 text-xs sm:text-sm text-zinc-400">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500">
             Handpicked activities, secret trails, and regional hubs across Tamil Nadu
           </p>
         </div>
 
-        {/* 6 Square Portrait Tiles Grid */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5 sm:gap-4">
+        {/* 6 Square Portrait Tiles Grid with AnimatedGroup */}
+        <AnimatedGroup
+          preset="blur-slide"
+          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5 sm:gap-4"
+        >
           {DESTINATION_HUBS.map((hub) => (
             <Link
               key={hub.name}
               to={hub.route}
               className="group block focus:outline-none"
             >
-              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-md transition-all duration-300 group-hover:scale-[1.03] group-hover:border-emerald-500/50 group-hover:shadow-xl">
+              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm transition-all duration-300 group-hover:scale-[1.03] group-hover:border-sky-300 group-hover:shadow-md">
                 <SafeImage
                   src={hub.image}
                   alt={hub.name}
                   category="hills"
                   className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-80 group-hover:opacity-60 transition-opacity" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent opacity-70 group-hover:opacity-50 transition-opacity" />
               </div>
               <div className="mt-2.5">
-                <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors">
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
                   {hub.name}
                 </h3>
               </div>
             </Link>
           ))}
-        </div>
+        </AnimatedGroup>
       </div>
 
       {/* ─────────────────────────────────────────────────────────── */}
@@ -186,10 +190,10 @@ export function ThingsToDoSection() {
       <div className="relative">
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-white font-display">
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
               Attractions you can't miss
             </h2>
-            <p className="mt-1 text-xs sm:text-sm text-zinc-400">
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
               Must-experience destinations, ancient wonders, and breathtaking natural sites
             </p>
           </div>
@@ -200,7 +204,7 @@ export function ThingsToDoSection() {
               type="button"
               onClick={() => scrollCarousel("left")}
               aria-label="Scroll left"
-              className="grid size-9 place-items-center rounded-full border border-zinc-700 bg-zinc-900 text-zinc-300 hover:border-emerald-500 hover:text-white transition shadow cursor-pointer"
+              className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:text-sky-600 transition shadow-sm cursor-pointer"
             >
               <ChevronLeft className="size-4" />
             </button>
@@ -208,7 +212,7 @@ export function ThingsToDoSection() {
               type="button"
               onClick={() => scrollCarousel("right")}
               aria-label="Scroll right"
-              className="grid size-9 place-items-center rounded-full border border-emerald-500/50 bg-emerald-500/10 text-emerald-400 hover:bg-emerald-500 hover:text-black transition shadow cursor-pointer"
+              className="grid size-9 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white transition shadow-sm cursor-pointer"
             >
               <ChevronRight className="size-4" />
             </button>
@@ -228,24 +232,24 @@ export function ThingsToDoSection() {
               params={{ slug: attraction.slug }}
               className="group flex-shrink-0 w-[260px] sm:w-[280px] md:w-[310px] snap-start focus:outline-none"
             >
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900 shadow-md transition-all duration-300 group-hover:scale-[1.02] group-hover:border-emerald-500/50 group-hover:shadow-2xl">
+              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:border-sky-300 group-hover:shadow-lg">
                 <SafeImage
                   src={attraction.image}
                   alt={attraction.title}
                   category={attraction.category}
                   className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
-                <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-md bg-black/60 backdrop-blur-md px-2 py-0.5 text-[10px] font-mono text-zinc-300 border border-white/10">
-                  <MapPin className="size-2.5 text-emerald-400" />
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
+                <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-md bg-white/90 backdrop-blur-md px-2 py-0.5 text-[10px] font-mono font-bold text-slate-800 border border-slate-200/80 shadow-sm">
+                  <MapPin className="size-2.5 text-sky-600" />
                   {attraction.district}
                 </span>
               </div>
               <div className="mt-2.5">
-                <h3 className="text-sm font-bold text-white group-hover:text-emerald-400 transition-colors leading-snug">
+                <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors leading-snug">
                   {attraction.title}
                 </h3>
-                <p className="text-[11px] text-zinc-400 font-sans mt-0.5">
+                <p className="text-[11px] text-slate-500 font-sans mt-0.5">
                   {attraction.activities}
                 </p>
               </div>

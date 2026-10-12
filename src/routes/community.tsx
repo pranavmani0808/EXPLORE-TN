@@ -76,10 +76,10 @@ function CommunityPage() {
 
       <div className="mx-auto max-w-6xl px-4 pb-24 sm:px-6">
         {/* Action Header */}
-        <div className="flex items-center justify-between gap-4 mb-8 bg-[#121821] border border-white/15 rounded-3xl p-5 shadow-2xl text-white">
+        <div className="flex items-center justify-between gap-4 mb-8 bg-white border border-sky-100 rounded-3xl p-5 shadow-sm text-slate-800">
           <div>
-            <h2 className="text-base font-bold text-white font-sans">Explorer Community Hub</h2>
-            <p className="text-xs text-slate-400 font-mono">Real-time user journals & verified trail photo logs</p>
+            <h2 className="text-base font-bold text-slate-900 font-sans">Explorer Community Hub</h2>
+            <p className="text-xs text-slate-500 font-mono">Real-time user journals & verified trail photo logs</p>
           </div>
           <Button
             onClick={() => {
@@ -88,7 +88,7 @@ function CommunityPage() {
               }, "Sign in to share your story or photo dump with the community.");
             }}
             size="sm"
-            className="bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-500/20 cursor-pointer"
+            className="bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs rounded-2xl shadow-md shadow-sky-500/20 cursor-pointer"
           >
             <Plus className="size-4 mr-1" /> Share Story / Photo Dump
           </Button>
@@ -98,20 +98,20 @@ function CommunityPage() {
           {/* Main Feed */}
           <div className="space-y-6">
             {posts.length === 0 ? (
-              <div className="bg-[#121821] border border-white/15 rounded-3xl p-10 text-center text-white space-y-4 shadow-2xl">
-                <div className="inline-flex size-14 place-items-center rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400">
+              <div className="bg-white border border-sky-100 rounded-3xl p-10 text-center text-slate-800 space-y-4 shadow-sm">
+                <div className="inline-flex size-14 place-items-center rounded-2xl bg-sky-50 border border-sky-200 text-sky-600">
                   <Sparkles className="size-7" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-black text-white font-sans">Be the First Explorer to Share a Story!</h3>
-                  <p className="text-xs text-slate-400 max-w-md mx-auto mt-1 font-mono">
+                  <h3 className="text-lg font-black text-slate-900 font-sans">Be the First Explorer to Share a Story!</h3>
+                  <p className="text-xs text-slate-500 max-w-md mx-auto mt-1 font-mono">
                     No posts yet. Share your secret waterfall finds, hairpins, and travel logs with the Tamil Nadu community.
                   </p>
                 </div>
                 <Button
                   onClick={() => setShowShareModal(true)}
                   size="sm"
-                  className="bg-emerald-500 hover:bg-emerald-600 text-black font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-500/20 cursor-pointer mt-2"
+                  className="bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs rounded-2xl shadow-md shadow-sky-500/20 cursor-pointer mt-2"
                 >
                   <Plus className="size-4 mr-1" /> Create First Community Post
                 </Button>
@@ -122,26 +122,26 @@ function CommunityPage() {
                   key={p.id}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="overflow-hidden rounded-3xl border border-white/15 bg-[#121821] shadow-2xl text-white font-sans"
+                  className="overflow-hidden rounded-3xl border border-sky-100 bg-white shadow-sm text-slate-800 font-sans"
                 >
-                  <div className="flex items-center gap-3 p-4 border-b border-white/10">
-                    <span className="grid size-10 place-items-center rounded-2xl bg-emerald-500 text-black font-black text-sm">
+                  <div className="flex items-center gap-3 p-4 border-b border-slate-100">
+                    <span className="grid size-10 place-items-center rounded-2xl bg-sky-500 text-white font-black text-sm">
                       {p.authorName.slice(0, 2).toUpperCase()}
                     </span>
                     <div>
-                      <p className="font-bold text-sm text-white">{p.authorName}</p>
-                      <p className="text-xs text-slate-400 font-mono">{p.authorLocation} • {p.timeAgo}</p>
+                      <p className="font-bold text-sm text-slate-900">{p.authorName}</p>
+                      <p className="text-xs text-slate-500 font-mono">{p.authorLocation} • {p.timeAgo}</p>
                     </div>
                   </div>
                   <img src={p.image} alt={p.placeName} loading="lazy" className="h-80 w-full object-cover" />
                   <div className="space-y-3 p-5">
-                    <h3 className="font-extrabold text-base text-white">{p.placeName}</h3>
-                    <p className="text-xs text-slate-300 leading-relaxed font-sans">{p.story}</p>
-                    <div className="flex items-center gap-5 pt-2 text-xs text-slate-400 font-mono border-t border-white/10">
-                      <button className="flex items-center gap-1.5 hover:text-emerald-400 transition">
-                        <Heart className="size-4 text-emerald-400" /> {p.likes} Likes
+                    <h3 className="font-extrabold text-base text-slate-900">{p.placeName}</h3>
+                    <p className="text-xs text-slate-600 leading-relaxed font-sans">{p.story}</p>
+                    <div className="flex items-center gap-5 pt-2 text-xs text-slate-500 font-mono border-t border-slate-100">
+                      <button className="flex items-center gap-1.5 hover:text-sky-600 transition">
+                        <Heart className="size-4 text-sky-500" /> {p.likes} Likes
                       </button>
-                      <button className="flex items-center gap-1.5 hover:text-white transition">
+                      <button className="flex items-center gap-1.5 hover:text-slate-900 transition">
                         <MessageCircle className="size-4 text-slate-400" /> {p.commentsCount} Comments
                       </button>
                     </div>
@@ -153,9 +153,9 @@ function CommunityPage() {
 
           {/* Right Sidebar: Curated Regional Collections */}
           <aside className="space-y-4">
-            <div className="bg-[#121821] border border-white/15 rounded-3xl p-5 shadow-2xl text-white space-y-3">
-              <h4 className="font-bold text-sm text-white font-sans flex items-center gap-2">
-                <Compass className="size-4 text-emerald-400" /> Verified Trail Collections
+            <div className="bg-white border border-sky-100 rounded-3xl p-5 shadow-sm text-slate-800 space-y-3">
+              <h4 className="font-bold text-sm text-slate-900 font-sans flex items-center gap-2">
+                <Compass className="size-4 text-sky-600" /> Verified Trail Collections
               </h4>
               <div className="grid grid-cols-2 gap-2">
                 {places.slice(0, 4).map((p) => (

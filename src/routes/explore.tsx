@@ -35,6 +35,7 @@ import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, DEFAULT_PANCHA_BHOOTA_TEMPLES, getPlace
 import { cn } from "@/lib/utils";
 import { TripRouteBuilderPanel } from "@/components/site/trip-route-builder-panel";
 import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
+import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 
 export const Route = createFileRoute("/explore")({
   validateSearch: (search: Record<string, unknown>) => {
@@ -611,27 +612,27 @@ function ExploreByExperiencePage() {
   }, [selectedCategory, categoryTiles]);
 
   return (
-    <AppShell className="bg-[#09090b]">
+    <AppShell className="bg-slate-50">
       {/* Page Header */}
-      <div className="relative border-b border-zinc-800/80 bg-[#09090b]/80 pt-20 pb-8 backdrop-blur-xl">
+      <div className="relative border-b border-sky-100 bg-white pt-20 pb-8 backdrop-blur-xl">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-amber-500/10 text-amber-400 border border-amber-500/20 mb-2">
-                <Compass className="size-3.5" /> EXPLORE TAMIL NADU BY EXPERIENCE
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200 mb-2">
+                <Compass className="size-3.5 text-sky-600" /> EXPLORE TAMIL NADU BY EXPERIENCE
               </span>
-              <h1 className="font-display text-3xl font-extrabold text-white sm:text-4xl tracking-tight">
+              <h1 className="font-display text-3xl font-extrabold text-slate-900 sm:text-4xl tracking-tight">
                 Curated Experiences & Destinations
               </h1>
-              <p className="mt-1 text-sm text-zinc-400 max-w-2xl">
-                Discover canonical places grouped by theme. Click <strong className="text-emerald-400">+ Add to Map</strong> on any place to build your interactive trip route.
+              <p className="mt-1 text-sm text-slate-500 max-w-2xl">
+                Discover canonical places grouped by theme. Click <strong className="text-sky-600">+ Add to Map</strong> on any place to build your interactive trip route.
               </p>
             </div>
 
             <div className="flex items-center gap-3">
               <Link
                 to="/routes"
-                className="px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-extrabold text-xs shadow-lg shadow-emerald-500/20 transition flex items-center gap-2"
+                className="px-5 py-2.5 rounded-full bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs shadow-md shadow-sky-500/20 transition flex items-center gap-2"
               >
                 <RouteIcon className="size-3.5" />
                 <span>Plan Route</span>
@@ -647,12 +648,12 @@ function ExploreByExperiencePage() {
           
           {/* LEFT SIDEBAR: Experience Categories */}
           <aside className="lg:col-span-3 space-y-4">
-            <div className="rounded-3xl bg-zinc-900/90 border border-zinc-800 p-4 shadow-xl space-y-3">
+            <div className="rounded-3xl bg-white border border-sky-100 p-4 shadow-sm space-y-3">
               <div className="flex items-center justify-between px-1">
-                <p className="text-[10px] font-mono font-bold text-zinc-400 uppercase tracking-wider">
+                <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
                   Experience Categories
                 </p>
-                <span className="text-[10px] font-mono font-bold text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20">
+                <span className="text-[10px] font-mono font-bold text-sky-700 px-2 py-0.5 rounded-full bg-sky-50 border border-sky-200">
                   {places.length + 6} Places
                 </span>
               </div>
@@ -671,22 +672,22 @@ function ExploreByExperiencePage() {
                       className={cn(
                         "w-full text-left flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border group cursor-pointer",
                         isSelected
-                          ? "bg-amber-500/15 border-amber-500/50 text-white shadow-[0_0_20px_rgba(251,191,36,0.15)]"
-                          : "bg-zinc-950/40 border-zinc-800/80 text-zinc-300 hover:bg-zinc-800/40 hover:border-zinc-700"
+                          ? "bg-sky-50 border-sky-300 text-sky-900 shadow-sm"
+                          : "bg-slate-50/60 border-slate-100 text-slate-700 hover:bg-sky-50/50 hover:border-sky-200"
                       )}
                     >
                       <div className="flex items-center gap-3 min-w-0">
                         <div className={cn(
                           "size-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                          isSelected ? "bg-amber-400 text-zinc-950 font-bold shadow-md shadow-amber-500/20" : "bg-zinc-800 " + tile.color
+                          isSelected ? "bg-sky-500 text-white font-bold shadow-sm shadow-sky-500/20" : "bg-slate-100 text-slate-600 group-hover:text-sky-600"
                         )}>
                           <Icon className="size-4" />
                         </div>
                         <div className="min-w-0">
-                          <p className={cn("text-xs font-bold truncate", isSelected ? "text-amber-300" : "text-zinc-200 group-hover:text-amber-300")}>
+                          <p className={cn("text-xs font-bold truncate", isSelected ? "text-sky-900" : "text-slate-800 group-hover:text-sky-700")}>
                             {tile.title}
                           </p>
-                          <p className="text-[10px] text-zinc-400 truncate">
+                          <p className="text-[10px] text-slate-400 truncate">
                             {tile.subtitle}
                           </p>
                         </div>
@@ -695,10 +696,10 @@ function ExploreByExperiencePage() {
                       <span className={cn(
                         "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ml-2",
                         isSelected
-                          ? "bg-amber-400 text-zinc-950"
+                          ? "bg-sky-500 text-white"
                           : count > 0
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30"
-                          : "bg-zinc-800 text-zinc-500"
+                          ? "bg-sky-100 text-sky-700 border border-sky-200"
+                          : "bg-slate-100 text-slate-400"
                       )}>
                         {count}
                       </span>
@@ -715,18 +716,18 @@ function ExploreByExperiencePage() {
             {/* Explore Cards Grid Column */}
             <section className={cn("space-y-6 transition-all duration-300", isPanelOpen ? "xl:col-span-7" : "col-span-1")}>
               {/* Category Header & Filters Toolbar */}
-              <div className="transform-gpu rounded-3xl bg-zinc-900/95 border border-zinc-800 p-5 sm:p-6 shadow-2xl space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-zinc-800 pb-4">
+              <div className="transform-gpu rounded-3xl bg-white border border-sky-100 p-5 sm:p-6 shadow-sm space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
                   <div>
                     <div className="flex items-center gap-2">
-                      <span className={cn("text-xs font-bold px-3 py-1 rounded-full border", selectedCategoryTile.badgeColor)}>
+                      <span className="text-xs font-bold px-3 py-1 rounded-full border bg-sky-50 text-sky-800 border-sky-200">
                         {selectedCategoryTile.title}
                       </span>
-                      <span className="text-xs text-zinc-400 font-mono">
+                      <span className="text-xs text-slate-500 font-mono">
                         {categoryFilteredPlaces.length} matching places
                       </span>
                     </div>
-                    <h2 className="text-2xl font-black text-white tracking-tight font-display mt-2">
+                    <h2 className="text-2xl font-black text-slate-900 tracking-tight font-display mt-2">
                       {selectedCategoryTile.title}
                     </h2>
                   </div>
@@ -734,20 +735,20 @@ function ExploreByExperiencePage() {
                   {/* Filter Toolbar */}
                   <div className="flex flex-col sm:flex-row items-center gap-3">
                     <div className="relative w-full sm:w-56">
-                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-zinc-400" />
+                      <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
                       <input
                         type="text"
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
                         placeholder="Search category..."
-                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-zinc-800 bg-zinc-950 text-xs text-white focus:border-amber-400 focus:outline-none"
+                        className="w-full pl-10 pr-4 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs text-slate-900 focus:border-sky-500 focus:bg-white focus:outline-none"
                       />
                     </div>
 
                     <select
                       value={selectedDistrict}
                       onChange={(e) => setSelectedDistrict(e.target.value)}
-                      className="w-full sm:w-auto px-3 py-2 rounded-xl border border-zinc-800 bg-zinc-950 text-xs font-bold text-zinc-200 focus:outline-none"
+                      className="w-full sm:w-auto px-3 py-2 rounded-xl border border-slate-200 bg-slate-50 text-xs font-bold text-slate-700 focus:outline-none focus:border-sky-500 cursor-pointer"
                     >
                       {TN_DISTRICTS.map((dist) => (
                         <option key={dist} value={dist}>
@@ -818,70 +819,71 @@ function ExploreByExperiencePage() {
                     </Button>
                   </div>
                 ) : (
-                  <div className={cn("grid gap-5", isPanelOpen ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")}>
+                  <AnimatedGroup
+                    preset="blur-slide"
+                    className={cn("grid gap-5", isPanelOpen ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")}
+                  >
                     {categoryFilteredPlaces.slice(0, visibleCount).map((p, idx) => {
                       const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
                       const isAdded = routeStops.some((s) => s.id === p.id || s.slug === p.slug);
 
                       return (
-                        <motion.div
+                        <div
                           key={p.id || p.slug}
-                          initial={{ opacity: 0, y: 8 }}
-                          animate={{ opacity: 1, y: 0 }}
                           className={cn(
-                            "group transform-gpu rounded-2xl border bg-zinc-950/90 overflow-hidden shadow-md transition-all duration-300 flex flex-col justify-between",
-                            isAdded ? "border-emerald-500/60 shadow-[0_0_15px_rgba(16,185,129,0.15)]" : "border-zinc-800 hover:border-amber-500/40"
+                            "group transform-gpu rounded-2xl border bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between",
+                            isAdded ? "border-sky-500 shadow-[0_0_15px_rgba(2,132,199,0.15)] ring-1 ring-sky-500" : "border-slate-200 hover:border-sky-300"
                           )}
                         >
                           <div>
                             {/* Image Preview */}
-                            <div className="relative aspect-[16/10] overflow-hidden bg-zinc-900">
+                            <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
                               <img
                                 src={img}
                                 alt={`Photograph of ${p.name}, ${p.district} District`}
                                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                 loading="lazy"
                               />
-                              <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-transparent to-transparent" />
+                              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
                               
                               {/* Sequence Badge if Added */}
                               {isAdded && (
-                                <div className="absolute top-3 left-3 bg-emerald-400 text-zinc-950 font-black text-xs px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
+                                <div className="absolute top-3 left-3 bg-sky-500 text-white font-black text-xs px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
                                   <Check className="size-3.5 stroke-[3]" />
                                   <span>In Your Trip</span>
                                 </div>
                               )}
 
-                              <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 bg-zinc-950/80 backdrop-blur-md px-2.5 py-0.5 rounded-full text-xs font-bold text-amber-400 border border-zinc-800">
-                                <Star className="size-3 fill-amber-400 text-amber-400" />
+                              <div className="absolute bottom-2.5 right-2.5 flex items-center gap-1 bg-white/90 backdrop-blur-md px-2.5 py-0.5 rounded-full text-xs font-bold text-slate-800 border border-slate-200 shadow-sm">
+                                <Star className="size-3 fill-amber-400 text-amber-500" />
                                 <span>{p.rating || 4.8}</span>
                               </div>
                             </div>
 
                             {/* Body Content */}
                             <div className="p-4 space-y-1.5">
-                              <div className="flex items-center gap-1.5 text-[11px] text-zinc-400 font-semibold">
-                                <MapPin className="size-3 text-amber-400 shrink-0" />
+                              <div className="flex items-center gap-1.5 text-[11px] text-sky-600 font-semibold">
+                                <MapPin className="size-3 text-sky-500 shrink-0" />
                                 <span>{p.district} District</span>
                               </div>
-                              <h3 className="text-base font-bold text-white line-clamp-1 group-hover:text-amber-300 transition-colors">
+                              <h3 className="text-base font-bold text-slate-900 line-clamp-1 group-hover:text-sky-600 transition-colors">
                                 {p.name}
                               </h3>
-                              <p className="text-xs text-zinc-400 line-clamp-2 leading-relaxed">
+                              <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
                                 {p.tagline || p.description}
                               </p>
                             </div>
                           </div>
 
                           {/* Footer Action Buttons */}
-                          <div className="p-4 pt-0 flex items-center gap-2 border-t border-zinc-800/60 mt-2 pt-2">
+                          <div className="p-4 pt-0 flex items-center gap-2 border-t border-slate-100 mt-2 pt-3">
                             <button
                               onClick={() => handleTogglePlaceToRoute(p)}
                               className={cn(
                                 "flex-1 py-2 px-3 rounded-xl font-extrabold text-xs transition border flex items-center justify-center gap-1.5 cursor-pointer",
                                 isAdded
-                                  ? "bg-emerald-500 text-zinc-950 border-emerald-400 shadow-md shadow-emerald-500/20 hover:bg-emerald-400"
-                                  : "bg-zinc-900 hover:bg-zinc-800 text-emerald-400 border-zinc-800 hover:border-emerald-500/30"
+                                  ? "bg-sky-600 text-white border-sky-600 shadow-sm hover:bg-sky-700"
+                                  : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200 hover:border-sky-300"
                               )}
                             >
                               {isAdded ? (
@@ -928,15 +930,15 @@ function ExploreByExperiencePage() {
                                   };
                                   setSelectedModalPlace(legacyPlace as Place);
                                 }}
-                                className="py-2 px-3 rounded-xl bg-zinc-900 hover:bg-zinc-800 text-xs font-bold text-zinc-300 transition border border-zinc-800 cursor-pointer"
+                                className="py-2 px-3 rounded-xl bg-slate-50 hover:bg-slate-100 text-xs font-bold text-slate-700 transition border border-slate-200 cursor-pointer"
                               >
                                 Details
                               </button>
                             </div>
-                          </motion.div>
+                          </div>
                         );
                       })}
-                    </div>
+                    </AnimatedGroup>
                   )}
 
                   {/* Load More Pagination Trigger */}
@@ -944,7 +946,7 @@ function ExploreByExperiencePage() {
                     <div className="flex justify-center pt-6">
                       <Button
                         onClick={() => setVisibleCount((prev) => prev + 18)}
-                        className="bg-zinc-900 hover:bg-zinc-800 text-amber-400 border border-amber-500/30 font-bold text-xs px-6 py-2 rounded-xl transition"
+                        className="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs px-6 py-2 rounded-xl transition shadow-sm"
                       >
                         Load More Destinations ({categoryFilteredPlaces.length - visibleCount} remaining)
                       </Button>

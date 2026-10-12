@@ -254,26 +254,26 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 z-[100] flex flex-col bg-[#09090b]/98 backdrop-blur-2xl text-white overflow-hidden font-sans outline-none"
+        className="fixed inset-0 z-[100] flex flex-col bg-white/98 backdrop-blur-2xl text-slate-800 overflow-hidden font-sans outline-none"
       >
         {/* Top Header Controls - Compact & Modern */}
-        <div className="shrink-0 border-b border-zinc-800 bg-[#09090b]/95 px-4 py-3 sm:px-8">
+        <div className="shrink-0 border-b border-sky-100 bg-white/95 px-4 py-3 sm:px-8">
           <div className="mx-auto flex max-w-[1500px] flex-col gap-3 md:flex-row md:items-center md:justify-between">
             {/* Title & Badge */}
             <div className="flex items-center gap-3">
-              <span className="grid size-9 place-items-center rounded-xl bg-amber-500/15 border border-amber-500/30 text-amber-400 shadow-md">
-                <Compass className="size-5 text-amber-400" aria-hidden="true" />
+              <span className="grid size-9 place-items-center rounded-xl bg-sky-50 border border-sky-200 text-sky-600 shadow-sm">
+                <Compass className="size-5 text-sky-600" aria-hidden="true" />
               </span>
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 id="districts-modal-title" className="font-display text-lg sm:text-xl font-extrabold text-white tracking-tight">
+                  <h2 id="districts-modal-title" className="font-display text-lg sm:text-xl font-extrabold text-slate-900 tracking-tight">
                     {lang === "ta" ? "தமிழ்நாடு சுற்றுலா இடங்கள்" : "Explore Places & Famous Spots"}
                   </h2>
-                  <span className="rounded-full bg-amber-500/15 border border-amber-500/30 px-2.5 py-0.5 text-[11px] font-mono font-bold text-amber-400">
+                  <span className="rounded-full bg-sky-100 border border-sky-200 px-2.5 py-0.5 text-[11px] font-mono font-bold text-sky-700">
                     {filteredSpots.length} {lang === "ta" ? "இடங்கள்" : "Spots"}
                   </span>
                 </div>
-                <p className="text-[11px] text-zinc-300">
+                <p className="text-[11px] text-slate-500">
                   {lang === "ta"
                     ? "குற்றாலம், சுருளி, மீனாட்சி அம்மன் கோவில் போன்ற தமிழ்நாட்டின் சிறந்த தலங்கள்."
                     : "Discover tourist spots, waterfalls, hill stations, and heritage places across Tamil Nadu."}
@@ -284,16 +284,16 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
             {/* Action Bar & Controls */}
             <div className="flex flex-wrap items-center gap-2 sm:gap-3">
               {/* Mode Switcher */}
-              <div className="flex items-center gap-1 bg-zinc-900 border border-zinc-800 p-1 rounded-xl" role="group" aria-label="View mode">
+              <div className="flex items-center gap-1 bg-slate-100 border border-slate-200 p-1 rounded-xl" role="group" aria-label="View mode">
                 <button
                   type="button"
                   aria-pressed={viewMode === "spots"}
                   onClick={() => setViewMode("spots")}
                   className={cn(
-                    "px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400",
+                    "px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
                     viewMode === "spots"
-                      ? "bg-amber-400 text-zinc-950 font-black shadow"
-                      : "text-zinc-300 hover:text-white"
+                      ? "bg-sky-600 text-white font-black shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
                   )}
                 >
                   <Compass className="size-3.5" aria-hidden="true" />
@@ -304,10 +304,10 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                   aria-pressed={viewMode === "regional"}
                   onClick={() => setViewMode("regional")}
                   className={cn(
-                    "px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400",
+                    "px-3 py-1.5 min-h-[36px] rounded-lg text-xs font-bold transition flex items-center gap-1.5 cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
                     viewMode === "regional"
-                      ? "bg-emerald-500 text-slate-950 font-black shadow"
-                      : "text-zinc-300 hover:text-white"
+                      ? "bg-sky-600 text-white font-black shadow-sm"
+                      : "text-slate-600 hover:text-slate-900"
                   )}
                 >
                   <Compass className="size-3.5" aria-hidden="true" />
@@ -321,7 +321,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                   <label htmlFor="spot-search-input" className="sr-only">
                     {lang === "ta" ? "இடங்களைத் தேடுக" : "Search spots"}
                   </label>
-                  <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-zinc-300" aria-hidden="true" />
+                  <Search className="absolute left-3 top-1/2 size-3.5 -translate-y-1/2 text-slate-400" aria-hidden="true" />
                   <input
                     ref={searchInputRef}
                     id="spot-search-input"
@@ -330,14 +330,14 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                     placeholder={lang === "ta" ? "இடங்களைத் தேடுக..." : "Search spot, district, tags..."}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full rounded-full border border-zinc-800 bg-zinc-900/80 pl-9 pr-7 py-1.5 min-h-[36px] text-xs text-white placeholder-zinc-500 focus:border-zinc-600 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-600 transition"
+                    className="w-full rounded-full border border-slate-200 bg-slate-50 pl-9 pr-7 py-1.5 min-h-[36px] text-xs text-slate-900 placeholder-slate-400 focus:border-sky-500 focus:bg-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-sky-500 transition shadow-inner"
                   />
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
                       aria-label="Clear spot search"
-                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-zinc-300 hover:text-white p-1"
+                      className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1"
                     >
                       <X className="size-3.5" aria-hidden="true" />
                     </button>
@@ -352,16 +352,16 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                   aria-expanded={showAdvanced}
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-xl border text-xs font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-emerald-400",
+                    "flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-xl border text-xs font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
                     showAdvanced || selectedDistrict !== "all" || sortBy !== "rating"
-                      ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-sm"
-                      : "bg-zinc-900 text-zinc-200 border-zinc-700 hover:border-zinc-600 hover:text-white"
+                      ? "bg-sky-50 text-sky-700 border-sky-300 shadow-sm"
+                      : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
-                  <SlidersHorizontal className="size-3.5 text-emerald-400" aria-hidden="true" />
+                  <SlidersHorizontal className="size-3.5 text-sky-600" aria-hidden="true" />
                   <span>{lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Advanced Options"}</span>
                   {(selectedDistrict !== "all" || sortBy !== "rating") && (
-                    <span className="size-1.5 rounded-full bg-emerald-400 animate-ping" aria-hidden="true" />
+                    <span className="size-1.5 rounded-full bg-sky-500 animate-ping" aria-hidden="true" />
                   )}
                 </button>
               )}
@@ -370,7 +370,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
               <button
                 type="button"
                 onClick={onClose}
-                className="grid size-9 sm:size-10 min-w-[36px] min-h-[36px] place-items-center rounded-xl border border-zinc-700 bg-zinc-900 text-zinc-200 hover:border-zinc-500 hover:bg-zinc-800 hover:text-white transition cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400"
+                className="grid size-9 sm:size-10 min-w-[36px] min-h-[36px] place-items-center rounded-xl border border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300 hover:bg-slate-100 hover:text-slate-900 transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400"
                 aria-label="Close spots modal"
               >
                 <X className="size-4" aria-hidden="true" />
@@ -384,19 +384,19 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
               initial={{ height: 0, opacity: 0 }}
               animate={{ height: "auto", opacity: 1 }}
               exit={{ height: 0, opacity: 0 }}
-              className="mx-auto mt-3 max-w-[1500px] overflow-hidden rounded-2xl border border-zinc-800 bg-zinc-900/95 p-3 sm:p-4 text-xs"
+              className="mx-auto mt-3 max-w-[1500px] overflow-hidden rounded-2xl border border-sky-100 bg-sky-50/50 p-3 sm:p-4 text-xs"
             >
               <div className="flex flex-wrap items-center gap-4">
                 {/* District Selector */}
                 <div className="flex items-center gap-2">
-                  <label htmlFor="modal-district-select" className="font-bold text-amber-400 flex items-center gap-1">
+                  <label htmlFor="modal-district-select" className="font-bold text-sky-700 flex items-center gap-1">
                     <Building2 className="size-3.5" aria-hidden="true" /> District:
                   </label>
                   <select
                     id="modal-district-select"
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-1.5 min-h-[36px] text-xs text-white focus:border-amber-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 cursor-pointer"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 min-h-[36px] text-xs text-slate-800 focus:border-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 cursor-pointer shadow-sm"
                   >
                     <option value="all">📍 All 38 Districts</option>
                     {availableDistricts.map((d) => (
@@ -409,14 +409,14 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
 
                 {/* Sort Order */}
                 <div className="flex items-center gap-2">
-                  <label htmlFor="modal-sort-select" className="font-bold text-emerald-400 flex items-center gap-1">
+                  <label htmlFor="modal-sort-select" className="font-bold text-sky-700 flex items-center gap-1">
                     <Filter className="size-3.5" aria-hidden="true" /> Sort By:
                   </label>
                   <select
                     id="modal-sort-select"
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="rounded-xl border border-zinc-700 bg-zinc-950 px-3 py-1.5 min-h-[36px] text-xs text-white focus:border-emerald-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 cursor-pointer"
+                    className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 min-h-[36px] text-xs text-slate-800 focus:border-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 cursor-pointer shadow-sm"
                   >
                     <option value="rating">★ Highest Rating</option>
                     <option value="name">🔤 Name (A-Z)</option>
@@ -434,7 +434,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                       setSearchQuery("");
                       setActiveCategory("all");
                     }}
-                    className="ml-auto text-amber-400 hover:underline text-xs font-bold py-1 min-h-[36px]"
+                    className="ml-auto text-sky-600 hover:underline text-xs font-bold py-1 min-h-[36px]"
                   >
                     Reset All Filters
                   </button>
@@ -470,13 +470,13 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                     aria-pressed={isActive}
                     onClick={() => setActiveCategory(cat.key as CategoryFilter)}
                     className={cn(
-                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 min-h-[36px] text-xs font-bold shrink-0 transition border cursor-pointer focus-visible:ring-2 focus-visible:ring-amber-400",
+                      "flex items-center gap-1.5 rounded-lg px-3 py-1.5 min-h-[36px] text-xs font-bold shrink-0 transition border cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
                       isActive
-                        ? "bg-amber-400 text-zinc-950 border-amber-300 font-extrabold shadow"
-                        : "bg-zinc-900/90 text-zinc-200 border-zinc-700 hover:border-zinc-500 hover:text-white"
+                        ? "bg-sky-600 text-white border-sky-600 font-extrabold shadow-sm"
+                        : "bg-slate-50 text-slate-600 border-slate-200 hover:border-sky-300 hover:bg-white hover:text-slate-900"
                     )}
                   >
-                    <Icon className={cn("size-3.5", isActive ? "text-zinc-950" : "text-amber-400")} aria-hidden="true" />
+                    <Icon className={cn("size-3.5", isActive ? "text-white" : "text-sky-600")} aria-hidden="true" />
                     <span>{cat.label}</span>
                   </button>
                 );
@@ -486,7 +486,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
         </div>
 
         {/* Modal Main Body */}
-        <div className="relative flex-1 overflow-hidden p-4 sm:p-6">
+        <div className="relative flex-1 overflow-hidden p-4 sm:p-6 bg-slate-50/60">
           {viewMode === "regional" ? (
             <div className="h-full overflow-y-auto pr-1">
               <RegionalTravelDiscovery
@@ -500,9 +500,9 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
             </div>
           ) : filteredSpots.length === 0 ? (
             <div className="flex h-full flex-col items-center justify-center text-center p-12">
-              <Search className="size-10 text-zinc-600 mb-3" />
-              <h3 className="text-base font-bold text-white mb-1">No matching spots found</h3>
-              <p className="text-xs text-zinc-400 max-w-sm">
+              <Search className="size-10 text-slate-300 mb-3" />
+              <h3 className="text-base font-bold text-slate-800 mb-1">No matching spots found</h3>
+              <p className="text-xs text-slate-500 max-w-sm">
                 We couldn't find any spot matching your criteria. Try adjusting your district or search keywords.
               </p>
               <button
@@ -511,7 +511,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                   setSelectedDistrict("all");
                   setActiveCategory("all");
                 }}
-                className="mt-4 rounded-xl bg-amber-400 px-4 py-1.5 text-xs font-bold text-zinc-950 hover:bg-amber-300 transition"
+                className="mt-4 rounded-xl bg-sky-600 px-4 py-1.5 text-xs font-bold text-white hover:bg-sky-500 transition shadow-sm"
               >
                 Clear All Filters
               </button>
@@ -529,16 +529,16 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
         </div>
 
         {/* Compact Footer Bar */}
-        <div className="shrink-0 border-t border-zinc-800 bg-[#09090b]/95 px-6 py-2.5 flex items-center justify-between text-xs text-zinc-400">
+        <div className="shrink-0 border-t border-slate-200 bg-white px-6 py-2.5 flex items-center justify-between text-xs text-slate-500">
           <div className="flex items-center gap-2">
-            <span className="inline-block size-2 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="font-medium text-zinc-300 text-[11px] sm:text-xs">
+            <span className="inline-block size-2 rounded-full bg-sky-500 animate-pulse" />
+            <span className="font-medium text-slate-600 text-[11px] sm:text-xs">
               Click any spot card to open its trip planning & route details
             </span>
           </div>
-          <div className="hidden sm:flex items-center gap-4 font-mono text-[11px] text-zinc-400">
+          <div className="hidden sm:flex items-center gap-4 font-mono text-[11px] text-slate-500">
             <span>ExploreTN Spatial GIS</span>
-            <span className="text-amber-400 font-bold">{filteredSpots.length} Spots Available</span>
+            <span className="text-sky-700 font-bold">{filteredSpots.length} Spots Available</span>
           </div>
         </div>
       </motion.div>
@@ -556,9 +556,9 @@ function SpotGridCard({ spot, onClose }: { spot: any; onClose: () => void }) {
       search={{ destination: spot.name }}
       onClick={onClose}
       aria-label={`${spot.name}, ${spot.district} District — Plan Route to Spot`}
-      className="gsap-district-card group relative flex flex-col rounded-2xl border border-zinc-800 bg-[#121215] p-3.5 transition-all duration-300 hover:border-emerald-400/60 hover:shadow-lg hover:shadow-emerald-500/5 hover:-translate-y-0.5 cursor-pointer min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 focus-visible:ring-offset-2 focus-visible:ring-offset-zinc-950"
+      className="gsap-district-card group relative flex flex-col rounded-2xl border border-slate-200 bg-white p-3.5 transition-all duration-300 hover:border-sky-400 hover:shadow-md hover:-translate-y-0.5 cursor-pointer min-h-[44px] min-w-[44px] focus:outline-none focus-visible:ring-2 focus-visible:ring-sky-500 focus-visible:ring-offset-2"
     >
-      <div className="relative h-36 w-full overflow-hidden rounded-xl bg-zinc-900 shrink-0">
+      <div className="relative h-36 w-full overflow-hidden rounded-xl bg-slate-100 shrink-0">
         <img
           src={imgSrc}
           alt={spot.name ? `${spot.name} in ${spot.district}` : "Destination thumbnail"}
@@ -566,41 +566,41 @@ function SpotGridCard({ spot, onClose }: { spot: any; onClose: () => void }) {
           className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
           loading="lazy"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#121215] via-transparent to-transparent opacity-80" aria-hidden="true" />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent opacity-80" aria-hidden="true" />
 
         {/* Category Badge */}
-        <span className="absolute top-2.5 left-2.5 rounded-md bg-zinc-950/90 backdrop-blur-md border border-zinc-700/80 px-2 py-0.5 text-[10px] font-extrabold text-emerald-400 uppercase tracking-wider">
+        <span className="absolute top-2.5 left-2.5 rounded-md bg-white/95 backdrop-blur-md border border-slate-200 px-2 py-0.5 text-[10px] font-extrabold text-sky-700 uppercase tracking-wider shadow-sm">
           {spot.category || "ATTRACTION"}
         </span>
 
         {/* District Badge */}
-        <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-md bg-amber-400 font-black px-2 py-0.5 text-[11px] text-zinc-950 shadow-sm">
-          <MapPin className="size-3 fill-zinc-950" aria-hidden="true" />
+        <span className="absolute top-2.5 right-2.5 flex items-center gap-1 rounded-md bg-sky-500 font-black px-2 py-0.5 text-[11px] text-white shadow-sm">
+          <MapPin className="size-3 fill-white" aria-hidden="true" />
           {spot.district}
         </span>
       </div>
 
       <div className="mt-3 flex flex-1 flex-col justify-between">
         <div>
-          <h3 className="font-display text-sm font-extrabold text-white group-hover:text-emerald-300 transition-colors tracking-tight line-clamp-1 group-focus-within:line-clamp-none">
+          <h3 className="font-display text-sm font-extrabold text-slate-900 group-hover:text-sky-600 transition-colors tracking-tight line-clamp-1 group-focus-within:line-clamp-none">
             {spot.name}
           </h3>
-          <p className="text-[11px] text-zinc-300 line-clamp-2 group-focus-within:line-clamp-none mt-1 leading-snug">
+          <p className="text-[11px] text-slate-500 line-clamp-2 group-focus-within:line-clamp-none mt-1 leading-snug">
             {spot.tagline}
           </p>
 
           <div className="mt-2.5 flex flex-wrap items-center justify-between gap-1 text-[11px]">
-            <span className="rounded-md bg-zinc-900 border border-zinc-800 px-2 py-0.5 font-semibold text-zinc-200">
+            <span className="rounded-md bg-slate-50 border border-slate-200 px-2 py-0.5 font-semibold text-slate-600">
               <span className="sr-only">Location: </span>📍 {spot.district}
             </span>
-            <span className="rounded-md bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 font-bold text-emerald-300 flex items-center gap-0.5">
-              <Star className="size-3 fill-emerald-400 text-emerald-400" aria-hidden="true" />
+            <span className="rounded-md bg-sky-50 border border-sky-100 px-2 py-0.5 font-bold text-sky-700 flex items-center gap-0.5">
+              <Star className="size-3 fill-amber-400 text-amber-500" aria-hidden="true" />
               <span className="sr-only">Rating: </span>{spot.rating}
             </span>
           </div>
         </div>
 
-        <div className="mt-3.5 flex items-center justify-between text-xs font-bold text-emerald-400 pt-2.5 border-t border-zinc-800/80 group-hover:text-emerald-300">
+        <div className="mt-3.5 flex items-center justify-between text-xs font-bold text-sky-600 pt-2.5 border-t border-slate-100 group-hover:text-sky-700">
           <span>Plan Route to Spot</span>
           <ArrowRight className="size-3.5 group-hover:translate-x-1 transition-transform" aria-hidden="true" />
         </div>
