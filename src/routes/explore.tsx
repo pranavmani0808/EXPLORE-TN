@@ -614,8 +614,8 @@ function ExploreByExperiencePage() {
   return (
     <AppShell className="bg-slate-50">
       {/* Page Header */}
-      <div className="relative border-b border-sky-100 bg-white pt-20 pb-8 backdrop-blur-xl">
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+      <div className="relative border-b border-sky-100 bg-white pt-28 pb-8 backdrop-blur-xl">
+        <div className="mx-auto max-w-[1720px] px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-mono font-bold bg-sky-50 text-sky-700 border border-sky-200 mb-2">
@@ -624,7 +624,7 @@ function ExploreByExperiencePage() {
               <h1 className="font-display text-3xl font-extrabold text-slate-900 sm:text-4xl tracking-tight">
                 Curated Experiences & Destinations
               </h1>
-              <p className="mt-1 text-sm text-slate-500 max-w-2xl">
+              <p className="mt-1 text-sm text-slate-500 max-w-3xl">
                 Discover canonical places grouped by theme. Click <strong className="text-sky-600">+ Add to Map</strong> on any place to build your interactive trip route.
               </p>
             </div>
@@ -643,11 +643,11 @@ function ExploreByExperiencePage() {
       </div>
 
       {/* Main Content Layout */}
-      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+      <div className="mx-auto max-w-[1720px] px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-16 gap-6 items-start">
           
           {/* LEFT SIDEBAR: Experience Categories */}
-          <aside className="lg:col-span-3 space-y-4">
+          <aside className="lg:col-span-4 xl:col-span-3 sticky top-28 space-y-4">
             <div className="rounded-3xl bg-white border border-sky-100 p-4 shadow-sm space-y-3">
               <div className="flex items-center justify-between px-1">
                 <p className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-wider">
@@ -711,7 +711,7 @@ function ExploreByExperiencePage() {
           </aside>
 
           {/* MAIN EXPLORE + TRIP ROUTE WORKSPACE */}
-          <div className={cn("transition-all duration-500 grid gap-6", isPanelOpen ? "lg:col-span-9 grid-cols-1 xl:grid-cols-12" : "lg:col-span-9 grid-cols-1")}>
+          <div className={cn("transition-all duration-500 grid gap-6", isPanelOpen ? "lg:col-span-8 xl:col-span-13 grid-cols-1 xl:grid-cols-12" : "lg:col-span-8 xl:col-span-13 grid-cols-1")}>
             
             {/* Explore Cards Grid Column */}
             <section className={cn("space-y-6 transition-all duration-300", isPanelOpen ? "xl:col-span-7" : "col-span-1")}>
@@ -782,20 +782,21 @@ function ExploreByExperiencePage() {
                   </div>
                 )}
 
+                {/* Murugan Trail Banner */}
                 {selectedCategory === "arupadai" && (
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 p-4 rounded-2xl bg-amber-50 border border-amber-200">
                     <div className="flex items-center gap-3">
-                      <span className="grid size-10 place-items-center rounded-xl bg-amber-500/20 text-amber-400 font-bold text-lg">
+                      <span className="grid size-10 place-items-center rounded-xl bg-amber-100 text-amber-600 font-bold text-lg">
                         🔥
                       </span>
                       <div>
-                        <h4 className="text-sm font-extrabold text-white">Arupadai Veedu Interactive Road Trail</h4>
-                        <p className="text-xs text-zinc-400">View real road route connecting all six sacred Murugan shrines sequentially (1 to 6) with turn-by-turn geometry</p>
+                        <h4 className="text-sm font-extrabold text-slate-900">Arupadai Veedu Interactive Road Trail</h4>
+                        <p className="text-xs text-slate-600">View real road route connecting all six sacred Murugan shrines sequentially (1 to 6) with turn-by-turn geometry</p>
                       </div>
                     </div>
                     <Link
                       to="/trails/arupadai-veedu"
-                      className="shrink-0 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-zinc-950 font-extrabold text-xs flex items-center gap-2 shadow-lg shadow-amber-500/20 transition"
+                      className="shrink-0 px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-600 text-white font-extrabold text-xs flex items-center gap-2 shadow-sm transition"
                     >
                       <RouteIcon className="size-3.5" />
                       <span>Open Interactive Trail Map</span>
@@ -806,22 +807,27 @@ function ExploreByExperiencePage() {
 
                 {/* Cards Grid */}
                 {categoryFilteredPlaces.length === 0 ? (
-                  <div className="text-center py-12 bg-zinc-950/50 border border-zinc-800 rounded-2xl p-6 max-w-md mx-auto space-y-3">
-                    <div className="inline-flex p-3 rounded-full bg-amber-500/10 text-amber-400">
+                  <div className="text-center py-12 bg-slate-50 border border-slate-200 rounded-2xl p-6 max-w-md mx-auto space-y-3">
+                    <div className="inline-flex p-3 rounded-full bg-sky-50 text-sky-600 border border-sky-100">
                       <SlidersHorizontal className="size-6" />
                     </div>
-                    <h3 className="text-base font-bold text-white">No destinations found</h3>
-                    <p className="text-xs text-zinc-400">
+                    <h3 className="text-base font-bold text-slate-900">No destinations found</h3>
+                    <p className="text-xs text-slate-500">
                       No places match your criteria. Reset filters to explore more places.
                     </p>
-                    <Button size="sm" onClick={() => { setSearchQuery(""); setSelectedDistrict("All Districts"); }} className="bg-amber-400 text-zinc-950 font-bold text-xs">
+                    <Button size="sm" onClick={() => { setSearchQuery(""); setSelectedDistrict("All Districts"); }} className="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs">
                       Reset Filters
                     </Button>
                   </div>
                 ) : (
                   <AnimatedGroup
                     preset="blur-slide"
-                    className={cn("grid gap-5", isPanelOpen ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3")}
+                    className={cn(
+                      "grid gap-5",
+                      isPanelOpen
+                        ? "grid-cols-1 sm:grid-cols-2"
+                        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                    )}
                   >
                     {categoryFilteredPlaces.slice(0, visibleCount).map((p, idx) => {
                       const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
