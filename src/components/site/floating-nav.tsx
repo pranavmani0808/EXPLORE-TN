@@ -211,30 +211,33 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 
   return (
     <>
-      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-7 sm:pt-5 font-sans">
-        <nav
-          className={cn(
-            "mx-auto flex h-[70px] max-w-[1400px] items-center justify-between gap-2 sm:gap-4 rounded-full px-4 sm:pl-6 sm:pr-8 transition-all duration-300 backdrop-blur-[24px]",
-            scrolled
-              ? "bg-white/95 border border-sky-100 shadow-[0_12px_40px_rgba(2,132,199,0.08)]"
-              : "bg-white/85 border border-sky-100/80 shadow-[0_8px_32px_rgba(2,132,199,0.05)]",
-          )}
-          aria-label="Main Navigation"
-        >
-          {/* Left: Brand Logo */}
-          <div className="flex items-center gap-3 shrink-0">
-            <Link to="/" className="flex items-center gap-2.5" aria-label="ExploreTN home">
-              <span className="grid size-10 place-items-center rounded-2xl bg-sky-500 text-white font-black shadow-lg shadow-sky-500/25">
-                <Compass className="size-6 text-white" aria-hidden />
-              </span>
-              <span className="font-display text-xl font-extrabold tracking-tight text-slate-900">
-                Explore<span className="text-sky-500">TN</span>
-              </span>
-            </Link>
-          </div>
+      <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 sm:pt-4 font-sans">
+        <div className="mx-auto flex max-w-7xl items-center justify-center">
+          {/* Floating Navbar Pill (Navigation5 Design) */}
+          <nav
+            className={cn(
+              "flex h-16 w-full max-w-5xl items-center justify-between gap-2 rounded-full border bg-white px-4 pr-3 shadow-sm transition-all duration-300 backdrop-blur-xl border-slate-200",
+              scrolled
+                ? "border-sky-200/80 bg-white/95 shadow-[0_12px_40px_rgba(2,132,199,0.1)]"
+                : "border-slate-200/90 bg-white/90 shadow-[0_4px_24px_rgba(0,0,0,0.04)]"
+            )}
+            aria-label="Main Navigation"
+          >
+            {/* Logo Section */}
+            <div className="flex items-center gap-2 pl-2 pr-4 shrink-0">
+              <Link to="/" className="flex items-center gap-2.5" aria-label="ExploreTN home">
+                <span className="grid size-8 place-items-center rounded-xl bg-sky-500 text-white font-black shadow-md shadow-sky-500/25">
+                  <Compass className="size-5 text-white" aria-hidden />
+                </span>
+                <span className="text-lg font-bold tracking-tight text-slate-900 font-display">
+                  Explore<span className="text-sky-500">TN</span>
+                </span>
+              </Link>
+            </div>
 
-          {/* Center: Main Visitor Navigation */}
-          <div className="hidden items-center gap-2 lg:flex shrink-0">
+            {/* Desktop Navigation */}
+            <div className="hidden lg:block">
+              <div className="flex items-center gap-1">
             {/* 1. Destinations Dropdown */}
             <div
               className="relative"
@@ -402,54 +405,61 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* 2. Map Explorer */}
           <Link
             to="/explore"
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 whitespace-nowrap transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 hover:scale-[1.02] shrink-0 border border-transparent hover:border-sky-200/60"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold border border-sky-200" }}
+            className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
           >
-            <Map className="size-4 text-sky-600 shrink-0" />
-            <span className="whitespace-nowrap">{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
+            <span className="flex items-center gap-1.5">
+              <Map className="size-3.5 text-sky-600 shrink-0" />
+              <span>{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
+            </span>
           </Link>
 
           {/* 3. Trails & Routes */}
           <Link
             to="/routes"
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 whitespace-nowrap transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 hover:scale-[1.02] shrink-0 border border-transparent hover:border-sky-200/60"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold border border-sky-200" }}
+            className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
           >
-            <Route className="size-4 text-sky-600 shrink-0" />
-            <span className="whitespace-nowrap">{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
+            <span className="flex items-center gap-1.5">
+              <Route className="size-3.5 text-sky-600 shrink-0" />
+              <span>{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
+            </span>
           </Link>
 
           {/* 4. Travel Guides */}
           <Link
             to="/community"
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 whitespace-nowrap transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 hover:scale-[1.02] shrink-0 border border-transparent hover:border-sky-200/60"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold border border-sky-200" }}
+            className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
           >
-            <Users className="size-4 text-slate-500 shrink-0" />
-            <span className="whitespace-nowrap">{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+            <span className="flex items-center gap-1.5">
+              <Users className="size-3.5 text-slate-500 shrink-0" />
+              <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+            </span>
           </Link>
 
           {/* 5. Events & Festivals */}
           <Link
             to="/events"
-            className="flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-slate-700 whitespace-nowrap transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 hover:scale-[1.02] shrink-0 border border-transparent hover:border-sky-200/60"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold border border-sky-200" }}
+            className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
+            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
           >
-            <CalendarDays className="size-4 text-sky-600 shrink-0" />
-            <span className="whitespace-nowrap">{lang === "ta" ? "நிகழ்வுகள் & திருவிழாக்கள்" : "Events"}</span>
+            <CalendarDays className="size-3.5 text-sky-600 shrink-0" />
+            <span>{lang === "ta" ? "நிகழ்வுகள்" : "Events"}</span>
           </Link>
         </div>
+      </div>
 
         {/* Right Utility Section & Primary Action CTA */}
-        <div className="flex items-center gap-2 ml-auto shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
           {/* Search Trigger Button */}
           <button
             type="button"
             onClick={onSearch}
-            className="hidden xl:flex h-[40px] items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3.5 text-xs text-slate-500 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 transition cursor-pointer shrink-0"
+            className="hidden xl:flex h-9 items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 text-xs text-slate-500 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700 transition cursor-pointer shrink-0"
           >
             <Search className="size-3.5 text-slate-400" />
-            <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search places..."}</span>
+            <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search..."}</span>
             <kbd className="rounded bg-white px-1.5 py-0.5 text-[10px] font-mono text-slate-500 border border-slate-200">
               {typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "") ? "⌘K" : "Ctrl K"}
             </kbd>
@@ -459,30 +469,29 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <button
             type="button"
             onClick={toggleLanguage}
-            className="hidden sm:flex items-center gap-1.5 rounded-full border border-sky-100 bg-sky-50 px-3 py-1.5 text-xs font-bold text-sky-800 hover:border-sky-300 hover:bg-sky-100 transition shrink-0"
+            className="hidden sm:flex items-center gap-1 rounded-full border border-sky-100 bg-sky-50 px-2.5 py-1 text-xs font-bold text-sky-700 hover:bg-sky-100 transition shrink-0 cursor-pointer"
             title="Switch Language / மொழியை மாற்றுக"
           >
-            <Languages className="size-3.5 text-sky-600" />
-            <span>{lang === "en" ? "தமிழ்" : "English"}</span>
+            <Languages className="size-3 text-sky-600" />
+            <span>{lang === "en" ? "தமிழ்" : "EN"}</span>
           </button>
 
           {/* Saved Places */}
           <Link
             to="/saved"
-            className="hidden sm:flex items-center justify-center size-10 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition shrink-0 shadow-sm"
+            className="hidden sm:flex items-center justify-center size-9 rounded-full border border-slate-200 bg-white text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50 transition shrink-0 shadow-sm"
             title={lang === "ta" ? "சேமித்த இடங்கள்" : "Saved Places"}
           >
-            <Bookmark className="size-4 text-slate-600" />
+            <Bookmark className="size-3.5" />
           </Link>
 
-          {/* Visually Lighter Nav CTA Button: Plan Route */}
+          {/* Plan Route Button */}
           <Link
             to="/routes"
-            data-testid="desktop-plan-route-btn"
-            className="hidden md:flex items-center gap-2 rounded-full border border-sky-300 bg-sky-500 px-4 py-2 text-xs font-bold text-white hover:bg-sky-600 hover:border-sky-400 transition shadow-md shadow-sky-500/20 shrink-0"
+            className="hidden md:flex items-center gap-1.5 rounded-full bg-sky-600 hover:bg-sky-500 px-5 py-2 text-xs font-extrabold text-white transition shadow-sm shadow-sky-600/20 shrink-0"
           >
-            <Route className="size-3.5 text-white" />
-            <span>{lang === "ta" ? "பாதையைத் திட்டமிடு" : "Plan Route"}</span>
+            <Route className="size-3.5" />
+            <span>{lang === "ta" ? "திட்டமிடு" : "Plan Route"}</span>
           </Link>
 
           {/* Account Icon & Profile Menu Dropdown */}
@@ -491,15 +500,16 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <Button
             variant="ghost"
             size="icon"
-            className="lg:hidden rounded-full size-10 border border-slate-200 bg-white text-slate-700 hover:bg-sky-50"
+            className="lg:hidden rounded-full size-9 border border-slate-200 bg-white text-slate-700 hover:bg-slate-100"
             onClick={() => setOpen((o) => !o)}
             aria-label="Open menu"
             aria-expanded={open}
           >
-            {open ? <X className="size-5" /> : <Menu className="size-5" />}
+            {open ? <X className="size-4" /> : <Menu className="size-4" />}
           </Button>
         </div>
       </nav>
+    </div>
 
       {/* Structured Mobile Drawer */}
       {open && (
