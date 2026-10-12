@@ -1244,22 +1244,22 @@ function PlannerPage() {
                     <span>Budget: <strong className="text-white">₹{plannerData.verifiedEngineOutput.costBreakdown.totalEstimated.toLocaleString("en-IN")}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-emerald-400" />
+                    <Check className="size-3.5 text-sky-400" />
                     <span>Transport: <strong className="text-white">{plannerData.verifiedEngineOutput.request.transport.mode.toUpperCase()}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-emerald-400" />
-                    <span>Exclusions: <strong className="text-emerald-300">{plannerData.verifiedEngineOutput.request.constraints.avoid.length > 0 ? `Avoided ${plannerData.verifiedEngineOutput.request.constraints.avoid.join(", ")}` : "Respected"}</strong></span>
+                    <Check className="size-3.5 text-sky-400" />
+                    <span>Exclusions: <strong className="text-sky-300">{plannerData.verifiedEngineOutput.request.constraints.avoid.length > 0 ? `Avoided ${plannerData.verifiedEngineOutput.request.constraints.avoid.join(", ")}` : "Respected"}</strong></span>
                   </div>
                   <div className="flex items-center gap-1.5">
-                    <Check className="size-3.5 text-emerald-400" />
+                    <Check className="size-3.5 text-sky-400" />
                     <span>Duplicates: <strong className="text-white">0 Duplicates</strong></span>
                   </div>
                 </div>
 
                 {/* Safety & Ghat Advisories */}
                 {plannerData.verifiedEngineOutput.safetyNotes && plannerData.verifiedEngineOutput.safetyNotes.length > 0 && (
-                  <div className="pt-2 border-t border-emerald-500/20 text-xs text-amber-300 space-y-1">
+                  <div className="pt-2 border-t border-sky-500/20 text-xs text-amber-300 space-y-1">
                     {plannerData.verifiedEngineOutput.safetyNotes.map((note: string, idx: number) => (
                       <div key={idx} className="flex items-center gap-1.5">
                         <ShieldAlert className="size-3.5 text-amber-400 shrink-0" />
@@ -1279,7 +1279,7 @@ function PlannerPage() {
                     <Wallet className="size-4 text-purple-400" />
                     <span>Itemized Cost Breakdown</span>
                   </h4>
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${plannerData.verifiedEngineOutput.costBreakdown.withinBudget ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30" : "bg-amber-500/10 text-amber-400 border border-amber-500/30"}`}>
+                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-mono font-bold ${plannerData.verifiedEngineOutput.costBreakdown.withinBudget ? "bg-sky-50 text-sky-600 border border-sky-200" : "bg-amber-500/10 text-amber-400 border border-amber-500/30"}`}>
                     {plannerData.verifiedEngineOutput.costBreakdown.withinBudget ? "Within Budget" : "Exceeds Target Budget"}
                   </span>
                 </div>
@@ -1307,7 +1307,7 @@ function PlannerPage() {
                   </div>
                   <div className="pt-2 border-t border-slate-700/80 flex justify-between text-sm font-extrabold text-white">
                     <span>Estimated Total:</span>
-                    <span className="text-emerald-400">₹{plannerData.verifiedEngineOutput.costBreakdown.totalEstimated.toLocaleString("en-IN")}</span>
+                    <span className="text-sky-400">₹{plannerData.verifiedEngineOutput.costBreakdown.totalEstimated.toLocaleString("en-IN")}</span>
                   </div>
                 </div>
               </div>
@@ -1316,7 +1316,7 @@ function PlannerPage() {
             {/* Timeline Itinerary */}
             <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821]/80 p-6 space-y-4">
               <h4 className="font-bold text-slate-900 dark:text-white flex items-center gap-2">
-                <Clock className="size-4 text-emerald-500" />
+                <Clock className="size-4 text-sky-500" />
                 <span>Generated Itinerary Timeline</span>
               </h4>
 
@@ -1324,8 +1324,8 @@ function PlannerPage() {
                 <div className="space-y-3 relative before:absolute before:left-2 before:top-2 before:bottom-2 before:w-0.5 before:bg-slate-200 dark:before:bg-white/10 pl-6">
                   {timeline.map((item, idx) => (
                     <div key={idx} className="relative">
-                      <div className="absolute -left-6 top-1 size-2.5 rounded-full bg-emerald-500 ring-4 ring-white dark:ring-[#121821]" />
-                      <div className="text-xs font-bold text-emerald-600 dark:text-emerald-400">{item.time}</div>
+                      <div className="absolute -left-6 top-1 size-2.5 rounded-full bg-sky-500 ring-4 ring-white dark:ring-[#121821]" />
+                      <div className="text-xs font-bold text-sky-600 dark:text-sky-400">{item.time}</div>
                       <div className="text-sm font-bold text-slate-900 dark:text-white">{item.name}</div>
                       <div className="text-xs text-slate-500 dark:text-muted-foreground">{item.description}</div>
                     </div>
@@ -1333,7 +1333,7 @@ function PlannerPage() {
                 </div>
               ) : (
                 <div className="py-6 text-center space-y-2.5 border border-dashed border-slate-200 dark:border-white/10 rounded-2xl bg-slate-50/50 dark:bg-white/[0.02] p-5">
-                  <div className="size-10 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center mx-auto text-emerald-400">
+                  <div className="size-10 rounded-2xl bg-sky-50 border border-sky-200 flex items-center justify-center mx-auto text-sky-500">
                     <Sparkles className="size-5" />
                   </div>
                   <div className="text-base font-extrabold text-slate-900 dark:text-white">
@@ -1348,8 +1348,8 @@ function PlannerPage() {
               {/* Explanations List ("Why These Places?") */}
               {plannerData?.verifiedEngineOutput?.explanations && plannerData.verifiedEngineOutput.explanations.length > 0 && (
                 <div className="pt-4 border-t border-slate-200 dark:border-white/10 space-y-2">
-                  <h5 className="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
-                    <Sparkles className="size-3.5 text-emerald-400" /> Why These Places?
+                  <h5 className="text-xs font-bold text-sky-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <Sparkles className="size-3.5 text-sky-400" /> Why These Places?
                   </h5>
                   <div className="space-y-1.5">
                     {plannerData.verifiedEngineOutput.explanations.map((exp, i) => (
@@ -1389,7 +1389,7 @@ function PlannerPage() {
                         toast.success("Trip itinerary saved to your account ✓");
                       }, "Sign in to save this trip itinerary to your account.");
                     }}
-                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-extrabold text-xs rounded-xl shadow-md shadow-emerald-500/20 cursor-pointer flex items-center gap-2"
+                    className="bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs rounded-xl shadow-md shadow-sky-500/20 cursor-pointer flex items-center gap-2"
                   >
                     <Bookmark className="size-4" />
                     <span>Save Trip</span>

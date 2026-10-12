@@ -172,21 +172,20 @@ function SavedPlacesPage() {
   }, [savedPlaces, searchQuery, selectedDistrict, selectedCategory]);
 
   return (
-    <AppShell>
+    <AppShell className="bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 pb-28 pt-28 sm:px-6 sm:pt-36 font-sans">
         {/* Header Hero Banner */}
-        <div className="relative overflow-hidden rounded-[32px] border border-slate-200 dark:border-white/10 bg-gradient-to-br from-emerald-950/40 via-slate-900 to-zinc-950 p-6 sm:p-10 text-white shadow-2xl backdrop-blur-xl mb-8">
-          <div className="absolute -right-16 -top-16 size-64 rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
+        <div className="relative overflow-hidden rounded-[32px] border border-sky-100 bg-white p-6 sm:p-10 text-slate-900 shadow-xl mb-8">
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div>
-              <div className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/20 px-3.5 py-1 text-xs font-mono font-bold text-emerald-400 mb-3">
-                <Bookmark className="size-3.5 fill-emerald-400 text-emerald-400" />
+              <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3.5 py-1 text-xs font-mono font-bold text-sky-700 mb-3">
+                <Bookmark className="size-3.5 fill-sky-500 text-sky-500" />
                 <span>SAVED COLLECTIONS</span>
               </div>
-              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-white">
+              <h1 className="text-2xl sm:text-4xl font-black tracking-tight text-slate-900">
                 Your Saved Places & Trails
               </h1>
-              <p className="mt-2 max-w-xl text-xs sm:text-sm text-slate-300 leading-relaxed font-sans">
+              <p className="mt-2 max-w-xl text-xs sm:text-sm text-slate-600 leading-relaxed font-sans">
                 Access your bookmarked Tamil Nadu destinations, hill viewpoints, temples, and custom road trip itineraries in one unified place.
               </p>
             </div>
@@ -196,7 +195,7 @@ function SavedPlacesPage() {
               <Link to="/explore">
                 <Button
                   size="sm"
-                  className="rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-black text-xs px-4 py-2.5 shadow-lg shadow-emerald-500/20 cursor-pointer"
+                  className="rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs px-4 py-2.5 shadow-md shadow-sky-500/20 cursor-pointer"
                 >
                   <Compass className="size-4 mr-1.5" />
                   Explore More Places
@@ -206,9 +205,9 @@ function SavedPlacesPage() {
                 <Button
                   size="sm"
                   variant="outline"
-                  className="rounded-2xl border-white/20 bg-white/5 hover:bg-white/10 text-white font-bold text-xs px-4 py-2.5 backdrop-blur-md cursor-pointer"
+                  className="rounded-2xl border-sky-200 bg-white hover:bg-sky-50 text-slate-700 hover:text-sky-700 font-bold text-xs px-4 py-2.5 shadow-sm cursor-pointer"
                 >
-                  <RouteIcon className="size-4 mr-1.5 text-emerald-400" />
+                  <RouteIcon className="size-4 mr-1.5 text-sky-600" />
                   Plan Route
                 </Button>
               </Link>
@@ -216,14 +215,14 @@ function SavedPlacesPage() {
           </div>
 
           {/* Sub-Tabs: Saved Places vs Custom Routes */}
-          <div className="relative z-10 flex items-center gap-2 mt-8 border-b border-white/10 pb-4">
+          <div className="relative z-10 flex items-center gap-2 mt-8 border-t border-slate-100 pt-4 flex-wrap">
             <button
               type="button"
               onClick={() => setActiveTab("places")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeTab === "places"
-                  ? "bg-emerald-500 text-slate-950 shadow-md font-black"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-sky-500 text-white shadow-md font-black"
+                  : "bg-slate-50 text-slate-600 hover:bg-sky-50 hover:text-sky-700"
               }`}
             >
               <Bookmark className="size-4" />
@@ -231,8 +230,8 @@ function SavedPlacesPage() {
               <span
                 className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                   activeTab === "places"
-                    ? "bg-slate-950/20 text-slate-950"
-                    : "bg-white/10 text-slate-300"
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 text-slate-700"
                 }`}
               >
                 {savedPlaces.length}
@@ -244,8 +243,8 @@ function SavedPlacesPage() {
               onClick={() => setActiveTab("routes")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeTab === "routes"
-                  ? "bg-emerald-500 text-slate-950 shadow-md font-black"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-sky-500 text-white shadow-md font-black"
+                  : "bg-slate-50 text-slate-600 hover:bg-sky-50 hover:text-sky-700"
               }`}
             >
               <RouteIcon className="size-4" />
@@ -253,8 +252,8 @@ function SavedPlacesPage() {
               <span
                 className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                   activeTab === "routes"
-                    ? "bg-slate-950/20 text-slate-950"
-                    : "bg-white/10 text-slate-300"
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 text-slate-700"
                 }`}
               >
                 {savedRoutes.length}
@@ -266,8 +265,8 @@ function SavedPlacesPage() {
               onClick={() => setActiveTab("events")}
               className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold transition cursor-pointer ${
                 activeTab === "events"
-                  ? "bg-emerald-500 text-slate-950 shadow-md font-black"
-                  : "bg-white/5 text-slate-300 hover:bg-white/10 hover:text-white"
+                  ? "bg-sky-500 text-white shadow-md font-black"
+                  : "bg-slate-50 text-slate-600 hover:bg-sky-50 hover:text-sky-700"
               }`}
             >
               <Calendar className="size-4" />
@@ -275,8 +274,8 @@ function SavedPlacesPage() {
               <span
                 className={`ml-1 px-2 py-0.5 rounded-full text-[10px] font-mono font-bold ${
                   activeTab === "events"
-                    ? "bg-slate-950/20 text-slate-950"
-                    : "bg-white/10 text-slate-300"
+                    ? "bg-white/20 text-white"
+                    : "bg-slate-200 text-slate-700"
                 }`}
               >
                 {savedEventIds.length}
@@ -289,7 +288,7 @@ function SavedPlacesPage() {
         {activeTab === "places" && (
           <div className="space-y-6">
             {/* Filter & Search Bar */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white dark:bg-[#121821] p-4 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-3xl border border-sky-100 shadow-sm">
               <div className="relative flex-1">
                 <Search className="absolute left-3.5 top-3 size-4 text-slate-400" />
                 <input
@@ -297,7 +296,7 @@ function SavedPlacesPage() {
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder="Search saved destinations by name, district, or category..."
-                  className="w-full rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-900/80 pl-10 pr-4 py-2.5 text-xs text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-emerald-500 focus:outline-none"
+                  className="w-full rounded-2xl border border-slate-200 bg-slate-50 pl-10 pr-4 py-2.5 text-xs text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:outline-none"
                 />
               </div>
 
@@ -307,7 +306,7 @@ function SavedPlacesPage() {
                   <select
                     value={selectedDistrict}
                     onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="rounded-2xl border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-zinc-900/80 px-3.5 py-2.5 text-xs font-bold text-slate-800 dark:text-slate-200 focus:border-emerald-500 focus:outline-none"
+                    className="rounded-2xl border border-slate-200 bg-slate-50 px-3.5 py-2.5 text-xs font-bold text-slate-800 focus:border-sky-500 focus:outline-none cursor-pointer"
                   >
                     <option value="all">All Districts ({availableDistricts.length})</option>
                     {availableDistricts.map((d) => (
@@ -332,8 +331,8 @@ function SavedPlacesPage() {
                     onClick={() => setSelectedCategory(cat.id)}
                     className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold transition shrink-0 cursor-pointer ${
                       isSelected
-                        ? "bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black font-extrabold shadow-sm"
-                        : "bg-white dark:bg-white/5 border border-slate-200 dark:border-white/10 text-slate-600 dark:text-slate-300 hover:border-emerald-500/40"
+                        ? "bg-sky-500 text-white font-extrabold shadow-sm"
+                        : "bg-white border border-slate-200 text-slate-600 hover:border-sky-300 hover:text-sky-600"
                     }`}
                   >
                     <Icon className="size-3.5" />
@@ -345,17 +344,17 @@ function SavedPlacesPage() {
 
             {/* Results Grid / Empty State */}
             {filteredPlaces.length === 0 ? (
-              <div className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-12 text-center shadow-sm space-y-4">
-                <div className="inline-flex size-16 place-items-center rounded-3xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+              <div className="rounded-3xl border border-sky-100 bg-white p-12 text-center shadow-sm space-y-4">
+                <div className="inline-flex size-16 place-items-center rounded-3xl bg-sky-50 text-sky-600 border border-sky-100">
                   <Bookmark className="size-8" />
                 </div>
                 <div className="max-w-md mx-auto">
-                  <h3 className="text-base font-black text-slate-900 dark:text-white">
+                  <h3 className="text-base font-black text-slate-900">
                     {savedPlaces.length === 0
                       ? "No saved places yet"
                       : "No destinations match your filter"}
                   </h3>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 leading-relaxed">
+                  <p className="text-xs text-slate-500 mt-1 leading-relaxed">
                     {savedPlaces.length === 0
                       ? "Bookmark your favorite hill stations, waterfalls, and temples across Tamil Nadu while exploring to curate your personal bucket list."
                       : "Try adjusting your search terms or clearing the district filter."}
@@ -363,7 +362,7 @@ function SavedPlacesPage() {
                 </div>
                 {savedPlaces.length === 0 ? (
                   <Link to="/explore">
-                    <Button className="rounded-2xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-black text-xs px-5 py-2.5 shadow-md">
+                    <Button className="rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-black text-xs px-5 py-2.5 shadow-md shadow-sky-500/20">
                       <Compass className="size-4 mr-2" />
                       Explore Tamil Nadu Places
                     </Button>
@@ -376,7 +375,7 @@ function SavedPlacesPage() {
                       setSelectedCategory("all");
                       setSelectedDistrict("all");
                     }}
-                    className="rounded-2xl text-xs font-bold"
+                    className="rounded-2xl text-xs font-bold border-sky-200 text-slate-700 hover:bg-sky-50 hover:text-sky-700"
                   >
                     Reset Filters
                   </Button>
@@ -393,10 +392,10 @@ function SavedPlacesPage() {
                       initial={{ opacity: 0, scale: 0.96 }}
                       animate={{ opacity: 1, scale: 1 }}
                       exit={{ opacity: 0, scale: 0.96 }}
-                      className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] shadow-sm hover:shadow-xl transition-all duration-300 hover:border-emerald-500/40"
+                      className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-sky-100 bg-white shadow-sm hover:shadow-xl transition-all duration-300 hover:border-sky-300"
                     >
                       {/* Image Thumbnail Header */}
-                      <div className="relative h-44 w-full overflow-hidden bg-slate-100 dark:bg-zinc-800">
+                      <div className="relative h-44 w-full overflow-hidden bg-slate-100">
                         <img
                           src={
                             place.imageUrl ||
@@ -410,7 +409,7 @@ function SavedPlacesPage() {
 
                         {/* Category & District Tags */}
                         <div className="absolute top-3 left-3 flex items-center gap-1.5 flex-wrap">
-                          <span className="rounded-full bg-emerald-500/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-mono font-black text-slate-950 uppercase shadow">
+                          <span className="rounded-full bg-sky-500/90 backdrop-blur-md px-2.5 py-1 text-[10px] font-mono font-black text-white uppercase shadow">
                             {place.category || "Place"}
                           </span>
                           <span className="rounded-full bg-black/60 backdrop-blur-md border border-white/20 px-2.5 py-1 text-[10px] font-mono font-bold text-white shadow">
@@ -423,11 +422,11 @@ function SavedPlacesPage() {
                           <button
                             type="button"
                             onClick={() => handleSharePlace(place)}
-                            className="p-2 rounded-xl bg-black/60 backdrop-blur-md text-white hover:text-emerald-400 hover:bg-black/80 transition cursor-pointer"
+                            className="p-2 rounded-xl bg-black/60 backdrop-blur-md text-white hover:text-sky-300 hover:bg-black/80 transition cursor-pointer"
                             title="Share place link"
                           >
                             {copiedId === place.id ? (
-                              <Check className="size-3.5 text-emerald-400" />
+                              <Check className="size-3.5 text-sky-400" />
                             ) : (
                               <Share2 className="size-3.5" />
                             )}
@@ -444,17 +443,17 @@ function SavedPlacesPage() {
 
                         {/* Bottom Name inside image */}
                         <div className="absolute bottom-3 left-3 right-3">
-                          <h3 className="text-base font-black text-white leading-tight drop-shadow-sm group-hover:text-emerald-300 transition-colors">
+                          <h3 className="text-base font-black text-white leading-tight drop-shadow-sm group-hover:text-sky-300 transition-colors">
                             {place.name}
                           </h3>
                         </div>
                       </div>
 
                       {/* Card Content & CTAs */}
-                      <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-white dark:bg-[#121821]">
-                        <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 font-mono">
+                      <div className="p-4 flex-1 flex flex-col justify-between space-y-3 bg-white">
+                        <div className="flex items-center justify-between text-xs text-slate-500 font-mono">
                           <span className="flex items-center gap-1">
-                            <MapPin className="size-3.5 text-emerald-500" />
+                            <MapPin className="size-3.5 text-sky-600" />
                             {place.district}, TN
                           </span>
                           {place.rating && (
@@ -465,12 +464,12 @@ function SavedPlacesPage() {
                         </div>
 
                         {/* Action buttons */}
-                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 dark:border-white/10 font-sans">
+                        <div className="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 font-sans">
                           <Link to="/place/$slug" params={{ slug }}>
                             <Button
                               variant="outline"
                               size="sm"
-                              className="w-full rounded-xl text-xs font-bold border-slate-200 dark:border-white/10 hover:bg-slate-50 dark:hover:bg-white/5 cursor-pointer"
+                              className="w-full rounded-xl text-xs font-bold border-slate-200 hover:bg-slate-50 text-slate-700 cursor-pointer"
                             >
                               Details
                               <ExternalLink className="size-3 ml-1.5 opacity-60" />
@@ -483,7 +482,7 @@ function SavedPlacesPage() {
                           >
                             <Button
                               size="sm"
-                              className="w-full rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs shadow-sm cursor-pointer"
+                              className="w-full rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs shadow-sm cursor-pointer"
                             >
                               <Navigation className="size-3 mr-1" />
                               Route

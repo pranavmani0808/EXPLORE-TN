@@ -239,12 +239,12 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 350, damping: 20 }}
-        className="relative grid size-10 place-items-center rounded-full bg-emerald-500 text-zinc-950 font-black text-xs shadow-md shadow-emerald-500/20 ring-2 ring-emerald-500/30 cursor-pointer focus:outline-none shrink-0 mr-1 sm:mr-1.5"
+        className="relative grid size-10 place-items-center rounded-full bg-sky-500 text-white font-black text-xs shadow-md shadow-sky-500/20 ring-2 ring-sky-500/30 cursor-pointer focus:outline-none shrink-0 mr-1 sm:mr-1.5"
         aria-label="User Profile Menu"
         aria-expanded={isOpen}
       >
         <span>{initials}</span>
-        <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-emerald-400 ring-2 ring-zinc-950" />
+        <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-sky-400 ring-2 ring-white" />
       </motion.button>
 
       {/* Floating Glass Profile Menu */}
@@ -255,23 +255,23 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.96, y: -8 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute right-0 top-full mt-3 w-[320px] origin-top-right rounded-[22px] bg-white dark:bg-[#10141A]/90 p-[14px] backdrop-blur-[30px] border border-slate-200 dark:border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.12)] dark:shadow-[0_25px_70px_rgba(0,0,0,0.45)] text-slate-900 dark:text-white overflow-hidden"
+            className="absolute right-0 top-full mt-3 w-[320px] origin-top-right rounded-[22px] bg-white p-[14px] backdrop-blur-[30px] border border-sky-100 shadow-[0_20px_50px_rgba(2,132,199,0.12)] text-slate-900 overflow-hidden"
           >
             {/* Authenticated User Header */}
-            <div className="rounded-2xl bg-slate-50 dark:bg-white/5 p-3.5 border border-slate-200 dark:border-white/10">
+            <div className="rounded-2xl bg-sky-50/60 p-3.5 border border-sky-100">
               <div className="flex items-center gap-3">
-                <div className="relative size-12 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white dark:text-black font-black flex items-center justify-center text-lg shadow-md shrink-0">
+                <div className="relative size-12 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 text-white font-black flex items-center justify-center text-lg shadow-md shrink-0">
                   {initials}
-                  <span className="absolute -top-1 -right-1 size-3 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#10141A]" />
+                  <span className="absolute -top-1 -right-1 size-3 rounded-full bg-sky-500 ring-2 ring-white" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-1.5">
-                    <h3 className="font-extrabold text-sm text-slate-900 dark:text-white truncate">{currentUser.name}</h3>
-                    <span className="px-2 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[9px] font-mono font-bold rounded-full border border-emerald-500/30 shrink-0 uppercase">
+                    <h3 className="font-extrabold text-sm text-slate-900 truncate">{currentUser.name}</h3>
+                    <span className="px-2 py-0.5 bg-sky-100 text-sky-700 text-[9px] font-mono font-bold rounded-full border border-sky-200 shrink-0 uppercase">
                       {currentUser.role.replace("_", " ")}
                     </span>
                   </div>
-                  <p className="text-[11px] font-mono text-slate-500 dark:text-slate-400 truncate mt-0.5">{currentUser.email}</p>
+                  <p className="text-[11px] font-mono text-slate-500 truncate mt-0.5">{currentUser.email}</p>
                 </div>
               </div>
             </div>
@@ -282,13 +282,13 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
                 <Link
                   to="/admin"
                   onClick={() => setIsOpen(false)}
-                  className="group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-extrabold bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 border border-emerald-500/30 transition-all hover:bg-emerald-600 hover:text-white dark:hover:bg-emerald-500 dark:hover:text-black shadow-sm"
+                  className="group flex items-center justify-between rounded-xl px-3 py-2.5 text-xs font-extrabold bg-sky-50 text-sky-700 border border-sky-200 transition-all hover:bg-sky-500 hover:text-white shadow-sm"
                 >
                   <div className="flex items-center gap-2.5">
                     <LayoutDashboard className="size-4 shrink-0" />
                     <span>Admin Dashboard</span>
                   </div>
-                  <span className="text-[10px] font-mono uppercase bg-emerald-600 dark:bg-emerald-400 text-white dark:text-black px-1.5 py-0.5 rounded font-black">
+                  <span className="text-[10px] font-mono uppercase bg-sky-600 text-white px-1.5 py-0.5 rounded font-black">
                     CONTROL
                   </span>
                 </Link>
@@ -302,13 +302,13 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
                   key={item.label}
                   to={item.to}
                   onClick={() => setIsOpen(false)}
-                  className="group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-300 transition-all hover:bg-emerald-500/10 dark:hover:bg-emerald-500/15 hover:text-slate-900 dark:hover:text-white"
+                  className="group flex items-center justify-between rounded-xl px-3 py-2 text-xs font-semibold text-slate-600 transition-all hover:bg-sky-50 hover:text-sky-700"
                 >
                   <div className="flex items-center gap-2.5 min-w-0">
-                    <item.icon className="size-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-[3px] group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
+                    <item.icon className="size-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-[3px] group-hover:text-sky-600" />
                     <span className="truncate transition-transform duration-200 group-hover:translate-x-[2px]">{item.label}</span>
                   </div>
-                  <ChevronRight className="size-3.5 text-slate-400 dark:text-slate-500 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-emerald-600 dark:group-hover:text-emerald-400" />
+                  <ChevronRight className="size-3.5 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-sky-600" />
                 </Link>
               ))}
             </div>

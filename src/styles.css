@@ -126,47 +126,47 @@
 }
 
 .dark {
-  /* Dark mode */
-  --background: oklch(0.16 0.024 215);
-  --foreground: oklch(0.96 0.008 150);
-  --surface: oklch(0.2 0.026 210);
-  --surface-2: oklch(0.25 0.03 205);
-  --card: oklch(0.21 0.027 210);
-  --card-foreground: oklch(0.96 0.008 150);
-  --popover: oklch(0.2 0.028 210);
-  --popover-foreground: oklch(0.96 0.008 150);
-  --primary: oklch(0.72 0.15 165);
-  --primary-foreground: oklch(0.16 0.03 190);
-  --secondary: oklch(0.27 0.03 205);
-  --secondary-foreground: oklch(0.95 0.01 150);
-  --muted: oklch(0.26 0.026 208);
-  --muted-foreground: oklch(0.72 0.022 200);
-  --accent: oklch(0.3 0.05 195);
-  --accent-foreground: oklch(0.95 0.02 165);
-  --destructive: oklch(0.62 0.2 25);
-  --destructive-foreground: oklch(0.98 0.01 90);
-  --border: oklch(0.98 0.02 180 / 12%);
-  --input: oklch(0.98 0.02 180 / 16%);
-  --ring: oklch(0.72 0.15 165);
+  /* White & Light Sky Blue Theme */
+  --background: #F8FAFC;
+  --foreground: #0F172A;
+  --surface: #FFFFFF;
+  --surface-2: #F0F9FF;
+  --card: #FFFFFF;
+  --card-foreground: #0F172A;
+  --popover: #FFFFFF;
+  --popover-foreground: #0F172A;
+  --primary: #0284C7;
+  --primary-foreground: #FFFFFF;
+  --secondary: #E0F2FE;
+  --secondary-foreground: #0369A1;
+  --muted: #F1F5F9;
+  --muted-foreground: #64748B;
+  --accent: #E0F2FE;
+  --accent-foreground: #0284C7;
+  --destructive: #EF4444;
+  --destructive-foreground: #FFFFFF;
+  --border: #E2E8F0;
+  --input: #E2E8F0;
+  --ring: #38BDF8;
 
-  --forest: oklch(0.55 0.13 158);
-  --forest-foreground: oklch(0.97 0.01 150);
-  --ocean: oklch(0.52 0.13 238);
-  --ocean-foreground: oklch(0.97 0.01 240);
-  --sand: oklch(0.83 0.05 82);
-  --sand-foreground: oklch(0.22 0.03 70);
-  --stone: oklch(0.66 0.015 225);
-  --sunset: oklch(0.72 0.17 48);
-  --sunset-foreground: oklch(0.18 0.03 55);
-  --emerald-glow: oklch(0.78 0.16 166);
-  --gold: oklch(0.84 0.14 88);
-  --gold-foreground: oklch(0.2 0.04 80);
+  --forest: #0EA5E9;
+  --forest-foreground: #FFFFFF;
+  --ocean: #0284C7;
+  --ocean-foreground: #FFFFFF;
+  --sand: #F8FAFC;
+  --sand-foreground: #334155;
+  --stone: #94A3B8;
+  --sunset: #F97316;
+  --sunset-foreground: #FFFFFF;
+  --emerald-glow: #38BDF8;
+  --gold: #F59E0B;
+  --gold-foreground: #0F172A;
 
   --gradient-hero: linear-gradient(
     160deg,
-    oklch(0.2 0.05 240) 0%,
-    oklch(0.19 0.05 190) 50%,
-    oklch(0.22 0.06 60) 100%
+    #F0F9FF 0%,
+    #E0F2FE 50%,
+    #BAE6FD 100%
   );
 }
 

@@ -411,29 +411,29 @@ function LoginPage() {
   return (
     <AppShell>
       <div className="mx-auto max-w-md px-4 pt-32 pb-20 sm:pt-36 font-sans">
-        <div className="bg-[#121821] border border-white/15 rounded-3xl p-6 sm:p-8 shadow-2xl text-white relative overflow-hidden">
+        <div className="bg-white border border-sky-100 rounded-3xl p-6 sm:p-8 shadow-2xl text-slate-800 relative overflow-hidden">
           {/* Header */}
           <div className="text-center mb-6">
-            <div className="inline-flex size-14 place-items-center rounded-2xl bg-emerald-500 text-black font-black shadow-lg shadow-emerald-500/20 mb-3">
-              <Compass className="size-8 text-black" />
+            <div className="inline-flex size-14 place-items-center rounded-2xl bg-sky-500 text-white font-black shadow-lg shadow-sky-500/20 mb-3">
+              <Compass className="size-8 text-white" />
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
-              Explorer<span className="text-gradient">TN</span> Gateway
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">
+              Explorer<span className="text-sky-600">TN</span> Gateway
             </h1>
-            <p className="text-xs text-slate-400 mt-1 font-mono">
+            <p className="text-xs text-slate-500 mt-1 font-mono">
               Authentication & Account Verification Portal
             </p>
           </div>
 
           {/* Mode Switcher Tabs for Sign In vs Register */}
           {(authMode === "signin" || authMode === "signup") && (
-            <div className="grid grid-cols-2 p-1 bg-white/5 border border-white/10 rounded-2xl mb-6 font-mono text-xs">
+            <div className="grid grid-cols-2 p-1 bg-slate-100 border border-slate-200/80 rounded-2xl mb-6 font-mono text-xs">
               <button
                 type="button"
                 id="btn-tab-signin"
                 onClick={() => { setAuthMode("signin"); setAuthStep("idle"); setMessage(null); }}
                 className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  authMode === "signin" ? "bg-emerald-500 text-black shadow-md" : "text-slate-400 hover:text-white"
+                  authMode === "signin" ? "bg-sky-500 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <Lock className="size-3.5" /> Sign In
@@ -443,7 +443,7 @@ function LoginPage() {
                 id="btn-tab-signup"
                 onClick={() => { setAuthMode("signup"); setAuthStep("idle"); setMessage(null); }}
                 className={`py-2 rounded-xl font-bold transition flex items-center justify-center gap-1.5 cursor-pointer ${
-                  authMode === "signup" ? "bg-emerald-500 text-black shadow-md" : "text-slate-400 hover:text-white"
+                  authMode === "signup" ? "bg-sky-500 text-white shadow-sm" : "text-slate-600 hover:text-slate-900"
                 }`}
               >
                 <UserPlus className="size-3.5" /> Create Account
@@ -453,8 +453,8 @@ function LoginPage() {
 
           {/* Alert Message Box */}
           {message && (
-            <div className="mb-4 p-3 bg-amber-500/10 border border-amber-500/30 rounded-xl text-amber-300 text-xs font-medium flex items-center gap-2">
-              <ShieldCheck className="size-4 shrink-0 text-amber-400" />
+            <div className="mb-4 p-3 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-xs font-medium flex items-center gap-2">
+              <ShieldCheck className="size-4 shrink-0 text-amber-600" />
               <span>{message}</span>
             </div>
           )}
@@ -468,19 +468,19 @@ function LoginPage() {
                     type="button"
                     size="lg"
                     onClick={handleGoogleLogin}
-                    className="w-full rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-6 text-sm shadow-xl transition flex items-center justify-center gap-3 cursor-pointer"
+                    className="w-full rounded-2xl bg-white hover:bg-slate-50 text-slate-900 font-extrabold py-6 text-sm border border-slate-200 shadow-sm transition flex items-center justify-center gap-3 cursor-pointer"
                   >
                     <GoogleLogoSVG /> Continue with Google
                   </Button>
 
                   <div className="flex items-center my-3">
-                    <div className="w-full border-t border-white/15" />
+                    <div className="w-full border-t border-slate-200" />
                     <span className="px-3 text-[10px] font-mono text-slate-400 uppercase shrink-0">OR WITH EMAIL & PASSWORD</span>
-                    <div className="w-full border-t border-white/15" />
+                    <div className="w-full border-t border-slate-200" />
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Email Address</label>
+                    <label className="block text-slate-700 font-bold mb-1">Email Address</label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input
@@ -489,7 +489,7 @@ function LoginPage() {
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         placeholder="you@explorertn.com"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
@@ -497,12 +497,12 @@ function LoginPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-slate-300 font-bold">Password</label>
+                      <label className="block text-slate-700 font-bold">Password</label>
                       <button
                         type="button"
                         id="link-forgot-password"
                         onClick={() => { setAuthMode("forgot_password"); setAuthStep("idle"); setMessage(null); }}
-                        className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
+                        className="text-[11px] text-sky-600 hover:underline font-semibold cursor-pointer"
                       >
                         Forgot Password?
                       </button>
@@ -515,7 +515,7 @@ function LoginPage() {
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         placeholder="••••••••••••"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
@@ -525,7 +525,7 @@ function LoginPage() {
                     id="btn-submit-signin"
                     type="submit"
                     size="lg"
-                    className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2 cursor-pointer"
+                    className="w-full rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold py-5 text-xs shadow-md shadow-sky-500/20 mt-2 cursor-pointer"
                   >
                     <Lock className="size-4 mr-1.5" /> Sign In →
                   </Button>
@@ -539,19 +539,19 @@ function LoginPage() {
                     type="button"
                     size="lg"
                     onClick={handleGoogleLogin}
-                    className="w-full rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-extrabold py-6 text-sm shadow-xl transition flex items-center justify-center gap-3 cursor-pointer mb-2"
+                    className="w-full rounded-2xl bg-white hover:bg-slate-50 text-slate-900 font-extrabold py-6 text-sm border border-slate-200 shadow-sm transition flex items-center justify-center gap-3 cursor-pointer mb-2"
                   >
                     <GoogleLogoSVG /> Sign up with Google
                   </Button>
 
                   <div className="flex items-center my-3">
-                    <div className="w-full border-t border-white/15" />
+                    <div className="w-full border-t border-slate-200" />
                     <span className="px-3 text-[10px] font-mono text-slate-400 uppercase shrink-0">OR WITH EMAIL</span>
-                    <div className="w-full border-t border-white/15" />
+                    <div className="w-full border-t border-slate-200" />
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Full Name</label>
+                    <label className="block text-slate-700 font-bold mb-1">Full Name</label>
                     <div className="relative">
                       <User className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input
@@ -560,14 +560,14 @@ function LoginPage() {
                         value={form.fullName}
                         onChange={(e) => setForm({ ...form, fullName: e.target.value })}
                         placeholder="e.g. Tamil Selvan"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Email Address</label>
+                    <label className="block text-slate-700 font-bold mb-1">Email Address</label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input
@@ -576,7 +576,7 @@ function LoginPage() {
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         placeholder="you@explorertn.com"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
@@ -584,11 +584,11 @@ function LoginPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-slate-300 font-bold">Password</label>
+                      <label className="block text-slate-700 font-bold">Password</label>
                       <button
                         type="button"
                         onClick={() => { setAuthMode("forgot_password"); setAuthStep("idle"); setMessage(null); }}
-                        className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
+                        className="text-[11px] text-sky-600 hover:underline font-semibold cursor-pointer"
                       >
                         Forgot Password?
                       </button>
@@ -601,7 +601,7 @@ function LoginPage() {
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         placeholder="At least 6 characters"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
@@ -611,7 +611,7 @@ function LoginPage() {
                     id="btn-submit-signup"
                     type="submit"
                     size="lg"
-                    className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2 cursor-pointer"
+                    className="w-full rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold py-5 text-xs shadow-md shadow-sky-500/20 mt-2 cursor-pointer"
                   >
                     <UserPlus className="size-4 mr-1.5" /> Create Account →
                   </Button>
@@ -622,16 +622,16 @@ function LoginPage() {
               {authMode === "email_verification" && (
                 <>
                   <div className="text-center py-2 space-y-2">
-                    <ShieldCheck className="mx-auto size-10 text-emerald-400" />
-                    <h3 className="font-bold text-sm text-white">Email Confirmation Dispatched</h3>
-                    <div className="p-3 bg-emerald-500/10 border border-emerald-500/25 rounded-2xl text-left space-y-1 text-xs">
-                      <p className="text-emerald-300 font-semibold">
-                        A verification email was sent to <span className="font-mono text-white">{form.email}</span>.
+                    <ShieldCheck className="mx-auto size-10 text-sky-500" />
+                    <h3 className="font-bold text-sm text-slate-900">Email Confirmation Dispatched</h3>
+                    <div className="p-3 bg-sky-50 border border-sky-200 rounded-2xl text-left space-y-1 text-xs">
+                      <p className="text-sky-800 font-semibold">
+                        A verification email was sent to <span className="font-mono text-slate-900">{form.email}</span>.
                       </p>
-                      <p className="text-slate-300 text-[11px] leading-relaxed">
-                        Please open your inbox and click <strong className="text-white">"Confirm email address"</strong> to activate your account.
+                      <p className="text-slate-600 text-[11px] leading-relaxed">
+                        Please open your inbox and click <strong className="text-slate-900">"Confirm email address"</strong> to activate your account.
                       </p>
-                      <p className="text-slate-400 text-[10px]">
+                      <p className="text-slate-500 text-[10px]">
                         Or enter the 6-digit confirmation code below if you received one:
                       </p>
                     </div>
@@ -639,7 +639,7 @@ function LoginPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-1">
-                      <label className="block text-slate-300 font-bold">Verification Code (Optional)</label>
+                      <label className="block text-slate-700 font-bold">Verification Code (Optional)</label>
                       <button
                         type="button"
                         onClick={async () => {
@@ -655,7 +655,7 @@ function LoginPage() {
                             setMessage("Unable to resend email right now. Please wait 60 seconds.");
                           }
                         }}
-                        className="text-[11px] text-emerald-400 hover:underline font-semibold cursor-pointer"
+                        className="text-[11px] text-sky-600 hover:underline font-semibold cursor-pointer"
                       >
                         Resend Email ↻
                       </button>
@@ -667,7 +667,7 @@ function LoginPage() {
                       value={form.otpCode}
                       onChange={(e) => setForm({ ...form, otpCode: e.target.value })}
                       placeholder="123456"
-                      className="w-full bg-[#0B0F14] border border-white/15 rounded-xl px-3 py-2.5 text-center text-white tracking-[0.5em] font-mono text-lg focus:outline-none focus:border-emerald-400"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-center text-slate-900 tracking-[0.5em] font-mono text-lg focus:outline-none focus:border-sky-500"
                     />
                   </div>
 
@@ -675,7 +675,7 @@ function LoginPage() {
                     id="btn-submit-verify-email"
                     type="submit"
                     size="lg"
-                    className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2 cursor-pointer"
+                    className="w-full rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold py-5 text-xs shadow-md shadow-sky-500/20 mt-2 cursor-pointer"
                   >
                     <CheckCircle2 className="size-4 mr-1.5" /> Complete Verification →
                   </Button>
@@ -683,7 +683,7 @@ function LoginPage() {
                   <button
                     type="button"
                     onClick={() => { setAuthMode("signin"); setAuthStep("idle"); }}
-                    className="w-full text-center text-xs text-slate-400 hover:text-white pt-2 flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-full text-center text-xs text-slate-500 hover:text-slate-800 pt-2 flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="size-3.5" /> Back to Sign In
                   </button>
@@ -694,15 +694,15 @@ function LoginPage() {
               {authMode === "forgot_password" && (
                 <>
                   <div className="text-center py-2 space-y-1">
-                    <Key className="mx-auto size-10 text-amber-400" />
-                    <h3 className="font-bold text-sm text-white">Forgot Password</h3>
-                    <p className="text-[11px] text-slate-400">
+                    <Key className="mx-auto size-10 text-sky-500" />
+                    <h3 className="font-bold text-sm text-slate-900">Forgot Password</h3>
+                    <p className="text-[11px] text-slate-500">
                       Enter your account email to receive a password reset link.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Registered Email Address</label>
+                    <label className="block text-slate-700 font-bold mb-1">Registered Email Address</label>
                     <div className="relative">
                       <Mail className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input
@@ -711,7 +711,7 @@ function LoginPage() {
                         value={form.email}
                         onChange={(e) => setForm({ ...form, email: e.target.value })}
                         placeholder="you@explorertn.com"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
@@ -721,7 +721,7 @@ function LoginPage() {
                     id="btn-submit-forgot-password"
                     type="submit"
                     size="lg"
-                    className="w-full rounded-2xl bg-amber-500 hover:bg-amber-600 text-black font-black py-5 text-xs shadow-lg shadow-amber-500/20 mt-2 cursor-pointer"
+                    className="w-full rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold py-5 text-xs shadow-md shadow-sky-500/20 mt-2 cursor-pointer"
                   >
                     <Mail className="size-4 mr-1.5" /> Send Reset Link →
                   </Button>
@@ -729,7 +729,7 @@ function LoginPage() {
                   <button
                     type="button"
                     onClick={() => { setAuthMode("signin"); setAuthStep("idle"); }}
-                    className="w-full text-center text-xs text-slate-400 hover:text-white pt-2 flex items-center justify-center gap-1 cursor-pointer"
+                    className="w-full text-center text-xs text-slate-500 hover:text-slate-800 pt-2 flex items-center justify-center gap-1 cursor-pointer"
                   >
                     <ArrowLeft className="size-3.5" /> Back to Sign In
                   </button>
@@ -740,15 +740,15 @@ function LoginPage() {
               {authMode === "reset_password" && (
                 <>
                   <div className="text-center py-2 space-y-1">
-                    <RefreshCw className="mx-auto size-10 text-emerald-400" />
-                    <h3 className="font-bold text-sm text-white">Set New Password</h3>
-                    <p className="text-[11px] text-slate-400">
+                    <RefreshCw className="mx-auto size-10 text-sky-500" />
+                    <h3 className="font-bold text-sm text-slate-900">Set New Password</h3>
+                    <p className="text-[11px] text-slate-500">
                       Enter your new password below.
                     </p>
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">New Password</label>
+                    <label className="block text-slate-700 font-bold mb-1">New Password</label>
                     <div className="relative">
                       <Key className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input
@@ -757,14 +757,14 @@ function LoginPage() {
                         value={form.password}
                         onChange={(e) => setForm({ ...form, password: e.target.value })}
                         placeholder="At least 6 characters"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
                   </div>
 
                   <div>
-                    <label className="block text-slate-300 font-bold mb-1">Confirm New Password</label>
+                    <label className="block text-slate-700 font-bold mb-1">Confirm New Password</label>
                     <div className="relative">
                       <Key className="absolute left-3.5 top-3 size-4 text-slate-400" />
                       <input
@@ -773,7 +773,7 @@ function LoginPage() {
                         value={form.confirmPassword}
                         onChange={(e) => setForm({ ...form, confirmPassword: e.target.value })}
                         placeholder="Re-enter new password"
-                        className="w-full bg-[#0B0F14] border border-white/15 rounded-xl pl-10 pr-3 py-2.5 text-white focus:outline-none focus:border-emerald-400 font-medium"
+                        className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3 py-2.5 text-slate-900 focus:outline-none focus:border-sky-500 font-medium"
                         required
                       />
                     </div>
@@ -783,7 +783,7 @@ function LoginPage() {
                     id="btn-submit-reset-password"
                     type="submit"
                     size="lg"
-                    className="w-full rounded-2xl bg-emerald-500 hover:bg-emerald-600 text-black font-black py-5 text-xs shadow-lg shadow-emerald-500/20 mt-2 cursor-pointer"
+                    className="w-full rounded-2xl bg-sky-500 hover:bg-sky-600 text-white font-bold py-5 text-xs shadow-md shadow-sky-500/20 mt-2 cursor-pointer"
                   >
                     <CheckCircle2 className="size-4 mr-1.5" /> Save New Password →
                   </Button>
@@ -795,13 +795,13 @@ function LoginPage() {
           {/* Authenticating / Success Flow Animations */}
           {authStep !== "idle" && (
             <div className="py-8 text-center space-y-4 font-sans">
-              <div className="relative inline-flex size-16 place-items-center rounded-full bg-emerald-500/20 border border-emerald-500/40 text-emerald-400">
-                <UserCheck className="size-8 text-emerald-400" />
-                <span className="absolute -inset-2 rounded-full border-2 border-emerald-400/40 animate-ping" />
+              <div className="relative inline-flex size-16 place-items-center rounded-full bg-sky-100 border border-sky-300 text-sky-600">
+                <UserCheck className="size-8 text-sky-600" />
+                <span className="absolute -inset-2 rounded-full border-2 border-sky-400/40 animate-ping" />
               </div>
 
               <div>
-                <h3 className="text-lg font-black text-white">
+                <h3 className="text-lg font-black text-slate-900">
                   {authStep === "verified"
                     ? "Email Verified!"
                     : authStep === "reset_sent"
@@ -812,12 +812,12 @@ function LoginPage() {
                     ? "Super Admin Access Granted!"
                     : "Welcome Back!"}
                 </h3>
-                <p className="text-xs text-emerald-400 font-mono mt-1">
+                <p className="text-xs text-sky-600 font-mono mt-1">
                   {form.email || "Explorer User"}
                 </p>
               </div>
 
-              <div className="p-3.5 bg-white/5 border border-white/10 rounded-2xl text-xs font-mono text-slate-300">
+              <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono text-slate-600">
                 {authStep === "authenticating" && "Verifying credentials & processing security token..."}
                 {authStep === "authorized" && "Authenticated successfully!"}
                 {authStep === "verified" && "Your email address has been verified successfully!"}
@@ -830,7 +830,7 @@ function LoginPage() {
                   type="button"
                   size="sm"
                   onClick={() => { setAuthMode("signin"); setAuthStep("idle"); setMessage(null); }}
-                  className="mt-4 bg-emerald-500 hover:bg-emerald-400 text-black font-bold text-xs rounded-xl cursor-pointer"
+                  className="mt-4 bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs rounded-xl cursor-pointer"
                 >
                   Return to Sign In
                 </Button>

@@ -192,20 +192,20 @@ function ProfilePage() {
 
   if (!currentUser) {
     return (
-      <AppShell>
+      <AppShell className="bg-slate-50">
         <div className="mx-auto max-w-2xl px-4 py-36 text-center font-sans">
-          <div className="bg-[#121821] border border-white/15 rounded-3xl p-8 shadow-2xl text-white">
-            <div className="inline-flex size-16 place-items-center rounded-2xl bg-emerald-500 text-black font-black mb-4">
-              <Compass className="size-8 text-black" />
+          <div className="bg-white border border-sky-100 rounded-3xl p-8 shadow-xl text-slate-800">
+            <div className="inline-flex size-16 place-items-center rounded-2xl bg-sky-500 text-white font-black mb-4 shadow-lg shadow-sky-500/20">
+              <Compass className="size-8 text-white" />
             </div>
-            <h2 className="text-2xl font-black">Sign in to view your Explorer Passport</h2>
-            <p className="mt-2 text-xs text-slate-300 leading-relaxed">
+            <h2 className="text-2xl font-black text-slate-900">Sign in to view your Explorer Passport</h2>
+            <p className="mt-2 text-xs text-slate-500 leading-relaxed">
               Track places visited across 38 districts, save custom routes, build itineraries, and sync your contributions.
             </p>
             <div className="mt-6 flex items-center justify-center gap-3">
               <Button
                 onClick={() => openAuthModal("Sign in to view your Explorer Passport.")}
-                className="bg-emerald-500 hover:bg-emerald-400 text-black font-black text-xs rounded-2xl px-6 py-2.5 shadow-lg shadow-emerald-500/20 cursor-pointer"
+                className="bg-sky-500 hover:bg-sky-600 text-white font-black text-xs rounded-2xl px-6 py-2.5 shadow-lg shadow-sky-500/20 cursor-pointer"
               >
                 Sign In to ExplorerTN
               </Button>
@@ -256,54 +256,54 @@ function ProfilePage() {
   ];
 
   return (
-    <AppShell>
+    <AppShell className="bg-slate-50">
       <div className="mx-auto max-w-6xl px-4 pb-24 pt-28 sm:px-6 sm:pt-36 font-sans">
         {/* Profile Header */}
-        <div className="flex flex-wrap items-center gap-6 rounded-[28px] p-6 sm:p-8 bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 text-slate-900 dark:text-white shadow-sm dark:shadow-2xl">
-          <span className="grid size-20 place-items-center rounded-3xl bg-gradient-to-br from-emerald-500 to-teal-600 font-black text-2xl text-white dark:text-black shadow-lg shadow-emerald-500/20 shrink-0">
+        <div className="flex flex-wrap items-center gap-6 rounded-[28px] p-6 sm:p-8 bg-white border border-sky-100 text-slate-900 shadow-sm">
+          <span className="grid size-20 place-items-center rounded-3xl bg-gradient-to-br from-sky-500 to-sky-600 font-black text-2xl text-white shadow-lg shadow-sky-500/20 shrink-0">
             {initials}
           </span>
           <div className="min-w-52 flex-1 space-y-2">
             <div className="flex items-center gap-2 flex-wrap">
-              <span className="px-3 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-mono text-[11px] font-bold rounded-full border border-emerald-500/30 flex items-center gap-1">
-                <Shield className="size-3 text-emerald-600 dark:text-emerald-400" /> Platform Role: {user.role.replace("_", " ").toUpperCase()}
+              <span className="px-3 py-1 bg-sky-50 text-sky-700 font-mono text-[11px] font-bold rounded-full border border-sky-200 flex items-center gap-1">
+                <Shield className="size-3 text-sky-600" /> Platform Role: {user.role.replace("_", " ").toUpperCase()}
               </span>
 
-              <span className="px-3 py-1 bg-amber-500/10 text-amber-700 dark:text-amber-400 font-mono text-[11px] font-bold rounded-full border border-amber-500/30">
+              <span className="px-3 py-1 bg-amber-50 text-amber-700 font-mono text-[11px] font-bold rounded-full border border-amber-200">
                 🏕️ Explorer Rank: {rankTitle}
               </span>
             </div>
 
-            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 dark:text-white tracking-tight">
+            <h1 className="text-3xl sm:text-4xl font-bold text-slate-900 tracking-tight">
               Welcome to ExplorerTN, {user.name}!
             </h1>
-            <p className="text-xs text-slate-500 dark:text-slate-400 font-mono">
+            <p className="text-xs text-slate-500 font-mono">
               {placesVisited === 0 ? "Let's start your first adventure across Tamil Nadu." : `${districtsExploredCount} Districts Unlocked • ${xpEarned} XP Earned`}
             </p>
 
             <div className="mt-3 max-w-md">
-              <div className="mb-1 flex justify-between text-xs font-mono text-slate-600 dark:text-slate-300">
+              <div className="mb-1 flex justify-between text-xs font-mono text-slate-600">
                 <span>{rankTitle}</span>
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold">{xpEarned % 100} / 100 XP</span>
+                <span className="text-sky-700 font-bold">{xpEarned % 100} / 100 XP</span>
               </div>
-              <Progress value={xpEarned % 100} className="h-2 bg-slate-100 dark:bg-white/10" />
+              <Progress value={xpEarned % 100} className="h-2 bg-slate-100" />
             </div>
 
             {/* Role-Based Admin Operations Banner */}
             {isAdminUser(user) && (
-              <div className="mt-5 border-t border-slate-200 dark:border-white/10 pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-emerald-500/10 dark:bg-emerald-500/15 border border-emerald-500/30 rounded-2xl p-4">
+              <div className="mt-5 border-t border-slate-100 pt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-sky-50/70 border border-sky-200 rounded-2xl p-4">
                 <div>
                   <div className="flex items-center gap-2">
-                    <Shield className="size-4 text-emerald-600 dark:text-emerald-400" />
-                    <span className="font-extrabold text-sm text-slate-900 dark:text-white">Admin Privileges Active</span>
+                    <Shield className="size-4 text-sky-600" />
+                    <span className="font-extrabold text-sm text-slate-900">Admin Privileges Active</span>
                   </div>
-                  <p className="text-xs text-slate-600 dark:text-slate-300 mt-0.5">
+                  <p className="text-xs text-slate-600 mt-0.5">
                     You have full operational authorization to the Explore TN Control Center & Crawler Ingestion Pipeline.
                   </p>
                 </div>
                 <Link
                   to="/admin"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs shadow-md shadow-emerald-500/20 shrink-0 transition"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs shadow-md shadow-sky-500/20 shrink-0 transition"
                 >
                   <LayoutDashboard className="size-4" /> Open Admin Dashboard →
                 </Link>
@@ -313,7 +313,7 @@ function ProfilePage() {
 
           <div className="flex items-center gap-2 shrink-0">
             <Link to="/explore">
-              <Button size="lg" className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs rounded-2xl shadow-lg shadow-emerald-500/20 cursor-pointer">
+              <Button size="lg" className="bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs rounded-2xl shadow-lg shadow-sky-500/20 cursor-pointer">
                 <Compass className="size-4 mr-1.5" /> Explore Places →
               </Button>
             </Link>
@@ -327,15 +327,15 @@ function ProfilePage() {
               key={s.label}
               whileHover={{ y: -6 }}
               transition={{ duration: 0.2 }}
-              className="rounded-3xl border border-slate-200 dark:border-white/10 bg-white dark:bg-[#121821] p-6 shadow-sm text-slate-900 dark:text-white flex flex-col justify-between"
+              className="rounded-3xl border border-sky-100 bg-white p-6 shadow-sm text-slate-900 flex flex-col justify-between"
             >
               <div>
-                <p className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wide text-slate-500 dark:text-slate-400">
-                  <s.icon className="size-4 text-emerald-600 dark:text-emerald-400" aria-hidden /> {s.label}
+                <p className="flex items-center gap-2 text-[11px] font-mono uppercase tracking-wide text-slate-500">
+                  <s.icon className="size-4 text-sky-600" aria-hidden /> {s.label}
                 </p>
-                <p className="mt-3 font-bold text-4xl text-slate-900 dark:text-white tracking-tight">{s.value}</p>
+                <p className="mt-3 font-bold text-4xl text-slate-900 tracking-tight">{s.value}</p>
               </div>
-              <p className="mt-3 text-xs text-emerald-700 dark:text-emerald-400 font-mono font-semibold">{s.subtext}</p>
+              <p className="mt-3 text-xs text-sky-700 font-mono font-semibold">{s.subtext}</p>
             </motion.div>
           ))}
         </div>
@@ -343,17 +343,17 @@ function ProfilePage() {
         {/* Main Grid: Explorer Passport & Saved Places */}
         <div className="mt-6 grid gap-6 lg:grid-cols-[0.85fr_1.15fr]">
           {/* Map Card */}
-          <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm flex flex-col justify-between space-y-4">
+          <div className="rounded-4xl p-6 border border-sky-100 bg-white text-slate-900 shadow-sm flex flex-col justify-between space-y-4">
             <div>
               <div className="flex items-center justify-between mb-3">
-                <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                  <MapPin className="size-4 text-emerald-600 dark:text-emerald-400" /> Exploration Map
+                <p className="text-sm font-bold flex items-center gap-2 text-slate-900">
+                  <MapPin className="size-4 text-sky-600" /> Exploration Map
                 </p>
-                <span className="text-[10px] font-mono text-slate-500 dark:text-slate-400">{placesVisited} Pins Logged</span>
+                <span className="text-[10px] font-mono text-slate-500">{placesVisited} Pins Logged</span>
               </div>
 
               {placesVisited === 0 && (
-                <div className="p-3.5 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-mono text-slate-600 dark:text-slate-300 text-center mb-3">
+                <div className="p-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-xs font-mono text-slate-600 text-center mb-3">
                   No places explored yet. Click "I've Been Here" on destination pages to log visits.
                 </div>
               )}
@@ -362,20 +362,20 @@ function ProfilePage() {
             </div>
 
             <Link to="/explore" className="w-full">
-              <Button variant="outline" size="sm" className="w-full border-slate-200 dark:border-white/15 bg-slate-50 dark:bg-transparent text-slate-800 dark:text-white hover:bg-slate-100 dark:hover:bg-white/10 text-xs font-bold rounded-2xl">
-                <Search className="size-3.5 mr-1.5 text-emerald-600 dark:text-emerald-400" /> Find Nearby Places
+              <Button variant="outline" size="sm" className="w-full border-sky-200 bg-slate-50 text-slate-800 hover:bg-sky-50 hover:text-sky-700 text-xs font-bold rounded-2xl">
+                <Search className="size-3.5 mr-1.5 text-sky-600" /> Find Nearby Places
               </Button>
             </Link>
           </div>
 
           <div className="space-y-6">
             {/* Explorer Passport Card */}
-            <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm space-y-4">
+            <div className="rounded-4xl p-6 border border-sky-100 bg-white text-slate-900 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
+                <p className="text-sm font-bold flex items-center gap-2 text-slate-900">
                   <Award className="size-4 text-amber-500" /> Explorer Passport (38 Districts)
                 </p>
-                <span className="text-xs font-mono text-emerald-600 font-bold">{districtsExploredCount} / 38 Districts Unlocked</span>
+                <span className="text-xs font-mono text-sky-700 font-bold">{districtsExploredCount} / 38 Districts Unlocked</span>
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-56 overflow-y-auto pr-1">
@@ -387,13 +387,13 @@ function ProfilePage() {
                       key={district}
                       className={`p-2.5 rounded-xl border text-xs font-mono flex items-center justify-between transition ${
                         isUnlocked
-                          ? "bg-emerald-50 dark:bg-emerald-500/15 border-emerald-300 dark:border-emerald-500/30 text-emerald-700 dark:text-emerald-400 font-bold"
-                          : "bg-slate-50 dark:bg-white/5 border-slate-200 dark:border-white/10 text-slate-400"
+                          ? "bg-sky-50 border-sky-200 text-sky-700 font-bold"
+                          : "bg-slate-50 border-slate-200 text-slate-400"
                       }`}
                     >
                       <span className="truncate">{district}</span>
                       {isUnlocked ? (
-                        <Check className="size-3.5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                        <Check className="size-3.5 text-sky-600 shrink-0" />
                       ) : (
                         <Lock className="size-3 text-slate-400 shrink-0" />
                       )}
@@ -404,15 +404,15 @@ function ProfilePage() {
             </div>
 
             {/* Saved Destinations Card */}
-            <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm space-y-4">
+            <div className="rounded-4xl p-6 border border-sky-100 bg-white text-slate-900 shadow-sm space-y-4">
               <div className="flex items-center justify-between">
-                <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                  <Bookmark className="size-4 text-emerald-600 dark:text-emerald-400" /> Saved Destinations
+                <p className="text-sm font-bold flex items-center gap-2 text-slate-900">
+                  <Bookmark className="size-4 text-sky-600" /> Saved Destinations
                 </p>
                 {savedPlaces.length > 0 && (
                   <Link
                     to="/saved"
-                    className="text-xs font-mono font-bold text-emerald-600 dark:text-emerald-400 hover:underline flex items-center gap-1"
+                    className="text-xs font-mono font-bold text-sky-600 hover:underline flex items-center gap-1"
                   >
                     <span>View All ({savedPlaces.length})</span>
                     <ArrowRight className="size-3" />
@@ -421,16 +421,16 @@ function ProfilePage() {
               </div>
 
               {savedPlaces.length === 0 ? (
-                <div className="p-6 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-3xl text-center space-y-3">
-                  <div className="inline-flex size-12 place-items-center rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400">
+                <div className="p-6 bg-slate-50 border border-slate-200 rounded-3xl text-center space-y-3">
+                  <div className="inline-flex size-12 place-items-center rounded-2xl bg-sky-50 text-sky-600 border border-sky-100">
                     <Bookmark className="size-6" />
                   </div>
                   <div>
-                    <h4 className="text-sm font-bold text-slate-900 dark:text-white">No saved destinations yet.</h4>
-                    <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">Bookmark places while exploring Tamil Nadu.</p>
+                    <h4 className="text-sm font-bold text-slate-900">No saved destinations yet.</h4>
+                    <p className="text-xs text-slate-500 font-mono mt-0.5">Bookmark places while exploring Tamil Nadu.</p>
                   </div>
                   <Link to="/explore">
-                    <Button size="sm" className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs rounded-xl mt-1">
+                    <Button size="sm" className="bg-sky-500 hover:bg-sky-600 text-white font-extrabold text-xs rounded-xl mt-1">
                       Explore Destinations →
                     </Button>
                   </Link>
@@ -513,30 +513,30 @@ function ProfilePage() {
             </div>
 
             {/* Explorer Controls: Account Security & Password Management Card */}
-            <div className="rounded-4xl p-6 border border-slate-200 dark:border-white/15 bg-white dark:bg-[#121821] text-slate-900 dark:text-white shadow-sm space-y-5">
+            <div className="rounded-4xl p-6 border border-sky-100 bg-white text-slate-900 shadow-sm space-y-5">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm font-bold flex items-center gap-2 text-slate-900 dark:text-white">
-                    <Lock className="size-4 text-emerald-600 dark:text-emerald-400" /> Explorer Controls & Password Security
+                  <p className="text-sm font-bold flex items-center gap-2 text-slate-900">
+                    <Lock className="size-4 text-sky-600" /> Explorer Controls & Password Security
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400 font-mono mt-0.5">
+                  <p className="text-xs text-slate-500 font-mono mt-0.5">
                     Update your password using current credentials or request a recovery link.
                   </p>
                 </div>
-                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold border border-emerald-500/20">
+                <span className="text-[10px] font-mono px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 font-bold border border-sky-200">
                   Auth Vault
                 </span>
               </div>
 
               {/* Mode Tabs: Change Password vs Forgot Password */}
-              <div className="grid grid-cols-2 p-1 bg-slate-100 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-2xl text-xs font-bold font-mono">
+              <div className="grid grid-cols-2 p-1 bg-slate-100 border border-slate-200 rounded-2xl text-xs font-bold font-mono">
                 <button
                   type="button"
                   onClick={() => { setActivePasswordTab("change"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
                   className={`py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
                     activePasswordTab === "change"
-                      ? "bg-emerald-500 text-black shadow-md font-black"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "bg-sky-500 text-white shadow-md font-black"
+                      : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
                   <Key className="size-3.5" /> Change Password
@@ -546,8 +546,8 @@ function ProfilePage() {
                   onClick={() => { setActivePasswordTab("forgot"); setPasswordStatusMsg(null); setResetEmailStatus(null); }}
                   className={`py-2 rounded-xl transition cursor-pointer flex items-center justify-center gap-1.5 ${
                     activePasswordTab === "forgot"
-                      ? "bg-emerald-500 text-black shadow-md font-black"
-                      : "text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
+                      ? "bg-sky-500 text-white shadow-md font-black"
+                      : "text-slate-500 hover:text-slate-900"
                   }`}
                 >
                   <RefreshCw className="size-3.5" /> Forgot Password
@@ -558,7 +558,7 @@ function ProfilePage() {
               {activePasswordTab === "change" && (
                 <form onSubmit={handleUpdatePasswordWithOld} className="space-y-3.5">
                   <div>
-                    <label className="text-[11px] font-mono uppercase font-bold text-slate-600 dark:text-slate-300">
+                    <label className="text-[11px] font-mono uppercase font-bold text-slate-600">
                       Current (Old) Password
                     </label>
                     <div className="relative mt-1">
@@ -569,14 +569,14 @@ function ProfilePage() {
                         value={oldPassword}
                         onChange={(e) => setOldPassword(e.target.value)}
                         placeholder="••••••••••••"
-                        className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+                        className="w-full h-10 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div>
-                      <label className="text-[11px] font-mono uppercase font-bold text-slate-600 dark:text-slate-300">
+                      <label className="text-[11px] font-mono uppercase font-bold text-slate-600">
                         New Password
                       </label>
                       <div className="relative mt-1">
@@ -587,13 +587,13 @@ function ProfilePage() {
                           value={newPassword}
                           onChange={(e) => setNewPassword(e.target.value)}
                           placeholder="Min 6 characters"
-                          className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+                          className="w-full h-10 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500"
                         />
                       </div>
                     </div>
 
                     <div>
-                      <label className="text-[11px] font-mono uppercase font-bold text-slate-600 dark:text-slate-300">
+                      <label className="text-[11px] font-mono uppercase font-bold text-slate-600">
                         Confirm New Password
                       </label>
                       <div className="relative mt-1">
@@ -604,7 +604,7 @@ function ProfilePage() {
                           value={confirmPassword}
                           onChange={(e) => setConfirmPassword(e.target.value)}
                           placeholder="Repeat new password"
-                          className="w-full h-10 pl-10 pr-4 bg-slate-50 dark:bg-white/5 border border-slate-200 dark:border-white/10 rounded-xl text-xs text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500"
+                          className="w-full h-10 pl-10 pr-4 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:outline-none focus:border-sky-500"
                         />
                       </div>
                     </div>
@@ -614,12 +614,12 @@ function ProfilePage() {
                     <div
                       className={`p-3 rounded-xl text-xs font-medium flex items-center gap-2 ${
                         passwordStatusMsg.type === "success"
-                          ? "bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
-                          : "bg-rose-500/10 border border-rose-500/30 text-rose-600 dark:text-rose-400"
+                          ? "bg-sky-50 border border-sky-200 text-sky-700"
+                          : "bg-rose-50 border border-rose-200 text-rose-700"
                       }`}
                     >
                       {passwordStatusMsg.type === "success" ? (
-                        <CheckCircle2 className="size-4 shrink-0 text-emerald-500" />
+                        <CheckCircle2 className="size-4 shrink-0 text-sky-600" />
                       ) : (
                         <AlertCircle className="size-4 shrink-0 text-rose-500" />
                       )}
@@ -630,7 +630,7 @@ function ProfilePage() {
                   <Button
                     type="submit"
                     disabled={isUpdatingPassword}
-                    className="w-full h-11 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-400 text-white dark:text-black font-black text-xs rounded-2xl shadow-md cursor-pointer"
+                    className="w-full h-11 bg-sky-500 hover:bg-sky-600 text-white font-black text-xs rounded-2xl shadow-md cursor-pointer"
                   >
                     {isUpdatingPassword ? "Verifying & Updating..." : "Update Password Using Old Password"}
                   </Button>

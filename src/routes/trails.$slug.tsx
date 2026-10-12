@@ -121,7 +121,7 @@ function TrailPage() {
         {/* Header Hero */}
         <div className="rounded-3xl border border-border bg-card p-6 sm:p-10 shadow-xl space-y-6">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <span className="px-3.5 py-1 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 text-xs font-mono font-bold">
+            <span className="px-3.5 py-1 rounded-full bg-sky-50 text-sky-600 border border-sky-200 text-xs font-mono font-bold">
               {trail.badge}
             </span>
             <div className="flex items-center gap-4 text-xs font-mono text-muted-foreground">
@@ -143,7 +143,7 @@ function TrailPage() {
           <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-border/60">
             <Button
               onClick={() => navigate({ to: "/planner" })}
-              className="rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold"
+              className="rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold"
             >
               <Sparkles className="mr-2 size-4" /> Custom Plan This Trail
             </Button>
@@ -157,7 +157,7 @@ function TrailPage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
           {trail.highlights.map((h, idx) => (
             <div key={idx} className="rounded-2xl border border-border bg-card p-4 space-y-2">
-              <CheckCircle2 className="size-5 text-emerald-500" />
+              <CheckCircle2 className="size-5 text-sky-500" />
               <p className="text-xs font-semibold text-foreground">{h}</p>
             </div>
           ))}
@@ -166,16 +166,16 @@ function TrailPage() {
         {/* Stops Catalog */}
         <div className="space-y-4">
           <h2 className="text-2xl font-bold font-serif text-foreground flex items-center gap-2">
-            <MapPin className="size-5 text-emerald-500" /> Trail Itinerary & Key Stops
+            <MapPin className="size-5 text-sky-500" /> Trail Itinerary & Key Stops
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {trail.stops.map((stop, i) => (
               <div
                 key={i}
-                className="rounded-2xl border border-border bg-card p-5 space-y-3 hover:border-emerald-500/40 transition"
+                className="rounded-2xl border border-border bg-card p-5 space-y-3 hover:border-sky-300 transition"
               >
                 <div className="flex items-center justify-between">
-                  <span className="px-2.5 py-0.5 rounded-md bg-zinc-800 text-emerald-400 font-mono text-[10px] font-bold">
+                  <span className="px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-700 font-mono text-[10px] font-bold border border-sky-100">
                     Stop #{i + 1}
                   </span>
                   <span className="text-xs text-muted-foreground">{stop.district} District</span>
@@ -185,7 +185,7 @@ function TrailPage() {
                 <Link
                   to="/place/$slug"
                   params={{ slug: stop.slug }}
-                  className="inline-flex items-center gap-1 text-xs font-bold text-emerald-500 hover:text-emerald-400"
+                  className="inline-flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700"
                 >
                   View Stop Details <ArrowRight className="size-3.5" />
                 </Link>

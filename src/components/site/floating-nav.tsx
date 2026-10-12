@@ -41,20 +41,15 @@ import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
 function useTheme() {
   const [dark, setDark] = useState(false);
   useEffect(() => {
-    const stored = localStorage.getItem("etn-theme");
-    const isDark = stored ? stored === "dark" : false;
-    setDark(isDark);
-    document.documentElement.classList.toggle("dark", isDark);
+    // Clear any previous dark mode preference to maintain crisp white and light blue
+    localStorage.removeItem("etn-theme");
+    document.documentElement.classList.remove("dark");
   }, []);
   const toggle = () => {
-    setDark((d) => {
-      const next = !d;
-      document.documentElement.classList.toggle("dark", next);
-      localStorage.setItem("etn-theme", next ? "dark" : "light");
-      return next;
-    });
+    // Keep it light
+    document.documentElement.classList.remove("dark");
   };
-  return { dark, toggle };
+  return { dark: false, toggle };
 }
 
 // Structured Destination Categories for Hover Menu
@@ -627,7 +622,7 @@ export function MobileTabBar() {
 
   return (
     <nav
-      className="fixed inset-x-3 bottom-3 z-50 flex items-center justify-around rounded-2xl px-2 py-2 sm:hidden bg-[#09090b]/90 backdrop-blur-[24px] border border-zinc-800 shadow-lg"
+      className="fixed inset-x-3 bottom-3 z-50 flex items-center justify-around rounded-2xl px-2 py-2 sm:hidden bg-white/95 backdrop-blur-[24px] border border-sky-100 shadow-xl text-slate-600"
       aria-label="Mobile Bottom Bar"
     >
       {[
@@ -645,8 +640,8 @@ export function MobileTabBar() {
             className={cn(
               "flex min-h-11 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium transition-colors",
               l.isActive
-                ? "text-emerald-400 font-bold"
-                : "text-zinc-400",
+                ? "text-sky-600 font-bold"
+                : "text-slate-500 hover:text-sky-600",
             )}
           >
             <Icon className="size-5" aria-hidden />

@@ -84,7 +84,7 @@ const CATEGORY_EMOJI: Record<string, string> = {
 };
 const CAT_COLOR: Record<string, string> = {
   waterfalls: "text-sky-400 bg-sky-500/15 border-sky-500/30",
-  hills: "text-emerald-400 bg-emerald-500/15 border-emerald-500/30",
+  hills: "text-sky-500 bg-sky-500/15 border-sky-500/30",
   beaches: "text-cyan-400 bg-cyan-500/15 border-cyan-500/30",
   temples: "text-amber-400 bg-amber-500/15 border-amber-500/30",
   heritage: "text-purple-400 bg-purple-500/15 border-purple-500/30",
@@ -167,7 +167,7 @@ function NearbyPlaceCard({
 
         {/* Distance badges */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          <span className="flex items-center gap-1 text-[10px] text-emerald-400 font-semibold bg-emerald-500/10 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+          <span className="flex items-center gap-1 text-[10px] text-sky-500 font-semibold bg-sky-500/10 px-1.5 py-0.5 rounded-full border border-sky-500/20">
             <Navigation className="w-2.5 h-2.5" /> {place.distanceKm} km
           </span>
           <span className="flex items-center gap-1 text-[10px] text-sky-400 bg-sky-500/10 px-1.5 py-0.5 rounded-full border border-sky-500/20">
@@ -189,8 +189,8 @@ function NearbyPlaceCard({
             onClick={() => onAddToTrip(place)}
             className={`flex-[1.4] py-1.5 rounded-xl text-[11px] font-bold transition-all flex items-center justify-center gap-1 cursor-pointer ${
               isInTrip
-                ? "bg-emerald-500/20 border border-emerald-500/40 text-emerald-400"
-                : "bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 hover:bg-emerald-500 hover:text-black hover:border-emerald-500"
+                ? "bg-sky-500/20 border border-sky-500/40 text-sky-500"
+                : "bg-sky-500/10 border border-sky-500/30 text-sky-500 hover:bg-sky-500 hover:text-black hover:border-sky-500"
             }`}
           >
             {isInTrip ? <CheckCircle2 className="w-3 h-3" /> : <Plus className="w-3 h-3" />}
@@ -220,8 +220,8 @@ function LocationInput({
   return (
     <div className="relative">
       <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block mb-1">{label}</label>
-      <div className="flex items-center gap-2 bg-white/5 border border-white/15 focus-within:border-emerald-400 px-3 py-2.5 rounded-xl transition">
-        <span className="text-emerald-400 shrink-0">{icon}</span>
+      <div className="flex items-center gap-2 bg-white/5 border border-white/15 focus-within:border-sky-500 px-3 py-2.5 rounded-xl transition">
+        <span className="text-sky-500 shrink-0">{icon}</span>
         <input
           type="text"
           placeholder={placeholder}
@@ -250,9 +250,9 @@ function LocationInput({
                 key={s.id}
                 type="button"
                 onMouseDown={() => onSelect(s)}
-                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-emerald-500/15 text-left transition cursor-pointer"
+                className="w-full flex items-center gap-2 px-3 py-2 rounded-xl hover:bg-sky-500/15 text-left transition cursor-pointer"
               >
-                <MapPin className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                <MapPin className="w-3.5 h-3.5 text-sky-500 shrink-0" />
                 <div className="min-w-0">
                   <p className="text-xs font-semibold text-white truncate">{s.name}</p>
                   <p className="text-[10px] text-slate-400 truncate">{s.sublabel}</p>
@@ -638,14 +638,14 @@ function TripPlannerPage() {
       <div className="min-h-screen bg-[#080d14] text-white">
         {/* ── Header ──────────────────────────────────────────── */}
         <div className="bg-[#0d1520]/90 backdrop-blur-xl border-b border-white/10 sticky top-0 z-30 px-4 py-3 flex items-center gap-3">
-          <Compass className="w-5 h-5 text-emerald-400" />
+          <Compass className="w-5 h-5 text-sky-500" />
           <div>
             <h1 className="text-sm font-extrabold text-white">Smart Trip Planner</h1>
             <p className="text-[10px] text-slate-400">Plan · Discover · Explore Tamil Nadu</p>
           </div>
           {activeTrip && (
             <div className="ml-auto flex items-center gap-2">
-              <span className="text-[10px] font-semibold text-emerald-400 bg-emerald-500/15 border border-emerald-500/30 px-2 py-1 rounded-full">
+              <span className="text-[10px] font-semibold text-sky-500 bg-sky-500/15 border border-sky-500/30 px-2 py-1 rounded-full">
                 🗺️ {activeTrip.originName} → {activeTrip.destinationName}
               </span>
               <button
@@ -666,7 +666,7 @@ function TripPlannerPage() {
             <div className="lg:col-span-2 space-y-4">
               <div className="bg-[#0d1520] border border-white/10 rounded-3xl p-5 space-y-4 shadow-xl">
                 <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                  <RouteIcon className="w-4 h-4 text-emerald-400" />
+                  <RouteIcon className="w-4 h-4 text-sky-500" />
                   <h2 className="font-bold text-sm text-white">Trip Configuration</h2>
                 </div>
 
@@ -699,7 +699,7 @@ function TripPlannerPage() {
                         }
                       }}
                       className={`px-2.5 py-1 rounded-full text-[10px] font-semibold transition cursor-pointer ${
-                        originName === c ? "bg-emerald-500 text-black" : "bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10"
+                        originName === c ? "bg-sky-500 text-black" : "bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10"
                       }`}
                     >
                       {c}
@@ -773,7 +773,7 @@ function TripPlannerPage() {
                   <div>
                     <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block mb-1">Travel Date</label>
                     <div className="flex items-center gap-2 bg-white/5 border border-white/15 px-3 py-2.5 rounded-xl">
-                      <Calendar className="w-3.5 h-3.5 text-emerald-400" />
+                      <Calendar className="w-3.5 h-3.5 text-sky-500" />
                       <input
                         type="date"
                         value={travelDate}
@@ -785,7 +785,7 @@ function TripPlannerPage() {
                   <div>
                     <label className="text-[10px] font-mono font-bold text-slate-400 uppercase tracking-widest block mb-1">Departure</label>
                     <div className="flex items-center gap-2 bg-white/5 border border-white/15 px-3 py-2.5 rounded-xl">
-                      <Timer className="w-3.5 h-3.5 text-emerald-400" />
+                      <Timer className="w-3.5 h-3.5 text-sky-500" />
                       <input
                         type="time"
                         value={departureTime}
@@ -812,7 +812,7 @@ function TripPlannerPage() {
                         onClick={() => setTravelMode(mode.id)}
                         className={`flex flex-col items-center gap-1 py-2.5 rounded-xl border text-xs font-bold transition cursor-pointer ${
                           travelMode === mode.id
-                            ? "bg-emerald-500 text-black border-emerald-500"
+                            ? "bg-sky-500 text-black border-sky-500"
                             : "bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white"
                         }`}
                       >
@@ -828,7 +828,7 @@ function TripPlannerPage() {
                   type="button"
                   onClick={handleCalculateRoute}
                   disabled={routeLoading || !originText || !destText}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-emerald-500/25 cursor-pointer"
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-2xl bg-sky-500 hover:bg-sky-500 text-black font-extrabold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed shadow-lg shadow-sky-500/25 cursor-pointer"
                 >
                   {routeLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <RouteIcon className="w-4 h-4" />}
                   {routeLoading ? "Calculating..." : "Calculate Route"}
@@ -844,19 +844,19 @@ function TripPlannerPage() {
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="bg-[#0d1520] border border-emerald-500/30 rounded-3xl p-5 space-y-4 shadow-xl"
+                  className="bg-[#0d1520] border border-sky-500/30 rounded-3xl p-5 space-y-4 shadow-xl"
                 >
                   <div className="flex items-center gap-2 border-b border-white/10 pb-3">
-                    <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                    <CheckCircle2 className="w-4 h-4 text-sky-500" />
                     <h3 className="font-bold text-sm text-white">Route Summary</h3>
                     <span className="text-[9px] font-mono text-slate-500 ml-auto">via {routeResult.provider?.split(" ")[0] || "OSRM"}</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-3">
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
-                      <Navigation className="w-4 h-4 text-emerald-400 mx-auto mb-1" />
+                      <Navigation className="w-4 h-4 text-sky-500 mx-auto mb-1" />
                       <p className="text-[10px] font-mono text-slate-400 uppercase">Distance</p>
-                      <p className="text-lg font-black text-emerald-400">{routeResult.distanceKm}<span className="text-xs font-bold ml-0.5">km</span></p>
+                      <p className="text-lg font-black text-sky-500">{routeResult.distanceKm}<span className="text-xs font-bold ml-0.5">km</span></p>
                     </div>
                     <div className="bg-white/5 border border-white/10 rounded-2xl p-3 text-center">
                       <Clock className="w-4 h-4 text-sky-400 mx-auto mb-1" />
@@ -878,8 +878,8 @@ function TripPlannerPage() {
                   {/* Route line: origin → stops → dest */}
                   <div className="space-y-1">
                     <div className="flex items-center gap-2 text-xs">
-                      <span className="w-5 h-5 rounded-full bg-emerald-500 text-black font-bold flex items-center justify-center text-[9px] shrink-0">S</span>
-                      <span className="text-emerald-300 font-semibold">{originName}</span>
+                      <span className="w-5 h-5 rounded-full bg-sky-500 text-black font-bold flex items-center justify-center text-[9px] shrink-0">S</span>
+                      <span className="text-sky-400 font-semibold">{originName}</span>
                     </div>
                     {extraStops.map((stop, i) => (
                       <div key={stop.id} className="flex items-center gap-2 text-xs pl-1">
@@ -936,7 +936,7 @@ function TripPlannerPage() {
                 {!originCoords && !destCoords && (
                   <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                     <div className="bg-black/70 backdrop-blur-md rounded-2xl px-6 py-4 text-center space-y-2">
-                      <MapPin className="w-8 h-8 text-emerald-400 mx-auto" />
+                      <MapPin className="w-8 h-8 text-sky-500 mx-auto" />
                       <p className="text-sm font-bold text-white">Enter origin & destination</p>
                       <p className="text-xs text-slate-400">Your route will appear here</p>
                     </div>
@@ -961,7 +961,7 @@ function TripPlannerPage() {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div>
                   <h2 className="text-lg font-extrabold text-white flex items-center gap-2">
-                    <span className="text-emerald-400">📍</span> Explore Nearby — Within 50 km
+                    <span className="text-sky-500">📍</span> Explore Nearby — Within 50 km
                   </h2>
                   <p className="text-xs text-slate-400 mt-0.5">
                     Attractions around <strong className="text-white">{destName}</strong> · {nearbyPlaces.length} places found
@@ -976,7 +976,7 @@ function TripPlannerPage() {
                       onClick={() => setNearbyCategory(c.id)}
                       className={`px-3 py-1 rounded-full text-[11px] font-bold shrink-0 transition cursor-pointer ${
                         nearbyCategory === c.id
-                          ? "bg-emerald-500 text-black shadow"
+                          ? "bg-sky-500 text-black shadow"
                           : "bg-white/5 border border-white/10 text-slate-400 hover:text-white hover:bg-white/10"
                       }`}
                     >
@@ -990,7 +990,7 @@ function TripPlannerPage() {
                 <div className="bg-white/5 border border-white/10 rounded-2xl p-8 text-center text-slate-400 text-sm">
                   <Mountain className="w-8 h-8 mx-auto mb-2 text-slate-600" />
                   No {nearbyCategory !== "all" ? nearbyCategory : ""} places found within 50km of {destName}.
-                  <button type="button" onClick={() => setNearbyCategory("all")} className="block mt-2 text-emerald-400 text-xs font-semibold underline mx-auto cursor-pointer">
+                  <button type="button" onClick={() => setNearbyCategory("all")} className="block mt-2 text-sky-500 text-xs font-semibold underline mx-auto cursor-pointer">
                     Show all categories
                   </button>
                 </div>
@@ -1100,7 +1100,7 @@ function TripPlannerPage() {
                         setDestCoords(coords);
                       }
                     }}
-                    className="px-4 py-2 bg-white/5 hover:bg-emerald-500/15 border border-white/10 hover:border-emerald-500/40 rounded-full text-sm font-semibold text-slate-300 hover:text-emerald-400 transition cursor-pointer"
+                    className="px-4 py-2 bg-white/5 hover:bg-sky-500/15 border border-white/10 hover:border-sky-500/40 rounded-full text-sm font-semibold text-slate-300 hover:text-sky-500 transition cursor-pointer"
                   >
                     {d}
                   </button>

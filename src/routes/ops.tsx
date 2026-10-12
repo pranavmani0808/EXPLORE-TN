@@ -155,7 +155,7 @@ function OperationsWorkspacePage() {
               </h2>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-2 font-mono leading-relaxed">
                 Your account ({currentUser?.email || "Guest"}) is assigned the role{" "}
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold uppercase">{currentUser?.role || "GUEST"}</span>.
+                <span className="text-sky-700 dark:text-sky-500 font-bold uppercase">{currentUser?.role || "GUEST"}</span>.
               </p>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 font-sans">
                 The Operations Command Center is restricted to authorized platform managers and administrators.
@@ -164,7 +164,7 @@ function OperationsWorkspacePage() {
 
             <div className="pt-2 flex flex-col gap-2">
               <Link to="/">
-                <Button className="w-full bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-extrabold text-xs rounded-xl">
+                <Button className="w-full bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white dark:text-black font-extrabold text-xs rounded-xl">
                   <ArrowLeft className="size-4 mr-1.5" /> Return to Explorer App
                 </Button>
               </Link>
@@ -196,21 +196,21 @@ function OperationsWorkspacePage() {
         {/* Executive Real Telemetry Header */}
         <div className="flex flex-wrap items-center justify-between gap-4 mb-8 bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white">
           <div className="flex items-center gap-4">
-            <div className="relative size-14 rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white dark:text-black font-black text-xl flex items-center justify-center shadow-md shrink-0">
+            <div className="relative size-14 rounded-2xl bg-gradient-to-br from-sky-500 to-teal-600 text-white dark:text-black font-black text-xl flex items-center justify-center shadow-md shrink-0">
               {user.avatar}
-              <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-emerald-500 ring-2 ring-white dark:ring-[#121821]" />
+              <span className="absolute bottom-0 right-0 size-3.5 rounded-full bg-sky-500 ring-2 ring-white dark:ring-[#121821]" />
             </div>
             <div>
               <div className="flex items-center gap-2">
                 <span className="text-xs text-slate-500 dark:text-slate-400 font-mono">Logged in as</span>
                 <h1 className="text-lg font-black text-slate-900 dark:text-white">{user.name}</h1>
-                <span className="px-2.5 py-0.5 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-400 font-mono text-[10px] font-bold rounded-full uppercase border border-emerald-500/30">
+                <span className="px-2.5 py-0.5 bg-sky-500/10 dark:bg-sky-500/20 text-sky-700 dark:text-sky-500 font-mono text-[10px] font-bold rounded-full uppercase border border-sky-500/30">
                   {user.role.replace("_", " ")}
                 </span>
               </div>
               <p className="text-xs text-slate-500 dark:text-slate-400 mt-1 flex items-center gap-3 font-mono">
                 <span>Email: {user.email}</span>
-                <span className="text-emerald-700 dark:text-emerald-400 font-bold">● Truthful Database Telemetry Active</span>
+                <span className="text-sky-700 dark:text-sky-500 font-bold">● Truthful Database Telemetry Active</span>
               </p>
             </div>
           </div>
@@ -219,7 +219,7 @@ function OperationsWorkspacePage() {
             <Button
               size="sm"
               onClick={() => setActiveTab("overview")}
-              className="bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-500 dark:hover:bg-emerald-600 text-white dark:text-black font-bold text-xs rounded-xl cursor-pointer"
+              className="bg-sky-600 hover:bg-sky-700 dark:bg-sky-500 dark:hover:bg-sky-600 text-white dark:text-black font-bold text-xs rounded-xl cursor-pointer"
             >
               <BarChart3 className="size-3.5 mr-1" /> Operations Command Center
             </Button>
@@ -244,7 +244,7 @@ function OperationsWorkspacePage() {
                       onClick={() => setActiveTab(item.id)}
                       className={`w-full flex items-center justify-between rounded-2xl px-3.5 py-2.5 text-xs font-bold transition text-left cursor-pointer ${
                         activeTab === item.id
-                          ? "bg-emerald-600 dark:bg-emerald-500 text-white dark:text-black shadow-md"
+                          ? "bg-sky-600 dark:bg-sky-500 text-white dark:text-black shadow-md"
                           : "text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-white/10 hover:text-slate-900 dark:hover:text-white"
                       }`}
                     >
@@ -257,7 +257,7 @@ function OperationsWorkspacePage() {
                           className={`px-2 py-0.5 text-[9px] font-extrabold rounded-full font-mono ${
                             activeTab === item.id
                               ? "bg-black/20 text-white dark:text-black"
-                              : "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/20"
+                              : "bg-sky-500/10 text-sky-700 dark:text-sky-500 border border-sky-500/20"
                           }`}
                         >
                           {badgeText}
@@ -295,7 +295,7 @@ function OperationsWorkspacePage() {
             {activeTab === "users" && (
               <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-6 animate-in fade-in duration-300">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Users className="size-5 text-emerald-600 dark:text-emerald-400" /> Complete RBAC User Directory
+                  <Users className="size-5 text-sky-600 dark:text-sky-500" /> Complete RBAC User Directory
                 </h2>
               </div>
             )}
@@ -306,7 +306,7 @@ function OperationsWorkspacePage() {
             {activeTab === "analytics" && (
               <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-6 animate-in fade-in duration-300">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Activity className="size-5 text-emerald-600 dark:text-emerald-400" /> Platform Search & District Heatmaps
+                  <Activity className="size-5 text-sky-600 dark:text-sky-500" /> Platform Search & District Heatmaps
                 </h2>
               </div>
             )}
@@ -315,7 +315,7 @@ function OperationsWorkspacePage() {
             {activeTab === "settings" && (
               <div className="bg-white dark:bg-[#121821] border border-slate-200 dark:border-white/15 rounded-3xl p-6 shadow-sm text-slate-900 dark:text-white space-y-6 animate-in fade-in duration-300">
                 <h2 className="text-xl font-bold flex items-center gap-2">
-                  <Settings className="size-5 text-emerald-600 dark:text-emerald-400" /> System Settings & API Keys
+                  <Settings className="size-5 text-sky-600 dark:text-sky-500" /> System Settings & API Keys
                 </h2>
               </div>
             )}
