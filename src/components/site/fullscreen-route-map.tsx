@@ -1899,8 +1899,8 @@ export function FullscreenRouteMap({
           panelState === "hidden"
             ? "-left-96 top-20"
             : panelState === "compact"
-            ? "left-4 top-20 w-80 sm:w-96 max-h-48"
-            : "left-4 top-20 w-80 sm:w-[380px] h-[calc(100dvh-100px)] max-h-[calc(100dvh-100px)] max-sm:top-auto max-sm:bottom-4 max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:h-[70vh] max-sm:max-h-[70vh]"
+            ? "left-4 top-20 w-84 sm:w-96 max-h-48"
+            : "left-4 top-20 w-88 sm:w-[420px] h-[calc(100dvh-100px)] max-h-[calc(100dvh-100px)] max-sm:top-auto max-sm:bottom-4 max-sm:left-4 max-sm:right-4 max-sm:w-auto max-sm:h-[70vh] max-sm:max-h-[70vh]"
         }`}
       >
         {/* Polite Live Region for dynamic screen reader updates */}
@@ -1908,7 +1908,7 @@ export function FullscreenRouteMap({
           {statusMessage}
         </div>
 
-        <div className="w-full h-full bg-white/95 backdrop-blur-2xl border border-sky-100 rounded-3xl p-4 shadow-2xl flex flex-col overflow-hidden text-slate-800 overscroll-contain">
+        <div className="w-full h-full bg-white border border-sky-200/80 rounded-3xl p-4.5 shadow-[0_12px_45px_rgba(15,23,42,0.18)] flex flex-col overflow-hidden text-slate-800 overscroll-contain">
           {/* Header Drag Handle & Collapse Button */}
           <div className="w-full flex items-center justify-between pb-1 shrink-0">
             {/* Visual Drag Indicator Handle */}
@@ -2047,12 +2047,12 @@ export function FullscreenRouteMap({
                 }}
                 className={`flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-full text-xs font-bold shrink-0 transition w-full justify-between focus-visible:ring-2 focus-visible:ring-sky-400 ${
                   selectedDistrict
-                    ? "bg-sky-500 text-black shadow-md font-extrabold"
-                    : "bg-white/5 border border-white/15 text-slate-200 hover:text-white hover:bg-white/10"
+                    ? "bg-sky-500 text-white shadow-sm font-extrabold"
+                    : "bg-slate-50 border border-slate-200 text-slate-700 hover:text-slate-900 hover:bg-slate-100"
                 }`}
               >
                 <span className="flex items-center gap-1.5">
-                  <MapPin className="w-3.5 h-3.5" aria-hidden="true" />
+                  <MapPin className="w-3.5 h-3.5 text-sky-600" aria-hidden="true" />
                   {selectedDistrict ? `${selectedDistrict} District` : "📍 Filter by District"}
                 </span>
                 <span className="flex items-center gap-1">
@@ -2076,7 +2076,7 @@ export function FullscreenRouteMap({
                           setStatusMessage("District filter cleared");
                         }
                       }}
-                      className="text-black/70 hover:text-black font-black text-sm leading-none p-1"
+                      className="text-white/80 hover:text-white font-black text-sm leading-none p-1"
                     >
                       ×
                     </span>
@@ -2091,9 +2091,9 @@ export function FullscreenRouteMap({
                   id="district-picker-dropdown"
                   role="dialog"
                   aria-label="Tamil Nadu Districts Filter"
-                  className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-[#0c1218]/98 backdrop-blur-2xl border border-white/20 rounded-2xl p-3 shadow-[0_20px_60px_rgba(0,0,0,0.85)] max-h-64 overflow-y-auto custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
+                  className="absolute top-full left-0 right-0 z-50 mt-1.5 bg-white border border-slate-200 rounded-2xl p-3 shadow-[0_20px_50px_rgba(15,23,42,0.18)] max-h-64 overflow-y-auto custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden"
                 >
-                  <p className="text-[10px] font-mono text-slate-300 uppercase tracking-widest mb-2 font-semibold">
+                  <p className="text-[10px] font-mono text-slate-500 uppercase tracking-widest mb-2 font-semibold">
                     Tamil Nadu Districts — Select to focus map
                   </p>
                   <div className="grid grid-cols-2 gap-1.5">
@@ -2107,8 +2107,8 @@ export function FullscreenRouteMap({
                         }}
                         className={`px-2.5 py-2 min-h-[36px] rounded-xl text-xs font-semibold text-left transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400 ${
                           selectedDistrict === d.name
-                            ? "bg-sky-500 text-black font-bold"
-                            : "bg-white/5 hover:bg-sky-500/20 hover:text-sky-300 text-slate-200 border border-white/10 hover:border-sky-500/40"
+                            ? "bg-sky-500 text-white font-bold"
+                            : "bg-slate-50 hover:bg-sky-50 hover:text-sky-700 text-slate-700 border border-slate-200 hover:border-sky-300"
                         }`}
                       >
                         {d.name}
@@ -2121,16 +2121,16 @@ export function FullscreenRouteMap({
 
             {/* Active district badge */}
             {selectedDistrict && (
-              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-500/15 border border-sky-500/30 rounded-xl text-[11px] text-sky-300 font-semibold">
-                <MapPin className="w-3.5 h-3.5 text-sky-400 shrink-0" aria-hidden="true" />
-                <span>Showing <strong className="text-sky-100">{selectedDistrict}</strong> District · {placesInScope.length} spots</span>
+              <div className="flex items-center gap-1.5 px-2.5 py-1.5 bg-sky-50 border border-sky-200 rounded-xl text-[11px] text-sky-800 font-semibold">
+                <MapPin className="w-3.5 h-3.5 text-sky-600 shrink-0" aria-hidden="true" />
+                <span>Showing <strong className="text-slate-900">{selectedDistrict}</strong> District · {placesInScope.length} spots</span>
                 <button
                   type="button"
                   onClick={() => {
                     setSelectedDistrict(null);
                     setStatusMessage("District filter cleared");
                   }}
-                  className="ml-auto text-sky-300 hover:text-white font-bold text-xs underline p-1 focus-visible:ring-2 focus-visible:ring-sky-400 rounded"
+                  className="ml-auto text-sky-600 hover:text-sky-800 font-bold text-xs underline p-1 focus-visible:ring-2 focus-visible:ring-sky-400 rounded"
                 >
                   Clear
                 </button>
@@ -2140,8 +2140,8 @@ export function FullscreenRouteMap({
 
           {/* Active Route Calculation Metrics & Intermediate Waypoint Addition */}
           {(selectedOrigin || selectedDestination) && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-2xl my-2 shrink-0 space-y-3 shadow-lg max-h-[45vh] overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-emerald-500/40 [&::-webkit-scrollbar-thumb]:rounded-full">
-              <div className="flex items-center justify-between border-b border-white/10 pb-2">
+            <div className="p-3.5 bg-sky-50/70 border border-sky-200 rounded-2xl my-2 shrink-0 space-y-3 shadow-sm max-h-[45vh] overflow-y-auto [scrollbar-width:thin] [&::-webkit-scrollbar]:w-[3px] [&::-webkit-scrollbar-thumb]:bg-sky-400/50 [&::-webkit-scrollbar-thumb]:rounded-full">
+              <div className="flex items-center justify-between border-b border-sky-100 pb-2">
                 <div
                   role="button"
                   tabIndex={0}
@@ -2155,14 +2155,14 @@ export function FullscreenRouteMap({
                   className="cursor-pointer select-none group flex flex-col"
                   title="Click to toggle route details"
                 >
-                  <div className="text-[10px] font-mono font-bold text-emerald-400 uppercase tracking-widest flex items-center gap-1.5 group-hover:text-emerald-300">
-                    <Navigation className="w-3.5 h-3.5 text-emerald-400 animate-pulse" />
+                  <div className="text-[10px] font-mono font-bold text-sky-700 uppercase tracking-widest flex items-center gap-1.5 group-hover:text-sky-800">
+                    <Navigation className="w-3.5 h-3.5 text-sky-600 animate-pulse" />
                     <span>Active Route Corridor</span>
-                    <span className="text-[9px] text-slate-400 font-normal">
+                    <span className="text-[9px] text-slate-500 font-normal">
                       ({isCorridorCollapsed ? "Show details ▼" : "Collapse ▲"})
                     </span>
                   </div>
-                  <h4 className="text-xs font-extrabold text-white truncate max-w-[190px] mt-0.5">
+                  <h4 className="text-xs font-extrabold text-slate-900 truncate max-w-[210px] mt-0.5">
                     {selectedOrigin ? selectedOrigin.name : "Select Origin"} → {selectedDestination ? selectedDestination.name : "Select Destination"}
                   </h4>
                 </div>
@@ -2170,7 +2170,7 @@ export function FullscreenRouteMap({
                   <button
                     type="button"
                     onClick={() => setIsCorridorCollapsed((prev) => !prev)}
-                    className="p-1 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white transition"
+                    className="p-1 rounded-lg hover:bg-sky-100 text-slate-500 hover:text-slate-900 transition"
                     title={isCorridorCollapsed ? "Expand route details" : "Collapse route details"}
                     aria-label={isCorridorCollapsed ? "Expand route details" : "Collapse route details"}
                   >
@@ -2184,7 +2184,7 @@ export function FullscreenRouteMap({
                       setWaypoints([]);
                       setIsDirectionsFocusMode(false);
                     }}
-                    className="px-2 py-1 rounded-lg bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/40 text-[9px] font-bold transition active:scale-95 cursor-pointer"
+                    className="px-2 py-1 rounded-lg bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-[9px] font-bold transition active:scale-95 cursor-pointer"
                   >
                     Clear Route
                   </button>
@@ -2194,27 +2194,27 @@ export function FullscreenRouteMap({
               {!isCorridorCollapsed && (
                 <>
               {/* Calculated Stats (Distance, Time, Stops) */}
-              <div className="grid grid-cols-3 gap-1.5 bg-black/40 border border-white/10 rounded-xl p-2 text-center">
+              <div className="grid grid-cols-3 gap-1.5 bg-white border border-sky-100 rounded-xl p-2.5 text-center shadow-xs">
                 <div>
-                  <span className="text-[9px] font-mono text-slate-400 uppercase block">Distance</span>
-                  <span className="text-xs font-black text-emerald-400">{totalDistanceKm > 0 ? `${totalDistanceKm} km` : "..."}</span>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase block font-medium">Distance</span>
+                  <span className="text-xs font-black text-sky-700">{totalDistanceKm > 0 ? `${totalDistanceKm} km` : "..."}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] font-mono text-slate-400 uppercase block">Est. Time</span>
-                  <span className="text-xs font-black text-sky-400">{totalDurationMins > 0 ? durationString : "..."}</span>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase block font-medium">Est. Time</span>
+                  <span className="text-xs font-black text-sky-600">{totalDurationMins > 0 ? durationString : "..."}</span>
                 </div>
                 <div>
-                  <span className="text-[9px] font-mono text-slate-400 uppercase block">Total Stops</span>
-                  <span className="text-xs font-black text-amber-400">{stops.length} Stops</span>
+                  <span className="text-[9px] font-mono text-slate-500 uppercase block font-medium">Total Stops</span>
+                  <span className="text-xs font-black text-amber-700">{stops.length} Stops</span>
                 </div>
               </div>
 
               {/* Multi-Modal Transit Comparison (Flight, Train, Bus, Drive) */}
               {multiModalData && multiModalData.options.length > 0 && (
-                <div className="space-y-1.5 pt-1 border-t border-white/10">
-                  <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-300 uppercase">
+                <div className="space-y-1.5 pt-1 border-t border-sky-100">
+                  <div className="flex items-center justify-between text-[10px] font-mono font-bold text-slate-700 uppercase">
                     <span>Multi-Modal Transit Options</span>
-                    <span className="text-emerald-400">Rome2Rio Style</span>
+                    <span className="text-sky-600 font-bold">Rome2Rio Style</span>
                   </div>
 
                   <div className="grid grid-cols-2 gap-1.5">
@@ -2224,12 +2224,12 @@ export function FullscreenRouteMap({
                         opt.mode === "flight" ? Plane : opt.mode === "train" ? Train : opt.mode === "bus" ? Bus : Car;
                       const modeBadgeColor =
                         opt.badge === "FASTEST"
-                          ? "bg-sky-500/20 text-sky-300 border-sky-500/40"
+                          ? "bg-sky-100 text-sky-800 border-sky-200"
                           : opt.badge === "CHEAPEST"
-                          ? "bg-emerald-500/20 text-emerald-300 border-emerald-500/40"
+                          ? "bg-emerald-100 text-emerald-800 border-emerald-200"
                           : opt.badge === "SCENIC"
-                          ? "bg-purple-500/20 text-purple-300 border-purple-500/40"
-                          : "bg-amber-500/20 text-amber-300 border-amber-500/40";
+                          ? "bg-purple-100 text-purple-800 border-purple-200"
+                          : "bg-amber-100 text-amber-800 border-amber-200";
 
                       return (
                         <button
@@ -2242,13 +2242,13 @@ export function FullscreenRouteMap({
                           }}
                           className={`p-2 rounded-xl text-left transition border cursor-pointer relative overflow-hidden flex flex-col justify-between ${
                             isSelected
-                              ? "bg-emerald-500/20 border-emerald-500 shadow-md ring-1 ring-emerald-500"
-                              : "bg-white/5 border-white/10 hover:bg-white/10 hover:border-white/20"
+                              ? "bg-white border-sky-500 shadow-sm ring-2 ring-sky-500/20"
+                              : "bg-white/80 border-slate-200/80 hover:bg-white hover:border-sky-300"
                           }`}
                         >
                           <div className="flex items-center justify-between gap-1">
-                            <div className="flex items-center gap-1.5 font-bold text-xs text-white truncate">
-                              <ModeIcon className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                            <div className="flex items-center gap-1.5 font-bold text-xs text-slate-900 truncate">
+                              <ModeIcon className="w-3.5 h-3.5 text-sky-600 shrink-0" />
                               <span className="capitalize">{opt.mode}</span>
                             </div>
                             {opt.badge && (
@@ -2259,8 +2259,8 @@ export function FullscreenRouteMap({
                           </div>
 
                           <div className="mt-1 flex items-baseline justify-between gap-1">
-                            <span className="text-xs font-black text-emerald-400">{opt.totalDurationText}</span>
-                            <span className="text-[10px] font-semibold text-slate-300 truncate">{opt.totalCostEstimate}</span>
+                            <span className="text-xs font-black text-sky-700">{opt.totalDurationText}</span>
+                            <span className="text-[10px] font-semibold text-slate-500 truncate">{opt.totalCostEstimate}</span>
                           </div>
                         </button>
                       );
@@ -2269,20 +2269,20 @@ export function FullscreenRouteMap({
 
                   {/* Selected Transit Mode Itinerary / Steps Breakdown */}
                   {activeTransitOption && (
-                    <div className="p-2.5 rounded-xl bg-black/50 border border-white/10 space-y-2 mt-2">
-                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-400">
-                        <span className="font-bold text-white uppercase">{activeTransitOption.title}</span>
-                        <span>{activeTransitOption.distanceKm} km · {activeTransitOption.totalCostEstimate}</span>
+                    <div className="p-3 rounded-xl bg-white border border-sky-100 space-y-2 mt-2 shadow-xs">
+                      <div className="flex items-center justify-between text-[10px] font-mono text-slate-500">
+                        <span className="font-bold text-slate-900 uppercase">{activeTransitOption.title}</span>
+                        <span className="font-semibold text-slate-600">{activeTransitOption.distanceKm} km · {activeTransitOption.totalCostEstimate}</span>
                       </div>
 
-                      <div className="space-y-1.5 border-l-2 border-emerald-500/40 ml-1 pl-2.5 py-0.5">
+                      <div className="space-y-1.5 border-l-2 border-sky-400 ml-1 pl-2.5 py-0.5">
                         {activeTransitOption.steps.map((st, sIdx) => (
                           <div key={sIdx} className="text-[11px] leading-tight space-y-0.5">
                             <div className="flex items-center justify-between gap-2">
-                              <strong className="text-white font-bold">{st.title}</strong>
-                              <span className="text-[9px] font-mono text-emerald-400 shrink-0">{st.durationText}</span>
+                              <strong className="text-slate-900 font-bold">{st.title}</strong>
+                              <span className="text-[9px] font-mono text-sky-600 font-bold shrink-0">{st.durationText}</span>
                             </div>
-                            <p className="text-[10px] text-slate-400">{st.details}</p>
+                            <p className="text-[10px] text-slate-500">{st.details}</p>
                           </div>
                         ))}
                       </div>
@@ -2293,16 +2293,16 @@ export function FullscreenRouteMap({
 
               {/* En-Route Corridor Discovery: Places that cover the route to reach destination */}
               {multiModalData?.corridorPlaces && multiModalData.corridorPlaces.length > 0 && (
-                <div className="space-y-1.5 pt-2 border-t border-white/10">
+                <div className="space-y-1.5 pt-2 border-t border-sky-100">
                   <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-mono font-bold text-amber-300 uppercase tracking-wider flex items-center gap-1">
-                      <Sparkles className="w-3 h-3 text-amber-400" />
+                    <span className="text-[10px] font-mono font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                      <Sparkles className="w-3 h-3 text-amber-600" />
                       Places Covering Route ({multiModalData.corridorPlaces.length})
                     </span>
-                    <span className="text-[9px] text-slate-400 font-mono">Sequential Stops</span>
+                    <span className="text-[9px] text-slate-500 font-mono">Sequential Stops</span>
                   </div>
 
-                  <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-amber-500/40 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
+                  <div className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:thin] [&::-webkit-scrollbar]:h-[3px] [&::-webkit-scrollbar-thumb]:bg-amber-400/50 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-track]:bg-transparent">
                     {multiModalData.corridorPlaces.map((poi) => {
                       const isAdded = waypoints.some((w) => w.id === poi.id);
                       const isHovered = hoveredPlaceId === poi.id;
@@ -2313,10 +2313,10 @@ export function FullscreenRouteMap({
                           onClick={() => handleFocusCorridorPlace(poi)}
                           onMouseEnter={() => handleSidebarHover(poi)}
                           onMouseLeave={() => handleSidebarHover(null)}
-                          className={`w-48 shrink-0 p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 group select-none ${
+                          className={`w-48 shrink-0 p-2.5 rounded-xl border transition-all cursor-pointer flex flex-col justify-between space-y-1.5 group select-none bg-white ${
                             isHovered
-                              ? "bg-amber-500/15 border-amber-400 scale-[1.02] shadow-lg shadow-amber-500/20"
-                              : "bg-white/5 border-white/10 hover:border-amber-400/60 hover:bg-white/10"
+                              ? "border-amber-400 scale-[1.02] shadow-md ring-1 ring-amber-400"
+                              : "border-slate-200 hover:border-amber-300 hover:shadow-xs"
                           }`}
                         >
                           <div>
@@ -2330,15 +2330,15 @@ export function FullscreenRouteMap({
                                   ? "⛰️"
                                   : "📍"}
                               </span>
-                              <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                              <span className="text-[8px] font-mono font-bold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
                                 +{poi.detourKm}km detour
                               </span>
                             </div>
-                            <h5 className="font-bold text-white text-[11px] truncate mt-0.5 group-hover:text-amber-300 transition-colors">
+                            <h5 className="font-bold text-slate-900 text-[11px] truncate mt-0.5 group-hover:text-amber-700 transition-colors">
                               {poi.canonicalName || poi.name}
                             </h5>
-                            <span className="text-[9px] text-slate-400 block truncate">{poi.district} · {poi.highwayNear}</span>
-                            <span className="text-[8px] text-amber-400/80 mt-0.5 flex items-center gap-0.5 opacity-80 group-hover:opacity-100">
+                            <span className="text-[9px] text-slate-500 block truncate">{poi.district} · {poi.highwayNear}</span>
+                            <span className="text-[8px] text-amber-600 mt-0.5 flex items-center gap-0.5">
                               <span>👆 Click to view on map</span>
                             </span>
                           </div>
@@ -2347,7 +2347,7 @@ export function FullscreenRouteMap({
                             <button
                               type="button"
                               onClick={() => handleFocusCorridorPlace(poi)}
-                              className="flex-1 py-1 rounded bg-white/10 hover:bg-amber-500/20 hover:text-amber-200 text-[9px] font-bold text-slate-200 transition text-center"
+                              className="flex-1 py-1 rounded bg-slate-100 hover:bg-slate-200 text-[9px] font-bold text-slate-700 transition text-center"
                             >
                               View Pin
                             </button>
@@ -2363,8 +2363,8 @@ export function FullscreenRouteMap({
                               }}
                               className={`flex-1 py-1 rounded text-[9px] font-bold transition text-center ${
                                 isAdded
-                                  ? "bg-emerald-500/20 text-emerald-300 border border-emerald-500/40"
-                                  : "bg-emerald-500 hover:bg-emerald-400 text-black font-extrabold"
+                                  ? "bg-sky-100 text-sky-800 border border-sky-300"
+                                  : "bg-sky-500 hover:bg-sky-600 text-white font-bold"
                               }`}
                             >
                               {isAdded ? "✓ Added" : "+ Add Stop"}
@@ -2379,23 +2379,23 @@ export function FullscreenRouteMap({
 
               {/* Waypoint Addition Input */}
               <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-[10px] font-mono text-slate-300 uppercase font-bold">
+                <div className="flex items-center justify-between text-[10px] font-mono text-slate-700 uppercase font-bold">
                   <span>+ Add Extra Place In-Between:</span>
-                  {waypoints.length > 0 && <span className="text-emerald-400">{waypoints.length} Waypoints</span>}
+                  {waypoints.length > 0 && <span className="text-sky-600">{waypoints.length} Waypoints</span>}
                 </div>
 
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-emerald-400 absolute left-2.5 top-2" />
+                  <Search className="w-3.5 h-3.5 text-sky-600 absolute left-2.5 top-2" />
                   <input
                     type="text"
                     placeholder="Search place to add as waypoint stop..."
                     value={waypointQuery}
                     onChange={(e) => setWaypointQuery(e.target.value)}
-                    className="w-full bg-white/5 border border-white/15 focus:border-emerald-400 rounded-xl pl-7 pr-3 py-1 text-[11px] text-white placeholder-slate-400 focus:outline-none"
+                    className="w-full bg-white border border-slate-200 focus:border-sky-500 rounded-xl pl-7 pr-3 py-1.5 text-[11px] text-slate-900 placeholder-slate-400 focus:outline-none shadow-xs"
                   />
 
                   {waypointQuery.trim() && (
-                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-[#121821] border border-white/20 rounded-2xl max-h-40 overflow-y-auto p-1.5 shadow-2xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
+                    <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-slate-200 rounded-2xl max-h-40 overflow-y-auto p-1.5 shadow-xl space-y-1 custom-scrollbar no-scrollbar [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden">
                       {searchEntities(waypointQuery).map((item) => {
                         const placeObj = item.place || (item.area ? {
                           id: item.area.id,
@@ -2422,10 +2422,10 @@ export function FullscreenRouteMap({
                               setWaypointQuery("");
                               toast.success(`Added ${placeObj.name} as waypoint stop 📍`);
                             }}
-                            className="p-1.5 rounded-xl hover:bg-emerald-500/20 text-xs text-white flex items-center justify-between gap-2 cursor-pointer"
+                            className="p-1.5 rounded-xl hover:bg-sky-50 text-xs text-slate-800 flex items-center justify-between gap-2 cursor-pointer"
                           >
                             <span className="font-bold truncate text-[11px]">{item.name}</span>
-                            <span className="text-[9px] text-emerald-400 font-bold shrink-0">+ Add Stop</span>
+                            <span className="text-[9px] text-sky-600 font-bold shrink-0">+ Add Stop</span>
                           </div>
                         );
                       })}
@@ -2445,22 +2445,22 @@ export function FullscreenRouteMap({
                     return (
                       <div
                         key={stop.id}
-                        className="px-2 py-1 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between gap-2 text-[11px]"
+                        className="px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 flex items-center justify-between gap-2 text-[11px] shadow-xs"
                       >
                         <div className="flex items-center gap-1.5 truncate">
                           <span className={`w-4 h-4 rounded-full flex items-center justify-center font-bold text-[9px] shrink-0 ${
-                            isStart ? "bg-emerald-500 text-black" : isEnd ? "bg-sky-500 text-black" : "bg-amber-500 text-black"
+                            isStart ? "bg-sky-500 text-white" : isEnd ? "bg-slate-900 text-white" : "bg-amber-500 text-white"
                           }`}>
                             {isStart ? "S" : isEnd ? "E" : idx}
                           </span>
-                          <span className="font-bold text-white truncate">{stop.canonicalName || stop.name}</span>
+                          <span className="font-bold text-slate-800 truncate">{stop.canonicalName || stop.name}</span>
                         </div>
 
                         {isWaypoint && (
                           <button
                             type="button"
                             onClick={() => handleRemoveRecommendedStop(stop.id)}
-                            className="text-slate-400 hover:text-rose-400 p-0.5"
+                            className="text-slate-400 hover:text-rose-600 p-0.5"
                             title="Remove stop"
                           >
                             <X className="w-3 h-3" />
