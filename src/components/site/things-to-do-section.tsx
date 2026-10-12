@@ -1,8 +1,9 @@
 import React, { useRef } from "react";
-import { Link } from "@tanstack/react-router";
-import { ChevronRight, ChevronLeft, MapPin, Sparkles } from "lucide-react";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { ChevronRight, ChevronLeft, MapPin, Sparkles, Compass, Mountain, Landmark, Waves } from "lucide-react";
 import { SafeImage } from "@/components/ui/safe-image";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
+import { MinimalCarousel, type CarouselCard } from "@/components/watermelon/minimal-carousel";
 
 export interface DestinationHub {
   name: string;
@@ -128,6 +129,7 @@ export const ICONIC_ATTRACTIONS: IconicAttraction[] = [
 
 export function ThingsToDoSection() {
   const carouselRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const scrollCarousel = (direction: "left" | "right") => {
     if (carouselRef.current) {
@@ -139,49 +141,49 @@ export function ThingsToDoSection() {
     }
   };
 
+  const hubCarouselCards: CarouselCard[] = DESTINATION_HUBS.map((hub) => ({
+    id: hub.name.toLowerCase().replace(/\s+/g, "-"),
+    title: hub.name,
+    value: hub.activitiesCount,
+    image: hub.image,
+    route: hub.route,
+    tagline: hub.tagline,
+    icon: hub.name === "Ooty" || hub.name === "Kodaikanal" 
+      ? Mountain 
+      : hub.name === "Mahabalipuram" || hub.name === "Rameswaram"
+      ? Waves
+      : Landmark,
+  }));
+
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
       {/* ─────────────────────────────────────────────────────────── */}
-      {/* ROW 1: Things to do wherever you're going                   */}
+      {/* ROW 1: Things to do wherever you're going (Minimal Carousel) */}
       {/* ─────────────────────────────────────────────────────────── */}
-      <div className="mb-8">
-        <div className="mb-4">
-          <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
-            Things to do wherever you're going
-          </h2>
-          <p className="mt-1 text-xs sm:text-sm text-slate-500">
-            Handpicked activities, secret trails, and regional hubs across Tamil Nadu
-          </p>
+      <div className="mb-10">
+        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
+              Things to do wherever you're going
+            </h2>
+            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+              Interactive travel hubs, handpicked activities, and regional circuits across Tamil Nadu
+            </p>
+          </div>
+          <span className="text-[11px] font-mono font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+            Tap hubs to switch
+          </span>
         </div>
 
-        {/* 6 Square Portrait Tiles Grid with AnimatedGroup */}
-        <AnimatedGroup
-          preset="blur-slide"
-          className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3.5 sm:gap-4"
-        >
-          {DESTINATION_HUBS.map((hub) => (
-            <Link
-              key={hub.name}
-              to={hub.route}
-              className="group block focus:outline-none"
-            >
-              <div className="relative aspect-square w-full overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm transition-all duration-300 group-hover:scale-[1.03] group-hover:border-sky-300 group-hover:shadow-md">
-                <SafeImage
-                  src={hub.image}
-                  alt={hub.name}
-                  category="hills"
-                  className="size-full object-cover transition-transform duration-500 group-hover:scale-110"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/50 via-transparent to-transparent opacity-70 group-hover:opacity-50 transition-opacity" />
-              </div>
-              <div className="mt-2.5">
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors">
-                  {hub.name}
-                </h3>
-              </div>
-            </Link>
-          ))}
-        </AnimatedGroup>
+        {/* Watermelon Minimal Carousel */}
+        <MinimalCarousel
+          cards={hubCarouselCards}
+          onActionClick={(card) => {
+            if (card.route) {
+              navigate({ to: card.route });
+            }
+          }}
+        />
       </div>
 
       {/* ─────────────────────────────────────────────────────────── */}
