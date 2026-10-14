@@ -37,6 +37,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skiper96, TabItemOrSeparator } from "@/components/ui/skiper96";
 import { getCurrentAuthUser, UserProfile, updateProfileUser, clearAuthSession } from "@/lib/auth-rbac";
 import { getStoredPreferences, saveStoredPreferences } from "@/components/site/explorer-onboarding-modal";
 import { supabase } from "@/lib/supabase-client";
@@ -505,26 +506,28 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
           {/* Right Content Panel */}
           <div className="flex-1 flex flex-col justify-between overflow-hidden bg-white">
             {/* Top Modal Navigation Header */}
-            <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3.5 gap-2">
-              <div className="flex items-center gap-2 overflow-x-auto scrollbar-none py-0.5 max-w-[calc(100vw-140px)] sm:max-w-md">
-                {/* Mobile scrollable tab pill strip */}
-                <div className="flex md:hidden items-center gap-1.5 overflow-x-auto scrollbar-none shrink-0">
-                  {sidebarGroups.flatMap((g) => g.items).map((i) => (
-                    <button
-                      key={i.id}
-                      type="button"
-                      onClick={() => setActiveTab(i.id)}
-                      className={`px-3 py-1 rounded-full text-[11px] font-bold whitespace-nowrap transition cursor-pointer shrink-0 ${
-                        activeTab === i.id
-                          ? "bg-sky-500 text-slate-900 shadow"
-                          : "bg-slate-100 text-slate-500 border border-slate-200"
-                      }`}
-                    >
-                      {i.label}
-                    </button>
-                  ))}
-                </div>
-                <h2 className="hidden md:block text-lg font-bold text-slate-900 capitalize">
+            <div className="flex items-center justify-between border-b border-slate-200 px-4 sm:px-6 py-3 gap-3">
+              <div className="flex items-center gap-3 overflow-x-auto scrollbar-none py-0.5">
+                {/* Skiper96 Expandable Tabs Navigation Component */}
+                <Skiper96
+                  tabs={sidebarGroups.map((g) => ({
+                    id: g.items[0].id,
+                    title: g.title,
+                    icon: g.items[0].icon,
+                  }))}
+                  selected={sidebarGroups.findIndex((g) => g.items.some((i) => i.id === activeTab))}
+                  onChange={(idx) => {
+                    if (idx !== null && sidebarGroups[idx]) {
+                      setActiveTab(sidebarGroups[idx].items[0].id);
+                    }
+                  }}
+                  className="bg-slate-50/90 border-slate-200/80 shadow-xs"
+                  activeColor="bg-sky-500 text-white font-extrabold shadow-sm"
+                />
+
+                <span className="hidden lg:inline text-xs font-semibold text-slate-400">/</span>
+
+                <h2 className="hidden md:block text-sm font-bold text-slate-900 capitalize">
                   {activeTab.replace(/_/g, " ")}
                 </h2>
               </div>
