@@ -29,6 +29,15 @@ import {
   Home,
   User,
   CalendarDays,
+  LogIn,
+  Settings,
+  ShieldAlert,
+  MapPin,
+  Lock,
+  Globe,
+  CreditCard,
+  HelpCircle,
+  Bot,
 } from "lucide-react";
 import { motion, AnimatePresence } from "motion/react";
 import { Button } from "@/components/ui/button";
@@ -37,6 +46,7 @@ import { DistrictsMegaModal } from "@/components/site/districts-mega-modal";
 import { cn } from "@/lib/utils";
 import { checkBackendHealth } from "@/lib/api";
 import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
+import { useAuthGuard } from "@/lib/auth-guard-context";
 
 function useTheme() {
   const [dark, setDark] = useState(false);
@@ -157,6 +167,19 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
   const handleMouseLeaveDest = () => {
     menuTimeoutRef.current = setTimeout(() => {
       setDestMenuOpen(false);
+    }, 180);
+  };
+  const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
+  const settingsTimeoutRef = useRef<any>(null);
+
+  const handleMouseEnterSettings = () => {
+    if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current);
+    setSettingsMenuOpen(true);
+  };
+
+  const handleMouseLeaveSettings = () => {
+    settingsTimeoutRef.current = setTimeout(() => {
+      setSettingsMenuOpen(false);
     }, 180);
   };
 
@@ -485,6 +508,220 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <Bookmark className="size-3.5" />
           </Link>
 
+          {/* Quick Settings Mega Icon & Dropdown */}
+          <div
+            className="relative hidden md:inline-block"
+            onMouseEnter={handleMouseEnterSettings}
+            onMouseLeave={handleMouseLeaveSettings}
+          >
+            <Link
+              to="/settings"
+              className={cn(
+                "flex items-center justify-center size-9 rounded-full border bg-white transition shrink-0 shadow-sm cursor-pointer",
+                pathname.startsWith("/settings") || settingsMenuOpen
+                  ? "border-sky-300 bg-sky-50 text-sky-600 ring-2 ring-sky-500/20"
+                  : "border-slate-200 text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"
+              )}
+              title="Settings & Controls"
+              aria-label="Settings & Controls"
+            >
+              <Settings className="size-4 text-slate-600 hover:text-sky-600 transition" />
+            </Link>
+
+            {/* Settings Mega Dropdown Popover */}
+            <AnimatePresence>
+              {settingsMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute right-0 top-full mt-2.5 w-[560px] rounded-3xl border border-sky-100 bg-white/98 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-800"
+                >
+                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
+                    <div className="flex items-center gap-2">
+                      <span className="grid size-7 place-items-center rounded-xl bg-sky-50 text-sky-600 border border-sky-200">
+                        <Settings className="size-4" />
+                      </span>
+                      <div>
+                        <h4 className="text-xs font-bold text-slate-900">Explorer Settings & Controls</h4>
+                        <p className="text-[10px] text-slate-400">Configure your travel intelligence & platform preferences</p>
+                      </div>
+                    </div>
+                    <Link
+                      to="/settings"
+                      onClick={() => setSettingsMenuOpen(false)}
+                      className="text-[11px] font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200 transition"
+                    >
+                      Open Full Settings →
+                    </Link>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* Column 1: ACCOUNT & TRAVEL */}
+                    <div className="space-y-4">
+                      {/* ACCOUNT */}
+                      <div>
+                        <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          ACCOUNT
+                        </div>
+                        <div className="space-y-0.5">
+                          <Link
+                            to="/settings"
+                            search={{ tab: "profile" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <User className="size-3.5 text-sky-600" />
+                            <span>Profile & Identity</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "preferences" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Compass className="size-3.5 text-sky-600" />
+                            <span>Travel Preferences</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "collections" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Bookmark className="size-3.5 text-sky-600" />
+                            <span>Saved & Collections</span>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* TRAVEL */}
+                      <div>
+                        <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          TRAVEL
+                        </div>
+                        <div className="space-y-0.5">
+                          <Link
+                            to="/settings"
+                            search={{ tab: "ai_planner" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Bot className="size-3.5 text-sky-600" />
+                            <span>AI Planner Controls</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "trips_routes" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Route className="size-3.5 text-sky-600" />
+                            <span>Trips & Saved Routes</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "map_prefs" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Map className="size-3.5 text-sky-600" />
+                            <span>Map Preferences</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Column 2: SAFETY & PRIVACY, APP, OTHER */}
+                    <div className="space-y-4">
+                      {/* SAFETY & PRIVACY */}
+                      <div>
+                        <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          SAFETY & PRIVACY
+                        </div>
+                        <div className="space-y-0.5">
+                          <Link
+                            to="/settings"
+                            search={{ tab: "safety_alerts" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <ShieldAlert className="size-3.5 text-rose-500" />
+                            <span>Safety Alerts & Ghats</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "location_privacy" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <MapPin className="size-3.5 text-sky-600" />
+                            <span>Location & Privacy</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "security" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Lock className="size-3.5 text-sky-600" />
+                            <span>Security & Sessions</span>
+                          </Link>
+                        </div>
+                      </div>
+
+                      {/* APP & OTHER */}
+                      <div>
+                        <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          APP & OTHER
+                        </div>
+                        <div className="space-y-0.5">
+                          <Link
+                            to="/settings"
+                            search={{ tab: "notifications" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Bell className="size-3.5 text-sky-600" />
+                            <span>Notifications</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "language_region" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Globe className="size-3.5 text-sky-600" />
+                            <span>Language & Region</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "connected_accounts" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <CreditCard className="size-3.5 text-sky-600" />
+                            <span>Payments & Accounts</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "help" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <HelpCircle className="size-3.5 text-sky-600" />
+                            <span>Help & Support</span>
+                          </Link>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
+
           {/* Plan Route Button */}
           <Link
             to="/routes"
@@ -529,52 +766,52 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <Link
               to="/explore"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 hover:border-sky-300"
             >
-              <Map className="size-4 text-emerald-400" />
+              <Map className="size-4 text-sky-600" />
               <span>{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
             </Link>
             <Link
               to="/routes"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 hover:border-sky-300"
             >
-              <Route className="size-4 text-emerald-400" />
+              <Route className="size-4 text-sky-600" />
               <span>{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
             </Link>
             <Link
               to="/community"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-zinc-200 bg-zinc-900/80 border border-zinc-800"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 hover:border-sky-300"
             >
-              <Users className="size-4 text-zinc-400" />
+              <Users className="size-4 text-slate-500" />
               <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
             </Link>
             <Link
               to="/events"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-emerald-300 bg-emerald-950/40 border border-emerald-500/30"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-slate-800 bg-slate-50 border border-slate-200 hover:border-sky-300"
             >
-              <CalendarDays className="size-4 text-emerald-400" />
+              <CalendarDays className="size-4 text-sky-600" />
               <span>{lang === "ta" ? "நிகழ்வுகள் & திருவிழாக்கள்" : "Events"}</span>
             </Link>
             <Link
               to="/settings"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-emerald-400 bg-emerald-500/10 border border-emerald-500/30 col-span-2"
+              className="flex items-center gap-2 rounded-2xl px-3 py-2.5 text-xs font-bold text-sky-700 bg-sky-50 border border-sky-200 hover:bg-sky-100 col-span-2"
             >
-              <User className="size-4 text-emerald-400" />
-              <span>{lang === "ta" ? "கணக்கு அமைப்புகள் & சுயவிவரம்" : "Account Settings & Explorer Profile"}</span>
+              <Settings className="size-4 text-sky-600" />
+              <span>{lang === "ta" ? "கணக்கு அமைப்புகள் & கட்டுப்பாடுகள்" : "Account Settings & Preferences"}</span>
             </Link>
           </div>
 
-          <div className="flex items-center justify-between border-t border-zinc-800 pt-3">
+          <div className="flex items-center justify-between border-t border-slate-200 pt-3">
             <button
               type="button"
               onClick={toggleLanguage}
-              className="flex items-center gap-2 rounded-xl border border-zinc-800 bg-zinc-900 px-3 py-2 text-xs font-bold text-amber-300"
+              className="flex items-center gap-2 rounded-xl border border-sky-100 bg-sky-50 px-3 py-2 text-xs font-bold text-sky-700 hover:bg-sky-100 transition"
             >
-              <Languages className="size-4 text-amber-400" />
+              <Languages className="size-4 text-sky-600" />
               <span>{lang === "en" ? "தமிழ் பதிப்பு" : "English Version"}</span>
             </button>
 
@@ -584,19 +821,19 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                 setOpen(false);
                 setDistrictsModalOpen(true);
               }}
-              className="flex items-center gap-2 rounded-xl bg-amber-500/10 border border-amber-500/30 px-3 py-2 text-xs font-bold text-amber-400"
+              className="flex items-center gap-2 rounded-xl bg-slate-100 border border-slate-200 px-3 py-2 text-xs font-bold text-slate-700 hover:bg-slate-200"
             >
-              <Grid className="size-3.5" />
-              <span>{lang === "ta" ? "38 மாவட்டங்கள்" : "38 Districts Stream"}</span>
+              <Grid className="size-3.5 text-slate-600" />
+              <span>{lang === "ta" ? "38 மாவட்டங்கள்" : "38 Districts"}</span>
             </button>
 
             <Link
               to="/routes"
               onClick={() => setOpen(false)}
-              className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2 text-xs font-bold text-zinc-950"
+              className="flex items-center gap-2 rounded-xl bg-sky-600 px-4 py-2 text-xs font-extrabold text-white shadow-sm shadow-sky-600/20"
             >
               <Route className="size-3.5" />
-              <span>{lang === "ta" ? "பாதையைத் திட்டமிடு" : "Plan Route"}</span>
+              <span>{lang === "ta" ? "திட்டமிடு" : "Plan Route"}</span>
             </Link>
           </div>
         </div>
@@ -616,6 +853,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
 export function MobileTabBar() {
   const location = useLocation();
   const pathname = location.pathname;
+  const { user, openAuthModal } = useAuthGuard();
 
   if (pathname.startsWith("/admin")) {
     return null;
@@ -640,7 +878,6 @@ export function MobileTabBar() {
         { to: "/explore", label: "Explore", icon: Map, isActive: isExploreActive },
         { to: "/routes", label: "Routes", icon: Route, isActive: pathname === "/routes" },
         { to: "/planner", label: "AI Planner", icon: Sparkles, isActive: pathname === "/planner" },
-        { to: "/settings", label: "Account", icon: User, isActive: pathname === "/settings" },
       ].map((l) => {
         const Icon = l.icon;
         return (
@@ -659,6 +896,31 @@ export function MobileTabBar() {
           </Link>
         );
       })}
+
+      {/* Account / Login Tab */}
+      <button
+        type="button"
+        onClick={() => {
+          if (!user) {
+            openAuthModal("Sign in to access your personal profile, trips, and custom explorer preferences.");
+          } else {
+            window.location.href = "/settings";
+          }
+        }}
+        className={cn(
+          "flex min-h-11 min-w-16 flex-col items-center justify-center gap-1 rounded-xl px-2 py-1 text-[11px] font-medium transition-colors cursor-pointer",
+          pathname === "/settings"
+            ? "text-sky-600 font-bold"
+            : "text-slate-500 hover:text-sky-600"
+        )}
+      >
+        {user ? (
+          <User className="size-5" aria-hidden />
+        ) : (
+          <LogIn className="size-5 text-sky-600" aria-hidden />
+        )}
+        <span>{user ? "Account" : "Log In"}</span>
+      </button>
     </nav>
   );
 }
