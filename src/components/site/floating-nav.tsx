@@ -39,7 +39,7 @@ import {
   HelpCircle,
   Bot,
 } from "lucide-react";
-import { motion, AnimatePresence } from "motion/react";
+import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import { Button } from "@/components/ui/button";
 import { ProfileMenu } from "@/components/site/profile-menu";
 import { DistrictsMegaModal } from "@/components/site/districts-mega-modal";
@@ -258,220 +258,282 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
               </Link>
             </div>
 
-            {/* Desktop Navigation */}
+            {/* Desktop Navigation with Continuous Tabs Animation */}
             <div className="hidden lg:block">
-              <div className="flex items-center gap-1">
-            {/* 1. Destinations Dropdown */}
-            <div
-              className="relative"
-              onMouseEnter={handleMouseEnterDest}
-              onMouseLeave={handleMouseLeaveDest}
-            >
-              <button
-                type="button"
-                onClick={() => setDistrictsModalOpen(true)}
-                className={cn(
-                  "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition-all duration-200 hover:bg-sky-50 hover:text-sky-700 hover:scale-[1.02] cursor-pointer shrink-0",
-                  isDestinationsActive
-                    ? "bg-sky-100 text-sky-700 font-bold border border-sky-200"
-                    : "text-slate-700 border border-transparent hover:border-sky-200/60",
-                )}
-              >
-                <Landmark className="size-4 text-sky-600 shrink-0" />
-                <span className="whitespace-nowrap">{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
-                <ChevronDown className={`size-3.5 shrink-0 transition-transform ${destMenuOpen ? "rotate-180 text-sky-600" : ""}`} />
-              </button>
-
-              {/* Mega Destinations Dropdown Popover */}
-              <AnimatePresence>
-                {destMenuOpen && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 10, scale: 0.98 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    exit={{ opacity: 0, y: 6, scale: 0.98 }}
-                    transition={{ duration: 0.2 }}
-                    className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-[840px] rounded-3xl border border-sky-100 bg-white/98 backdrop-blur-2xl p-6 shadow-2xl z-50 text-slate-800"
+              <LayoutGroup id="explore-tn-navbar-tabs">
+                <nav className="relative flex items-center gap-1 p-1 rounded-full border border-slate-200/80 bg-slate-50/70 shadow-[inset_0_-2px_4px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,0.9),0_2px_8px_rgba(2,132,199,0.04)] transition-all duration-300">
+                  {/* 1. Destinations Dropdown */}
+                  <div
+                    className="relative"
+                    onMouseEnter={handleMouseEnterDest}
+                    onMouseLeave={handleMouseLeaveDest}
                   >
-                    {/* Header Banner: Best Places for October & Trending Spots */}
-                    <div className="mb-4 rounded-2xl bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 border border-sky-200 p-4">
-                      <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                        <div className="flex items-center gap-2">
-                          <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/15 text-sky-700 border border-sky-300 flex items-center gap-1">
-                            <Sparkles className="size-3 text-sky-600" /> Best for October & Trending
-                          </span>
-                          <span className="text-xs font-bold text-slate-700">
-                            Post-Monsoon Seasonal Picks
-                          </span>
-                        </div>
-                        <button
-                          onClick={() => {
-                            setDestMenuOpen(false);
-                            setDistrictsModalOpen(true);
+                    <button
+                      type="button"
+                      onClick={() => setDistrictsModalOpen(true)}
+                      className={cn(
+                        "relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 outline-none cursor-pointer shrink-0 select-none",
+                        isDestinationsActive ? "text-white font-bold" : "text-slate-600 hover:text-slate-900"
+                      )}
+                    >
+                      {isDestinationsActive && (
+                        <motion.div
+                          layoutId="explore-tn-active-pill"
+                          transition={{
+                            type: "spring",
+                            stiffness: 380,
+                            damping: 30,
+                            mass: 0.9,
                           }}
-                          className="flex items-center gap-1.5 rounded-xl bg-sky-500 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-sky-600 transition shadow-md shadow-sky-500/20"
+                          className="absolute inset-0 rounded-full bg-sky-500 shadow-sm"
+                        />
+                      )}
+                      <Landmark className={cn("size-3.5 relative z-10 shrink-0", isDestinationsActive ? "text-white" : "text-sky-600")} />
+                      <span className="relative z-10 whitespace-nowrap">{lang === "ta" ? "மாவட்டங்கள்" : "Destinations"}</span>
+                      <ChevronDown className={cn("size-3 relative z-10 shrink-0 transition-transform", destMenuOpen ? "rotate-180" : "", isDestinationsActive ? "text-white" : "text-slate-400")} />
+                    </button>
+
+                    {/* Mega Destinations Dropdown Popover */}
+                    <AnimatePresence>
+                      {destMenuOpen && (
+                        <motion.div
+                          initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                          transition={{ duration: 0.2 }}
+                          className="absolute top-full left-1/2 -translate-x-1/2 mt-2.5 w-[840px] rounded-3xl border border-sky-100 bg-white/98 backdrop-blur-2xl p-6 shadow-2xl z-50 text-slate-800"
                         >
-                          <Grid className="size-3.5" />
-                          <span>All 38 Districts & Culture</span>
-                          <ArrowRight className="size-3.5" />
-                        </button>
-                      </div>
-
-                      {/* Month-Based Top Spots Pills Grid */}
-                      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                        <Link
-                          to="/districts/$districtSlug"
-                          params={{ districtSlug: "the-nilgiris" }}
-                          onClick={() => setDestMenuOpen(false)}
-                          className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">🌿</span>
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-100 text-sky-700">Oct Top Hill</span>
-                            </div>
-                            <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Ooty (Nilgiris)</h4>
-                            <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Doddabetta, Toy Train & Pykara</p>
-                          </div>
-                        </Link>
-
-                        <Link
-                          to="/districts/$districtSlug"
-                          params={{ districtSlug: "dindigul" }}
-                          onClick={() => setDestMenuOpen(false)}
-                          className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">⛰️</span>
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-100 text-sky-700">Cool Mist</span>
-                            </div>
-                            <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Kodaikanal</h4>
-                            <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Star Lake & Pillar Rocks</p>
-                          </div>
-                        </Link>
-
-                        <Link
-                          to="/districts/$districtSlug"
-                          params={{ districtSlug: "dharmapuri" }}
-                          onClick={() => setDestMenuOpen(false)}
-                          className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">💧</span>
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700">Cascades</span>
-                            </div>
-                            <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Hogenakkal Falls</h4>
-                            <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Kaveri Coracle Rafting</p>
-                          </div>
-                        </Link>
-
-                        <Link
-                          to="/districts/$districtSlug"
-                          params={{ districtSlug: "madurai" }}
-                          onClick={() => setDestMenuOpen(false)}
-                          className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
-                        >
-                          <div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-sm">🛕</span>
-                              <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">Culture & Spot</span>
-                            </div>
-                            <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Madurai Heritage</h4>
-                            <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Meenakshi Amman & Nayak Palace</p>
-                          </div>
-                        </Link>
-                      </div>
-                    </div>
-
-                    {/* Categorized 4-Column Grid */}
-                    <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
-                      {DESTINATION_CATEGORIES.map((cat) => {
-                        const Icon = cat.icon;
-                        return (
-                          <div key={cat.title} className="flex flex-col gap-2">
-                            <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
-                              <span className="flex items-center gap-1.5 text-xs font-bold text-sky-700">
-                                <Icon className="size-3.5 text-sky-600" />
-                                <span>{cat.title}</span>
-                              </span>
-                              <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-mono text-slate-500">
-                                {cat.badge}
-                              </span>
+                          {/* Header Banner: Best Places for October & Trending Spots */}
+                          <div className="mb-4 rounded-2xl bg-gradient-to-r from-sky-50 via-blue-50 to-indigo-50 border border-sky-200 p-4">
+                            <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+                              <div className="flex items-center gap-2">
+                                <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider bg-sky-500/15 text-sky-700 border border-sky-300 flex items-center gap-1">
+                                  <Sparkles className="size-3 text-sky-600" /> Best for October & Trending
+                                </span>
+                                <span className="text-xs font-bold text-slate-700">
+                                  Post-Monsoon Seasonal Picks
+                                </span>
+                              </div>
+                              <button
+                                onClick={() => {
+                                  setDestMenuOpen(false);
+                                  setDistrictsModalOpen(true);
+                                }}
+                                className="flex items-center gap-1.5 rounded-xl bg-sky-500 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-sky-600 transition shadow-md shadow-sky-500/20"
+                              >
+                                <Grid className="size-3.5" />
+                                <span>All 38 Districts & Culture</span>
+                                <ArrowRight className="size-3.5" />
+                              </button>
                             </div>
 
-                            <div className="flex flex-col gap-1 mt-1">
-                              {cat.items.map((item) => (
-                                <Link
-                                  key={item.label}
-                                  to={item.to}
-                                  onClick={() => setDestMenuOpen(false)}
-                                  className="group flex flex-col rounded-xl p-2 hover:bg-sky-50 transition"
-                                >
-                                  <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors flex items-center justify-between">
-                                    <span>{item.label}</span>
-                                    <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-sky-600">→</span>
-                                  </span>
-                                  <span className="text-[10px] text-slate-500 truncate mt-0.5">{item.subtitle}</span>
-                                </Link>
-                              ))}
+                            {/* Month-Based Top Spots Pills Grid */}
+                            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                              <Link
+                                to="/districts/$districtSlug"
+                                params={{ districtSlug: "the-nilgiris" }}
+                                onClick={() => setDestMenuOpen(false)}
+                                className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm">🌿</span>
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-100 text-sky-700">Oct Top Hill</span>
+                                  </div>
+                                  <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Ooty (Nilgiris)</h4>
+                                  <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Doddabetta, Toy Train & Pykara</p>
+                                </div>
+                              </Link>
+
+                              <Link
+                                to="/districts/$districtSlug"
+                                params={{ districtSlug: "dindigul" }}
+                                onClick={() => setDestMenuOpen(false)}
+                                className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm">⛰️</span>
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-sky-100 text-sky-700">Cool Mist</span>
+                                  </div>
+                                  <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Kodaikanal</h4>
+                                  <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Star Lake & Pillar Rocks</p>
+                                </div>
+                              </Link>
+
+                              <Link
+                                to="/districts/$districtSlug"
+                                params={{ districtSlug: "dharmapuri" }}
+                                onClick={() => setDestMenuOpen(false)}
+                                className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm">💧</span>
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-blue-100 text-blue-700">Cascades</span>
+                                  </div>
+                                  <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Hogenakkal Falls</h4>
+                                  <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Kaveri Coracle Rafting</p>
+                                </div>
+                              </Link>
+
+                              <Link
+                                to="/districts/$districtSlug"
+                                params={{ districtSlug: "madurai" }}
+                                onClick={() => setDestMenuOpen(false)}
+                                className="group p-2.5 rounded-xl bg-white border border-sky-100 shadow-sm hover:border-sky-300 transition flex flex-col justify-between"
+                              >
+                                <div>
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-sm">🛕</span>
+                                    <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-800">Culture & Spot</span>
+                                  </div>
+                                  <h4 className="text-xs font-extrabold text-slate-900 group-hover:text-sky-600 mt-1">Madurai Heritage</h4>
+                                  <p className="text-[10px] text-slate-500 line-clamp-1 mt-0.5">Meenakshi Amman & Nayak Palace</p>
+                                </div>
+                              </Link>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
+
+                          {/* Categorized 4-Column Grid */}
+                          <div className="grid grid-cols-2 gap-5 lg:grid-cols-4">
+                            {DESTINATION_CATEGORIES.map((cat) => {
+                              const Icon = cat.icon;
+                              return (
+                                <div key={cat.title} className="flex flex-col gap-2">
+                                  <div className="flex items-center justify-between pb-1.5 border-b border-slate-100">
+                                    <span className="flex items-center gap-1.5 text-xs font-bold text-sky-700">
+                                      <Icon className="size-3.5 text-sky-600" />
+                                      <span>{cat.title}</span>
+                                    </span>
+                                    <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[9px] font-mono text-slate-500">
+                                      {cat.badge}
+                                    </span>
+                                  </div>
+
+                                  <div className="flex flex-col gap-1 mt-1">
+                                    {cat.items.map((item) => (
+                                      <Link
+                                        key={item.label}
+                                        to={item.to}
+                                        onClick={() => setDestMenuOpen(false)}
+                                        className="group flex flex-col rounded-xl p-2 hover:bg-sky-50 transition"
+                                      >
+                                        <span className="text-xs font-bold text-slate-800 group-hover:text-sky-600 transition-colors flex items-center justify-between">
+                                          <span>{item.label}</span>
+                                          <span className="opacity-0 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all text-sky-600">→</span>
+                                        </span>
+                                        <span className="text-[10px] text-slate-500 truncate mt-0.5">{item.subtitle}</span>
+                                      </Link>
+                                    ))}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </motion.div>
+                      )}
+                    </AnimatePresence>
+                  </div>
+
+                  {/* 2. Map Explorer */}
+                  <Link
+                    to="/explore"
+                    className={cn(
+                      "relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 outline-none shrink-0 select-none",
+                      pathname === "/explore" ? "text-white font-bold" : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    {pathname === "/explore" && (
+                      <motion.div
+                        layoutId="explore-tn-active-pill"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 30,
+                          mass: 0.9,
+                        }}
+                        className="absolute inset-0 rounded-full bg-sky-500 shadow-sm"
+                      />
+                    )}
+                    <Map className={cn("size-3.5 relative z-10 shrink-0", pathname === "/explore" ? "text-white" : "text-sky-600")} />
+                    <span className="relative z-10">{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
+                  </Link>
+
+                  {/* 3. Trails & Routes */}
+                  <Link
+                    to="/routes"
+                    className={cn(
+                      "relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 outline-none shrink-0 select-none",
+                      pathname === "/routes" ? "text-white font-bold" : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    {pathname === "/routes" && (
+                      <motion.div
+                        layoutId="explore-tn-active-pill"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 30,
+                          mass: 0.9,
+                        }}
+                        className="absolute inset-0 rounded-full bg-sky-500 shadow-sm"
+                      />
+                    )}
+                    <Route className={cn("size-3.5 relative z-10 shrink-0", pathname === "/routes" ? "text-white" : "text-sky-600")} />
+                    <span className="relative z-10">{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
+                  </Link>
+
+                  {/* 4. Travel Guides */}
+                  <Link
+                    to="/community"
+                    className={cn(
+                      "relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 outline-none shrink-0 select-none",
+                      pathname === "/community" ? "text-white font-bold" : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    {pathname === "/community" && (
+                      <motion.div
+                        layoutId="explore-tn-active-pill"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 30,
+                          mass: 0.9,
+                        }}
+                        className="absolute inset-0 rounded-full bg-sky-500 shadow-sm"
+                      />
+                    )}
+                    <Users className={cn("size-3.5 relative z-10 shrink-0", pathname === "/community" ? "text-white" : "text-slate-500")} />
+                    <span className="relative z-10">{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
+                  </Link>
+
+                  {/* 5. Events & Festivals */}
+                  <Link
+                    to="/events"
+                    className={cn(
+                      "relative flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold whitespace-nowrap transition-colors duration-200 outline-none shrink-0 select-none",
+                      pathname === "/events" ? "text-white font-bold" : "text-slate-600 hover:text-slate-900"
+                    )}
+                  >
+                    {pathname === "/events" && (
+                      <motion.div
+                        layoutId="explore-tn-active-pill"
+                        transition={{
+                          type: "spring",
+                          stiffness: 380,
+                          damping: 30,
+                          mass: 0.9,
+                        }}
+                        className="absolute inset-0 rounded-full bg-sky-500 shadow-sm"
+                      />
+                    )}
+                    <CalendarDays className={cn("size-3.5 relative z-10 shrink-0", pathname === "/events" ? "text-white" : "text-sky-600")} />
+                    <span className="relative z-10">{lang === "ta" ? "நிகழ்வுகள்" : "Events"}</span>
+                  </Link>
+                </nav>
+              </LayoutGroup>
             </div>
-
-          {/* 2. Map Explorer */}
-          <Link
-            to="/explore"
-            className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
-          >
-            <span className="flex items-center gap-1.5">
-              <Map className="size-3.5 text-sky-600 shrink-0" />
-              <span>{lang === "ta" ? "வரைபட உலா" : "Map Explorer"}</span>
-            </span>
-          </Link>
-
-          {/* 3. Trails & Routes */}
-          <Link
-            to="/routes"
-            className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
-          >
-            <span className="flex items-center gap-1.5">
-              <Route className="size-3.5 text-sky-600 shrink-0" />
-              <span>{lang === "ta" ? "பயணப் பாதைகள்" : "Trails & Routes"}</span>
-            </span>
-          </Link>
-
-          {/* 4. Travel Guides */}
-          <Link
-            to="/community"
-            className="rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
-          >
-            <span className="flex items-center gap-1.5">
-              <Users className="size-3.5 text-slate-500 shrink-0" />
-              <span>{lang === "ta" ? "வழிகாட்டிகள்" : "Travel Guides"}</span>
-            </span>
-          </Link>
-
-          {/* 5. Events & Festivals */}
-          <Link
-            to="/events"
-            className="flex items-center gap-1.5 rounded-full px-3.5 py-1.5 text-xs font-semibold text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors shrink-0"
-            activeProps={{ className: "bg-sky-100 text-sky-700 font-bold" }}
-          >
-            <CalendarDays className="size-3.5 text-sky-600 shrink-0" />
-            <span>{lang === "ta" ? "நிகழ்வுகள்" : "Events"}</span>
-          </Link>
-        </div>
-      </div>
 
         {/* Right Utility Section & Primary Action CTA */}
         <div className="flex items-center gap-2 shrink-0">
