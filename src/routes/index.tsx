@@ -348,15 +348,44 @@ function Index() {
           </Link>
         </div>
 
-        {/* Bento Grid mirroring the exact 4-card structure from screenshot */}
+        {/* Bento Grid mirroring the exact 4-card structure with Top Places in each card */}
         <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
-          {/* Card 1: Top-Left (Real-time Metrics / Bar Chart) */}
+          {/* Card 1: Top-Left (Real-time Metrics / Bar Chart + Top Place: Meenakshi Amman Temple) */}
           <div className="flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-7 border border-slate-800/80 transition-all hover:border-slate-700">
             <div>
-              <p className="text-[11px] font-mono uppercase tracking-wider text-slate-400">LIVE EXPLORER TELEMETRY</p>
-              <div className="mt-1 flex items-baseline gap-2">
-                <span className="text-3xl font-extrabold tracking-tight font-display sm:text-4xl text-white">12,450</span>
-                <span className="text-xs font-mono text-slate-400">check-ins/hr</span>
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="text-[11px] font-mono uppercase tracking-wider text-slate-400">LIVE EXPLORER TELEMETRY</p>
+                  <div className="mt-1 flex items-baseline gap-2">
+                    <span className="text-3xl font-extrabold tracking-tight font-display sm:text-4xl text-white">12,450</span>
+                    <span className="text-xs font-mono text-slate-400">check-ins/hr</span>
+                  </div>
+                </div>
+
+                {/* 📍 TOP PLACE SPOTLIGHT PILL */}
+                <Link
+                  to="/place/$slug"
+                  params={{ slug: "meenakshi-amman-temple" }}
+                  className="group/top flex items-center gap-3 rounded-2xl bg-[#282d37] hover:bg-[#323946] border border-slate-700/80 p-2 pr-3.5 transition shadow-md"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=120&q=80"
+                    alt="Meenakshi Temple"
+                    className="size-10 rounded-xl object-cover shrink-0"
+                  />
+                  <div className="text-left">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-[10px] font-mono uppercase font-bold text-[#83be09]">#1 TOP TEMPLE</span>
+                      <span className="flex items-center gap-0.5 text-[11px] text-amber-400 font-bold">
+                        <Star className="size-3 fill-amber-400" /> 4.9
+                      </span>
+                    </div>
+                    <p className="text-xs font-bold text-white group-hover/top:text-[#83be09] transition flex items-center gap-1">
+                      <span>Meenakshi Amman Temple</span>
+                      <ArrowRight className="size-3 text-slate-400 group-hover/top:translate-x-0.5 transition-transform" />
+                    </p>
+                  </div>
+                </Link>
               </div>
 
               {/* Dynamic Bar Chart matching green aesthetic */}
@@ -393,13 +422,37 @@ function Index() {
             </div>
           </div>
 
-          {/* Card 2: Top-Right (99.99% Uptime / Global Network) */}
+          {/* Card 2: Top-Right (99.99% Uptime + Top Place: Kodaikanal Lake) */}
           <div className="flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-5 border border-slate-800/80 transition-all hover:border-slate-700">
             <div>
-              <h3 className="text-2xl font-bold font-display text-white">99.99% Trail Access</h3>
-              <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">
-                Enterprise-grade road reliability and verified access status out of the box.
-              </p>
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="text-2xl font-bold font-display text-white">99.99% Trail Access</h3>
+                  <p className="mt-1 text-xs text-slate-400 leading-relaxed">
+                    Enterprise-grade road reliability and verified access status.
+                  </p>
+                </div>
+
+                {/* 📍 TOP PLACE SPOTLIGHT PILL */}
+                <Link
+                  to="/place/$slug"
+                  params={{ slug: "kodaikanal" }}
+                  className="group/top flex items-center gap-2.5 rounded-2xl bg-[#282d37] hover:bg-[#323946] border border-slate-700/80 p-1.5 pr-3 transition shrink-0 shadow-md"
+                >
+                  <img
+                    src="https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=120&q=80"
+                    alt="Kodaikanal"
+                    className="size-9 rounded-xl object-cover shrink-0"
+                  />
+                  <div className="text-left">
+                    <span className="text-[9px] font-mono uppercase font-bold text-[#83be09]">#1 TOP HILL</span>
+                    <p className="text-xs font-bold text-white group-hover/top:text-[#83be09] transition flex items-center gap-0.5">
+                      <span>Kodaikanal</span>
+                      <ArrowRight className="size-2.5 text-slate-400" />
+                    </p>
+                  </div>
+                </Link>
+              </div>
             </div>
 
             <div className="mt-8 space-y-4">
@@ -431,12 +484,38 @@ function Index() {
             </div>
           </div>
 
-          {/* Card 3: Bottom-Left (Smart Alerts with Bell Icon) */}
+          {/* Card 3: Bottom-Left (Smart Alerts + Top Place: Courtallam Falls) */}
           <div className="flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-4 border border-slate-800/80 transition-all hover:border-slate-700">
-            <div className="flex justify-center py-6">
-              <div className="flex size-14 items-center justify-center rounded-2xl bg-[#282d37] border border-slate-700/80 text-slate-200 shadow-inner">
-                <Bell className="size-6 text-slate-200" />
+            <div>
+              <div className="flex items-center justify-between">
+                <div className="flex size-12 items-center justify-center rounded-2xl bg-[#282d37] border border-slate-700/80 text-slate-200 shadow-inner">
+                  <Bell className="size-5 text-slate-200" />
+                </div>
+                <span className="rounded-full bg-emerald-950/80 border border-[#83be09]/40 px-2.5 py-0.5 text-[10px] font-mono text-[#83be09] font-bold">
+                  LIVE MONITORED
+                </span>
               </div>
+
+              {/* 📍 TOP PLACE SPOTLIGHT PILL */}
+              <Link
+                to="/place/$slug"
+                params={{ slug: "valli-chunai-falls" }}
+                className="mt-5 group/top flex items-center gap-3 rounded-2xl bg-[#282d37] hover:bg-[#323946] border border-slate-700/80 p-2.5 transition shadow-md"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=120&q=80"
+                  alt="Valli Chunai Falls"
+                  className="size-11 rounded-xl object-cover shrink-0"
+                />
+                <div className="text-left flex-1 min-w-0">
+                  <span className="text-[10px] font-mono uppercase font-bold text-[#83be09]">#1 WATERFALL ALERT</span>
+                  <p className="text-xs font-bold text-white group-hover/top:text-[#83be09] transition truncate">
+                    Valli Chunai Falls
+                  </p>
+                  <p className="text-[10px] text-slate-400 font-mono">Open & Accessible · Clear</p>
+                </div>
+                <ArrowRight className="size-3.5 text-slate-400 group-hover/top:text-[#83be09] transition-transform group-hover/top:translate-x-0.5 shrink-0" />
+              </Link>
             </div>
 
             <div className="mt-6">
@@ -447,13 +526,38 @@ function Index() {
             </div>
           </div>
 
-          {/* Card 4: Bottom-Right (Global Edge Network with Map & Avatars) */}
+          {/* Card 4: Bottom-Right (Global Edge Network + Top Place: Mahabalipuram Shore Temple) */}
           <div className="relative flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-8 border border-slate-800/80 overflow-hidden transition-all hover:border-slate-700">
-            <div className="flex flex-col items-end text-right z-10">
-              <h3 className="text-xl font-bold font-display text-white">Tamil Nadu Explorer Network</h3>
-              <p className="mt-1 text-xs text-slate-400 max-w-sm leading-relaxed">
-                Connect active travelers across 38+ districts with verified community check-ins and live road telemetry.
-              </p>
+            <div className="flex flex-wrap items-center justify-between gap-3 z-10">
+              {/* 📍 TOP PLACE SPOTLIGHT PILL */}
+              <Link
+                to="/place/$slug"
+                params={{ slug: "mahabalipuram" }}
+                className="group/top flex items-center gap-3 rounded-2xl bg-[#282d37] hover:bg-[#323946] border border-slate-700/80 p-2 pr-4 transition shadow-md"
+              >
+                <img
+                  src="https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=120&q=80"
+                  alt="Mahabalipuram"
+                  className="size-10 rounded-xl object-cover shrink-0"
+                />
+                <div className="text-left">
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-[10px] font-mono uppercase font-bold text-[#83be09]">#1 COASTAL HERITAGE</span>
+                    <span className="text-[10px] text-slate-400 font-mono">UNESCO</span>
+                  </div>
+                  <p className="text-xs font-bold text-white group-hover/top:text-[#83be09] transition flex items-center gap-1">
+                    <span>Mahabalipuram Shore</span>
+                    <ArrowRight className="size-3 text-slate-400" />
+                  </p>
+                </div>
+              </Link>
+
+              <div className="flex flex-col items-end text-right">
+                <h3 className="text-xl font-bold font-display text-white">Tamil Nadu Explorer Network</h3>
+                <p className="mt-0.5 text-xs text-slate-400 max-w-xs leading-relaxed">
+                  Connect active travelers across 38+ districts with verified telemetry.
+                </p>
+              </div>
             </div>
 
             {/* Dotted Map Graphic Background with Floating Avatars */}
