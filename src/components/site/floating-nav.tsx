@@ -38,14 +38,18 @@ import {
   CreditCard,
   HelpCircle,
   Bot,
+  UserPlus,
+  LogOut,
+  Award,
+  ChevronRight,
+  LayoutDashboard,
 } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import { Button } from "@/components/ui/button";
-import { ProfileMenu } from "@/components/site/profile-menu";
 import { DistrictsMegaModal } from "@/components/site/districts-mega-modal";
 import { cn } from "@/lib/utils";
 import { checkBackendHealth } from "@/lib/api";
-import { getCurrentAuthUser, isAdminUser } from "@/lib/auth-rbac";
+import { getCurrentAuthUser, isAdminUser, clearAuthSession, subscribeToAuthChanges, UserProfile } from "@/lib/auth-rbac";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 
 function useTheme() {
@@ -172,6 +176,19 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
   const [settingsMenuOpen, setSettingsMenuOpen] = useState(false);
   const settingsTimeoutRef = useRef<any>(null);
 
+  const { user: authGuardUser, openAuthModal, logout: authGuardLogout } = useAuthGuard();
+  const [currentUser, setCurrentUser] = useState<UserProfile | null>(() => getCurrentAuthUser());
+
+  useEffect(() => {
+    setCurrentUser(authGuardUser || getCurrentAuthUser());
+    const unsubscribe = subscribeToAuthChanges((updatedUser) => {
+      setCurrentUser(updatedUser);
+    });
+    return () => {
+      unsubscribe();
+    };
+  }, [authGuardUser]);
+
   const handleMouseEnterSettings = () => {
     if (settingsTimeoutRef.current) clearTimeout(settingsTimeoutRef.current);
     setSettingsMenuOpen(true);
@@ -180,8 +197,33 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
   const handleMouseLeaveSettings = () => {
     settingsTimeoutRef.current = setTimeout(() => {
       setSettingsMenuOpen(false);
-    }, 180);
+    }, 200);
   };
+
+  const handleLogOut = async () => {
+    try {
+      const { supabase } = await import("@/lib/supabase-client");
+      await supabase.auth.signOut().catch(() => null);
+    } catch {
+      // ignore
+    }
+    clearAuthSession();
+    setCurrentUser(null);
+    authGuardLogout();
+    setSettingsMenuOpen(false);
+    if (typeof window !== "undefined") {
+      window.location.replace("/");
+    }
+  };
+
+  const initials = currentUser?.name
+    ? currentUser.name
+        .split(" ")
+        .map((n) => n[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : "EX";
 
   if (isAdminRoute) {
     return (
@@ -214,7 +256,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <span className="text-zinc-300">Geospatial Operations Center</span>
           </div>
 
-          {/* Right: Exit to Public Site & Profile Menu */}
+          {/* Right: Exit to Public Site & Settings */}
           <div className="flex items-center gap-3 shrink-0">
             <Link
               to="/"
@@ -225,7 +267,13 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
               <span>Public Site</span>
               <ArrowRight className="size-3.5 text-zinc-400" />
             </Link>
-            <ProfileMenu dark={dark} toggleTheme={toggle} />
+            <Link
+              to="/settings"
+              className="flex items-center justify-center size-9 rounded-full border border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:text-white hover:border-zinc-700 transition shrink-0"
+              title="Settings & Controls"
+            >
+              <Settings className="size-4" />
+            </Link>
           </div>
         </nav>
       </header>
@@ -635,30 +683,166 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                   animate={{ opacity: 1, y: 0, scale: 1 }}
                   exit={{ opacity: 0, y: 6, scale: 0.98 }}
                   transition={{ duration: 0.18 }}
-                  className="absolute right-0 top-full mt-2.5 w-[560px] rounded-3xl border border-sky-100 bg-white/98 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-800"
+                  className="absolute right-0 top-full mt-2.5 w-[580px] rounded-3xl border border-sky-100 bg-white/98 backdrop-blur-2xl p-5 shadow-2xl z-50 text-slate-800"
                 >
-                  <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
-                    <div className="flex items-center gap-2">
-                      <span className="grid size-7 place-items-center rounded-xl bg-sky-50 text-sky-600 border border-sky-200">
-                        <Settings className="size-4" />
-                      </span>
-                      <div>
-                        <h4 className="text-xs font-bold text-slate-900">Explorer Settings & Controls</h4>
-                        <p className="text-[10px] text-slate-400">Configure your travel intelligence & platform preferences</p>
+                  {/* Top Header: User Identity / Account Banner */}
+                  {currentUser ? (
+                    <div className="rounded-2xl bg-gradient-to-r from-sky-50/80 via-white to-sky-50/50 p-3.5 border border-sky-100 mb-3.5 shadow-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="relative size-11 rounded-2xl bg-gradient-to-br from-sky-500 to-sky-600 text-white font-black flex items-center justify-center text-sm shadow-md shrink-0">
+                            {initials}
+                            <span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full bg-emerald-400 ring-2 ring-white" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <h4 className="font-extrabold text-sm text-slate-900 truncate">{currentUser.name}</h4>
+                              <span className="px-2 py-0.5 bg-sky-100 text-sky-700 text-[9px] font-mono font-bold rounded-full border border-sky-200 shrink-0 uppercase">
+                                {currentUser.role?.replace("_", " ") || "EXPLORER"}
+                              </span>
+                            </div>
+                            <p className="text-[11px] font-mono text-slate-500 truncate mt-0.5">{currentUser.email}</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Link
+                            to="/settings"
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="text-[11px] font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-full border border-sky-200 transition"
+                          >
+                            Full Settings →
+                          </Link>
+                          <button
+                            type="button"
+                            onClick={handleLogOut}
+                            className="flex items-center gap-1 text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2.5 py-1.5 rounded-full border border-rose-200 transition cursor-pointer"
+                            title="Log Out"
+                          >
+                            <LogOut className="size-3.5 text-rose-500" />
+                            <span>Log Out</span>
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Admin Quick Jump if super_admin / admin */}
+                      {isAdminUser(currentUser) && (
+                        <div className="mt-2.5 pt-2 border-t border-sky-100/80">
+                          <Link
+                            to="/admin"
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-extrabold bg-sky-500 text-white hover:bg-sky-600 transition shadow-xs"
+                          >
+                            <div className="flex items-center gap-2">
+                              <LayoutDashboard className="size-3.5" />
+                              <span>Go to Admin Dashboard</span>
+                            </div>
+                            <span className="text-[9px] font-mono uppercase bg-white/20 text-white px-1.5 py-0.5 rounded font-black">
+                              CONTROL
+                            </span>
+                          </Link>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="rounded-2xl bg-gradient-to-r from-sky-100 via-sky-50 to-blue-50 p-3.5 border border-sky-200 mb-3.5 shadow-sm">
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                          <div className="grid size-10 place-items-center rounded-xl bg-sky-500 text-white font-black shadow-md">
+                            <User className="size-5" />
+                          </div>
+                          <div>
+                            <h4 className="text-xs font-extrabold text-slate-900">Explorer Account</h4>
+                            <p className="text-[10px] text-slate-500">Save trips, custom routes & sync preferences</p>
+                          </div>
+                        </div>
+
+                        <div className="flex items-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSettingsMenuOpen(false);
+                              openAuthModal("Sign in to save your trip plans, preferences, and personal collections.");
+                            }}
+                            className="flex items-center gap-1.5 rounded-xl bg-white border border-slate-200 px-3 py-1.5 text-xs font-bold text-slate-700 hover:bg-slate-50 transition cursor-pointer shadow-xs"
+                          >
+                            <LogIn className="size-3.5 text-sky-600" />
+                            <span>Sign In</span>
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSettingsMenuOpen(false);
+                              openAuthModal("Create an account to save your personalized AI route plans and unlock trails.");
+                            }}
+                            className="flex items-center gap-1.5 rounded-xl bg-sky-500 px-3 py-1.5 text-xs font-extrabold text-white hover:bg-sky-600 transition cursor-pointer shadow-md shadow-sky-500/20"
+                          >
+                            <UserPlus className="size-3.5" />
+                            <span>Sign Up</span>
+                          </button>
+                        </div>
                       </div>
                     </div>
-                    <Link
-                      to="/settings"
-                      onClick={() => setSettingsMenuOpen(false)}
-                      className="text-[11px] font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 px-2.5 py-1 rounded-full border border-sky-200 transition"
-                    >
-                      Open Full Settings →
-                    </Link>
-                  </div>
+                  )}
 
+                  {/* Settings 2-Column Grid */}
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Column 1: TRAVEL & AI SYSTEMS */}
+                    {/* Column 1: PROFILE, IDENTITY & TRAVEL ENGINE */}
                     <div className="space-y-4">
+                      {/* IDENTITY & EXPLORER PASSPORT */}
+                      <div>
+                        <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
+                          EXPLORER PROFILE & PASSPORT
+                        </div>
+                        <div className="space-y-0.5">
+                          <Link
+                            to="/settings"
+                            search={{ tab: "profile" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <User className="size-3.5 text-sky-600" />
+                              <span>Explorer Passport & Bio</span>
+                            </div>
+                            <span className="text-[9px] font-mono font-bold bg-sky-100 text-sky-700 px-1.5 py-0.5 rounded-full border border-sky-200">
+                              Level 4
+                            </span>
+                          </Link>
+                          <Link
+                            to="/profile"
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Award className="size-3.5 text-amber-500" />
+                              <span>My Badges & Milestones</span>
+                            </div>
+                            <ChevronRight className="size-3 text-slate-400" />
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "preferences" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Compass className="size-3.5 text-sky-600" />
+                            <span>Travel Style & Base Location</span>
+                          </Link>
+                          <Link
+                            to="/saved"
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center justify-between rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <div className="flex items-center gap-2.5">
+                              <Bookmark className="size-3.5 text-sky-600" />
+                              <span>Saved Places & Collections</span>
+                            </div>
+                            <ChevronRight className="size-3 text-slate-400" />
+                          </Link>
+                        </div>
+                      </div>
+
                       {/* TRAVEL ENGINE PREFERENCES */}
                       <div>
                         <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
@@ -692,27 +876,27 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                             <Map className="size-3.5 text-sky-600" />
                             <span>Map Layers (3D & Satellite)</span>
                           </Link>
-                          <Link
-                            to="/settings"
-                            search={{ tab: "preferences" }}
-                            onClick={() => setSettingsMenuOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
-                          >
-                            <Compass className="size-3.5 text-sky-600" />
-                            <span>Default Starting Location</span>
-                          </Link>
                         </div>
                       </div>
                     </div>
 
-                    {/* Column 2: SAFETY & PRIVACY, APP, OTHER */}
+                    {/* Column 2: SAFETY & PRIVACY, APP & OTHER */}
                     <div className="space-y-4">
                       {/* SAFETY & PRIVACY */}
                       <div>
                         <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                          SAFETY & PRIVACY
+                          SAFETY & SECURITY
                         </div>
                         <div className="space-y-0.5">
+                          <Link
+                            to="/settings"
+                            search={{ tab: "security" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Lock className="size-3.5 text-sky-600" />
+                            <span>Account Security & Password</span>
+                          </Link>
                           <Link
                             to="/settings"
                             search={{ tab: "safety_alerts" }}
@@ -731,22 +915,13 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                             <MapPin className="size-3.5 text-sky-600" />
                             <span>Location & Privacy</span>
                           </Link>
-                          <Link
-                            to="/settings"
-                            search={{ tab: "security" }}
-                            onClick={() => setSettingsMenuOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
-                          >
-                            <Lock className="size-3.5 text-sky-600" />
-                            <span>Security & Sessions</span>
-                          </Link>
                         </div>
                       </div>
 
                       {/* APP & OTHER */}
                       <div>
                         <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                          APP & OTHER
+                          APP & SUPPORT
                         </div>
                         <div className="space-y-0.5">
                           <Link
@@ -777,13 +952,12 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                             <span>Payments & Accounts</span>
                           </Link>
                           <Link
-                            to="/settings"
-                            search={{ tab: "help" }}
+                            to="/support"
                             onClick={() => setSettingsMenuOpen(false)}
                             className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                           >
                             <HelpCircle className="size-3.5 text-sky-600" />
-                            <span>Help & Support</span>
+                            <span>Help & Traveler Support</span>
                           </Link>
                         </div>
                       </div>
@@ -792,11 +966,6 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                 </motion.div>
               )}
             </AnimatePresence>
-          </div>
-
-          {/* Account Icon & Profile Menu Dropdown */}
-          <div className="flex items-center shrink-0 pr-1 sm:pr-2">
-            <ProfileMenu dark={dark} toggleTheme={toggle} />
           </div>
 
           <Button
