@@ -188,45 +188,438 @@ export function ThingsToDoSection() {
     },
   ];
 
+  const [selectedHubId, setSelectedHubId] = React.useState<string>("ooty");
+
+  // Places mapping for each hub when clicked
+  const hubPlacesData: Record<
+    string,
+    {
+      hubName: string;
+      tagline: string;
+      route: string;
+      districtLabel: string;
+      places: Array<{
+        name: string;
+        category: string;
+        timeNeeded: string;
+        image: string;
+        slug: string;
+        rating: number;
+        description: string;
+      }>;
+    }
+  > = {
+    ooty: {
+      hubName: "Ooty & The Nilgiris",
+      tagline: "Queen of Hill Stations, misty pine valleys & emerald tea gardens",
+      route: "/districts/the-nilgiris",
+      districtLabel: "The Nilgiris District",
+      places: [
+        {
+          name: "Nilgiri Mountain Railway (UNESCO)",
+          category: "Heritage Mountain Train",
+          timeNeeded: "3 - 4 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.9,
+          description: "Centuries-old Swiss rack-and-pinion steam locomotive chugging through 16 tunnels and 250 bridges.",
+        },
+        {
+          name: "Doddabetta Peak & Telescope House",
+          category: "Highest Peak in Nilgiris",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.8,
+          description: "Highest vantage point (2,637m) in Tamil Nadu offering panoramic vistas of Bandipur and Nilgiri ridges.",
+        },
+        {
+          name: "Pykara Lake & Waterfalls",
+          category: "Scenic Lake & Boating",
+          timeNeeded: "2.5 hours",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.7,
+          description: "Sacred Toda tribal river cascading down stepped cliffs with tranquil speed boat rides.",
+        },
+        {
+          name: "Government Botanical Gardens",
+          category: "Exotic Flora Sanctuary",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.6,
+          description: "Terraced English gardens established in 1848, featuring a 20-million-year-old fossilized tree trunk.",
+        },
+      ],
+    },
+    kodaikanal: {
+      hubName: "Kodaikanal & Palani Hills",
+      tagline: "Princess of Hill Stations, star-shaped lake, mist & cliff trails",
+      route: "/districts/dindigul",
+      districtLabel: "Dindigul District",
+      places: [
+        {
+          name: "Kodaikanal Star Lake Promenade",
+          category: "Iconic Lakeside Cycling",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.9,
+          description: "Cruising, paddle boating, and cycling along the 5km star-shaped lake hemmed by weeping willows.",
+        },
+        {
+          name: "Coaker's Walk & Cloud Edge Trail",
+          category: "Cliff Edge Panoramic Walk",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.8,
+          description: "Pedestrian cliff walk built along mountain contours overlooking dolphin nose ridge and Pambar valley.",
+        },
+        {
+          name: "Pillar Rocks & Guna Caves",
+          category: "Granite Monoliths & Chasm",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.7,
+          description: "Three majestic vertical granite boulders standing 400ft tall shrouded in dramatic afternoon mist.",
+        },
+        {
+          name: "Silver Cascade Waterfalls",
+          category: "Roadside Mountain Cascade",
+          timeNeeded: "45 mins",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.6,
+          description: "Spectacular 180ft cascade formed by overflow from Kodai Lake, welcome point on the ghat road.",
+        },
+      ],
+    },
+    madurai: {
+      hubName: "Madurai Temple City",
+      tagline: "Thoonga Nagaram, 2,500 years of living Tamil heritage and culinary legends",
+      route: "/districts/madurai",
+      districtLabel: "Madurai District",
+      places: [
+        {
+          name: "Meenakshi Sundareswarar Temple",
+          category: "Dravidian Architectural Marvel",
+          timeNeeded: "3 hours",
+          image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=700&q=80",
+          slug: "meenakshi-amman-temple",
+          rating: 5.0,
+          description: "Historic epicenter with 14 gopurams, Hall of Thousand Pillars, and golden lotus sacred pond.",
+        },
+        {
+          name: "Thirumalai Nayakkar Mahal",
+          category: "Indo-Saracenic Palace",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=700&q=80",
+          slug: "meenakshi-amman-temple",
+          rating: 4.8,
+          description: "Palatial 17th-century courtyard featuring giant 82ft-high stucco pillars and evening light-and-sound shows.",
+        },
+        {
+          name: "Famous Jigarthanda & Food Safari",
+          category: "Culinary Heritage Legend",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=700&q=80",
+          slug: "meenakshi-amman-temple",
+          rating: 4.9,
+          description: "Taste authentic Kari Dosa, bun parotta, and the chilled Badam Pisin royal cooling elixir.",
+        },
+        {
+          name: "Puthu Mandapam Textile Arcade",
+          category: "Living 16th-Century Bazaar",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "meenakshi-amman-temple",
+          rating: 4.7,
+          description: "Centuries-old stone hall opposite Meenakshi Temple bustling with Sungudi artisans and bronze casters.",
+        },
+      ],
+    },
+    rameswaram: {
+      hubName: "Rameswaram Island & Coast",
+      tagline: "Sacred island shores, Pamban sea bridge & the mystical ghost town of Dhanushkodi",
+      route: "/districts/ramanathapuram",
+      districtLabel: "Ramanathapuram District",
+      places: [
+        {
+          name: "Ramanathaswamy Temple Corridors",
+          category: "Longest Hallway in the World",
+          timeNeeded: "2.5 hours",
+          image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.9,
+          description: "World-famous 1,212 carved pillars and 22 sacred teertham wells right on the oceanic coastline.",
+        },
+        {
+          name: "Dhanushkodi Land's End & Ghost Town",
+          category: "Two-Oceans Confluence",
+          timeNeeded: "3 hours",
+          image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.9,
+          description: "Ruins of the 1964 submerged township where Bay of Bengal meets the Indian Ocean.",
+        },
+        {
+          name: "Pamban Sea Bridge & Rail Cantilever",
+          category: "Engineering Wonder Over Ocean",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.8,
+          description: "India's first sea bridge opened in 1914 with iconic Scherzer lifting bridge mechanism.",
+        },
+        {
+          name: "APJ Abdul Kalam National Memorial",
+          category: "Presidential Memorial & Museum",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1600100397608-f010f444f434?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.7,
+          description: "Tribute to India's People's President featuring missile replicas, personal memorabilia and heritage garden.",
+        },
+      ],
+    },
+    mahabalipuram: {
+      hubName: "Mahabalipuram Shore Heritage",
+      tagline: "UNESCO world heritage rock sanctuaries, coastal monoliths & seaside cafes",
+      route: "/districts/chengalpattu",
+      districtLabel: "Chengalpattu District",
+      places: [
+        {
+          name: "Shore Temple on the Bay of Bengal",
+          category: "7th-Century Structural Temple",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1600100397608-f010f444f434?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.9,
+          description: "Magnificent granite shrine built by Narasimhavarman II weathering coastal spray for 1,300 years.",
+        },
+        {
+          name: "Pancha Rathas (Five Chariots)",
+          category: "Monolithic Rock Architecture",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.8,
+          description: "Monolithic temples carved out of individual pink granite boulders, each with distinct Dravidian style.",
+        },
+        {
+          name: "Arjuna's Penance & Krishna's Butter Ball",
+          category: "World's Largest Bas-Relief",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.7,
+          description: "Gigantic 250-ton precariously balanced boulder and a massive cliff carving of the Descent of the Ganges.",
+        },
+        {
+          name: "Surfing Shore & Coastal Seafood Cafes",
+          category: "Coastal Beach Lifestyle",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.7,
+          description: "Learn to catch gentle waves with local surf schools followed by fresh catch at beachside shacks.",
+        },
+      ],
+    },
+    thanjavur: {
+      hubName: "Thanjavur & Chola Heartland",
+      tagline: "Rice Bowl of Tamil Nadu, imperial Chola architecture & classical arts",
+      route: "/districts/thanjavur",
+      districtLabel: "Thanjavur District",
+      places: [
+        {
+          name: "Brihadisvara Big Temple (UNESCO)",
+          category: "Chola Imperial Grandeur",
+          timeNeeded: "2.5 hours",
+          image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=700&q=80",
+          slug: "thanjavur-city",
+          rating: 5.0,
+          description: "Thousand-year-old architectural titan built in 1010 AD with an 80-tonne single granite capstone vimana.",
+        },
+        {
+          name: "Thanjavur Maratha Royal Palace",
+          category: "Palace Art Gallery & Bell Tower",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=700&q=80",
+          slug: "thanjavur-city",
+          rating: 4.7,
+          description: "Royal residence of Nayak and Maratha rulers housing priceless ancient bronze statues and rare manuscripts.",
+        },
+        {
+          name: "Saraswathi Mahal Library",
+          category: "Oldest Library in Asia",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "thanjavur-city",
+          rating: 4.8,
+          description: "Historical repository containing 60,000+ rare palm-leaf manuscripts and ancient cartographic atlases.",
+        },
+        {
+          name: "Thanjavur Dancing Doll & Art Studios",
+          category: "GI-Tagged Handicraft Trail",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1600100397608-f010f444f434?auto=format&fit=crop&w=700&q=80",
+          slug: "thanjavur-city",
+          rating: 4.6,
+          description: "Watch master artisans craft gold-foil Thanjavur paintings and oscillating Thalayatti Bommai dolls.",
+        },
+      ],
+    },
+  };
+
+  const currentHubData = hubPlacesData[selectedHubId] || hubPlacesData.ooty;
+
   return (
     <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
       {/* ─────────────────────────────────────────────────────────── */}
-      {/* ROW 1: Things to do wherever you're going (Minimal Carousel) */}
+      {/* ROW 1: Things to do wherever you're going                   */}
+      {/* Interactive Hubs (Right) & Places (Left)                     */}
       {/* ─────────────────────────────────────────────────────────── */}
-      <div className="mb-10">
-        <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
+      <div className="mb-14">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
               Things to do wherever you're going
             </h2>
             <p className="mt-1 text-xs sm:text-sm text-slate-500">
-              Interactive travel hubs, handpicked activities, and regional circuits across Tamil Nadu
+              Select any regional hub on the right to discover handpicked places and top attractions on the left
             </p>
           </div>
-          <span className="text-[11px] font-mono font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
-            Tap hubs to expand
-          </span>
+          <div className="flex items-center gap-2">
+            <span className="text-[11px] font-mono font-bold text-sky-600 bg-sky-50 px-3 py-1 rounded-full border border-sky-200">
+              Active: {currentHubData.hubName}
+            </span>
+          </div>
         </div>
 
-        {/* Minimal Carousel Component */}
-        <MinimalCarousel
-          cards={hubCarouselCards}
-          onCopyClick={(card) => {
-            const districtRoutes: Record<string, string> = {
-              ooty: "/districts/the-nilgiris",
-              kodaikanal: "/districts/dindigul",
-              madurai: "/districts/madurai",
-              rameswaram: "/districts/ramanathapuram",
-              mahabalipuram: "/districts/chengalpattu",
-              thanjavur: "/districts/thanjavur",
-            };
-            const targetRoute = districtRoutes[card.id] || "/explore";
-            navigate({ to: targetRoute });
-          }}
-          onCustomizeClick={(card) => {
-            navigate({ to: "/explore" });
-          }}
-        />
+        {/* 2-Column Layout: Left (Places for selected hub) | Right (Hubs Minimal Carousel) */}
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+          {/* LEFT SIDE: PLACES FOR SELECTED HUB */}
+          <div className="lg:col-span-7 rounded-3xl border border-sky-100 bg-white/80 backdrop-blur-md p-5 sm:p-6 shadow-sm">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="grid size-6 place-items-center rounded-lg bg-sky-100 text-sky-600">
+                    <MapPin className="size-3.5" />
+                  </span>
+                  <h3 className="text-base sm:text-lg font-extrabold text-slate-900">
+                    Places & Attractions in {currentHubData.hubName}
+                  </h3>
+                </div>
+                <p className="text-xs text-slate-500 mt-0.5">{currentHubData.tagline}</p>
+              </div>
+
+              <Link
+                to={currentHubData.route}
+                className="hidden sm:inline-flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700 bg-sky-50 hover:bg-sky-100 px-3 py-1.5 rounded-full border border-sky-200 transition shrink-0"
+              >
+                <span>Explore all {currentHubData.districtLabel}</span>
+                <ChevronRight className="size-3.5" />
+              </Link>
+            </div>
+
+            {/* Places Grid */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              {currentHubData.places.map((place, idx) => (
+                <Link
+                  key={idx}
+                  to="/place/$slug"
+                  params={{ slug: place.slug }}
+                  className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-3 hover:border-sky-300 hover:shadow-md transition-all duration-200"
+                >
+                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-slate-100 mb-2.5">
+                    <SafeImage
+                      src={place.image}
+                      alt={place.name}
+                      category="heritage"
+                      className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
+                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md bg-white/90 backdrop-blur-md px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-800 border border-slate-200/80">
+                      ★ {place.rating}
+                    </span>
+                    <span className="absolute top-2 right-2 rounded-full bg-slate-900/70 backdrop-blur-md px-2 py-0.5 text-[9px] font-mono font-semibold text-white">
+                      {place.timeNeeded}
+                    </span>
+                  </div>
+
+                  <div>
+                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-600">
+                      {place.category}
+                    </span>
+                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1 mt-0.5">
+                      {place.name}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                      {place.description}
+                    </p>
+                  </div>
+                </Link>
+              ))}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between sm:hidden">
+              <Link
+                to={currentHubData.route}
+                className="w-full text-center text-xs font-bold text-sky-600 bg-sky-50 py-2 rounded-xl border border-sky-200"
+              >
+                View all in {currentHubData.districtLabel} →
+              </Link>
+            </div>
+          </div>
+
+          {/* RIGHT SIDE: HUBS CAROUSEL */}
+          <div className="lg:col-span-5 flex flex-col justify-start">
+            <div className="mb-2 px-1 flex items-center justify-between">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
+                TRAVEL HUBS (TAP TO SWITCH)
+              </span>
+              <span className="text-[11px] text-sky-600 font-semibold">
+                6 Featured Hubs
+              </span>
+            </div>
+
+            <MinimalCarousel
+              cards={hubCarouselCards}
+              activeId={selectedHubId}
+              hideExpandedCard={true}
+              onCardSelect={(cardId) => {
+                if (cardId) setSelectedHubId(cardId);
+              }}
+              onCopyClick={(card) => {
+                const districtRoutes: Record<string, string> = {
+                  ooty: "/districts/the-nilgiris",
+                  kodaikanal: "/districts/dindigul",
+                  madurai: "/districts/madurai",
+                  rameswaram: "/districts/ramanathapuram",
+                  mahabalipuram: "/districts/chengalpattu",
+                  thanjavur: "/districts/thanjavur",
+                };
+                const targetRoute = districtRoutes[card.id] || "/explore";
+                navigate({ to: targetRoute });
+              }}
+              onCustomizeClick={(card) => {
+                const districtRoutes: Record<string, string> = {
+                  ooty: "/districts/the-nilgiris",
+                  kodaikanal: "/districts/dindigul",
+                  madurai: "/districts/madurai",
+                  rameswaram: "/districts/ramanathapuram",
+                  mahabalipuram: "/districts/chengalpattu",
+                  thanjavur: "/districts/thanjavur",
+                };
+                navigate({ to: districtRoutes[card.id] || "/explore" });
+              }}
+            />
+          </div>
+        </div>
       </div>
 
       {/* ─────────────────────────────────────────────────────────── */}

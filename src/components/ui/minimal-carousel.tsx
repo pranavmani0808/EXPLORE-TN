@@ -15,19 +15,33 @@ export interface CarouselCard {
 
 interface MinimalCarouselProps {
   cards: CarouselCard[];
+  activeId?: string | null;
+  onCardSelect?: (cardId: string | null) => void;
   onCopyClick?: (card: CarouselCard) => void;
   onCustomizeClick?: (card: CarouselCard) => void;
+  hideExpandedCard?: boolean;
 }
 
 export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
   cards,
+  activeId: controlledActiveId,
+  onCardSelect,
   onCopyClick,
   onCustomizeClick,
+  hideExpandedCard = false,
 }) => {
-  const [activeId, setActiveId] = useState<string | null>(null);
+  const [internalActiveId, setInternalActiveId] = useState<string | null>(null);
+  const activeId = controlledActiveId !== undefined ? controlledActiveId : internalActiveId;
+
+  const setActiveId = (id: string | null) => {
+    if (controlledActiveId === undefined) {
+      setInternalActiveId(id);
+    }
+    onCardSelect?.(id);
+  };
 
   const activeCard = cards.find((c) => c.id === activeId);
-  const secondaryCards = cards.filter((c) => c.id !== activeId);
+  const secondaryCards = hideExpandedCard ? cards : cards.filter((c) => c.id !== activeId);
 
   const handleBackgroundClick = (e: React.MouseEvent) => {
     if (e.target === e.currentTarget) setActiveId(null);
@@ -45,7 +59,7 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
 
             {/* Expanded Card */}
             <AnimatePresence mode="popLayout">
-              {activeCard && (
+              {activeCard && !hideExpandedCard && (
                 <motion.div
                   key={activeCard.id}
                   layoutId={activeCard.id}
@@ -110,39 +124,43 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
               className={`grid gap-2 sm:gap-3 transition-all duration-500 ${activeId ? "grid-cols-3" : "grid-cols-2"
                 }`}
             >
-              {(activeId ? secondaryCards : cards).map((card) => (
-                <motion.div
-                  key={card.id}
-                  layoutId={card.id}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setActiveId(card.id);
-                  }}
-                  transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  className={`relative flex flex-col justify-between cursor-pointer
-                             rounded-[22px] sm:rounded-[28px] p-3 sm:p-4 text-white shadow-lg
-                             ${card.color}
-                             ${activeId ? "h-24 sm:h-28" : "h-28 sm:h-32"}`}
-                >
-                  <div className="flex justify-between items-start">
-                    <card.icon size={activeId ? 20 : 28} className="shrink-0" />
-                    <div className="rounded-full bg-white/10 p-1 sm:p-1.5 transition-colors">
-                      <MoreHorizontal size={16} />
+              {(activeId && !hideExpandedCard ? secondaryCards : cards).map((card) => {
+                const isSelected = activeId === card.id;
+                return (
+                  <motion.div
+                    key={card.id}
+                    layoutId={card.id}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveId(isSelected && !hideExpandedCard ? null : card.id);
+                    }}
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    className={`relative flex flex-col justify-between cursor-pointer
+                               rounded-[22px] sm:rounded-[28px] p-3 sm:p-4 text-white shadow-lg transition-all
+                               ${card.color}
+                               ${isSelected ? "ring-4 ring-sky-300 ring-offset-2 scale-[1.03] shadow-2xl" : "hover:brightness-105"}
+                               ${activeId && !hideExpandedCard ? "h-24 sm:h-28" : "h-28 sm:h-32"}`}
+                  >
+                    <div className="flex justify-between items-start">
+                      <card.icon size={activeId && !hideExpandedCard ? 20 : 28} className="shrink-0" />
+                      <div className="rounded-full bg-white/10 p-1 sm:p-1.5 transition-colors">
+                        <MoreHorizontal size={16} />
+                      </div>
                     </div>
-                  </div>
 
-                  <div className="mt-1 overflow-hidden">
-                    <h4 className={`${activeId ? "text-[10px] sm:text-xs" : "text-sm sm:text-base"} 
-                                   font-medium opacity-90 truncate leading-tight`}>
-                      {card.title}
-                    </h4>
-                    <p className={`${activeId ? "text-[10px] sm:text-xs" : "text-sm sm:text-base"} 
-                                   font-semibold text-white/60 truncate`}>
-                      {card.value}
-                    </p>
-                  </div>
-                </motion.div>
-              ))}
+                    <div className="mt-1 overflow-hidden">
+                      <h4 className={`${activeId && !hideExpandedCard ? "text-[10px] sm:text-xs" : "text-sm sm:text-base"} 
+                                     font-medium opacity-90 truncate leading-tight`}>
+                        {card.title}
+                      </h4>
+                      <p className={`${activeId && !hideExpandedCard ? "text-[10px] sm:text-xs" : "text-sm sm:text-base"} 
+                                     font-semibold text-white/60 truncate`}>
+                        {card.value}
+                      </p>
+                    </div>
+                  </motion.div>
+                );
+              })}
             </motion.div>
           </motion.div>
         </div>

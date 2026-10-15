@@ -46,6 +46,7 @@ import {
 } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "motion/react";
 import { Button } from "@/components/ui/button";
+import { Notification2, type TeamUpdate } from "@/components/ui/notification-2";
 import { DistrictsMegaModal } from "@/components/site/districts-mega-modal";
 import { cn } from "@/lib/utils";
 import { checkBackendHealth } from "@/lib/api";
@@ -199,6 +200,88 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
       setSettingsMenuOpen(false);
     }, 200);
   };
+
+  const [notificationOpen, setNotificationOpen] = useState(false);
+  const notificationRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
+        setNotificationOpen(false);
+      }
+    };
+    if (notificationOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [notificationOpen]);
+
+  const explorerNotifications: TeamUpdate[] = [
+    {
+      id: "tn-1",
+      type: "alert",
+      priority: "urgent",
+      author: {
+        name: "Nilgiris Ghat Patrol",
+        initials: "NG",
+        avatar: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=120&q=80",
+      },
+      project: "Kallar Ghat Road",
+      message: "Heavy mist & hairpin bend advisory between Mettupalayam and Coonoor",
+      detail: "Speed limit restricted to 30 km/h. Both lanes operational with continuous escort patrols.",
+      timestamp: "5m ago",
+      isUnread: true,
+      isMention: false,
+    },
+    {
+      id: "tn-2",
+      type: "deploy",
+      priority: "normal",
+      author: {
+        name: "ExploreTN AI",
+        initials: "AI",
+        avatar: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=120&q=80",
+      },
+      project: "Circuit Planner",
+      message: "New 3-Day Western Ghats Monsoon Trail generated for your wishlist",
+      detail: "Includes Courtallam Main Falls, Manimuthar dam canopy walk, and Kalakkad sanctuary pass.",
+      timestamp: "45m ago",
+      isUnread: true,
+      isMention: true,
+    },
+    {
+      id: "tn-3",
+      type: "team",
+      priority: "normal",
+      author: {
+        name: "Madurai Guides",
+        initials: "MG",
+        avatar: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=120&q=80",
+      },
+      project: "Meenakshi Temple",
+      message: "Chithirai Festival special morning darshan slots opened for travelers",
+      timestamp: "2h ago",
+      isUnread: true,
+      isMention: false,
+    },
+    {
+      id: "tn-4",
+      type: "doc",
+      priority: "low",
+      author: {
+        name: "Shore Heritage",
+        initials: "SH",
+        avatar: "https://images.unsplash.com/photo-1600100397608-f010f444f434?auto=format&fit=crop&w=120&q=80",
+      },
+      project: "Mahabalipuram",
+      message: "New audio guide updated for Arjuna's Penance & Five Rathas",
+      timestamp: "Yesterday",
+      isUnread: false,
+      isMention: false,
+    },
+  ];
 
   const handleLogOut = async () => {
     try {
@@ -652,6 +735,47 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           >
             <Bookmark className="size-4" />
           </Link>
+
+          {/* Notification Bell Icon & Popover (Notification-2) */}
+          <div ref={notificationRef} className="relative hidden sm:inline-block">
+            <button
+              type="button"
+              onClick={() => setNotificationOpen((prev) => !prev)}
+              className={cn(
+                "relative flex items-center justify-center size-9 rounded-full border transition shrink-0 shadow-sm cursor-pointer",
+                !scrolled
+                  ? "border-white/30 bg-white/20 text-slate-700 hover:bg-white/40 hover:text-sky-600"
+                  : notificationOpen
+                  ? "border-sky-300 bg-sky-50 text-sky-600 ring-2 ring-sky-500/20"
+                  : "border-slate-200 bg-white text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"
+              )}
+              title="Travel Alerts & Notifications"
+              aria-label="Travel Alerts & Notifications"
+            >
+              <Bell className="size-4" />
+              {/* Unread indicator pulse badge */}
+              <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-sky-500 ring-2 ring-white animate-pulse" />
+            </button>
+
+            {/* Notification2 Dropdown Menu */}
+            <AnimatePresence>
+              {notificationOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10, scale: 0.98 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.98 }}
+                  transition={{ duration: 0.18 }}
+                  className="absolute right-0 top-full mt-2.5 w-[380px] sm:w-[410px] z-50 shadow-2xl rounded-3xl"
+                >
+                  <Notification2
+                    heading="Tamil Nadu Updates"
+                    updates={explorerNotifications}
+                    className="p-0"
+                  />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
 
           {/* Account Settings Mega Icon & Dropdown */}
           <div
