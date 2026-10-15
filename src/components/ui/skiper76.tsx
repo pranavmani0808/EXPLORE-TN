@@ -54,39 +54,39 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
   return (
     <div
       className={cn(
-        "relative z-10 w-full rounded-3xl bg-zinc-900/80 backdrop-blur-xl border border-zinc-800/80 p-6 md:p-10 shadow-2xl overflow-hidden transition-all",
+        "relative z-10 w-full rounded-3xl bg-white border border-sky-100 p-6 md:p-10 shadow-xl overflow-hidden transition-all",
         className
       )}
     >
       {/* Background Decorative Gradient Grid */}
-      <div className="absolute inset-0 z-0 opacity-20 pointer-events-none bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:24px_24px]" />
-      <div className="absolute -top-32 -right-32 size-[500px] rounded-full bg-emerald-500/10 blur-3xl pointer-events-none" />
-      <div className="absolute -bottom-32 -left-32 size-[500px] rounded-full bg-amber-500/10 blur-3xl pointer-events-none" />
+      <div className="absolute inset-0 z-0 opacity-10 pointer-events-none bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:24px_24px]" />
+      <div className="absolute -top-32 -right-32 size-[500px] rounded-full bg-sky-200/30 blur-3xl pointer-events-none" />
+      <div className="absolute -bottom-32 -left-32 size-[500px] rounded-full bg-blue-100/30 blur-3xl pointer-events-none" />
 
       {/* Header Banner */}
-      <div className="relative z-10 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-zinc-800/80 pb-6 max-w-7xl mx-auto w-full">
+      <div className="relative z-10 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-slate-100 pb-6 max-w-7xl mx-auto w-full">
         <div>
           <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1 rounded-full bg-amber-500/10 px-3 py-1 text-xs font-bold text-amber-400 border border-amber-500/30">
-              <Sparkles className="size-3.5 text-amber-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1 rounded-full bg-sky-50 px-3 py-1 text-xs font-bold text-sky-700 border border-sky-200">
+              <Sparkles className="size-3.5 text-sky-600 animate-pulse" />
               Apple-Style Skiper76 Spotlight Showcase
             </span>
-            <span className="text-xs text-zinc-500">
+            <span className="text-xs text-slate-500">
               {districtName} · Featured Destinations
             </span>
           </div>
-          <h3 className="mt-2 font-display text-2xl md:text-3xl lg:text-4xl font-black text-white tracking-tight">
+          <h3 className="mt-2 font-display text-2xl md:text-3xl lg:text-4xl font-black text-slate-900 tracking-tight">
             Explore {districtName}&apos;s Iconic Places & Architectural Legends
           </h3>
-          <p className="mt-1 text-xs sm:text-sm text-zinc-400 max-w-3xl">
+          <p className="mt-1 text-xs sm:text-sm text-slate-500 max-w-3xl">
             Interactive visual feature showcase. Select any spot to reveal architectural details, color themes, and location highlights.
           </p>
         </div>
 
         {/* Counter */}
         <div className="flex items-center gap-3">
-          <div className="rounded-xl border border-zinc-800 bg-zinc-900/90 px-4 py-2 text-xs font-mono text-amber-400">
-            <span className="font-bold text-white">0{activeIndex + 1}</span> / 0{items.length}
+          <div className="rounded-xl border border-sky-200 bg-sky-50 px-4 py-2 text-xs font-mono text-sky-700">
+            <span className="font-bold text-slate-900">0{activeIndex + 1}</span> / 0{items.length}
           </div>
         </div>
       </div>
@@ -98,8 +98,8 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
         {/* 1. LEFT PART (3.5 COLS): ICON PLACE LIST & ARROWS                  */}
         {/* ------------------------------------------------------------------ */}
         <div className="lg:col-span-4 xl:col-span-3.5 flex flex-col justify-between space-y-4">
-          <div className="flex items-center justify-between pb-2 border-b border-zinc-800/80">
-            <span className="text-xs font-bold uppercase tracking-wider text-amber-400">
+          <div className="flex items-center justify-between pb-2 border-b border-slate-100">
+            <span className="text-xs font-bold uppercase tracking-wider text-sky-700">
               Destinations Catalog
             </span>
             {/* Up / Down Navigation Buttons */}
@@ -108,7 +108,7 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                 type="button"
                 onClick={handlePrev}
                 aria-label="Previous item"
-                className="grid size-8 place-items-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-300 transition hover:border-amber-500/50 hover:bg-zinc-800 hover:text-amber-400 active:scale-95"
+                className="grid size-8 place-items-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-sky-300 hover:bg-white hover:text-sky-700 active:scale-95"
               >
                 <ChevronUp className="size-4" />
               </button>
@@ -116,7 +116,7 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                 type="button"
                 onClick={handleNext}
                 aria-label="Next item"
-                className="grid size-8 place-items-center rounded-full border border-zinc-800 bg-zinc-900 text-zinc-300 transition hover:border-amber-500/50 hover:bg-zinc-800 hover:text-amber-400 active:scale-95"
+                className="grid size-8 place-items-center rounded-full border border-slate-200 bg-slate-50 text-slate-600 transition hover:border-sky-300 hover:bg-white hover:text-sky-700 active:scale-95"
               >
                 <ChevronDown className="size-4" />
               </button>
@@ -135,8 +135,8 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                   className={cn(
                     "flex items-center justify-between rounded-2xl px-4 py-3 text-xs font-semibold transition-all duration-300 text-left",
                     isActive
-                      ? "bg-zinc-900 text-white border border-amber-500/50 ring-1 ring-amber-500/20 shadow-lg"
-                      : "bg-zinc-900/60 text-zinc-400 border border-zinc-800 hover:bg-zinc-800/80 hover:text-zinc-200"
+                      ? "bg-sky-50 text-sky-950 border border-sky-300 ring-2 ring-sky-500/10 shadow-sm"
+                      : "bg-slate-50/70 text-slate-600 border border-slate-200 hover:bg-white hover:text-slate-900"
                   )}
                 >
                   <div className="flex items-center gap-3 truncate">
@@ -144,8 +144,8 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                       className={cn(
                         "grid size-6 place-items-center rounded-full transition-colors text-[11px] shrink-0",
                         isActive
-                          ? "bg-amber-500 text-zinc-950 font-bold"
-                          : "bg-zinc-800 text-zinc-400"
+                          ? "bg-sky-600 text-white font-bold"
+                          : "bg-slate-200 text-slate-500"
                       )}
                     >
                       {isActive ? <Check className="size-3.5 stroke-[3]" /> : <Plus className="size-3.5" />}
@@ -153,7 +153,7 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                     <span className="truncate">{item.title}</span>
                   </div>
 
-                  <span className="text-[10px] text-zinc-500 font-mono shrink-0 ml-2">
+                  <span className="text-[10px] text-slate-400 font-mono shrink-0 ml-2">
                     {item.category}
                   </span>
                 </button>
@@ -173,43 +173,43 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
               animate={{ opacity: 1, x: 0, scale: 1 }}
               exit={{ opacity: 0, x: 15, scale: 0.97 }}
               transition={{ duration: 0.35, ease: "easeOut" }}
-              className="size-full rounded-3xl border border-zinc-700/60 bg-zinc-900/90 p-6 shadow-2xl backdrop-blur-md flex flex-col justify-between space-y-6"
+              className="size-full rounded-3xl border border-sky-100 bg-slate-50/70 p-6 shadow-md backdrop-blur-md flex flex-col justify-between space-y-6"
             >
               <div className="space-y-4">
-                <div className="flex items-start justify-between gap-3 border-b border-zinc-800/80 pb-4">
+                <div className="flex items-start justify-between gap-3 border-b border-slate-200/80 pb-4">
                   <div>
-                    <span className="text-[10px] font-bold uppercase tracking-wider text-amber-400 block mb-1">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 block mb-1">
                       {activeItem.category}
                     </span>
-                    <h4 className="font-display font-black text-xl text-white leading-tight">
+                    <h4 className="font-display font-black text-xl text-slate-900 leading-tight">
                       {activeItem.title}
                     </h4>
-                    <p className="text-xs text-amber-300 font-semibold mt-1">
+                    <p className="text-xs text-sky-700 font-semibold mt-1">
                       {activeItem.subtitle}
                     </p>
                   </div>
 
                   {activeItem.rating && (
-                    <div className="flex items-center gap-1 rounded-lg bg-zinc-950 px-2.5 py-1 text-xs font-bold text-amber-400 border border-zinc-800 shrink-0">
-                      <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                    <div className="flex items-center gap-1 rounded-lg bg-white px-2.5 py-1 text-xs font-bold text-amber-600 border border-slate-200 shrink-0 shadow-xs">
+                      <Star className="size-3.5 fill-amber-500 text-amber-500" />
                       {activeItem.rating}
                     </div>
                   )}
                 </div>
 
                 <div className="space-y-2">
-                  <h5 className="text-[11px] font-bold uppercase text-zinc-400 tracking-wider">Spot Description</h5>
-                  <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
+                  <h5 className="text-[11px] font-bold uppercase text-slate-500 tracking-wider">Spot Description</h5>
+                  <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
                     {activeItem.description}
                   </p>
                 </div>
 
                 {activeItem.highlights && activeItem.highlights.length > 0 && (
-                  <div className="space-y-2 pt-2 border-t border-zinc-800/80">
-                    <h5 className="text-[11px] font-bold uppercase text-zinc-400 tracking-wider">Must-See Highlights</h5>
+                  <div className="space-y-2 pt-2 border-t border-slate-200/80">
+                    <h5 className="text-[11px] font-bold uppercase text-slate-500 tracking-wider">Must-See Highlights</h5>
                     <div className="flex flex-wrap gap-1.5">
                       {activeItem.highlights.map((h, hIdx) => (
-                        <span key={hIdx} className="rounded-lg bg-zinc-800/80 px-2.5 py-1 text-[11px] font-medium text-zinc-200 border border-zinc-700/60">
+                        <span key={hIdx} className="rounded-lg bg-white px-2.5 py-1 text-[11px] font-medium text-slate-700 border border-slate-200 shadow-xs">
                           ✨ {h}
                         </span>
                       ))}
@@ -220,12 +220,12 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
 
               {/* Swatches / Color Perspective Toggles */}
               {activeItem.swatches && activeItem.swatches.length > 0 && (
-                <div className="pt-4 border-t border-zinc-800/80 flex items-center justify-between">
+                <div className="pt-4 border-t border-slate-200/80 flex items-center justify-between">
                   <div>
-                    <span className="text-xs font-semibold text-zinc-400 block">
+                    <span className="text-xs font-semibold text-slate-500 block">
                       View Palette
                     </span>
-                    <span className="text-xs font-bold text-amber-400">
+                    <span className="text-xs font-bold text-sky-700">
                       {activeSwatch.label}
                     </span>
                   </div>
@@ -240,7 +240,7 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                         className={cn(
                           "size-6 rounded-full transition-transform border-2",
                           selectedSwatchIndex === sIdx
-                            ? "scale-125 border-white ring-2 ring-amber-500/50"
+                            ? "scale-125 border-sky-600 ring-2 ring-sky-500/30"
                             : "border-transparent opacity-70 hover:opacity-100 hover:scale-110"
                         )}
                         style={{ backgroundColor: swatch.color }}
@@ -257,7 +257,7 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
         {/* 3. RIGHT PART (4.5 COLS): ICON PLACE IMAGE SHOWCASE                */}
         {/* ------------------------------------------------------------------ */}
         <div className="lg:col-span-4 xl:col-span-4.5 flex flex-col">
-          <div className="relative rounded-3xl overflow-hidden border border-zinc-800 bg-zinc-900 shadow-2xl h-[420px] lg:h-full min-h-[440px] group size-full">
+          <div className="relative rounded-3xl overflow-hidden border border-slate-200 bg-slate-100 shadow-xl h-[420px] lg:h-full min-h-[440px] group size-full">
             
             {/* Animated Showcase Image */}
             <AnimatePresence mode="wait">
@@ -274,32 +274,31 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
             </AnimatePresence>
 
             {/* Overlays */}
-            <div className="absolute inset-0 bg-gradient-to-t from-zinc-950 via-zinc-950/20 to-transparent pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-r from-zinc-950/60 via-transparent to-transparent pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent pointer-events-none" />
 
             {/* Top Bar Badges */}
             <div className="absolute top-4 left-4 right-4 flex items-center justify-between z-10 pointer-events-none">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-zinc-950/80 px-3 py-1 text-xs font-bold text-amber-300 border border-zinc-800 backdrop-blur-md">
-                <Compass className="size-3.5 text-amber-400" />
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-xs font-bold text-sky-800 border border-slate-200 backdrop-blur-md shadow-xs">
+                <Compass className="size-3.5 text-sky-600" />
                 {activeItem.category}
               </span>
 
               {activeItem.address && (
-                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-zinc-950/80 px-3 py-1 text-[11px] font-semibold text-zinc-300 border border-zinc-800 backdrop-blur-md">
-                  <MapPin className="size-3 text-emerald-400" />
+                <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full bg-white/90 px-3 py-1 text-[11px] font-semibold text-slate-700 border border-slate-200 backdrop-blur-md shadow-xs">
+                  <MapPin className="size-3 text-sky-600" />
                   {activeItem.address}
                 </span>
               )}
             </div>
 
             {/* Bottom Info Bar & Focus Button */}
-            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-zinc-950/90 border border-zinc-800/90 p-4 rounded-2xl backdrop-blur-md">
+            <div className="absolute bottom-4 left-4 right-4 z-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-white/95 border border-sky-100 p-4 rounded-2xl backdrop-blur-md shadow-lg">
               <div>
-                <h5 className="font-display font-bold text-sm text-white flex items-center gap-2">
+                <h5 className="font-display font-bold text-sm text-slate-900 flex items-center gap-2">
                   <span>{activeItem.title}</span>
-                  <span className="text-[10px] text-amber-400 font-mono">• {activeSwatch.label}</span>
+                  <span className="text-[10px] text-sky-700 font-mono">• {activeSwatch.label}</span>
                 </h5>
-                <p className="text-xs text-zinc-400 line-clamp-1 mt-0.5">
+                <p className="text-xs text-slate-500 line-clamp-1 mt-0.5">
                   {activeItem.subtitle}
                 </p>
               </div>
@@ -308,7 +307,7 @@ export function Skiper76Showcase({ items, districtName = "Tamil Nadu", onFocusSp
                 <button
                   type="button"
                   onClick={() => onFocusSpot(activeItem.id)}
-                  className="shrink-0 flex items-center gap-1.5 rounded-xl bg-amber-500 px-3.5 py-2 text-xs font-bold text-zinc-950 transition hover:bg-amber-400 active:scale-95 shadow-lg"
+                  className="shrink-0 flex items-center gap-1.5 rounded-xl bg-sky-600 px-3.5 py-2 text-xs font-bold text-white transition hover:bg-sky-500 active:scale-95 shadow-md"
                 >
                   <span>Focus on Map</span>
                   <ExternalLink className="size-3.5" />

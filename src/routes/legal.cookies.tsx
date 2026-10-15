@@ -7,6 +7,15 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/legal/cookies")({
+  head: () => ({
+    meta: [
+      { title: "Cookie Policy & Data Preferences — ExplorerTN" },
+      {
+        name: "description",
+        content: "ExploreTN cookie usage policy, session analytics, map caching preferences, and tracking consent settings.",
+      },
+    ],
+  }),
   component: CookiePolicyPage,
 });
 

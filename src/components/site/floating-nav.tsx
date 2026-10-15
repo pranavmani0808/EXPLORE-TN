@@ -242,11 +242,9 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           <nav
             className={cn(
               "flex h-16 w-full max-w-5xl items-center justify-between gap-2 rounded-full border px-4 pr-3 transition-all duration-300",
-              isHomePage && !scrolled
-                ? "border-white/40 bg-white/20 backdrop-blur-md shadow-xs"
-                : scrolled
+              scrolled
                 ? "border-sky-200/80 bg-white/95 shadow-[0_12px_40px_rgba(2,132,199,0.1)] backdrop-blur-xl"
-                : "border-slate-200/90 bg-white/90 shadow-[0_4px_24px_rgba(0,0,0,0.04)] backdrop-blur-xl"
+                : "border-white/30 bg-white/20 shadow-sm backdrop-blur-md"
             )}
             aria-label="Main Navigation"
           >
@@ -268,8 +266,8 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                 <nav
                   className={cn(
                     "relative flex items-center gap-1 p-1 rounded-full border transition-all duration-300",
-                    isHomePage && !scrolled
-                      ? "border-white/30 bg-white/30 shadow-none backdrop-blur-xs"
+                    !scrolled
+                      ? "border-white/30 bg-white/20 shadow-none backdrop-blur-xs"
                       : "border-slate-200/80 bg-slate-50/70 shadow-[inset_0_-2px_4px_rgba(0,0,0,0.02),inset_0_1px_0_rgba(255,255,255,0.9),0_2px_8px_rgba(2,132,199,0.04)]"
                   )}
                 >
@@ -554,14 +552,14 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             onClick={onSearch}
             className={cn(
               "hidden xl:flex h-9 items-center gap-2 rounded-full border px-3 text-xs transition cursor-pointer shrink-0",
-              isHomePage && !scrolled
-                ? "border-white/30 bg-white/30 text-slate-700 hover:bg-white/50"
+              !scrolled
+                ? "border-white/30 bg-white/20 text-slate-700 hover:bg-white/40"
                 : "border-slate-200 bg-slate-50 text-slate-500 hover:border-sky-200 hover:bg-sky-50 hover:text-sky-700"
             )}
           >
             <Search className="size-3.5 text-slate-500" />
             <span className="font-medium">{lang === "ta" ? "தேடுக..." : "Search..."}</span>
-            <kbd className={cn("rounded px-1.5 py-0.5 text-[10px] font-mono border", isHomePage && !scrolled ? "bg-white/60 text-slate-600 border-white/50" : "bg-white text-slate-500 border-slate-200")}>
+            <kbd className={cn("rounded px-1.5 py-0.5 text-[10px] font-mono border", !scrolled ? "bg-white/60 text-slate-600 border-white/50" : "bg-white text-slate-500 border-slate-200")}>
               {typeof navigator !== "undefined" && /Mac/i.test(navigator.platform || "") ? "⌘K" : "Ctrl K"}
             </kbd>
           </button>
@@ -572,8 +570,8 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             onClick={toggleLanguage}
             className={cn(
               "hidden sm:flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs font-bold transition shrink-0 cursor-pointer",
-              isHomePage && !scrolled
-                ? "border-white/30 bg-white/30 text-sky-800 hover:bg-white/50"
+              !scrolled
+                ? "border-white/30 bg-white/20 text-sky-800 hover:bg-white/40"
                 : "border-sky-100 bg-sky-50 text-sky-700 hover:bg-sky-100"
             )}
             title="Switch Language / மொழியை மாற்றுக"
@@ -587,8 +585,8 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             to="/saved"
             className={cn(
               "hidden sm:flex items-center justify-center size-9 rounded-full border transition shrink-0 shadow-sm",
-              isHomePage && !scrolled
-                ? "border-white/30 bg-white/30 text-slate-700 hover:bg-white/50 hover:text-sky-600"
+              !scrolled
+                ? "border-white/30 bg-white/20 text-slate-700 hover:bg-white/40 hover:text-sky-600"
                 : "border-slate-200 bg-white text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"
             )}
             title={lang === "ta" ? "சேமித்த இடங்கள்" : "Saved Places"}
@@ -606,8 +604,8 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
               to="/settings"
               className={cn(
                 "flex items-center justify-center size-9 rounded-full border transition shrink-0 shadow-sm cursor-pointer",
-                isHomePage && !scrolled
-                  ? "border-white/30 bg-white/30 text-slate-700 hover:bg-white/50 hover:text-sky-600"
+                !scrolled
+                  ? "border-white/30 bg-white/20 text-slate-700 hover:bg-white/40 hover:text-sky-600"
                   : pathname.startsWith("/settings") || settingsMenuOpen
                   ? "border-sky-300 bg-sky-50 text-sky-600 ring-2 ring-sky-500/20"
                   : "border-slate-200 bg-white text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"

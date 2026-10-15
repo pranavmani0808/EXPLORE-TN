@@ -4,6 +4,12 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/payment/success")({
+  head: () => ({
+    meta: [
+      { title: "Payment Successful | ExploreTN" },
+      { name: "description", content: "Your ExploreTN Pro Adventurer subscription or booking payment was confirmed successfully." },
+    ],
+  }),
   component: PaymentSuccessPage,
 });
 

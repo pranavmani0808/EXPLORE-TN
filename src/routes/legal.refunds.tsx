@@ -3,6 +3,12 @@ import { CreditCard, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/legal/refunds")({
+  head: () => ({
+    meta: [
+      { title: "Refund Policy | ExploreTN" },
+      { name: "description", content: "ExploreTN refund and cancellation policy for Pro passes, subscriptions, and guided trail bookings in Tamil Nadu." },
+    ],
+  }),
   component: RefundPolicyPage,
 });
 

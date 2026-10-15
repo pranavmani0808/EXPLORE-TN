@@ -3,6 +3,15 @@ import { Shield, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/legal/privacy")({
+  head: () => ({
+    meta: [
+      { title: "Privacy Policy — ExplorerTN" },
+      {
+        name: "description",
+        content: "ExploreTN privacy policy, traveler data handling practices, GPS telemetry controls, and user privacy protections.",
+      },
+    ],
+  }),
   component: PrivacyPolicyPage,
 });
 

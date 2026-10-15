@@ -3,6 +3,15 @@ import { Scale, FileText, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/legal/terms")({
+  head: () => ({
+    meta: [
+      { title: "Terms of Service — ExplorerTN" },
+      {
+        name: "description",
+        content: "ExploreTN terms of service, platform usage guidelines, itinerary booking policies, and traveler legal agreements.",
+      },
+    ],
+  }),
   component: TermsOfServicePage,
 });
 

@@ -264,7 +264,7 @@ export function DistrictView({ district }: DistrictViewProps) {
   };
 
   return (
-    <div ref={containerRef} className="relative min-h-screen bg-zinc-950 text-foreground font-sans overflow-x-hidden">
+    <div ref={containerRef} className="relative min-h-screen bg-slate-50 text-slate-800 font-sans overflow-x-hidden">
       {/* ============================================================ */}
       {/* FIXED FULL-PAGE BACKGROUND HERO IMAGE LAYER                   */}
       {/* ============================================================ */}
@@ -275,11 +275,11 @@ export function DistrictView({ district }: DistrictViewProps) {
           onError={(e) => {
             e.currentTarget.src = "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80";
           }}
-          className="h-full w-full object-cover object-center opacity-30 scale-105 filter brightness-90 contrast-105 saturate-110"
+          className="h-full w-full object-cover object-center opacity-10 scale-105 filter brightness-105 contrast-100"
         />
-        {/* Multi-stage Luxury Gradient & Dot Grid Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/85 to-zinc-950/95" />
-        <div className="absolute inset-0 bg-[radial-gradient(#38bdf8_1px,transparent_1px)] [background-size:28px_28px] opacity-15" />
+        {/* Multi-stage Light Sky Gradient & Dot Grid Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-b from-sky-50/70 via-slate-50/90 to-slate-50" />
+        <div className="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:28px_28px] opacity-10" />
       </div>
 
       <div className="relative z-10">
@@ -295,29 +295,29 @@ export function DistrictView({ district }: DistrictViewProps) {
             onError={(e) => {
               e.currentTarget.src = "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&q=80";
             }}
-            className="gsap-hero-bg h-full w-full object-cover object-right sm:object-center opacity-90 scale-105 filter brightness-95 contrast-105 saturate-110"
+            className="gsap-hero-bg h-full w-full object-cover object-right sm:object-center opacity-30 scale-105 filter brightness-105 contrast-105"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-zinc-950 via-zinc-950/85 to-zinc-950/30" />
-          <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-transparent to-background" />
-          <div className="absolute inset-0 bg-grid-white/10 [mask-image:linear-gradient(90deg,white,rgba(255,255,255,0.2))]" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-50 via-slate-50/90 to-transparent" />
+          <div className="absolute inset-0 bg-gradient-to-b from-sky-100/50 via-transparent to-slate-50" />
+          <div className="absolute inset-0 bg-grid-slate-900/5 [mask-image:linear-gradient(90deg,white,rgba(255,255,255,0.2))]" />
         </div>
 
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6">
           <div className="max-w-3xl space-y-4 text-left">
             {/* Left-Aligned Badges */}
             <div className="flex flex-wrap items-center justify-start gap-2.5">
-              <Badge variant="secondary" className="gsap-hero-center-badge bg-amber-500/20 text-amber-300 border-amber-500/40 uppercase text-xs tracking-wider font-extrabold px-4 py-1.5 backdrop-blur-md">
-                <Compass className="mr-1.5 size-4 text-amber-400" />
+              <Badge variant="secondary" className="gsap-hero-center-badge bg-sky-100 text-sky-800 border-sky-200 uppercase text-xs tracking-wider font-extrabold px-4 py-1.5 backdrop-blur-md shadow-xs">
+                <Compass className="mr-1.5 size-4 text-sky-600" />
                 {district.region} · District Guide
               </Badge>
-              <Badge variant="outline" className="gsap-hero-center-badge text-zinc-200 border-zinc-700 bg-zinc-900/80 backdrop-blur-md text-xs font-semibold px-4 py-1.5">
+              <Badge variant="outline" className="gsap-hero-center-badge text-slate-700 border-slate-200 bg-white/90 backdrop-blur-md text-xs font-semibold px-4 py-1.5 shadow-xs">
                 📅 Best Time: {district.overview.bestTimeToVisit}
               </Badge>
             </div>
 
             {/* Left-Aligned Title Block */}
             <div className="gsap-hero-center-title space-y-2">
-              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-amber-300 tracking-tight leading-none drop-shadow-2xl font-display">
+              <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-sky-900 tracking-tight leading-none drop-shadow-sm font-display">
                 {district.name}
               </h1>
               <div className="py-1">
@@ -332,9 +332,9 @@ export function DistrictView({ district }: DistrictViewProps) {
                   drift={16}
                   align="left"
                   textScale={0.065}
-                  brightness={1.8}
+                  brightness={0.9}
                   saturation={1.3}
-                  className="font-display font-black tracking-tight uppercase drop-shadow-[0_2px_10px_rgba(251,191,36,0.3)] filter drop-shadow-[0_4px_16px_rgba(0,0,0,0.9)]"
+                  className="font-display font-black tracking-tight uppercase text-slate-900 filter drop-shadow-[0_2px_8px_rgba(2,132,199,0.15)]"
                 />
               </div>
             </div>
@@ -589,7 +589,7 @@ export function DistrictView({ district }: DistrictViewProps) {
       {/* ============================================================ */}
       <div className="sticky top-[75px] z-30 py-2.5 my-2 pointer-events-none">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 pointer-events-auto">
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-zinc-900/90 backdrop-blur-xl border border-zinc-800/80 p-3 shadow-2xl">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 rounded-2xl bg-white/95 backdrop-blur-xl border border-sky-100 p-3 shadow-lg shadow-sky-900/5">
             {/* Category Filter Tabs */}
             <div className="flex w-full sm:w-auto items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 scrollbar-none">
               {CATEGORY_TABS.map((tab) => {
@@ -602,8 +602,8 @@ export function DistrictView({ district }: DistrictViewProps) {
                     onClick={(e) => handleCategoryTabClick(tab.key, e)}
                     className={`rounded-full text-xs font-medium shrink-0 transition-all ${
                       isActive
-                        ? "bg-amber-500 text-zinc-950 font-extrabold hover:bg-amber-400 shadow-md"
-                        : "border-zinc-800 bg-zinc-900/80 text-zinc-300 hover:bg-zinc-800 hover:text-white"
+                        ? "bg-sky-600 text-white font-extrabold hover:bg-sky-500 shadow-sm"
+                        : "border-slate-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-700"
                     }`}
                   >
                     <span className="mr-1.5">{tab.icon}</span>
@@ -615,13 +615,13 @@ export function DistrictView({ district }: DistrictViewProps) {
 
             {/* Search Input */}
             <div className="relative w-full sm:w-80">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
               <Input
                 type="text"
                 placeholder={`Search ${district.name} spots, landmarks...`}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 rounded-full bg-zinc-900/90 border-zinc-800 text-xs text-white placeholder:text-zinc-500 focus-visible:ring-amber-500"
+                className="pl-9 h-9 rounded-full bg-slate-50 border-slate-200 text-xs text-slate-800 placeholder:text-slate-400 focus-visible:ring-sky-500"
               />
             </div>
           </div>
@@ -632,17 +632,17 @@ export function DistrictView({ district }: DistrictViewProps) {
       {/* 4. DISTRICT SPOTS CATALOG LIST                                */}
       {/* ============================================================ */}
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 space-y-6">
-        <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3">
+        <div className="flex items-center justify-between border-b border-slate-200 pb-3">
           <div>
-            <h3 className="font-display text-2xl font-bold text-white flex items-center gap-2">
+            <h3 className="font-display text-2xl font-bold text-slate-900 flex items-center gap-2">
               <span>{selectedCategory === "all" ? `All ${district.name} Spots` : CATEGORY_TABS.find((t) => t.key === selectedCategory)?.label}</span>
             </h3>
-            <p className="text-xs text-zinc-400">
+            <p className="text-xs text-slate-500">
               Scroll horizontally or click focus button to center any spot on the map
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <Badge variant="outline" className="border-amber-500/40 bg-amber-500/10 text-amber-300 text-xs">
+            <Badge variant="outline" className="border-sky-200 bg-sky-50 text-sky-700 text-xs font-bold">
               {filteredSpots.length} Spots Active
             </Badge>
             {/* Left & Right Horizontal Scroll Navigation Buttons */}
@@ -651,7 +651,7 @@ export function DistrictView({ district }: DistrictViewProps) {
                 type="button"
                 onClick={handleScrollLeft}
                 aria-label="Scroll left"
-                className="grid size-8 place-items-center rounded-xl border border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-amber-500/50 hover:bg-zinc-800 hover:text-amber-400 transition active:scale-95 shadow-md"
+                className="grid size-8 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 transition active:scale-95 shadow-xs"
               >
                 <ChevronLeft className="size-4" />
               </button>
@@ -659,7 +659,7 @@ export function DistrictView({ district }: DistrictViewProps) {
                 type="button"
                 onClick={handleScrollRight}
                 aria-label="Scroll right"
-                className="grid size-8 place-items-center rounded-xl border border-zinc-800 bg-zinc-900/90 text-zinc-300 hover:border-amber-500/50 hover:bg-zinc-800 hover:text-amber-400 transition active:scale-95 shadow-md"
+                className="grid size-8 place-items-center rounded-xl border border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:bg-sky-50 hover:text-sky-700 transition active:scale-95 shadow-xs"
               >
                 <ChevronRight className="size-4" />
               </button>
@@ -668,17 +668,17 @@ export function DistrictView({ district }: DistrictViewProps) {
         </div>
 
         {filteredSpots.length === 0 ? (
-          <div className="rounded-3xl border border-dashed border-zinc-800 p-12 text-center">
-            <Compass className="mx-auto size-10 text-zinc-600 mb-3 animate-spin-slow" />
-            <h4 className="font-bold text-base text-zinc-300">No Spots Found</h4>
-            <p className="mt-1 text-xs text-zinc-400">No {district.name} spots match your search query.</p>
+          <div className="rounded-3xl border border-dashed border-slate-200 bg-white p-12 text-center">
+            <Compass className="mx-auto size-10 text-slate-400 mb-3 animate-spin-slow" />
+            <h4 className="font-bold text-base text-slate-800">No Spots Found</h4>
+            <p className="mt-1 text-xs text-slate-500">No {district.name} spots match your search query.</p>
             <Button
               size="sm"
               onClick={() => {
                 setSelectedCategory("all");
                 setSearchQuery("");
               }}
-              className="mt-4 bg-amber-500 text-zinc-950 hover:bg-amber-400 text-xs font-bold rounded-xl"
+              className="mt-4 bg-sky-600 text-white hover:bg-sky-500 text-xs font-bold rounded-xl"
             >
               Reset Spot Filters
             </Button>
@@ -694,26 +694,26 @@ export function DistrictView({ district }: DistrictViewProps) {
                 <Card
                   key={spot.id}
                   onClick={() => handleSpotFocus(spot)}
-                  className={`gsap-spot-card transform-gpu cursor-pointer overflow-hidden bg-zinc-900/95 border transition-all duration-300 shrink-0 w-[340px] sm:w-[400px] snap-start flex flex-col justify-between ${
+                  className={`gsap-spot-card transform-gpu cursor-pointer overflow-hidden bg-white border transition-all duration-300 shrink-0 w-[340px] sm:w-[400px] snap-start flex flex-col justify-between ${
                     isSelected
-                      ? "border-emerald-500 ring-2 ring-emerald-500/30 shadow-2xl bg-zinc-900"
-                      : "border-zinc-800 hover:border-zinc-700 hover:bg-zinc-900"
+                      ? "border-sky-500 ring-2 ring-sky-500/20 shadow-xl"
+                      : "border-slate-200 hover:border-sky-300 hover:shadow-md"
                   }`}
                 >
                   <CardContent className="p-5 flex flex-col justify-between h-full space-y-4">
                     {/* Spot Image Thumbnail */}
-                    <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-2xl bg-zinc-950">
+                    <div className="relative h-44 w-full shrink-0 overflow-hidden rounded-2xl bg-slate-100">
                       <img
                         src={spot.image}
                         alt={spot.name}
                         className="size-full object-cover transition-transform duration-500 hover:scale-105"
                         loading="lazy"
                       />
-                      <Badge className="absolute top-2.5 left-2.5 bg-zinc-950/80 backdrop-blur-md text-amber-300 border-zinc-800 text-[10px] font-bold">
+                      <Badge className="absolute top-2.5 left-2.5 bg-white/95 backdrop-blur-md text-sky-800 border-sky-100 text-[10px] font-bold shadow-xs">
                         {spot.categoryLabel}
                       </Badge>
-                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-zinc-950/90 backdrop-blur-md px-2 py-0.5 rounded-md border border-zinc-800 text-xs font-bold text-amber-400">
-                        <Star className="size-3 fill-amber-400 text-amber-400" />
+                      <div className="absolute top-2.5 right-2.5 flex items-center gap-1 bg-white/95 backdrop-blur-md px-2 py-0.5 rounded-md border border-slate-100 text-xs font-bold text-amber-600 shadow-xs">
+                        <Star className="size-3 fill-amber-500 text-amber-500" />
                         {spot.rating}
                       </div>
                     </div>
@@ -721,21 +721,21 @@ export function DistrictView({ district }: DistrictViewProps) {
                     {/* Spot Details Column */}
                     <div className="space-y-3 flex-1 flex flex-col justify-between">
                       <div>
-                        <h4 className="font-display font-bold text-base text-white hover:text-emerald-400 transition-colors line-clamp-1">
+                        <h4 className="font-display font-bold text-base text-slate-900 hover:text-sky-600 transition-colors line-clamp-1">
                           {spot.name}
                         </h4>
-                        <p className="text-xs text-amber-400/90 font-semibold mt-0.5 line-clamp-1">{spot.tagline}</p>
-                        <p className="text-xs text-zinc-300 leading-relaxed line-clamp-2 mt-1.5">{spot.description}</p>
+                        <p className="text-xs text-sky-700 font-semibold mt-0.5 line-clamp-1">{spot.tagline}</p>
+                        <p className="text-xs text-slate-600 leading-relaxed line-clamp-2 mt-1.5">{spot.description}</p>
                       </div>
 
                       {/* Address & Highlights */}
-                      <div className="space-y-1 pt-2 border-t border-zinc-800/80 text-[11px] text-zinc-400">
+                      <div className="space-y-1 pt-2 border-t border-slate-100 text-[11px] text-slate-500">
                         <div className="flex items-center gap-1.5 truncate">
-                          <MapPin className="size-3 text-emerald-400 shrink-0" />
+                          <MapPin className="size-3 text-sky-600 shrink-0" />
                           <span className="truncate">{spot.address}</span>
                         </div>
                         <div className="flex items-center gap-1.5 truncate">
-                          <Clock className="size-3 text-amber-400 shrink-0" />
+                          <Clock className="size-3 text-amber-600 shrink-0" />
                           <span className="truncate">{spot.timings}</span>
                         </div>
                       </div>
@@ -743,7 +743,7 @@ export function DistrictView({ district }: DistrictViewProps) {
                       <div className="flex items-center justify-between pt-2">
                         <div className="flex flex-wrap gap-1">
                           {spot.highlights.slice(0, 2).map((h, idx) => (
-                            <span key={idx} className="rounded bg-zinc-800 px-2 py-0.5 text-[10px] text-zinc-300">
+                            <span key={idx} className="rounded bg-sky-50 px-2 py-0.5 text-[10px] text-sky-700 border border-sky-100 font-medium">
                               {h}
                             </span>
                           ))}
@@ -756,7 +756,7 @@ export function DistrictView({ district }: DistrictViewProps) {
                               e.stopPropagation();
                               handleOpenSpotModal(spot);
                             }}
-                            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold bg-amber-500/15 text-amber-300 hover:bg-amber-500 hover:text-zinc-950 border border-amber-500/30 transition"
+                            className="flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold bg-sky-50 text-sky-700 hover:bg-sky-100 border border-sky-200 transition"
                           >
                             <span>Details</span>
                           </button>
@@ -770,8 +770,8 @@ export function DistrictView({ district }: DistrictViewProps) {
                             className={cn(
                               "flex items-center gap-1 rounded-lg px-2.5 py-1 text-[11px] font-bold transition",
                               isSelected
-                                ? "bg-emerald-400 text-zinc-950 font-extrabold"
-                                : "bg-zinc-800 text-emerald-400 hover:bg-emerald-400 hover:text-zinc-950 font-bold",
+                                ? "bg-sky-600 text-white font-extrabold"
+                                : "bg-slate-100 text-sky-700 hover:bg-sky-600 hover:text-white font-bold",
                             )}
                           >
                             <span>Focus</span>
@@ -806,38 +806,36 @@ export function DistrictView({ district }: DistrictViewProps) {
       {/* ============================================================ */}
       {/* 5. SPOTLIGHT SECTIONS: CRAFTS, BAZAARS & FOOD TRAILS          */}
       {/* ============================================================ */}
-      <div className="relative overflow-hidden bg-transparent py-20">
+      <div className="relative overflow-hidden bg-transparent py-14">
         {/* Ambient Glow Orbs */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-purple-600/15 blur-[140px] pointer-events-none" />
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-amber-500/15 blur-[140px] pointer-events-none" />
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-emerald-500/5 blur-[180px] pointer-events-none" />
+        <div className="absolute -top-40 -left-40 w-96 h-96 rounded-full bg-sky-200/40 blur-[140px] pointer-events-none" />
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 rounded-full bg-blue-100/40 blur-[140px] pointer-events-none" />
         
         {/* Subtle Radial Mesh Grid overlay */}
-        <div className="absolute inset-0 bg-[radial-gradient(#3f3f46_1px,transparent_1px)] [background-size:24px_24px] opacity-25 pointer-events-none" />
+        <div className="absolute inset-0 bg-[radial-gradient(#0284c7_1px,transparent_1px)] [background-size:24px_24px] opacity-10 pointer-events-none" />
 
-        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 space-y-14">
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 space-y-12">
           
           {/* BAZAARS & CRAFTS SPOTLIGHT */}
-          <div className="gsap-spotlight-box group relative overflow-hidden rounded-3xl border border-purple-500/40 bg-zinc-900/90 backdrop-blur-xl p-6 md:p-10 space-y-6 shadow-[0_0_60px_-15px_rgba(168,85,247,0.25)] transition-all hover:border-purple-500/60">
+          <div className="gsap-spotlight-box group relative overflow-hidden rounded-3xl border border-sky-100 bg-white p-6 md:p-10 space-y-6 shadow-xl">
             {/* Background Texture Image Overlay */}
             <div 
-              className="absolute inset-0 z-0 opacity-15 mix-blend-overlay bg-cover bg-center pointer-events-none transition-transform duration-1000 group-hover:scale-105" 
+              className="absolute inset-0 z-0 opacity-5 mix-blend-multiply bg-cover bg-center pointer-events-none transition-transform duration-1000 group-hover:scale-105" 
               style={{ backgroundImage: `url(${district.spots.find(s => s.category === 'thrift-streets')?.image || district.heroImage})` }} 
             />
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-purple-500/60 to-transparent" />
-            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-sky-400 to-transparent" />
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <Badge className="bg-purple-500/20 text-purple-300 border-purple-500/50 text-[10px] tracking-wider uppercase font-semibold px-3 py-1">
+                <Badge className="bg-sky-50 text-sky-700 border-sky-200 text-[10px] tracking-wider uppercase font-semibold px-3 py-1">
                   🛍️ {district.name} Shopping & Crafts
                 </Badge>
-                <h3 className="mt-3 font-display text-2xl md:text-3xl font-bold text-white tracking-tight">
+                <h3 className="mt-3 font-display text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
                   {district.slug === "madurai"
                     ? "Madurai Famous Thrift Streets & Heritage Bazaars"
                     : `${district.name} Heritage Bazaars & Traditional Crafts`}
                 </h3>
-                <p className="mt-2 text-sm text-zinc-300 max-w-2xl leading-relaxed">
+                <p className="mt-2 text-sm text-slate-600 max-w-2xl leading-relaxed">
                   {district.tagline}. Discover local handlooms, specialty crafts, and traditional shopping lanes across {district.name}.
                 </p>
               </div>
@@ -846,34 +844,34 @@ export function DistrictView({ district }: DistrictViewProps) {
             <div className="relative z-10 grid grid-cols-1 md:grid-cols-3 gap-5">
               {district.slug === "madurai" ? (
                 <>
-                  <div className="group/item relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-950/80 p-5 space-y-2.5 hover:border-purple-400/60 hover:bg-zinc-900/90 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
-                    <h4 className="font-display text-base font-bold text-purple-300 group-hover/item:text-purple-200 transition-colors">Puthu Mandapam Thrift Arcade</h4>
-                    <p className="text-xs text-zinc-300 leading-relaxed">
+                  <div className="group/item relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2.5 hover:border-sky-300 hover:bg-white transition-all duration-300 hover:shadow-md">
+                    <h4 className="font-display text-base font-bold text-slate-900 group-hover/item:text-sky-700 transition-colors">Puthu Mandapam Thrift Arcade</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       17th-century Nayak hall with 100+ tailors stitching custom apparel in 30 minutes, plus brass lamps and copper vessels.
                     </p>
-                    <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1.5 pt-1">📍 Adjacent to Meenakshi Temple East Tower</span>
+                    <span className="text-[11px] text-sky-700 font-semibold flex items-center gap-1.5 pt-1">📍 Adjacent to Meenakshi Temple East Tower</span>
                   </div>
-                  <div className="group/item relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-950/80 p-5 space-y-2.5 hover:border-purple-400/60 hover:bg-zinc-900/90 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
-                    <h4 className="font-display text-base font-bold text-purple-300 group-hover/item:text-purple-200 transition-colors">Vilakkuthoon Brassware Street</h4>
-                    <p className="text-xs text-zinc-300 leading-relaxed">
+                  <div className="group/item relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2.5 hover:border-sky-300 hover:bg-white transition-all duration-300 hover:shadow-md">
+                    <h4 className="font-display text-base font-bold text-slate-900 group-hover/item:text-sky-700 transition-colors">Vilakkuthoon Brassware Street</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       Historic lamp column circle famous for bronze statues, traditional Kuthuvilakku lamps, and antique Madurai handicrafts.
                     </p>
-                    <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1.5 pt-1">📍 Near East Veli Street</span>
+                    <span className="text-[11px] text-sky-700 font-semibold flex items-center gap-1.5 pt-1">📍 Near East Veli Street</span>
                   </div>
-                  <div className="group/item relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-950/80 p-5 space-y-2.5 hover:border-purple-400/60 hover:bg-zinc-900/90 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
-                    <h4 className="font-display text-base font-bold text-purple-300 group-hover/item:text-purple-200 transition-colors">Avani Moola & Town Hall Road</h4>
-                    <p className="text-xs text-zinc-300 leading-relaxed">
+                  <div className="group/item relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2.5 hover:border-sky-300 hover:bg-white transition-all duration-300 hover:shadow-md">
+                    <h4 className="font-display text-base font-bold text-slate-900 group-hover/item:text-sky-700 transition-colors">Avani Moola & Town Hall Road</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">
                       Bustling wholesale textile markets specializing in authentic Madurai Sungudi cotton sarees, tie-dye silks, and spices.
                     </p>
-                    <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1.5 pt-1">📍 Central Temple Concentric Street</span>
+                    <span className="text-[11px] text-sky-700 font-semibold flex items-center gap-1.5 pt-1">📍 Central Temple Concentric Street</span>
                   </div>
                 </>
               ) : (
                 district.spots.slice(0, 3).map((spot, idx) => (
-                  <div key={idx} className="group/item relative overflow-hidden rounded-2xl border border-purple-500/20 bg-zinc-950/80 p-5 space-y-2.5 hover:border-purple-400/60 hover:bg-zinc-900/90 transition-all duration-300 hover:shadow-lg hover:shadow-purple-500/10">
-                    <h4 className="font-display text-base font-bold text-purple-300 group-hover/item:text-purple-200 transition-colors">{spot.name}</h4>
-                    <p className="text-xs text-zinc-300 leading-relaxed">{spot.tagline}</p>
-                    <span className="text-[11px] text-amber-400 font-semibold flex items-center gap-1.5 pt-1">📍 {spot.address}</span>
+                  <div key={idx} className="group/item relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2.5 hover:border-sky-300 hover:bg-white transition-all duration-300 hover:shadow-md">
+                    <h4 className="font-display text-base font-bold text-slate-900 group-hover/item:text-sky-700 transition-colors">{spot.name}</h4>
+                    <p className="text-xs text-slate-600 leading-relaxed">{spot.tagline}</p>
+                    <span className="text-[11px] text-sky-700 font-semibold flex items-center gap-1.5 pt-1">📍 {spot.address}</span>
                   </div>
                 ))
               )}
@@ -881,26 +879,25 @@ export function DistrictView({ district }: DistrictViewProps) {
           </div>
 
           {/* FOOD TRAILS SPOTLIGHT */}
-          <div className="gsap-spotlight-box group relative overflow-hidden rounded-3xl border border-amber-500/40 bg-zinc-900/90 backdrop-blur-xl p-6 md:p-10 space-y-6 shadow-[0_0_60px_-15px_rgba(245,158,11,0.25)] transition-all hover:border-amber-500/60">
+          <div className="gsap-spotlight-box group relative overflow-hidden rounded-3xl border border-sky-100 bg-white p-6 md:p-10 space-y-6 shadow-xl">
             {/* Background Texture Image Overlay */}
             <div 
-              className="absolute inset-0 z-0 opacity-15 mix-blend-overlay bg-cover bg-center pointer-events-none transition-transform duration-1000 group-hover:scale-105" 
+              className="absolute inset-0 z-0 opacity-5 mix-blend-multiply bg-cover bg-center pointer-events-none transition-transform duration-1000 group-hover:scale-105" 
               style={{ backgroundImage: `url(${district.spots.find(s => s.category === 'food-spots')?.image || district.heroImage})` }} 
             />
-            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-500/60 to-transparent" />
-            <div className="absolute bottom-0 inset-x-0 h-24 bg-gradient-to-t from-zinc-950 via-zinc-950/80 to-transparent pointer-events-none" />
+            <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-amber-400 to-transparent" />
 
             <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-4">
               <div>
-                <Badge className="bg-amber-500/20 text-amber-300 border-amber-500/50 text-[10px] tracking-wider uppercase font-semibold px-3 py-1">
+                <Badge className="bg-amber-50 text-amber-800 border-amber-200 text-[10px] tracking-wider uppercase font-semibold px-3 py-1">
                   🍲 Culinary Highlights
                 </Badge>
-                <h3 className="mt-3 font-display text-2xl md:text-3xl font-bold text-white tracking-tight">
+                <h3 className="mt-3 font-display text-2xl md:text-3xl font-bold text-slate-900 tracking-tight">
                   {district.slug === "madurai"
                     ? "Madurai 24/7 Iconic Street Food Experience"
                     : `${district.name} Signature Local Food Experience`}
                 </h3>
-                <p className="mt-2 text-sm text-zinc-300 max-w-2xl leading-relaxed">
+                <p className="mt-2 text-sm text-slate-600 max-w-2xl leading-relaxed">
                   {district.overview.culture}
                 </p>
               </div>
@@ -908,10 +905,10 @@ export function DistrictView({ district }: DistrictViewProps) {
 
             <div className="relative z-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
               {district.overview.famousFor.map((item, idx) => (
-                <div key={idx} className="group/item relative overflow-hidden rounded-2xl border border-amber-500/20 bg-zinc-950/80 p-5 space-y-2 hover:border-amber-400/60 hover:bg-zinc-900/90 transition-all duration-300 hover:shadow-lg hover:shadow-amber-500/10">
+                <div key={idx} className="group/item relative overflow-hidden rounded-2xl border border-slate-200 bg-slate-50/80 p-5 space-y-2 hover:border-amber-300 hover:bg-white transition-all duration-300 hover:shadow-md">
                   <div className="text-2xl transform transition-transform group-hover/item:scale-110 duration-300">✨</div>
-                  <h4 className="font-bold text-sm text-white group-hover/item:text-amber-200 transition-colors">{item}</h4>
-                  <p className="text-[11px] text-zinc-400 leading-normal">Curated highlight of {district.name}.</p>
+                  <h4 className="font-bold text-sm text-slate-900 group-hover/item:text-amber-800 transition-colors">{item}</h4>
+                  <p className="text-[11px] text-slate-500 leading-normal">Curated highlight of {district.name}.</p>
                 </div>
               ))}
             </div>
@@ -922,22 +919,22 @@ export function DistrictView({ district }: DistrictViewProps) {
             const districtEvents = getEventsForDistrict(district.slug || district.name);
             if (districtEvents.length === 0) return null;
             return (
-              <div className="mt-12 rounded-3xl border border-emerald-500/30 bg-gradient-to-br from-zinc-950 via-zinc-900/90 to-zinc-950 p-6 md:p-8 space-y-6">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-zinc-800 pb-4">
+              <div className="mt-12 rounded-3xl border border-sky-100 bg-white p-6 md:p-8 space-y-6 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-100 pb-4">
                   <div>
-                    <Badge className="bg-emerald-500/20 text-emerald-300 border-emerald-500/40 text-[10px] tracking-wider uppercase font-semibold px-3 py-1 mb-2">
+                    <Badge className="bg-sky-50 text-sky-700 border-sky-200 text-[10px] tracking-wider uppercase font-semibold px-3 py-1 mb-2">
                       🎫 Experiences & Festivals
                     </Badge>
-                    <h3 className="font-display text-2xl font-bold text-white tracking-tight">
+                    <h3 className="font-display text-2xl font-bold text-slate-900 tracking-tight">
                       Upcoming Events & Cultural Celebrations in {district.name}
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-1">
+                    <p className="text-xs text-slate-500 mt-1">
                       Connect your {district.name} visit with live group trips, temple chariot festivals, and local heritage meets.
                     </p>
                   </div>
                   <a
                     href={`/events?district=${encodeURIComponent(district.name)}`}
-                    className="text-xs font-bold text-emerald-400 hover:text-emerald-300 flex items-center gap-1 shrink-0"
+                    className="text-xs font-bold text-sky-600 hover:text-sky-700 flex items-center gap-1 shrink-0"
                   >
                     View All {district.name} Events →
                   </a>

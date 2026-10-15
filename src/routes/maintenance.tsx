@@ -3,6 +3,12 @@ import { Wrench, Clock, Compass } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 
 export const Route = createFileRoute("/maintenance")({
+  head: () => ({
+    meta: [
+      { title: "System Maintenance | ExploreTN" },
+      { name: "description", content: "ExploreTN map servers are undergoing routine maintenance and updates. Systems will resume shortly." },
+    ],
+  }),
   component: MaintenancePage,
 });
 

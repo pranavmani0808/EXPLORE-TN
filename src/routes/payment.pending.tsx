@@ -4,6 +4,12 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/payment/pending")({
+  head: () => ({
+    meta: [
+      { title: "Payment Pending | ExploreTN" },
+      { name: "description", content: "Awaiting bank or UPI settlement confirmation for your ExploreTN transaction." },
+    ],
+  }),
   component: PaymentPendingPage,
 });
 

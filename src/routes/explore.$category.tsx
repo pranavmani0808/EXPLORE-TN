@@ -436,8 +436,8 @@ function CategoryExplorePage() {
 
               {/* Spatial Map Link */}
               <Link
-                to="/discover"
-                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-sm shadow-xl shadow-emerald-600/20 transition group shrink-0"
+                to="/explore"
+                className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white font-bold text-sm shadow-xl shadow-sky-600/20 transition group shrink-0"
               >
                 <MapIcon className="size-4" />
                 <span>View {catMeta.title} on Map</span>

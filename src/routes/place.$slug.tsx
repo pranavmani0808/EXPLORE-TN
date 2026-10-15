@@ -200,8 +200,8 @@ function PlacePage() {
               </span>
 
               <Link
-                to="/discover"
-                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 hover:bg-emerald-500/10 transition"
+                to="/explore"
+                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-sky-600 dark:text-sky-400 border border-sky-500/30 hover:bg-sky-500/10 transition"
               >
                 <Map className="size-4" />
                 <span>View on Map</span>

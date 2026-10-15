@@ -7,6 +7,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/billing")({
+  head: () => ({
+    meta: [
+      { title: "Explorer Membership & Billing Management — ExplorerTN" },
+      {
+        name: "description",
+        content:
+          "Manage your ExploreTN Explorer subscription, offline map packs, invoice receipts, and travel plan tier features.",
+      },
+    ],
+  }),
   component: BillingPage,
 });
 

@@ -3,6 +3,15 @@ import { ShieldCheck, Key, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/legal/security")({
+  head: () => ({
+    meta: [
+      { title: "Security & Infrastructure Protections — ExplorerTN" },
+      {
+        name: "description",
+        content: "ExploreTN platform security, data encryption standards, payment authentication, and vulnerability disclosure policies.",
+      },
+    ],
+  }),
   component: SecurityPolicyPage,
 });
 

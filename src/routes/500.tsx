@@ -4,6 +4,12 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/500")({
+  head: () => ({
+    meta: [
+      { title: "500 Server Error | ExploreTN" },
+      { name: "description", content: "Something went wrong on our servers. Please reload or return home." },
+    ],
+  }),
   component: ServerError500Page,
 });
 

@@ -5,6 +5,12 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/payment/failed")({
+  head: () => ({
+    meta: [
+      { title: "Payment Failed | ExploreTN" },
+      { name: "description", content: "Payment transaction unsuccessful. Retry your payment securely or contact ExploreTN support." },
+    ],
+  }),
   component: PaymentFailedPage,
 });
 

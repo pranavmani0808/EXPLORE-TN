@@ -3,13 +3,24 @@ import { FloatingNav, MobileTabBar } from "@/components/site/floating-nav";
 import { SearchPanel } from "@/components/site/search-panel";
 import { cn } from "@/lib/utils";
 
-export function AppShell({ children, className }: { children: ReactNode; className?: string }) {
+import { SiteFooter } from "@/components/site/site-footer";
+
+export function AppShell({
+  children,
+  className,
+  hideFooter = false,
+}: {
+  children: ReactNode;
+  className?: string;
+  hideFooter?: boolean;
+}) {
   const [searchOpen, setSearchOpen] = useState(false);
   return (
-    <div className={cn("min-h-screen bg-background", className)}>
+    <div className={cn("min-h-screen bg-background overflow-x-hidden", className)}>
       <FloatingNav onSearch={() => setSearchOpen(true)} />
       <SearchPanel open={searchOpen} onOpenChange={setSearchOpen} />
       <main className="pb-24 sm:pb-0">{children}</main>
+      {!hideFooter && <SiteFooter />}
       <MobileTabBar />
     </div>
   );

@@ -551,23 +551,6 @@ function Index() {
         <PeakTravelGuide />
       </section>
 
-      {/* SECTION 9: FOOTER (Popz Design Spec: Clear attribution + subtle admin link) */}
-      <footer className="border-t border-slate-200 bg-white text-slate-500 py-10 mt-10">
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center gap-6 text-xs">
-          <div className="flex items-center gap-2">
-            <span className="font-display font-bold text-slate-900 text-base">Explore<span className="text-sky-500">TN</span></span>
-            <span>· Your guide to Tamil Nadu, beyond the usual.</span>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-6 text-slate-600">
-            <Link to="/explore" className="hover:text-sky-600 transition">Places</Link>
-            <Link to="/routes" className="hover:text-sky-600 transition">Routes</Link>
-            <Link to="/community" className="hover:text-sky-600 transition">Guides</Link>
-            <Link to="/legal/privacy" className="hover:text-sky-600 transition">Privacy</Link>
-            <Link to="/legal/terms" className="hover:text-sky-600 transition">Terms</Link>
-          </div>
-        </div>
-      </footer>
       </div>
     </AppShell>
   );

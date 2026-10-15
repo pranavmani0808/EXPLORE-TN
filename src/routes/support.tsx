@@ -6,6 +6,16 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 export const Route = createFileRoute("/support")({
+  head: () => ({
+    meta: [
+      { title: "Traveler Support & Emergency Helplines — ExplorerTN" },
+      {
+        name: "description",
+        content:
+          "24/7 Tamil Nadu traveler assistance, emergency contact helplines, FAQs on permits and routes, and direct support ticketing.",
+      },
+    ],
+  }),
   component: SupportPage,
 });
 

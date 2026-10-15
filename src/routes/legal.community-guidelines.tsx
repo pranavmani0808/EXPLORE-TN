@@ -3,6 +3,12 @@ import { Users, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/legal/community-guidelines")({
+  head: () => ({
+    meta: [
+      { title: "Community Guidelines | ExploreTN" },
+      { name: "description", content: "ExploreTN community code of conduct, Leave No Trace eco-tourism principles, and acceptable use policy for travelers." },
+    ],
+  }),
   component: CommunityGuidelinesPage,
 });
 

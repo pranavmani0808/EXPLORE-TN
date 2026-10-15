@@ -4,6 +4,12 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/403")({
+  head: () => ({
+    meta: [
+      { title: "403 Forbidden | ExploreTN" },
+      { name: "description", content: "Access restricted. You do not have authorization to view this resource." },
+    ],
+  }),
   component: Forbidden403Page,
 });
 

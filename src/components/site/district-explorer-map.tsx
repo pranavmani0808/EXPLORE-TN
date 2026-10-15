@@ -307,8 +307,8 @@ export function DistrictExplorerMap({
       <div ref={mapContainerRef} className={className} />
 
       {/* Google Maps / Mapcn Engine Indicator */}
-      <div className="pointer-events-none absolute top-3 left-3 z-[900] flex items-center gap-2 rounded-xl border border-zinc-800/80 bg-zinc-950/85 px-3 py-1.5 backdrop-blur-md text-[11px] text-emerald-400 font-mono shadow-md">
-        <span className="size-2 rounded-full bg-emerald-400 animate-pulse" />
+      <div className="pointer-events-none absolute top-3 left-3 z-[900] flex items-center gap-2 rounded-xl border border-sky-100 bg-white/95 px-3 py-1.5 backdrop-blur-md text-[11px] text-sky-700 font-mono shadow-md">
+        <span className="size-2 rounded-full bg-sky-500 animate-pulse" />
         <span className="font-bold">
           {mapStyle === "google-roadmap"
             ? "GOOGLE MAPS ROADMAP"
@@ -316,7 +316,7 @@ export function DistrictExplorerMap({
             ? "GOOGLE SATELLITE HYBRID"
             : mapStyle === "google-terrain"
             ? "TOPOGRAPHIC ELEVATION TERRAIN"
-            : "MAPCN DARK MODE"}{" "}
+            : "LIGHT MAP MODE"}{" "}
           · BOUNDARY LOCKED
         </span>
       </div>

@@ -3,6 +3,12 @@ import { Info, Eye } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/legal/disclaimer")({
+  head: () => ({
+    meta: [
+      { title: "Disclaimer & Accessibility | ExploreTN" },
+      { name: "description", content: "ExploreTN route accuracy disclaimer, trail safety notices, and digital accessibility (WCAG 2.1 AA) commitment." },
+    ],
+  }),
   component: DisclaimerPage,
 });
 
