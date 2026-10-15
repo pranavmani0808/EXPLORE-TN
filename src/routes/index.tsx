@@ -327,17 +327,17 @@ function Index() {
         </AnimatedGroup>
       </section>
 
-      {/* SECTION 3: FEATURED DESTINATIONS BENTO CARDS */}
+      {/* SECTION 3: FEATURED DESTINATIONS UNEVEN BENTO GRID */}
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
-                Verified Telemetry & Circuits
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+                Top Rated Spots
               </span>
             </div>
             <h2 className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">Featured Destinations</h2>
-            <p className="mt-1 text-sm text-slate-500">Live trail conditions, regional uptime, alerts and cross-district explorer network</p>
+            <p className="mt-1 text-sm text-slate-500">Iconic landmarks, sacred temple towers, and tranquil hill stations across Tamil Nadu</p>
           </div>
           <Link
             to="/explore"
@@ -348,40 +348,27 @@ function Index() {
           </Link>
         </div>
 
-        {/* Bento Grid: Full Card Cover Images for Top Places with Telemetry & Details */}
-        <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
-          {/* Card 1: Meenakshi Amman Kovil (Madurai) - Covered with Temple Image */}
+        {/* Uneven Bento Grid: Asymmetrical card arrangement with full photo cover */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-12 auto-rows-[minmax(190px,auto)]">
+          {/* Hero Place 1 (Large / Tall Anchor - spans 8 cols, 2 rows): Meenakshi Amman Kovil */}
           <Link
             to="/place/$slug"
             params={{ slug: "meenakshi-amman-temple" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-2xl md:col-span-7 min-h-[380px] border border-slate-700/60 transition-all hover:border-[#83be09]/60 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-xl md:col-span-8 md:row-span-2 min-h-[460px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
           >
-            {/* Background Image covering entire card */}
             <img
               src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1400&q=85"
               alt="Meenakshi Amman Kovil, Madurai"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            {/* Multi-layer Dark Gradient for high contrast legibility */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-slate-900/60" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/30" />
 
-            {/* Top Bar: Telemetry + Place Tag */}
-            <div className="relative z-10 flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3 py-1 text-[11px] font-mono font-bold text-emerald-300 backdrop-blur-md">
-                  <span className="size-2 rounded-full bg-[#83be09] animate-pulse" />
-                  LIVE EXPLORER TELEMETRY
-                </span>
-                <div className="mt-2 flex items-baseline gap-2">
-                  <span className="text-3xl font-extrabold tracking-tight font-display sm:text-4xl text-white drop-shadow-md">
-                    12,450
-                  </span>
-                  <span className="text-xs font-mono text-slate-300">check-ins/hr</span>
-                </div>
-              </div>
-
-              {/* Verified Place Rating & District Pill */}
+            {/* Top Badges */}
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3.5 py-1 text-xs font-mono font-bold text-emerald-300 backdrop-blur-md">
+                🏛️ SACRED HERITAGE CIRCUIT
+              </span>
               <div className="flex items-center gap-2 rounded-2xl bg-slate-950/80 border border-white/15 px-3 py-1.5 backdrop-blur-md shadow-lg">
                 <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
                   <Star className="size-3.5 fill-amber-400" /> 4.9
@@ -391,330 +378,188 @@ function Index() {
               </div>
             </div>
 
-            {/* Dynamic Telemetry Bars Overlay */}
-            <div className="relative z-10 my-4 flex items-end gap-2.5 sm:gap-3 h-20 pt-2">
-              {[
-                { height: "45%" },
-                { height: "70%" },
-                { height: "50%" },
-                { height: "92%" },
-                { height: "75%" },
-                { height: "90%" },
-                { height: "40%" },
-                { height: "65%" },
-                { height: "55%" },
-                { height: "82%" },
-                { height: "60%" },
-                { height: "80%" },
-              ].map((bar, idx) => (
-                <div key={idx} className="flex-1 flex flex-col items-center h-full justify-end">
-                  <div
-                    className="w-full rounded-md bg-[#83be09]/90 backdrop-blur-sm shadow-sm group-hover:bg-[#99db0d] transition-all"
-                    style={{ height: bar.height }}
-                  />
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Place Info & Story */}
-            <div className="relative z-10 pt-2 border-t border-white/10">
-              <div className="flex items-center justify-between">
+            {/* Bottom Place Info */}
+            <div className="relative z-10 pt-6">
+              <div className="flex items-end justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
-                      #1 TOP SACRED HERITAGE
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                      #1 TOP DESTINATION
                     </span>
-                    <span className="text-xs text-slate-400 font-mono">14 Towering Gopurams</span>
+                    <span className="text-xs text-slate-300 font-mono">14 Towering Gopurams</span>
                   </div>
-                  <h3 className="mt-1 text-2xl font-bold font-display text-white tracking-tight group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                  <h3 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white tracking-tight group-hover:text-[#83be09] transition-colors drop-shadow-md">
                     Meenakshi Amman Kovil
                   </h3>
-                  <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed max-w-xl font-medium">
-                    Historic 2,500-year-old temple city heart with sacred Golden Lotus Tank, thousand-pillar mandapam, and world-renowned Dravidian sculpted gopurams.
+                  <p className="mt-2 text-sm text-slate-200 line-clamp-3 leading-relaxed max-w-xl font-medium">
+                    Historic 2,500-year-old temple city heart with sacred Golden Lotus Tank, thousand-pillar mandapam, and world-renowned Dravidian sculpted gopurams dedicated to Goddess Meenakshi.
                   </p>
                 </div>
-                <div className="hidden sm:flex size-10 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-4 border border-white/20">
-                  <ArrowRight className="size-4" />
+                <div className="flex size-12 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-4 border border-white/20 shadow-lg">
+                  <ArrowRight className="size-5" />
                 </div>
               </div>
             </div>
           </Link>
 
-          {/* Card 2: Kodaikanal Lake & Shola Hills - Covered with Kodaikanal Image */}
+          {/* Place 2 (Upper Compact - spans 4 cols): Kodaikanal Lake */}
           <Link
             to="/place/$slug"
             params={{ slug: "kodaikanal" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-2xl md:col-span-5 min-h-[380px] border border-slate-700/60 transition-all hover:border-[#83be09]/60 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
           >
-            {/* Background Image covering entire card */}
             <img
               src="https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=85"
               alt="Kodaikanal Lake and Misty Hills"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            {/* Multi-layer Dark Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-900/60" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/70 via-transparent to-slate-950/50" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
 
-            {/* Top Bar: Title & Status */}
-            <div className="relative z-10 flex items-start justify-between gap-3">
-              <div>
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3 py-1 text-[11px] font-mono font-bold text-sky-200 backdrop-blur-md">
-                  GHAT ACCESS TELEMETRY
-                </span>
-                <h3 className="mt-2 text-2xl font-bold font-display text-white drop-shadow-md">
-                  99.99% Trail Access
-                </h3>
-                <p className="mt-1 text-xs text-slate-300 font-medium">
-                  Continuous highway transit monitoring & live pass telemetry.
-                </p>
-              </div>
-              <span className="flex items-center gap-1 text-xs font-bold text-amber-400 bg-slate-950/80 border border-white/15 px-3 py-1 rounded-full backdrop-blur-md shrink-0">
-                <Star className="size-3.5 fill-amber-400" /> 4.8
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3 py-0.5 text-xs font-mono font-bold text-sky-200 backdrop-blur-md">
+                🌲 HIGHLAND RETREAT
               </span>
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-cyan-300">
+                Dindigul
+              </div>
             </div>
 
-            {/* Status Segment Rows matching screenshot */}
-            <div className="relative z-10 my-4 space-y-3 bg-slate-950/60 p-3.5 rounded-2xl border border-white/10 backdrop-blur-md">
-              <div className="flex items-center justify-between text-[10px] font-mono uppercase tracking-wider text-slate-300 border-b border-white/10 pb-1.5">
-                <span>DISTRICT NETWORK</span>
-                <span className="flex items-center gap-1.5 text-xs text-[#83be09] font-bold">
-                  <span className="size-2 rounded-full bg-[#83be09] animate-pulse" /> 100% HEALTHY
-                </span>
-              </div>
-
-              {[
-                { name: "Palani Ghat Road", segments: 12 },
-                { name: "Pillar Rocks Corridor", segments: 12 },
-                { name: "Berijam Shola Track", segments: 12 },
-              ].map((row, idx) => (
-                <div key={idx} className="space-y-1">
-                  <div className="text-[10px] font-mono font-medium text-slate-300">{row.name}</div>
-                  <div className="flex items-center gap-1">
-                    {Array.from({ length: row.segments }).map((_, sIdx) => (
-                      <div
-                        key={sIdx}
-                        className="h-1.5 flex-1 rounded-sm bg-[#83be09] transition-colors"
-                      />
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* Bottom Place Info */}
-            <div className="relative z-10 pt-2 border-t border-white/10">
-              <div className="flex items-center justify-between">
-                <div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
-                    #1 PRINCESS OF HILL STATIONS · DINDIGUL
-                  </span>
-                  <h4 className="text-lg font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
-                    Kodaikanal Lake & Sholas
-                  </h4>
-                  <p className="text-xs text-slate-300 line-clamp-1 mt-0.5">
-                    Star-shaped highland lake nestled among pine forests and rolling eucalyptus cloud hills.
-                  </p>
-                </div>
-                <ArrowRight className="size-4 text-slate-400 group-hover:text-[#83be09] group-hover:translate-x-1 transition shrink-0 ml-3" />
-              </div>
+            <div className="relative z-10 pt-4">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                Princess of Hill Stations
+              </span>
+              <h3 className="mt-0.5 text-xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                Kodaikanal Lake & Sholas
+              </h3>
+              <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed">
+                Star-shaped highland lake nestled among ancient pine forests and misty cloud viewpoints.
+              </p>
             </div>
           </Link>
 
-          {/* Card 3: Valli Chunai Falls (Kanyakumari) - Covered with Waterfall Image */}
+          {/* Place 3 (Middle Compact - spans 4 cols): Valli Chunai Falls */}
           <Link
             to="/place/$slug"
             params={{ slug: "valli-chunai-falls" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-2xl md:col-span-4 min-h-[380px] border border-slate-700/60 transition-all hover:border-[#83be09]/60 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
           >
-            {/* Background Image covering entire card */}
             <img
-              src="https://images.unsplash.com/photo-1546182990-dffeafbe841d?auto=format&fit=crop&w=1000&q=85"
-              alt="Valli Chunai Falls & Western Ghats stream"
+              src="https://images.unsplash.com/photo-1434394354979-a235cd36269d?auto=format&fit=crop&w=1000&q=85"
+              alt="Valli Chunai Falls"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            {/* Multi-layer Dark Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-900/60" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-transparent to-slate-950/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
 
-            {/* Top Bar: Icon + Live Monitored Badge */}
-            <div className="relative z-10 flex items-center justify-between">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-slate-900/80 border border-white/20 text-white backdrop-blur-md shadow-inner">
-                <Bell className="size-5 text-amber-400" />
-              </div>
-              <span className="rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3 py-1 text-[10px] font-mono text-emerald-300 font-bold backdrop-blur-md">
-                LIVE MONITORED
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 px-3 py-0.5 text-xs font-mono font-bold text-cyan-200 backdrop-blur-md">
+                🌊 FOREST CASCADE
               </span>
-            </div>
-
-            {/* Middle Feature Alert Box */}
-            <div className="relative z-10 my-4 rounded-2xl bg-slate-950/70 border border-white/10 p-3.5 backdrop-blur-md">
-              <div className="flex items-center justify-between">
-                <span className="text-[10px] font-mono uppercase font-bold text-[#83be09]">
-                  #1 WATERFALL TRAIL
-                </span>
-                <span className="text-[10px] font-mono text-slate-300">Kanyakumari</span>
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-emerald-400">
+                Kanyakumari
               </div>
-              <p className="mt-1 text-sm font-bold text-white group-hover:text-[#83be09] transition-colors">
-                Valli Chunai Falls
-              </p>
-              <p className="text-[11px] text-emerald-400 font-mono mt-0.5 flex items-center gap-1.5">
-                <span className="size-1.5 rounded-full bg-emerald-400" /> Open & Accessible · Flow Active
-              </p>
             </div>
 
-            {/* Bottom Info */}
-            <div className="relative z-10 pt-2 border-t border-white/10">
-              <h3 className="text-xl font-bold font-display text-white">Smart Stream Alerts</h3>
-              <p className="mt-1 text-xs text-slate-300 leading-relaxed line-clamp-2">
-                Instant advisories for mountain rainfall, water flow surges, and forest trekking clearances before you drive.
+            <div className="relative z-10 pt-4">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                Western Ghats Trail
+              </span>
+              <h3 className="mt-0.5 text-xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                Valli Chunai Falls
+              </h3>
+              <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed">
+                Hidden natural waterfall cascading through rocks and lush forest trails in the southern ranges.
               </p>
             </div>
           </Link>
 
-          {/* Card 4: Mahabalipuram Shore (Chengalpattu) - Covered with Coastal Temple Image */}
+          {/* Place 4 (Lower Medium - spans 5 cols): Thanjavur Brihadisvara Temple */}
           <Link
             to="/place/$slug"
-            params={{ slug: "mahabalipuram" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-2xl md:col-span-8 min-h-[380px] border border-slate-700/60 transition-all hover:border-[#83be09]/60 hover:shadow-2xl"
+            params={{ slug: "thanjavur" }}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-5 min-h-[260px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
           >
-            {/* Background Image covering entire card */}
             <img
-              src="https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1400&q=85"
-              alt="Mahabalipuram UNESCO Shore Temple and Coast"
+              src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Thanjavur_2.jpg/1280px-Thanjavur_2.jpg"
+              alt="Thanjavur Brihadisvara Temple"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
-            {/* Multi-layer Dark Gradient */}
-            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/80 to-slate-900/60" />
-            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-transparent to-slate-950/60" />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
 
-            {/* Top Bar */}
-            <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3 py-1 text-[11px] font-mono font-bold text-sky-200 backdrop-blur-md">
-                UNESCO WORLD HERITAGE · COASTAL HIGHWAY
+            <div className="relative z-10 flex items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 px-3 py-0.5 text-xs font-mono font-bold text-amber-200 backdrop-blur-md">
+                🏛️ GREAT LIVING CHOLA TEMPLE
               </span>
-              <div className="flex items-center gap-2 rounded-2xl bg-slate-950/80 border border-white/15 px-3 py-1.5 backdrop-blur-md shadow-lg">
-                <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
-                  <Star className="size-3.5 fill-amber-400" /> 4.9
-                </span>
-                <span className="text-slate-400">·</span>
-                <span className="text-xs font-mono font-bold text-cyan-300">Bay of Bengal</span>
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-amber-300">
+                Thanjavur
               </div>
             </div>
 
-            {/* Center: Dotted Map with Live Regional Telemetry Avatars */}
-            <div className="relative z-10 my-4 h-36 w-full overflow-hidden rounded-2xl bg-slate-950/60 border border-white/15 backdrop-blur-md flex items-center justify-center">
-              <div
-                className="absolute inset-0 opacity-25"
-                style={{
-                  backgroundImage: "radial-gradient(#94a3b8 1.2px, transparent 1.2px)",
-                  backgroundSize: "16px 16px",
-                }}
-              />
-
-              {/* Avatar 1: Nilgiris */}
-              <div className="absolute left-[20%] top-[25%] flex flex-col items-center">
-                <div className="relative size-9 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg">
-                  <img
-                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
-                    alt="Ooty"
-                    className="size-full object-cover"
-                  />
-                  <span className="absolute bottom-0 right-0 size-2 rounded-full bg-[#83be09]" />
-                </div>
-                <span className="mt-1 rounded bg-black/80 px-1.5 py-0.5 text-[8px] font-mono text-slate-300">
-                  Ooty
-                </span>
-              </div>
-
-              {/* Avatar 2: Madurai */}
-              <div className="absolute left-[45%] top-[50%] flex flex-col items-center">
-                <div className="relative size-9 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg">
-                  <img
-                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
-                    alt="Madurai"
-                    className="size-full object-cover"
-                  />
-                  <span className="absolute bottom-0 right-0 size-2 rounded-full bg-[#83be09]" />
-                </div>
-                <span className="mt-1 rounded bg-black/80 px-1.5 py-0.5 text-[8px] font-mono text-slate-300">
-                  Madurai
-                </span>
-              </div>
-
-              {/* Avatar 3: Shore Temple */}
-              <div className="absolute right-[28%] top-[20%] flex flex-col items-center">
-                <div className="relative size-9 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg">
-                  <img
-                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
-                    alt="Chennai"
-                    className="size-full object-cover"
-                  />
-                  <span className="absolute bottom-0 right-0 size-2 rounded-full bg-[#83be09]" />
-                </div>
-                <span className="mt-1 rounded bg-black/80 px-1.5 py-0.5 text-[8px] font-mono text-slate-300">
-                  Shore Temple
-                </span>
-              </div>
-
-              {/* Avatar 4: Kanyakumari */}
-              <div className="absolute right-[14%] top-[40%] flex flex-col items-center">
-                <div className="relative size-9 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg">
-                  <img
-                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
-                    alt="Kanyakumari"
-                    className="size-full object-cover"
-                  />
-                  <span className="absolute bottom-0 right-0 size-2 rounded-full bg-[#83be09]" />
-                </div>
-                <span className="mt-1 rounded bg-black/80 px-1.5 py-0.5 text-[8px] font-mono text-slate-300">
-                  Kanyakumari
-                </span>
-              </div>
-            </div>
-
-            {/* Bottom Place Info & Story */}
-            <div className="relative z-10 pt-2 border-t border-white/10">
-              <div className="flex items-center justify-between">
+            <div className="relative z-10 pt-4">
+              <div className="flex items-end justify-between">
                 <div>
-                  <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
-                    #1 SEASIDE ROCK SCULPTURE · 7TH CENTURY PALLAVA
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                    Granite Architectural Marvel
                   </span>
-                  <h3 className="mt-0.5 text-2xl font-bold font-display text-white tracking-tight group-hover:text-[#83be09] transition-colors drop-shadow-md">
-                    Mahabalipuram Shore Temple
+                  <h3 className="mt-0.5 text-xl sm:text-2xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                    Brihadisvara Temple
                   </h3>
-                  <p className="mt-1 text-xs text-slate-200 line-clamp-1 leading-relaxed max-w-xl font-medium">
-                    Carved granite monolithic monuments overlooking crashing Bay of Bengal waves, Arjuna's Penance, and coastal lighthouse drives.
+                  <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed">
+                    11th-century monumental temple crowned with an 80-tonne granite monolithic dome and ancient fresco murals.
                   </p>
                 </div>
-                <div className="hidden sm:flex size-10 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-4 border border-white/20">
+                <div className="flex size-10 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-3 border border-white/20 shadow-lg">
                   <ArrowRight className="size-4" />
                 </div>
               </div>
             </div>
           </Link>
-        </div>
 
-        {/* Highlighted Places Quick Tray below the Bento Cards */}
-        <div className="mt-8 pt-6 border-t border-slate-200">
-          <div className="mb-4 flex items-center justify-between">
-            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 font-mono">
-              Top Pick Destinations
-            </h3>
-            <Link to="/explore" className="text-xs font-bold text-sky-600 hover:text-sky-700">
-              Browse all 400+ destinations →
-            </Link>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
-            {featuredPlaces.slice(0, 3).map((place) => (
-              <PlaceCard
-                key={place.id || place.slug}
-                place={place}
-                onAddToTrip={handleAddToTrip}
-                isAdded={addedTrips[place.slug]}
-              />
-            ))}
-          </div>
+          {/* Place 5 (Lower Wide - spans 7 cols): Mahabalipuram Shore Temple */}
+          <Link
+            to="/place/$slug"
+            params={{ slug: "mahabalipuram" }}
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-7 min-h-[260px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
+          >
+            <img
+              src="https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=85"
+              alt="Mahabalipuram UNESCO Shore Temple and Coast"
+              className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
+            <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/30" />
+
+            <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 px-3 py-0.5 text-xs font-mono font-bold text-amber-200 backdrop-blur-md">
+                🏛️ UNESCO WORLD HERITAGE · COASTAL DRIVE
+              </span>
+              <div className="flex items-center gap-2 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md shadow-lg">
+                <span className="flex items-center gap-1 text-xs font-bold text-amber-400">
+                  <Star className="size-3 fill-amber-400" /> 4.9
+                </span>
+                <span className="text-slate-400">·</span>
+                <span className="text-xs font-mono font-bold text-cyan-300">Chengalpattu</span>
+              </div>
+            </div>
+
+            <div className="relative z-10 pt-4">
+              <div className="flex items-end justify-between">
+                <div>
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                    Coastal Heritage
+                  </span>
+                  <h3 className="mt-0.5 text-xl sm:text-2xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                    Mahabalipuram Shore Temple
+                  </h3>
+                  <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed max-w-lg">
+                    7th-century monolithic rock-cut Dravidian temples and stone sculptures carved overlooking crashing Bay of Bengal ocean waves.
+                  </p>
+                </div>
+                <div className="flex size-10 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-3 border border-white/20 shadow-lg">
+                  <ArrowRight className="size-4" />
+                </div>
+              </div>
+            </div>
+          </Link>
         </div>
       </section>
 
