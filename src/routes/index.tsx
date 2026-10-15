@@ -24,6 +24,8 @@ import {
   Navigation,
   ChevronLeft,
   ChevronRight,
+  Bell,
+  Activity,
 } from "lucide-react";
 import heroImg from "@/assets/hero-ghats.jpg";
 import { AppShell } from "@/components/site/app-shell";
@@ -325,12 +327,17 @@ function Index() {
         </AnimatedGroup>
       </section>
 
-      {/* SECTION 3: FEATURED PLACES (Popz Design Spec: 3-column grid, photo-first) */}
+      {/* SECTION 3: FEATURED DESTINATIONS BENTO CARDS */}
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">Featured Destinations</h2>
-            <p className="mt-1 text-sm text-slate-500">Must-visit places with verified coordinates and practical details</p>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
+                Verified Telemetry & Circuits
+              </span>
+            </div>
+            <h2 className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">Featured Destinations</h2>
+            <p className="mt-1 text-sm text-slate-500">Live trail conditions, regional uptime, alerts and cross-district explorer network</p>
           </div>
           <Link
             to="/explore"
@@ -341,20 +348,209 @@ function Index() {
           </Link>
         </div>
 
-        {/* 3-Column Responsive Grid with Smooth AnimatedGroup */}
-        <AnimatedGroup
-          preset="blur-slide"
-          className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3"
-        >
-          {featuredPlaces.map((place) => (
-            <PlaceCard
-              key={place.id || place.slug}
-              place={place}
-              onAddToTrip={handleAddToTrip}
-              isAdded={addedTrips[place.slug]}
-            />
-          ))}
-        </AnimatedGroup>
+        {/* Bento Grid mirroring the exact 4-card structure from screenshot */}
+        <div className="grid grid-cols-1 gap-5 md:grid-cols-12">
+          {/* Card 1: Top-Left (Real-time Metrics / Bar Chart) */}
+          <div className="flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-7 border border-slate-800/80 transition-all hover:border-slate-700">
+            <div>
+              <p className="text-[11px] font-mono uppercase tracking-wider text-slate-400">LIVE EXPLORER TELEMETRY</p>
+              <div className="mt-1 flex items-baseline gap-2">
+                <span className="text-3xl font-extrabold tracking-tight font-display sm:text-4xl text-white">12,450</span>
+                <span className="text-xs font-mono text-slate-400">check-ins/hr</span>
+              </div>
+
+              {/* Dynamic Bar Chart matching green aesthetic */}
+              <div className="mt-8 flex items-end gap-2.5 sm:gap-3 h-28 pt-2">
+                {[
+                  { height: "45%", label: "Mon" },
+                  { height: "70%", label: "Tue" },
+                  { height: "50%", label: "Wed" },
+                  { height: "92%", label: "Thu" },
+                  { height: "75%", label: "Fri" },
+                  { height: "90%", label: "Sat" },
+                  { height: "40%", label: "Sun" },
+                  { height: "65%", label: "Mon" },
+                  { height: "55%", label: "Tue" },
+                  { height: "82%", label: "Wed" },
+                  { height: "60%", label: "Thu" },
+                  { height: "80%", label: "Fri" },
+                ].map((bar, idx) => (
+                  <div key={idx} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                    <div
+                      className="w-full rounded-md bg-[#72a608] hover:bg-[#83be09] transition-all duration-300"
+                      style={{ height: bar.height }}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="mt-8">
+              <h3 className="text-xl font-bold font-display text-white">Real-time Metrics</h3>
+              <p className="mt-1.5 text-xs text-slate-400 leading-relaxed max-w-md">
+                Monitor live footfall, parking occupancy, and ghat transit speed across Tamil Nadu destinations with zero-latency telemetry.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 2: Top-Right (99.99% Uptime / Global Network) */}
+          <div className="flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-5 border border-slate-800/80 transition-all hover:border-slate-700">
+            <div>
+              <h3 className="text-2xl font-bold font-display text-white">99.99% Trail Access</h3>
+              <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">
+                Enterprise-grade road reliability and verified access status out of the box.
+              </p>
+            </div>
+
+            <div className="mt-8 space-y-4">
+              <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-slate-400 border-b border-slate-800 pb-2">
+                <span>DISTRICT NETWORK</span>
+                <span className="flex items-center gap-1.5 text-xs text-[#83be09] font-bold">
+                  <span className="size-2 rounded-full bg-[#83be09] animate-pulse" /> 100% HEALTHY
+                </span>
+              </div>
+
+              {/* Status Segment Rows matching the dashed green bars in screenshot */}
+              {[
+                { name: "Western Ghats Passes", segments: 14 },
+                { name: "Coastal Highway (ECR)", segments: 14 },
+                { name: "Temple Corridor Express", segments: 14 },
+              ].map((row, idx) => (
+                <div key={idx} className="space-y-1.5">
+                  <div className="text-[11px] font-medium text-slate-300">{row.name}</div>
+                  <div className="flex items-center gap-1.5">
+                    {Array.from({ length: row.segments }).map((_, sIdx) => (
+                      <div
+                        key={sIdx}
+                        className="h-2 flex-1 rounded-sm bg-[#5c8704] transition-colors"
+                      />
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Card 3: Bottom-Left (Smart Alerts with Bell Icon) */}
+          <div className="flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-4 border border-slate-800/80 transition-all hover:border-slate-700">
+            <div className="flex justify-center py-6">
+              <div className="flex size-14 items-center justify-center rounded-2xl bg-[#282d37] border border-slate-700/80 text-slate-200 shadow-inner">
+                <Bell className="size-6 text-slate-200" />
+              </div>
+            </div>
+
+            <div className="mt-6">
+              <h3 className="text-xl font-bold font-display text-white">Smart Alerts</h3>
+              <p className="mt-1.5 text-xs text-slate-400 leading-relaxed">
+                Get notified immediately of sudden rain, ghat hairpin blocks, or entry-pass requirements before critical delays happen.
+              </p>
+            </div>
+          </div>
+
+          {/* Card 4: Bottom-Right (Global Edge Network with Map & Avatars) */}
+          <div className="relative flex flex-col justify-between rounded-3xl bg-[#1e2229] p-7 text-white shadow-xl md:col-span-8 border border-slate-800/80 overflow-hidden transition-all hover:border-slate-700">
+            <div className="flex flex-col items-end text-right z-10">
+              <h3 className="text-xl font-bold font-display text-white">Tamil Nadu Explorer Network</h3>
+              <p className="mt-1 text-xs text-slate-400 max-w-sm leading-relaxed">
+                Connect active travelers across 38+ districts with verified community check-ins and live road telemetry.
+              </p>
+            </div>
+
+            {/* Dotted Map Graphic Background with Floating Avatars */}
+            <div className="relative my-4 h-48 w-full overflow-hidden rounded-2xl bg-gradient-to-b from-[#181b20] to-[#121418] border border-slate-800/60 flex items-center justify-center">
+              {/* Dotted Grid Pattern */}
+              <div
+                className="absolute inset-0 opacity-25"
+                style={{
+                  backgroundImage: "radial-gradient(#94a3b8 1.2px, transparent 1.2px)",
+                  backgroundSize: "16px 16px",
+                }}
+              />
+
+              {/* Explorer Avatar 1: Nilgiris/Ooty */}
+              <div className="absolute left-[22%] top-[30%] flex flex-col items-center">
+                <div className="relative size-10 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg shadow-black/60">
+                  <img
+                    src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80"
+                    alt="Explorer in Nilgiris"
+                    className="size-full object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#83be09] ring-2 ring-slate-900" />
+                </div>
+                <span className="mt-1 rounded-md bg-slate-950/80 px-2 py-0.5 text-[9px] font-mono text-slate-300 backdrop-blur-sm border border-slate-800">
+                  Ooty (2.2k)
+                </span>
+              </div>
+
+              {/* Explorer Avatar 2: Madurai */}
+              <div className="absolute left-[45%] top-[55%] flex flex-col items-center">
+                <div className="relative size-10 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg shadow-black/60">
+                  <img
+                    src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=120&q=80"
+                    alt="Explorer in Madurai"
+                    className="size-full object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#83be09] ring-2 ring-slate-900" />
+                </div>
+                <span className="mt-1 rounded-md bg-slate-950/80 px-2 py-0.5 text-[9px] font-mono text-slate-300 backdrop-blur-sm border border-slate-800">
+                  Madurai (4.1k)
+                </span>
+              </div>
+
+              {/* Explorer Avatar 3: Chennai Coast */}
+              <div className="absolute right-[28%] top-[25%] flex flex-col items-center">
+                <div className="relative size-10 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg shadow-black/60">
+                  <img
+                    src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=120&q=80"
+                    alt="Explorer in Chennai"
+                    className="size-full object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#83be09] ring-2 ring-slate-900" />
+                </div>
+                <span className="mt-1 rounded-md bg-slate-950/80 px-2 py-0.5 text-[9px] font-mono text-slate-300 backdrop-blur-sm border border-slate-800">
+                  Chennai Coast
+                </span>
+              </div>
+
+              {/* Explorer Avatar 4: Kanyakumari */}
+              <div className="absolute right-[14%] top-[45%] flex flex-col items-center">
+                <div className="relative size-10 rounded-full border-2 border-[#83be09] bg-slate-900 overflow-hidden shadow-lg shadow-black/60">
+                  <img
+                    src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=120&q=80"
+                    alt="Explorer in Kanyakumari"
+                    className="size-full object-cover"
+                  />
+                  <span className="absolute bottom-0 right-0 size-2.5 rounded-full bg-[#83be09] ring-2 ring-slate-900" />
+                </div>
+                <span className="mt-1 rounded-md bg-slate-950/80 px-2 py-0.5 text-[9px] font-mono text-slate-300 backdrop-blur-sm border border-slate-800">
+                  Kanyakumari
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Highlighted Places Quick Tray below the Bento Cards */}
+        <div className="mt-8 pt-6 border-t border-slate-200">
+          <div className="mb-4 flex items-center justify-between">
+            <h3 className="text-sm font-bold uppercase tracking-wider text-slate-500 font-mono">
+              Top Pick Destinations
+            </h3>
+            <Link to="/explore" className="text-xs font-bold text-sky-600 hover:text-sky-700">
+              Browse all 400+ destinations →
+            </Link>
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-5">
+            {featuredPlaces.slice(0, 3).map((place) => (
+              <PlaceCard
+                key={place.id || place.slug}
+                place={place}
+                onAddToTrip={handleAddToTrip}
+                isAdded={addedTrips[place.slug]}
+              />
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* SECTION 4: DISCOVER BY DISTRICT (Popz Design Spec) */}
