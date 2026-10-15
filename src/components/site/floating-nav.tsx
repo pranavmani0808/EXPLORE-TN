@@ -241,20 +241,20 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* Floating Navbar Pill (Navigation5 Design) */}
           <nav
             className={cn(
-              "flex h-16 w-full max-w-5xl items-center justify-between gap-2 rounded-full border px-4 pr-3 transition-all duration-300",
+              "flex h-16 w-full max-w-7xl items-center justify-between gap-4 rounded-full border px-4 sm:px-6 transition-all duration-300",
               scrolled
                 ? "border-sky-200/80 bg-white/95 shadow-[0_12px_40px_rgba(2,132,199,0.1)] backdrop-blur-xl"
                 : "border-white/30 bg-white/20 shadow-sm backdrop-blur-md"
             )}
             aria-label="Main Navigation"
           >
-            {/* Logo Section */}
-            <div className="flex items-center gap-2 pl-2 pr-4 shrink-0">
+            {/* Logo Section - Left Aligned */}
+            <div className="flex items-center gap-2 shrink-0">
               <Link to="/" className="flex items-center gap-2.5" aria-label="ExploreTN home">
-                <span className="grid size-8 place-items-center rounded-xl bg-sky-500 text-white font-black shadow-md shadow-sky-500/25">
+                <span className="grid size-9 place-items-center rounded-xl bg-sky-500 text-white font-black shadow-md shadow-sky-500/25">
                   <Compass className="size-5 text-white" aria-hidden />
                 </span>
-                <span className="text-lg font-bold tracking-tight text-slate-900 font-display">
+                <span className="text-xl font-bold tracking-tight text-slate-900 font-display">
                   Explore<span className="text-sky-500">TN</span>
                 </span>
               </Link>
@@ -580,21 +580,32 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
             <span>{lang === "en" ? "தமிழ்" : "EN"}</span>
           </button>
 
-          {/* Saved Places */}
+          {/* Plan Route Button */}
+          <Link
+            to="/routes"
+            className="hidden md:flex items-center gap-1.5 rounded-full bg-sky-600 hover:bg-sky-500 px-4 py-2 text-xs font-extrabold text-white transition shadow-sm shadow-sky-600/20 shrink-0"
+          >
+            <Route className="size-3.5" />
+            <span>{lang === "ta" ? "திட்டமிடு" : "Plan Route"}</span>
+          </Link>
+
+          {/* Saved Places Icon */}
           <Link
             to="/saved"
             className={cn(
-              "hidden sm:flex items-center justify-center size-9 rounded-full border transition shrink-0 shadow-sm",
+              "hidden sm:flex items-center justify-center size-9 rounded-full border transition shrink-0 shadow-sm cursor-pointer",
               !scrolled
                 ? "border-white/30 bg-white/20 text-slate-700 hover:bg-white/40 hover:text-sky-600"
+                : pathname === "/saved"
+                ? "border-sky-300 bg-sky-50 text-sky-600 ring-2 ring-sky-500/20"
                 : "border-slate-200 bg-white text-slate-600 hover:text-sky-600 hover:border-sky-300 hover:bg-sky-50"
             )}
             title={lang === "ta" ? "சேமித்த இடங்கள்" : "Saved Places"}
           >
-            <Bookmark className="size-3.5" />
+            <Bookmark className="size-4" />
           </Link>
 
-          {/* Quick Settings Mega Icon & Dropdown */}
+          {/* Account Settings Mega Icon & Dropdown */}
           <div
             className="relative hidden md:inline-block"
             onMouseEnter={handleMouseEnterSettings}
@@ -809,15 +820,6 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
               )}
             </AnimatePresence>
           </div>
-
-          {/* Plan Route Button */}
-          <Link
-            to="/routes"
-            className="hidden md:flex items-center gap-1.5 rounded-full bg-sky-600 hover:bg-sky-500 px-5 py-2 text-xs font-extrabold text-white transition shadow-sm shadow-sky-600/20 shrink-0"
-          >
-            <Route className="size-3.5" />
-            <span>{lang === "ta" ? "திட்டமிடு" : "Plan Route"}</span>
-          </Link>
 
           {/* Account Icon & Profile Menu Dropdown */}
           <ProfileMenu dark={dark} toggleTheme={toggle} />
