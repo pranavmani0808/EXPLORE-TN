@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { motion } from "motion/react";
 import {
@@ -22,6 +22,8 @@ import {
   ShieldAlert,
   Info,
   Navigation,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 import heroImg from "@/assets/hero-ghats.jpg";
 import { AppShell } from "@/components/site/app-shell";
@@ -146,6 +148,17 @@ function Index() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDedicatedMapOpen, setIsDedicatedMapOpen] = useState(false);
   const [addedTrips, setAddedTrips] = useState<Record<string, boolean>>({});
+  const trailsScrollRef = useRef<HTMLDivElement>(null);
+
+  const scrollTrails = (direction: "left" | "right") => {
+    if (trailsScrollRef.current) {
+      const scrollAmount = 380;
+      trailsScrollRef.current.scrollBy({
+        left: direction === "left" ? -scrollAmount : scrollAmount,
+        behavior: "smooth",
+      });
+    }
+  };
 
   const handleAddToTrip = (slug: string) => {
     setAddedTrips((prev) => ({ ...prev, [slug]: true }));
@@ -393,21 +406,50 @@ function Index() {
         </AnimatedGroup>
       </section>
 
-      {/* SECTION 5: SIGNATURE EDITORIAL TRAILS (Popz Design Spec) */}
+      {/* SECTION 5: SIGNATURE EDITORIAL TRAILS (Popz Design Spec with Carousel Effect) */}
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
-          <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">Signature Travel Trails</h2>
-          <p className="mt-1 text-sm text-slate-500">Curated themed circuits with road distance and verified itineraries</p>
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
+                Curated Circuits
+              </span>
+            </div>
+            <h2 className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">Signature Travel Trails</h2>
+            <p className="mt-1 text-sm text-slate-500">Curated themed circuits with road distance and verified itineraries</p>
+          </div>
+
+          {/* Carousel Navigation Buttons */}
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => scrollTrails("left")}
+              aria-label="Previous trail"
+              className="flex size-9 items-center justify-center rounded-full border border-sky-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-300 transition shadow-sm cursor-pointer"
+            >
+              <ChevronLeft className="size-4" />
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollTrails("right")}
+              aria-label="Next trail"
+              className="flex size-9 items-center justify-center rounded-full border border-sky-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-300 transition shadow-sm cursor-pointer"
+            >
+              <ChevronRight className="size-4" />
+            </button>
+          </div>
         </div>
 
-        <AnimatedGroup
-          preset="blur-slide"
-          className="grid grid-cols-1 gap-6 lg:grid-cols-3"
+        {/* Scrollable Carousel Track */}
+        <div
+          ref={trailsScrollRef}
+          className="flex gap-5 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
         >
           {SIGNATURE_TRAILS.map((trail) => (
             <div
               key={trail.title}
-              className="flex flex-col justify-between rounded-3xl border border-sky-100 bg-white p-6 shadow-sm relative overflow-hidden group hover:border-sky-300 hover:shadow-lg transition-all h-full"
+              className="w-[320px] sm:w-[360px] md:w-[380px] shrink-0 snap-start flex flex-col justify-between rounded-3xl border border-sky-100 bg-white p-6 shadow-sm relative overflow-hidden group hover:border-sky-300 hover:shadow-lg transition-all h-[340px]"
             >
               <div className="flex-1 flex flex-col justify-between">
                 <div>
@@ -421,10 +463,10 @@ function Index() {
                     </span>
                   </div>
 
-                  <h3 className="mt-4 font-display text-lg font-bold text-slate-900 leading-snug group-hover:text-sky-600 transition-colors">
+                  <h3 className="mt-4 font-display text-lg font-bold text-slate-900 leading-snug group-hover:text-sky-600 transition-colors line-clamp-2">
                     {trail.title}
                   </h3>
-                  <p className="mt-2 text-xs text-slate-600 leading-relaxed">{trail.subtitle}</p>
+                  <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-2">{trail.subtitle}</p>
                 </div>
 
                 {/* Additional Metadata Pills */}
@@ -453,7 +495,7 @@ function Index() {
               </div>
             </div>
           ))}
-        </AnimatedGroup>
+        </div>
       </section>
 
       {/* SECTION 6: MAP PREVIEW (Popz Design Spec: Non-wheel-hijacking lightweight preview) */}

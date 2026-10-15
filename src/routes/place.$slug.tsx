@@ -156,12 +156,12 @@ function PlacePage() {
             transition={{ duration: 1.8, ease: "easeOut" }}
             className="absolute inset-0 size-full object-cover"
           />
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/45 to-background/60" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
           <div className="absolute inset-x-0 bottom-0 mx-auto max-w-6xl px-4 pb-10 sm:px-6">
             <div className="flex flex-wrap items-center gap-3 mb-6">
               <Link
                 to="/explore"
-                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-foreground border border-border hover:bg-card transition"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-white bg-slate-900/70 backdrop-blur-md border border-white/20 hover:bg-slate-800 transition"
               >
                 <ArrowLeft className="size-3.5" aria-hidden /> Back to All Places
               </Link>
@@ -169,39 +169,39 @@ function PlacePage() {
               <Link
                 to="/districts/$districtSlug"
                 params={{ districtSlug: (place.district || "chennai").toLowerCase().replace(/[^a-z0-9]+/g, "-") }}
-                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-amber-300 border border-amber-500/30 hover:bg-amber-500/10 transition"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-xs font-bold text-amber-300 bg-amber-950/40 backdrop-blur-md border border-amber-400/40 hover:bg-amber-900/60 transition"
               >
                 <MapPin className="size-3.5 text-amber-400" /> Explore {place.district} District Guide →
               </Link>
             </div>
             <div className="flex flex-wrap items-center gap-2 mb-2">
-              <span className="text-xs font-mono font-bold uppercase px-3 py-1 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+              <span className="text-xs font-mono font-bold uppercase px-3 py-1 rounded-full bg-emerald-500/25 text-emerald-300 border border-emerald-400/40 backdrop-blur-sm">
                 {travelIntel.canonicalEntityType || "TOURIST_ATTRACTION"}
               </span>
               {travelIntel.confidenceAndProvenance && (
-                <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-blue-500/20 text-blue-300 border border-blue-500/30">
+                <span className="text-xs font-mono font-semibold px-3 py-1 rounded-full bg-sky-500/25 text-sky-200 border border-sky-400/40 backdrop-blur-sm">
                   🛡️ {travelIntel.confidenceAndProvenance.confidenceScore}% Data Confidence Score
                 </span>
               )}
             </div>
 
-            <p className="flex items-center gap-2 text-sm text-muted-foreground font-mono">
-              <MapPin className="size-4 text-emerald-500" aria-hidden />
+            <p className="flex items-center gap-2 text-sm text-slate-300 font-mono">
+              <MapPin className="size-4 text-emerald-400" aria-hidden />
               <span>{place.district} District · {place.distanceFromChennai} from Chennai</span>
             </p>
-            <h1 className="mt-2 text-4xl font-extrabold sm:text-6xl text-white">{place.name}</h1>
-            <p className="mt-3 max-w-2xl text-base text-muted-foreground sm:text-lg">{place.tagline}</p>
+            <h1 className="mt-2 text-4xl font-extrabold sm:text-6xl text-white tracking-tight drop-shadow-md">{place.name}</h1>
+            <p className="mt-3 max-w-2xl text-base text-slate-200 sm:text-lg font-medium leading-relaxed drop-shadow-sm">{place.tagline}</p>
             
             {/* Dynamic Controls Row */}
             <div className="mt-6 flex flex-wrap items-center gap-3">
-              <span className="glass flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-mono font-bold text-amber-400">
-                <Star className="size-4 fill-current" aria-hidden />
+              <span className="flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-mono font-bold text-amber-300 bg-slate-900/80 backdrop-blur-md border border-amber-400/30 shadow-md">
+                <Star className="size-4 fill-amber-400 text-amber-400" aria-hidden />
                 <span>{place.rating} · {place.reviews} verified reviews</span>
               </span>
 
               <Link
                 to="/explore"
-                className="glass inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-sky-600 dark:text-sky-400 border border-sky-500/30 hover:bg-sky-500/10 transition"
+                className="inline-flex items-center gap-2 rounded-full px-4 py-2 text-sm font-bold text-sky-300 bg-slate-900/80 backdrop-blur-md border border-sky-400/30 hover:bg-sky-950/60 transition shadow-md"
               >
                 <Map className="size-4" />
                 <span>View on Map</span>
@@ -260,6 +260,7 @@ function PlacePage() {
               slug={place.slug}
               initialName={place.name}
               initialDistrict={place.district}
+              initialData={travelIntel}
             />
 
             {/* 🏞️ CONTEXTUAL POI HILL INTELLIGENCE (CATEGORY SPECIFIC: WATERFALL/VIEWPOINT/TREK/LAKE/TEMPLE) */}
