@@ -657,48 +657,12 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                   </div>
 
                   <div className="grid grid-cols-2 gap-4">
-                    {/* Column 1: ACCOUNT & TRAVEL */}
+                    {/* Column 1: TRAVEL & AI SYSTEMS */}
                     <div className="space-y-4">
-                      {/* ACCOUNT */}
+                      {/* TRAVEL ENGINE PREFERENCES */}
                       <div>
                         <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                          ACCOUNT
-                        </div>
-                        <div className="space-y-0.5">
-                          <Link
-                            to="/settings"
-                            search={{ tab: "profile" }}
-                            onClick={() => setSettingsMenuOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
-                          >
-                            <User className="size-3.5 text-sky-600" />
-                            <span>Profile & Identity</span>
-                          </Link>
-                          <Link
-                            to="/settings"
-                            search={{ tab: "preferences" }}
-                            onClick={() => setSettingsMenuOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
-                          >
-                            <Compass className="size-3.5 text-sky-600" />
-                            <span>Travel Preferences</span>
-                          </Link>
-                          <Link
-                            to="/settings"
-                            search={{ tab: "collections" }}
-                            onClick={() => setSettingsMenuOpen(false)}
-                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
-                          >
-                            <Bookmark className="size-3.5 text-sky-600" />
-                            <span>Saved & Collections</span>
-                          </Link>
-                        </div>
-                      </div>
-
-                      {/* TRAVEL */}
-                      <div>
-                        <div className="px-2 text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 mb-1.5">
-                          TRAVEL
+                          TRAVEL ENGINE PREFERENCES
                         </div>
                         <div className="space-y-0.5">
                           <Link
@@ -708,7 +672,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                             className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                           >
                             <Bot className="size-3.5 text-sky-600" />
-                            <span>AI Planner Controls</span>
+                            <span>AI Planner & Route Engine</span>
                           </Link>
                           <Link
                             to="/settings"
@@ -717,7 +681,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                             className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                           >
                             <Route className="size-3.5 text-sky-600" />
-                            <span>Trips & Saved Routes</span>
+                            <span>Offline Route Downloads</span>
                           </Link>
                           <Link
                             to="/settings"
@@ -726,7 +690,16 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
                             className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
                           >
                             <Map className="size-3.5 text-sky-600" />
-                            <span>Map Preferences</span>
+                            <span>Map Layers (3D & Satellite)</span>
+                          </Link>
+                          <Link
+                            to="/settings"
+                            search={{ tab: "preferences" }}
+                            onClick={() => setSettingsMenuOpen(false)}
+                            className="flex items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-xs font-semibold text-slate-700 hover:bg-sky-50 hover:text-sky-700 transition"
+                          >
+                            <Compass className="size-3.5 text-sky-600" />
+                            <span>Default Starting Location</span>
                           </Link>
                         </div>
                       </div>
