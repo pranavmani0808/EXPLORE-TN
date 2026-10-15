@@ -1,6 +1,20 @@
 import React, { useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
-import { ChevronRight, ChevronLeft, MapPin, Sparkles, Mountain, Landmark, Waves } from "lucide-react";
+import {
+  ChevronRight,
+  ChevronLeft,
+  MapPin,
+  Sparkles,
+  Mountain,
+  Landmark,
+  Waves,
+  Palmtree,
+  Trees,
+  Footprints,
+  Church,
+  Sun,
+  Compass,
+} from "lucide-react";
 import { FaCloud } from "react-icons/fa";
 import { BsBookmarkStarFill } from "react-icons/bs";
 import { VscSparkleFilled } from "react-icons/vsc";
@@ -173,6 +187,13 @@ export function ThingsToDoSection() {
       icon: Waves,
     },
     {
+      id: "kanniyakumari",
+      title: "Kanniyakumari",
+      value: "38 Activities · 3 Oceans",
+      color: "bg-[#0284c7]",
+      icon: Sun,
+    },
+    {
       id: "mahabalipuram",
       title: "Mahabalipuram",
       value: "29 Activities · UNESCO",
@@ -185,6 +206,41 @@ export function ThingsToDoSection() {
       value: "41 Activities · Chola",
       color: "bg-[#1d4ed8]",
       icon: BsBookmarkStarFill,
+    },
+    {
+      id: "yelagiri",
+      title: "Yelagiri",
+      value: "25 Activities · Treks",
+      color: "bg-[#0284c7]",
+      icon: Trees,
+    },
+    {
+      id: "courtallam",
+      title: "Courtallam",
+      value: "31 Activities · Spa Falls",
+      color: "bg-[#0ea5e9]",
+      icon: Waves,
+    },
+    {
+      id: "hogenakkal",
+      title: "Hogenakkal",
+      value: "27 Activities · River Falls",
+      color: "bg-[#0284c7]",
+      icon: Footprints,
+    },
+    {
+      id: "valparai",
+      title: "Valparai",
+      value: "34 Activities · Rainforest",
+      color: "bg-[#0369a1]",
+      icon: Palmtree,
+    },
+    {
+      id: "velankanni",
+      title: "Velankanni",
+      value: "22 Activities · Coastal Coast",
+      color: "bg-[#1d4ed8]",
+      icon: Church,
     },
   ];
 
@@ -473,6 +529,270 @@ export function ThingsToDoSection() {
         },
       ],
     },
+    kanniyakumari: {
+      hubName: "Kanniyakumari Coast",
+      tagline: "India's southern apex where the Arabian Sea, Bay of Bengal, and Indian Ocean meet",
+      route: "/districts/kanniyakumari",
+      districtLabel: "Kanniyakumari District",
+      places: [
+        {
+          name: "Vivekananda Rock Memorial & Ferry",
+          category: "Offshore Spiritual Monument",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.9,
+          description: "Iconic granite island memorial built in 1970 where Swami Vivekananda attained enlightenment.",
+        },
+        {
+          name: "Thiruvalluvar 133-ft Stone Statue",
+          category: "Monumental Tamil Landmark",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.8,
+          description: "Soaring 133-foot stone colossus honoring the author of the Tirukkural on an ocean islet.",
+        },
+        {
+          name: "Sunset & Sunrise Confluence Point",
+          category: "Triveni Sangam Natural Spectacle",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.8,
+          description: "One of the few spots on earth where both sunrise and sunset can be viewed from the exact same beach.",
+        },
+        {
+          name: "Padmanabhapuram Wooden Palace",
+          category: "Kerala-Tamil Wooden Heritage",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.7,
+          description: "16th-century Travancore wooden fortress with rosewood ceilings, antique murals, and Belgian mirrors.",
+        },
+      ],
+    },
+    yelagiri: {
+      hubName: "Yelagiri Hills",
+      tagline: "Pocket-sized hill retreat, tranquil orchards, paragliding and green trekking trails",
+      route: "/districts/tirupathur",
+      districtLabel: "Tirupathur District",
+      places: [
+        {
+          name: "Swamimalai Peak Trek (4,338 ft)",
+          category: "Highest Viewpoint Trek",
+          timeNeeded: "3 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.7,
+          description: "Rewarding cake-shaped summit trail offering breathtaking views across the entire green valley.",
+        },
+        {
+          name: "Punganur Artificial Lake & Boating",
+          category: "Lakeside Boating & Deer Park",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.5,
+          description: "Calm water body in the center of the hill station with row-boating, pedal-boating and garden walks.",
+        },
+        {
+          name: "Jalagamparai Mountain Falls",
+          category: "Forest Waterfall Trail",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.6,
+          description: "Attaru river waterfall dropping in two cascades amidst fragrant herbal forest vegetation.",
+        },
+        {
+          name: "Yelagiri Adventure & Paragliding Club",
+          category: "Aero & Rope Sports",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.6,
+          description: "Zip-lining, rock climbing, and paragliding workshops over the scenic hills of northern Tamil Nadu.",
+        },
+      ],
+    },
+    courtallam: {
+      hubName: "Courtallam Spa Waterfalls",
+      tagline: "The natural herbal water theme park of South India nestled in the Western Ghats",
+      route: "/districts/tenkasi",
+      districtLabel: "Tenkasi District",
+      places: [
+        {
+          name: "Main Falls (Peraruvi)",
+          category: "Medicinal Herbal Waterfall",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.9,
+          description: "Rivers flowing through dense herbal forests create this natural therapeutic outdoor bath.",
+        },
+        {
+          name: "Five Falls (Aintharuvi)",
+          category: "5-Pronged Cascade",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.8,
+          description: "Split into five streams resembling the five heads of Adishesha serpent over smooth rocky tiers.",
+        },
+        {
+          name: "Old Courtallam Falls (Pazhaya Aruvi)",
+          category: "Secluded Valley Cascades",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.7,
+          description: "Tucked amidst rocks and valleys, offering peaceful bathing away from the crowded town center.",
+        },
+        {
+          name: "Shenbaga Devi Temple & Falls",
+          category: "Pilgrim Trek & Sacred Grove",
+          timeNeeded: "2.5 hours",
+          image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.7,
+          description: "Ancient forest temple dedicated to Goddess Shenbaga Devi, accessible via a picturesque trail.",
+        },
+      ],
+    },
+    hogenakkal: {
+      hubName: "Hogenakkal Falls",
+      tagline: "The Niagara of India, deep river gorges, carbonatite rocks & coracle boat adventures",
+      route: "/districts/dharmapuri",
+      districtLabel: "Dharmapuri District",
+      places: [
+        {
+          name: "Kaveri Coracle Boating Safari",
+          category: "Round Bamboo Boat Adventure",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.9,
+          description: "Spinning coracle boats drifting through vertical black canyon walls right into roaring spray.",
+        },
+        {
+          name: "Hogenakkal Main Gorge & Hanging Bridge",
+          category: "Panoramic Suspension Walk",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.8,
+          description: "Overlook the smoke-like mist formed by high water force plunging into ancient rocky chasms.",
+        },
+        {
+          name: "Fresh River Fish Fry Stalls",
+          category: "Rustic Culinary Specialty",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1589301760014-d929f3979dbc?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.8,
+          description: "Freshly caught Kaveri river fish seasoned with native spices and roasted crisply on open tava.",
+        },
+        {
+          name: "Melagiri Hills Medicinal Oil Massages",
+          category: "Traditional Herbal Therapy",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "theni",
+          rating: 4.6,
+          description: "Renowned riverside Ayurvedic masseurs providing invigorating herbal body massages.",
+        },
+      ],
+    },
+    valparai: {
+      hubName: "Valparai Anamalai Hills",
+      tagline: "Pristine evergreen rainforests, 40 hairpin bends, Lion-tailed macaques & tea estates",
+      route: "/districts/coimbatore",
+      districtLabel: "Coimbatore District",
+      places: [
+        {
+          name: "40 Hairpin Bends Scenic Ghat Route",
+          category: "Iconic Mountain Drive",
+          timeNeeded: "3 hours",
+          image: "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 5.0,
+          description: "Thrilling drive from Pollachi through dense Anamalai Tiger Reserve with sweeping reservoir views.",
+        },
+        {
+          name: "Sholayar Dam & Reservoir",
+          category: "Second Deepest Dam in Asia",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1512343879784-a960bf40e7f2?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.8,
+          description: "Massive hydroelectric reservoir flanked by misty rolling tea gardens and wild evergreen woods.",
+        },
+        {
+          name: "Aliyar Dam & Monkey Falls",
+          category: "Foothill Gardens & Waterfalls",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.7,
+          description: "Pleasant stopover at the base of Valparai with natural water rapids and manicured theme parks.",
+        },
+        {
+          name: "Nallamudi Viewpoint & Tea Estates",
+          category: "Tribal Valley Viewpoint",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=700&q=80",
+          slug: "kodaikanal",
+          rating: 4.8,
+          description: "Walk through private tea plantations to view deep valleys, silver streams and Anamudi peak.",
+        },
+      ],
+    },
+    velankanni: {
+      hubName: "Velankanni Coastal Promenade",
+      tagline: "Lourdes of the East on the Bay of Bengal coast with sandy shores and sacred basilica",
+      route: "/districts/nagapattinam",
+      districtLabel: "Nagapattinam District",
+      places: [
+        {
+          name: "Basilica of Our Lady of Good Health",
+          category: "Gothic Coastal Cathedral",
+          timeNeeded: "2 hours",
+          image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.9,
+          description: "Gleaming white cathedral with distinctive neo-Gothic spires receiving millions of pilgrims.",
+        },
+        {
+          name: "Velankanni Beach Promenade",
+          category: "Coastal Beach & Sunset Walk",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.6,
+          description: "Sandy coastal stretch with souvenir bazaars, handmade seashell crafts, and sunrise ocean views.",
+        },
+        {
+          name: "Nagapattinam Lighthouse & Harbor",
+          category: "Maritime Navigation Tower",
+          timeNeeded: "1 hour",
+          image: "https://images.unsplash.com/photo-1600100397608-f010f444f434?auto=format&fit=crop&w=700&q=80",
+          slug: "mahabalipuram",
+          rating: 4.6,
+          description: "Historic maritime port beacon offering bird's-eye views of active fishing boat fleets.",
+        },
+        {
+          name: "Sikkal Singaravelan Temple",
+          category: "Ancient Coastal Murugan Shrine",
+          timeNeeded: "1.5 hours",
+          image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=700&q=80",
+          slug: "thanjavur-city",
+          rating: 4.7,
+          description: "Celebrated Chola shrine where Lord Murugan received his divine Vel (spear) to vanquish evil.",
+        },
+      ],
+    },
   };
 
   const currentHubData = hubPlacesData[selectedHubId] || hubPlacesData.ooty;
@@ -577,13 +897,13 @@ export function ThingsToDoSection() {
           </div>
 
           {/* RIGHT SIDE: HUBS CAROUSEL */}
-          <div className="lg:col-span-5 flex flex-col justify-start">
+          <div className="lg:col-span-5 flex flex-col justify-between">
             <div className="mb-2 px-1 flex items-center justify-between">
               <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-slate-400">
                 TRAVEL HUBS (TAP TO SWITCH)
               </span>
               <span className="text-[11px] text-sky-600 font-semibold">
-                6 Featured Hubs
+                {hubCarouselCards.length} Regional Hubs
               </span>
             </div>
 
@@ -591,6 +911,8 @@ export function ThingsToDoSection() {
               cards={hubCarouselCards}
               activeId={selectedHubId}
               hideExpandedCard={true}
+              gridClassName="grid-cols-2 gap-2.5 sm:gap-3"
+              cardClassName="h-[96px] sm:h-[104px]"
               onCardSelect={(cardId) => {
                 if (cardId) setSelectedHubId(cardId);
               }}
@@ -600,8 +922,14 @@ export function ThingsToDoSection() {
                   kodaikanal: "/districts/dindigul",
                   madurai: "/districts/madurai",
                   rameswaram: "/districts/ramanathapuram",
+                  kanniyakumari: "/districts/kanniyakumari",
                   mahabalipuram: "/districts/chengalpattu",
                   thanjavur: "/districts/thanjavur",
+                  yelagiri: "/districts/tirupathur",
+                  courtallam: "/districts/tenkasi",
+                  hogenakkal: "/districts/dharmapuri",
+                  valparai: "/districts/coimbatore",
+                  velankanni: "/districts/nagapattinam",
                 };
                 const targetRoute = districtRoutes[card.id] || "/explore";
                 navigate({ to: targetRoute });
@@ -612,8 +940,14 @@ export function ThingsToDoSection() {
                   kodaikanal: "/districts/dindigul",
                   madurai: "/districts/madurai",
                   rameswaram: "/districts/ramanathapuram",
+                  kanniyakumari: "/districts/kanniyakumari",
                   mahabalipuram: "/districts/chengalpattu",
                   thanjavur: "/districts/thanjavur",
+                  yelagiri: "/districts/tirupathur",
+                  courtallam: "/districts/tenkasi",
+                  hogenakkal: "/districts/dharmapuri",
+                  valparai: "/districts/coimbatore",
+                  velankanni: "/districts/nagapattinam",
                 };
                 navigate({ to: districtRoutes[card.id] || "/explore" });
               }}

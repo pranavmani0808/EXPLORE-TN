@@ -3,6 +3,7 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "motion/react";
 import { MoreHorizontal, Copy } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 /* --- Types --- */
 export interface CarouselCard {
@@ -20,6 +21,10 @@ interface MinimalCarouselProps {
   onCopyClick?: (card: CarouselCard) => void;
   onCustomizeClick?: (card: CarouselCard) => void;
   hideExpandedCard?: boolean;
+  className?: string;
+  containerClassName?: string;
+  gridClassName?: string;
+  cardClassName?: string;
 }
 
 export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
@@ -29,6 +34,10 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
   onCopyClick,
   onCustomizeClick,
   hideExpandedCard = false,
+  className,
+  containerClassName,
+  gridClassName,
+  cardClassName,
 }) => {
   const [internalActiveId, setInternalActiveId] = useState<string | null>(null);
   const activeId = controlledActiveId !== undefined ? controlledActiveId : internalActiveId;
@@ -48,13 +57,13 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
   };
 
   return (
-    <div className="min-h-full w-full flex items-center justify-center bg-transparent">
+    <div className={cn("min-h-full w-full flex items-center justify-center bg-transparent", className)}>
       <div
-        className="w-full flex flex-col items-center justify-center px-3 sm:px-4 select-none font-sans"
+        className={cn("w-full flex flex-col items-center justify-center px-2 select-none font-sans", containerClassName)}
         onClick={handleBackgroundClick}
       >
         {/* Container  */}
-        <div className="w-full max-w-105">
+        <div className="w-full">
           <motion.div layout className="flex flex-col gap-3">
 
             {/* Expanded Card */}
@@ -121,8 +130,10 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
             {/* Grid Layout */}
             <motion.div
               layout
-              className={`grid gap-2 sm:gap-3 transition-all duration-500 ${activeId ? "grid-cols-3" : "grid-cols-2"
-                }`}
+              className={cn(
+                "grid gap-2 sm:gap-2.5 transition-all duration-500",
+                gridClassName || (activeId && !hideExpandedCard ? "grid-cols-3" : "grid-cols-2")
+              )}
             >
               {(activeId && !hideExpandedCard ? secondaryCards : cards).map((card) => {
                 const isSelected = activeId === card.id;
@@ -135,11 +146,12 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
                       setActiveId(isSelected && !hideExpandedCard ? null : card.id);
                     }}
                     transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                    className={`relative flex flex-col justify-between cursor-pointer
-                               rounded-[22px] sm:rounded-[28px] p-3 sm:p-4 text-white shadow-lg transition-all
-                               ${card.color}
-                               ${isSelected ? "ring-4 ring-sky-300 ring-offset-2 scale-[1.03] shadow-2xl" : "hover:brightness-105"}
-                               ${activeId && !hideExpandedCard ? "h-24 sm:h-28" : "h-28 sm:h-32"}`}
+                    className={cn(
+                      "relative flex flex-col justify-between cursor-pointer rounded-[22px] sm:rounded-[28px] p-3 sm:p-4 text-white shadow-lg transition-all",
+                      card.color,
+                      isSelected ? "ring-4 ring-sky-300 ring-offset-2 scale-[1.03] shadow-2xl" : "hover:brightness-105",
+                      cardClassName || (activeId && !hideExpandedCard ? "h-24 sm:h-28" : "h-28 sm:h-32")
+                    )}
                   >
                     <div className="flex justify-between items-start">
                       <card.icon size={activeId && !hideExpandedCard ? 20 : 28} className="shrink-0" />

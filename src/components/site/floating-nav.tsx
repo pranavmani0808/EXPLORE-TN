@@ -372,7 +372,7 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           {/* Floating Navbar Pill (Navigation5 Design) */}
           <nav
             className={cn(
-              "flex h-16 w-full max-w-7xl items-center justify-between gap-3 sm:gap-4 rounded-full border pl-5 sm:pl-7 pr-8 sm:pr-10 transition-all duration-300",
+              "flex h-16 w-full max-w-7xl items-center justify-between gap-2 sm:gap-3 rounded-full border px-3 sm:px-4 md:px-5 transition-all duration-300",
               scrolled
                 ? "border-sky-200/80 bg-white/95 shadow-[0_12px_40px_rgba(2,132,199,0.1)] backdrop-blur-xl"
                 : "border-white/30 bg-white/20 shadow-sm backdrop-blur-md"
