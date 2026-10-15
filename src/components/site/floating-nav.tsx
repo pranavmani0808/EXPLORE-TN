@@ -237,11 +237,11 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
   return (
     <>
       <header className="fixed inset-x-0 top-0 z-50 px-4 pt-4 sm:px-6 sm:pt-4 font-sans">
-        <div className="mx-auto flex max-w-7xl items-center justify-center">
+        <div className="mx-auto flex max-w-[1440px] items-center justify-center">
           {/* Floating Navbar Pill (Navigation5 Design) */}
           <nav
             className={cn(
-              "flex h-16 w-full max-w-7xl items-center justify-between gap-3 sm:gap-4 rounded-full border pl-4 sm:pl-6 pr-4 sm:pr-6 transition-all duration-300",
+              "flex h-16 w-full max-w-7xl items-center justify-between gap-3 sm:gap-4 rounded-full border pl-5 sm:pl-7 pr-8 sm:pr-10 transition-all duration-300",
               scrolled
                 ? "border-sky-200/80 bg-white/95 shadow-[0_12px_40px_rgba(2,132,199,0.1)] backdrop-blur-xl"
                 : "border-white/30 bg-white/20 shadow-sm backdrop-blur-md"
@@ -822,7 +822,9 @@ export function FloatingNav({ onSearch }: { onSearch?: () => void }) {
           </div>
 
           {/* Account Icon & Profile Menu Dropdown */}
-          <ProfileMenu dark={dark} toggleTheme={toggle} />
+          <div className="flex items-center shrink-0 pr-1 sm:pr-2">
+            <ProfileMenu dark={dark} toggleTheme={toggle} />
+          </div>
 
           <Button
             variant="ghost"
