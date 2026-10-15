@@ -18,6 +18,7 @@ import {
   UserPlus,
   Settings,
   Lock,
+  Award,
 } from "lucide-react";
 import { getCurrentAuthUser, clearAuthSession, subscribeToAuthChanges, UserProfile, isAdminUser } from "@/lib/auth-rbac";
 import { useAuthGuard } from "@/lib/auth-guard-context";
@@ -218,12 +219,12 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
     : "EX";
 
   const mainActions = [
-    { label: "Profile & Identity", icon: User, to: "/profile" },
-    { label: "Explorer Settings", icon: Settings, to: "/settings" },
-    { label: "Change Password", icon: Lock, to: "/settings?tab=profile" },
-    { label: "Saved Collections", icon: Bookmark, to: "/saved" },
-    { label: "AI Expeditions", icon: Sparkles, to: "/planner" },
-    { label: "Help & Support", icon: HelpCircle, to: "/support" },
+    { label: "Explorer Passport & Profile", icon: User, to: "/profile", badge: "Level 4" },
+    { label: "My Badges & Milestones", icon: Award, to: "/profile" },
+    { label: "Saved Places & Collections", icon: Bookmark, to: "/saved" },
+    { label: "My Created Itineraries", icon: Sparkles, to: "/planner" },
+    { label: "Account Security & Password", icon: Lock, to: "/settings?tab=security" },
+    { label: "Help & Traveler Support", icon: HelpCircle, to: "/support" },
   ];
 
   return (
@@ -239,7 +240,7 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
         transition={{ type: "spring", stiffness: 350, damping: 20 }}
-        className="relative grid size-10 place-items-center rounded-full bg-sky-500 text-white font-black text-xs shadow-md shadow-sky-500/20 ring-2 ring-sky-500/30 cursor-pointer focus:outline-none shrink-0 mr-1 sm:mr-1.5"
+        className="relative grid size-10 place-items-center rounded-full bg-sky-500 text-white font-black text-xs shadow-md shadow-sky-500/20 ring-2 ring-sky-500/30 cursor-pointer focus:outline-none shrink-0"
         aria-label="User Profile Menu"
         aria-expanded={isOpen}
       >
@@ -308,7 +309,14 @@ export function ProfileMenu({ dark, toggleTheme }: ProfileMenuProps) {
                     <item.icon className="size-4 text-slate-400 transition-transform duration-200 group-hover:translate-x-[3px] group-hover:text-sky-600" />
                     <span className="truncate transition-transform duration-200 group-hover:translate-x-[2px]">{item.label}</span>
                   </div>
-                  <ChevronRight className="size-3.5 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-sky-600" />
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {item.badge && (
+                      <span className="px-1.5 py-0.2 rounded-full text-[9px] font-mono font-bold bg-sky-100 text-sky-700 border border-sky-200">
+                        {item.badge}
+                      </span>
+                    )}
+                    <ChevronRight className="size-3.5 text-slate-400 transition-transform duration-200 group-hover:translate-x-1 group-hover:text-sky-600" />
+                  </div>
                 </Link>
               ))}
             </div>
