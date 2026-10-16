@@ -788,7 +788,8 @@ export function ThingsToDoSection() {
   const currentHubData = hubPlacesData[selectedHubId] || hubPlacesData.ooty;
 
   return (
-    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
+    <>
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
       {/* ─────────────────────────────────────────────────────────── */}
       {/* ROW 1: Things to do wherever you're going                   */}
       {/* Interactive Hubs (Right) & Places (Left)                     */}
@@ -945,38 +946,15 @@ export function ThingsToDoSection() {
           </div>
         </div>
       </div>
-
-      {/* ─────────────────────────────────────────────────────────── */}
-      {/* ROW 2: Attractions you can't miss                           */}
-      {/* ─────────────────────────────────────────────────────────── */}
-      <div className="relative">
-        <div className="mb-6 flex items-end justify-between">
-          <div>
-            <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-xs font-semibold border border-sky-200/60 dark:border-sky-800/50">
-              <Sparkles className="size-3.5 text-sky-600 dark:text-sky-400" />
-              <span>Iconic Heritage & Nature</span>
-            </div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-display">
-              Attractions you can't miss
-            </h2>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-              Must-experience destinations, ancient wonders, and breathtaking natural sites
-            </p>
-          </div>
-
-          <div className="hidden sm:flex flex-col items-end">
-            <span className="text-xs font-mono font-bold tracking-widest uppercase text-slate-400 dark:text-slate-500">
-              3D Motion Reel
-            </span>
-            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-sans">
-              Scroll or drag to rotate
-            </span>
-          </div>
-        </div>
-
-        {/* 3D Vertical Cylinder Carousel */}
-        <AttractionsDrumCarousel attractions={ICONIC_ATTRACTIONS} />
-      </div>
     </section>
-  );
+
+    {/* ─────────────────────────────────────────────────────────── */}
+    {/* ROW 2: Attractions you can't miss (Full-Screen Sticky 3D Reel) */}
+    {/* ─────────────────────────────────────────────────────────── */}
+    <section className="relative w-full overflow-visible">
+      {/* 3D Vertical Cylinder Carousel with Full Screen Viewport Sticky Lock */}
+      <AttractionsDrumCarousel attractions={ICONIC_ATTRACTIONS} fullScreenSticky={true} />
+    </section>
+  </>
+);
 }
