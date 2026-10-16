@@ -38,6 +38,7 @@ import { places } from "@/data/places";
 import { PeakTravelGuide } from "@/components/site/peak-travel-guide";
 import { ThingsToDoSection } from "@/components/site/things-to-do-section";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
+import { ExpandableInterestSection } from "@/components/site/expandable-interest-cards";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -294,45 +295,15 @@ function Index() {
       {/* THINGS TO DO WHEREVER YOU'RE GOING & ATTRACTIONS YOU CAN'T MISS */}
       <ThingsToDoSection />
 
-        {/* SECTION 2: EXPLORE BY INTEREST (Popz Design Spec) */}
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
-        <div className="mb-6">
-          <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">Explore by Interest</h2>
-          <p className="mt-1 text-sm text-slate-500">Curated collections based on travel themes across Tamil Nadu</p>
-        </div>
-
-        <AnimatedGroup
-          preset="blur-slide"
-          className="grid grid-cols-2 gap-3.5 sm:grid-cols-3 lg:grid-cols-6"
-        >
-          {INTEREST_CATEGORIES.map((cat) => {
-            const Icon = cat.icon;
-            return (
-              <Link
-                key={cat.slug}
-                to="/explore"
-                search={{ category: cat.categoryParam }}
-                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-white p-4 sm:p-5 transition-all duration-300 hover:-translate-y-1 hover:shadow-lg shadow-sm min-h-[140px]`}
-              >
-                <span className={`grid size-11 place-items-center rounded-xl bg-sky-50 border border-sky-100 ${cat.text} shrink-0`}>
-                  <Icon className="size-5" />
-                </span>
-                <div className="mt-3">
-                  <h3 className="text-xs sm:text-sm font-bold text-slate-800 group-hover:text-sky-600 transition leading-snug">{cat.title}</h3>
-                  <p className="mt-1 text-[11px] text-slate-500 font-mono">{cat.count}</p>
-                </div>
-              </Link>
-            );
-          })}
-        </AnimatedGroup>
-      </section>
+      {/* SECTION 2: EXPLORE BY INTEREST (Expandable Card Experience) */}
+      <ExpandableInterestSection />
 
       {/* SECTION 3: FEATURED DESTINATIONS UNEVEN BENTO GRID */}
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
                 Top Rated Spots
               </span>
             </div>
@@ -354,7 +325,7 @@ function Index() {
           <Link
             to="/place/$slug"
             params={{ slug: "meenakshi-amman-temple" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-xl md:col-span-8 md:row-span-2 min-h-[460px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-xl md:col-span-8 md:row-span-2 min-h-[460px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
             <img
               src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1400&q=85"
@@ -366,7 +337,7 @@ function Index() {
 
             {/* Top Badges */}
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-500/20 border border-emerald-400/40 px-3.5 py-1 text-xs font-mono font-bold text-emerald-300 backdrop-blur-md">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3.5 py-1 text-xs font-mono font-bold text-sky-200 backdrop-blur-md">
                 🏛️ SACRED HERITAGE CIRCUIT
               </span>
               <div className="flex items-center gap-2 rounded-2xl bg-slate-950/80 border border-white/15 px-3 py-1.5 backdrop-blur-md shadow-lg">
@@ -374,7 +345,7 @@ function Index() {
                   <Star className="size-3.5 fill-amber-400" /> 4.9
                 </span>
                 <span className="text-slate-400">·</span>
-                <span className="text-xs font-mono font-bold text-emerald-400">Madurai</span>
+                <span className="text-xs font-mono font-bold text-sky-300">Madurai</span>
               </div>
             </div>
 
@@ -383,19 +354,19 @@ function Index() {
               <div className="flex items-end justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                    <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-300">
                       #1 TOP DESTINATION
                     </span>
                     <span className="text-xs text-slate-300 font-mono">14 Towering Gopurams</span>
                   </div>
-                  <h3 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white tracking-tight group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                  <h3 className="mt-1 text-2xl sm:text-3xl lg:text-4xl font-bold font-display text-white tracking-tight group-hover:text-sky-300 transition-colors drop-shadow-md">
                     Meenakshi Amman Kovil
                   </h3>
                   <p className="mt-2 text-sm text-slate-200 line-clamp-3 leading-relaxed max-w-xl font-medium">
                     Historic 2,500-year-old temple city heart with sacred Golden Lotus Tank, thousand-pillar mandapam, and world-renowned Dravidian sculpted gopurams dedicated to Goddess Meenakshi.
                   </p>
                 </div>
-                <div className="flex size-12 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-4 border border-white/20 shadow-lg">
+                <div className="flex size-12 rounded-full bg-white/10 group-hover:bg-sky-400 group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-4 border border-white/20 shadow-lg">
                   <ArrowRight className="size-5" />
                 </div>
               </div>
@@ -406,7 +377,7 @@ function Index() {
           <Link
             to="/place/$slug"
             params={{ slug: "kodaikanal" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
             <img
               src="https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=85"
@@ -419,16 +390,16 @@ function Index() {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3 py-0.5 text-xs font-mono font-bold text-sky-200 backdrop-blur-md">
                 🌲 HIGHLAND RETREAT
               </span>
-              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-cyan-300">
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-sky-300">
                 Dindigul
               </div>
             </div>
 
             <div className="relative z-10 pt-4">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-300">
                 Princess of Hill Stations
               </span>
-              <h3 className="mt-0.5 text-xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+              <h3 className="mt-0.5 text-xl font-bold font-display text-white group-hover:text-sky-300 transition-colors drop-shadow-md">
                 Kodaikanal Lake & Sholas
               </h3>
               <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed">
@@ -441,7 +412,7 @@ function Index() {
           <Link
             to="/place/$slug"
             params={{ slug: "valli-chunai-falls" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
             <img
               src="https://images.unsplash.com/photo-1434394354979-a235cd36269d?auto=format&fit=crop&w=1000&q=85"
@@ -454,16 +425,16 @@ function Index() {
               <span className="inline-flex items-center gap-1.5 rounded-full bg-cyan-500/20 border border-cyan-400/40 px-3 py-0.5 text-xs font-mono font-bold text-cyan-200 backdrop-blur-md">
                 🌊 FOREST CASCADE
               </span>
-              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-emerald-400">
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-sky-300">
                 Kanyakumari
               </div>
             </div>
 
             <div className="relative z-10 pt-4">
-              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+              <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-300">
                 Western Ghats Trail
               </span>
-              <h3 className="mt-0.5 text-xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+              <h3 className="mt-0.5 text-xl font-bold font-display text-white group-hover:text-sky-300 transition-colors drop-shadow-md">
                 Valli Chunai Falls
               </h3>
               <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed">
@@ -476,7 +447,7 @@ function Index() {
           <Link
             to="/place/$slug"
             params={{ slug: "thanjavur" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-5 min-h-[260px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-5 min-h-[260px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
             <img
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Thanjavur_2.jpg/1280px-Thanjavur_2.jpg"
@@ -486,10 +457,10 @@ function Index() {
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
 
             <div className="relative z-10 flex items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 px-3 py-0.5 text-xs font-mono font-bold text-amber-200 backdrop-blur-md">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3 py-0.5 text-xs font-mono font-bold text-sky-200 backdrop-blur-md">
                 🏛️ GREAT LIVING CHOLA TEMPLE
               </span>
-              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-amber-300">
+              <div className="flex items-center gap-1.5 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md text-xs font-bold text-sky-300">
                 Thanjavur
               </div>
             </div>
@@ -497,17 +468,17 @@ function Index() {
             <div className="relative z-10 pt-4">
               <div className="flex items-end justify-between">
                 <div>
-                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-300">
                     Granite Architectural Marvel
                   </span>
-                  <h3 className="mt-0.5 text-xl sm:text-2xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                  <h3 className="mt-0.5 text-xl sm:text-2xl font-bold font-display text-white group-hover:text-sky-300 transition-colors drop-shadow-md">
                     Brihadisvara Temple
                   </h3>
                   <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed">
                     11th-century monumental temple crowned with an 80-tonne granite monolithic dome and ancient fresco murals.
                   </p>
                 </div>
-                <div className="flex size-10 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-3 border border-white/20 shadow-lg">
+                <div className="flex size-10 rounded-full bg-white/10 group-hover:bg-sky-400 group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-3 border border-white/20 shadow-lg">
                   <ArrowRight className="size-4" />
                 </div>
               </div>
@@ -518,7 +489,7 @@ function Index() {
           <Link
             to="/place/$slug"
             params={{ slug: "mahabalipuram" }}
-            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-7 min-h-[260px] border border-slate-700/60 transition-all hover:border-[#83be09]/70 hover:shadow-2xl"
+            className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-7 min-h-[260px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
             <img
               src="https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=85"
@@ -529,7 +500,7 @@ function Index() {
             <div className="absolute inset-0 bg-gradient-to-r from-slate-950/80 via-transparent to-slate-950/30" />
 
             <div className="relative z-10 flex flex-wrap items-center justify-between gap-2">
-              <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-500/20 border border-amber-400/40 px-3 py-0.5 text-xs font-mono font-bold text-amber-200 backdrop-blur-md">
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-500/20 border border-sky-400/40 px-3 py-0.5 text-xs font-mono font-bold text-sky-200 backdrop-blur-md">
                 🏛️ UNESCO WORLD HERITAGE · COASTAL DRIVE
               </span>
               <div className="flex items-center gap-2 rounded-xl bg-slate-950/80 border border-white/15 px-2.5 py-1 backdrop-blur-md shadow-lg">
@@ -537,24 +508,24 @@ function Index() {
                   <Star className="size-3 fill-amber-400" /> 4.9
                 </span>
                 <span className="text-slate-400">·</span>
-                <span className="text-xs font-mono font-bold text-cyan-300">Chengalpattu</span>
+                <span className="text-xs font-mono font-bold text-sky-300">Chengalpattu</span>
               </div>
             </div>
 
             <div className="relative z-10 pt-4">
               <div className="flex items-end justify-between">
                 <div>
-                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-[#83be09]">
+                  <span className="text-[11px] font-mono font-bold uppercase tracking-wider text-sky-300">
                     Coastal Heritage
                   </span>
-                  <h3 className="mt-0.5 text-xl sm:text-2xl font-bold font-display text-white group-hover:text-[#83be09] transition-colors drop-shadow-md">
+                  <h3 className="mt-0.5 text-xl sm:text-2xl font-bold font-display text-white group-hover:text-sky-300 transition-colors drop-shadow-md">
                     Mahabalipuram Shore Temple
                   </h3>
                   <p className="mt-1 text-xs text-slate-200 line-clamp-2 leading-relaxed max-w-lg">
                     7th-century monolithic rock-cut Dravidian temples and stone sculptures carved overlooking crashing Bay of Bengal ocean waves.
                   </p>
                 </div>
-                <div className="flex size-10 rounded-full bg-white/10 group-hover:bg-[#83be09] group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-3 border border-white/20 shadow-lg">
+                <div className="flex size-10 rounded-full bg-white/10 group-hover:bg-sky-400 group-hover:text-slate-950 items-center justify-center transition shrink-0 ml-3 border border-white/20 shadow-lg">
                   <ArrowRight className="size-4" />
                 </div>
               </div>
