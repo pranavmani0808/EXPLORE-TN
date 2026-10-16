@@ -20,6 +20,7 @@ import { BsBookmarkStarFill } from "react-icons/bs";
 import { VscSparkleFilled } from "react-icons/vsc";
 import { SafeImage } from "@/components/ui/safe-image";
 import { MinimalCarousel, type CarouselCard } from "@/components/ui/minimal-carousel";
+import { AttractionsDrumCarousel } from "./attractions-drum-carousel";
 
 export interface DestinationHub {
   name: string;
@@ -144,18 +145,7 @@ export const ICONIC_ATTRACTIONS: IconicAttraction[] = [
 ];
 
 export function ThingsToDoSection() {
-  const carouselRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-
-  const scrollCarousel = (direction: "left" | "right") => {
-    if (carouselRef.current) {
-      const scrollAmount = 320;
-      carouselRef.current.scrollBy({
-        left: direction === "right" ? scrollAmount : -scrollAmount,
-        behavior: "smooth",
-      });
-    }
-  };
 
   const hubCarouselCards: CarouselCard[] = [
     {
@@ -962,72 +952,30 @@ export function ThingsToDoSection() {
       <div className="relative">
         <div className="mb-6 flex items-end justify-between">
           <div>
-            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
+            <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/40 text-sky-700 dark:text-sky-300 text-xs font-semibold border border-sky-200/60 dark:border-sky-800/50">
+              <Sparkles className="size-3.5 text-sky-600 dark:text-sky-400" />
+              <span>Iconic Heritage & Nature</span>
+            </div>
+            <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white font-display">
               Attractions you can't miss
             </h2>
-            <p className="mt-1 text-xs sm:text-sm text-slate-500">
+            <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
               Must-experience destinations, ancient wonders, and breathtaking natural sites
             </p>
           </div>
 
-          {/* Desktop Navigation Controls */}
-          <div className="hidden sm:flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => scrollCarousel("left")}
-              aria-label="Scroll left"
-              className="grid size-9 place-items-center rounded-full border border-slate-200 bg-white text-slate-700 hover:border-sky-300 hover:text-sky-600 transition shadow-sm cursor-pointer"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollCarousel("right")}
-              aria-label="Scroll right"
-              className="grid size-9 place-items-center rounded-full border border-sky-200 bg-sky-50 text-sky-600 hover:bg-sky-500 hover:text-white transition shadow-sm cursor-pointer"
-            >
-              <ChevronRight className="size-4" />
-            </button>
+          <div className="hidden sm:flex flex-col items-end">
+            <span className="text-xs font-mono font-bold tracking-widest uppercase text-slate-400 dark:text-slate-500">
+              3D Motion Reel
+            </span>
+            <span className="text-[11px] text-slate-400 dark:text-slate-500 font-sans">
+              Scroll or drag to rotate
+            </span>
           </div>
         </div>
 
-        {/* Horizontal Carousel */}
-        <div
-          ref={carouselRef}
-          className="flex gap-4 sm:gap-5 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {ICONIC_ATTRACTIONS.map((attraction) => (
-            <Link
-              key={attraction.id}
-              to="/place/$slug"
-              params={{ slug: attraction.slug }}
-              className="group flex-shrink-0 w-[260px] sm:w-[280px] md:w-[310px] snap-start focus:outline-none"
-            >
-              <div className="relative aspect-[16/10] w-full overflow-hidden rounded-2xl border border-sky-100 bg-white shadow-sm transition-all duration-300 group-hover:scale-[1.02] group-hover:border-sky-300 group-hover:shadow-lg">
-                <SafeImage
-                  src={attraction.image}
-                  alt={attraction.title}
-                  category={attraction.category}
-                  className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/40 via-transparent to-transparent" />
-                <span className="absolute bottom-2.5 left-2.5 inline-flex items-center gap-1 rounded-md bg-white/90 backdrop-blur-md px-2 py-0.5 text-[10px] font-mono font-bold text-slate-800 border border-slate-200/80 shadow-sm">
-                  <MapPin className="size-2.5 text-sky-600" />
-                  {attraction.district}
-                </span>
-              </div>
-              <div className="mt-2.5">
-                <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors leading-snug">
-                  {attraction.title}
-                </h3>
-                <p className="text-[11px] text-slate-500 font-sans mt-0.5">
-                  {attraction.activities}
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+        {/* 3D Vertical Cylinder Carousel */}
+        <AttractionsDrumCarousel attractions={ICONIC_ATTRACTIONS} />
       </div>
     </section>
   );

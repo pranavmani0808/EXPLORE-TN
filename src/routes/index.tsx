@@ -62,15 +62,6 @@ export const Route = createFileRoute("/")({
 import { getCategoryLabel } from "@/lib/categoryLabels";
 import type { Place } from "@/data/places";
 
-const INTEREST_CATEGORIES = [
-  { slug: "heritage-temples", categoryParam: "heritage-temples", title: "Heritage & Temples", icon: Landmark, count: "480+ Places", bg: "from-sky-50 to-white", border: "border-sky-100", text: "text-sky-600" },
-  { slug: "hill-escapes", categoryParam: "hill-escapes", title: "Hill Escapes", icon: Mountain, count: "120+ Viewpoints", bg: "from-blue-50 to-white", border: "border-sky-100", text: "text-sky-600" },
-  { slug: "waterfalls", categoryParam: "waterfalls", title: "Waterfalls & Streams", icon: CloudRain, count: "85+ Waterfalls", bg: "from-sky-100/60 to-white", border: "border-sky-200", text: "text-sky-600" },
-  { slug: "coastal", categoryParam: "coastal", title: "Coastal Journeys", icon: Waves, count: "140 km Coast", bg: "from-cyan-50 to-white", border: "border-cyan-100", text: "text-cyan-600" },
-  { slug: "culinary", categoryParam: "culinary", title: "Culinary Trails", icon: Utensils, count: "90+ Local Spots", bg: "from-amber-50 to-white", border: "border-amber-100", text: "text-amber-600" },
-  { slug: "wildlife", categoryParam: "wildlife", title: "Forest & Wildlife", icon: Trees, count: "32 Trails", bg: "from-emerald-50 to-white", border: "border-emerald-100", text: "text-emerald-600" },
-];
-
 // District Highlights (Popz Design Section 4)
 const DISTRICT_HIGHLIGHTS = [
   { name: "Madurai", title: "Cultural Capital & Meenakshi Temple", spots: 42, image: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=800&q=80", route: "/districts/madurai" },
