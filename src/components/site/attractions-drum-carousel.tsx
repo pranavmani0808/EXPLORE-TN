@@ -155,7 +155,7 @@ export function AttractionsDrumCarousel({
       ref={sectionWrapRef}
       className={
         fullScreenSticky
-          ? "relative h-[280vh] w-full"
+          ? "relative h-[200vh] w-full"
           : "relative w-full py-4 select-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-3xl"
       }
     >

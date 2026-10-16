@@ -788,13 +788,12 @@ export function ThingsToDoSection() {
   const currentHubData = hubPlacesData[selectedHubId] || hubPlacesData.ooty;
 
   return (
-    <>
-      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
+    <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6 font-sans">
       {/* ─────────────────────────────────────────────────────────── */}
       {/* ROW 1: Things to do wherever you're going                   */}
       {/* Interactive Hubs (Right) & Places (Left)                     */}
       {/* ─────────────────────────────────────────────────────────── */}
-      <div className="mb-14">
+      <div>
         <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h2 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 font-display">
@@ -947,14 +946,14 @@ export function ThingsToDoSection() {
         </div>
       </div>
     </section>
+  );
+}
 
-    {/* ─────────────────────────────────────────────────────────── */}
-    {/* ROW 2: Attractions you can't miss (Full-Screen Sticky 3D Reel) */}
-    {/* ─────────────────────────────────────────────────────────── */}
+export function AttractionsYouCantMissSection() {
+  return (
     <section className="relative w-full overflow-visible">
       {/* 3D Vertical Cylinder Carousel with Full Screen Viewport Sticky Lock */}
       <AttractionsDrumCarousel attractions={ICONIC_ATTRACTIONS} fullScreenSticky={true} />
     </section>
-  </>
-);
+  );
 }

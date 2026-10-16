@@ -36,7 +36,7 @@ import { SearchPanel } from "@/components/site/search-panel";
 import { Button } from "@/components/ui/button";
 import { places } from "@/data/places";
 import { PeakTravelGuide } from "@/components/site/peak-travel-guide";
-import { ThingsToDoSection } from "@/components/site/things-to-do-section";
+import { ThingsToDoSection, AttractionsYouCantMissSection } from "@/components/site/things-to-do-section";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
 import { ExpandableInterestSection } from "@/components/site/expandable-interest-cards";
 
@@ -283,8 +283,11 @@ function Index() {
         </div>
       </section>
 
-      {/* THINGS TO DO WHEREVER YOU'RE GOING & ATTRACTIONS YOU CAN'T MISS */}
+      {/* THINGS TO DO WHEREVER YOU'RE GOING */}
       <ThingsToDoSection />
+
+      {/* ATTRACTIONS YOU CAN'T MISS (Full-Screen Sticky 3D Cylinder Reel) */}
+      <AttractionsYouCantMissSection />
 
       {/* SECTION 2: EXPLORE BY INTEREST (Expandable Card Experience) */}
       <ExpandableInterestSection />
