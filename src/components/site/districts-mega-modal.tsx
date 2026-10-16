@@ -52,11 +52,13 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
   const [sortBy, setSortBy] = useState<SortOption>("rating");
   const [minRating, setMinRating] = useState<number>(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
+  const [isDistrictDropdownOpen, setIsDistrictDropdownOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("spots");
 
   const searchInputRef = useRef<HTMLInputElement>(null);
   const filterPopoverRef = useRef<HTMLDivElement>(null);
   const filterButtonRef = useRef<HTMLButtonElement>(null);
+  const districtDropdownRef = useRef<HTMLDivElement>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
 
   // Close filter popover on click outside
@@ -396,7 +398,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                     )}
                   </button>
 
-                  {/* Dark Popover Card Effect (matches user design screenshot) */}
+                  {/* Clean White & Light-Blue Popover Card */}
                   <AnimatePresence>
                     {showAdvanced && (
                       <motion.div
@@ -405,15 +407,15 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                         animate={{ opacity: 1, y: 0, scale: 1 }}
                         exit={{ opacity: 0, y: 8, scale: 0.96 }}
                         transition={{ duration: 0.18, ease: "easeOut" }}
-                        className="absolute right-0 top-full mt-2.5 w-[320px] sm:w-[350px] z-50 rounded-3xl bg-[#0f1115] text-white p-5 shadow-2xl border border-white/10 ring-1 ring-black/40 backdrop-blur-xl"
+                        className="absolute right-0 top-full mt-2.5 w-[320px] sm:w-[350px] z-50 rounded-3xl bg-white text-slate-800 p-5 shadow-2xl border border-sky-100 ring-1 ring-slate-900/10"
                       >
                         {/* Header: Title + Reset all button */}
-                        <div className="flex items-start justify-between pb-4 border-b border-white/10">
+                        <div className="flex items-start justify-between pb-4 border-b border-slate-100">
                           <div>
-                            <h3 className="font-extrabold text-lg text-white tracking-tight">
+                            <h3 className="font-extrabold text-lg text-slate-900 tracking-tight">
                               {lang === "ta" ? "மேம்பட்ட வடிகட்டிகள்" : "Advanced Filters"}
                             </h3>
-                            <p className="text-xs text-neutral-400 mt-0.5">
+                            <p className="text-xs text-slate-500 mt-0.5">
                               {lang === "ta" ? "விருப்பங்களை தேர்வு செய்க" : "Filter by attributes"}
                             </p>
                           </div>
@@ -424,8 +426,9 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                               setSortBy("rating");
                               setMinRating(0);
                               setActiveCategory("all");
+                              setIsDistrictDropdownOpen(false);
                             }}
-                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-neutral-200 hover:text-white text-xs font-semibold border border-white/10 transition cursor-pointer"
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-sky-50 hover:bg-sky-100 text-sky-700 text-xs font-bold border border-sky-200 transition cursor-pointer"
                           >
                             <RotateCcw className="size-3" />
                             <span>{lang === "ta" ? "மீட்டமை" : "Reset all"}</span>
@@ -433,11 +436,11 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                         </div>
 
                         {/* Filter category section with radio/checkbox style */}
-                        <div className="py-4 border-b border-white/10">
-                          <h4 className="text-sm font-semibold text-neutral-300 mb-3">
+                        <div className="py-4 border-b border-slate-100">
+                          <h4 className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-3">
                             {lang === "ta" ? "வகை வடிகட்டி" : "Filter category"}
                           </h4>
-                          <div className="space-y-2.5">
+                          <div className="space-y-1.5">
                             {[
                               { key: "all", label: "All Spots" },
                               { key: "hills", label: "Hill Stations" },
@@ -451,19 +454,22 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                                   key={cat.key}
                                   type="button"
                                   onClick={() => setActiveCategory(cat.key as CategoryFilter)}
-                                  className="w-full flex items-center gap-3 py-1 px-1 rounded-lg text-left transition hover:bg-white/5 cursor-pointer group"
+                                  className={cn(
+                                    "w-full flex items-center gap-3 py-2 px-2.5 rounded-xl text-left transition cursor-pointer group",
+                                    isSelected ? "bg-sky-50/80" : "hover:bg-slate-50"
+                                  )}
                                 >
                                   <div
                                     className={cn(
                                       "size-5 rounded-full flex items-center justify-center border transition-all shrink-0",
                                       isSelected
-                                        ? "bg-lime-500 border-lime-500 text-black"
-                                        : "border-neutral-600 group-hover:border-neutral-400 bg-transparent"
+                                        ? "bg-sky-500 border-sky-500 text-white shadow-sm"
+                                        : "border-slate-300 group-hover:border-sky-400 bg-white"
                                     )}
                                   >
                                     {isSelected && <Check className="size-3.5 stroke-[3]" />}
                                   </div>
-                                  <span className={cn("text-sm font-medium", isSelected ? "text-white font-semibold" : "text-neutral-300")}>
+                                  <span className={cn("text-xs font-semibold", isSelected ? "text-sky-900 font-bold" : "text-slate-700")}>
                                     {cat.label}
                                   </span>
                                 </button>
@@ -472,37 +478,93 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                           </div>
                         </div>
 
-                        {/* District Selector */}
-                        <div className="py-4 border-b border-white/10">
-                          <label htmlFor="popover-district-select" className="text-sm font-semibold text-neutral-300 block mb-2">
-                            {lang === "ta" ? "மாவட்டம்" : "District"}
-                          </label>
-                          <div className="relative">
-                            <select
-                              id="popover-district-select"
-                              value={selectedDistrict}
-                              onChange={(e) => setSelectedDistrict(e.target.value)}
-                              className="w-full rounded-xl border border-white/15 bg-neutral-900/90 px-3 py-2 text-xs font-medium text-white focus:border-lime-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-500 cursor-pointer appearance-none"
-                            >
-                              <option value="all">📍 All 38 Districts</option>
-                              {availableDistricts.map((d) => (
-                                <option key={d} value={d}>
-                                  {d} District
-                                </option>
-                              ))}
-                            </select>
-                            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+                        {/* Custom White & Light-Blue District Dropdown */}
+                        <div className="py-4 border-b border-slate-100 relative" ref={districtDropdownRef}>
+                          <div className="flex items-center justify-between mb-2">
+                            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider block">
+                              {lang === "ta" ? "மாவட்டம்" : "District"}
+                            </label>
+                            {selectedDistrict !== "all" && (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedDistrict("all")}
+                                className="text-[11px] font-bold text-sky-600 hover:underline"
+                              >
+                                Clear
+                              </button>
+                            )}
                           </div>
+
+                          {/* District Trigger Button */}
+                          <button
+                            type="button"
+                            onClick={() => setIsDistrictDropdownOpen((prev) => !prev)}
+                            className={cn(
+                              "w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-xs font-bold transition text-left cursor-pointer shadow-sm",
+                              selectedDistrict !== "all"
+                                ? "bg-sky-50 border-sky-300 text-sky-900"
+                                : "bg-white border-slate-200 hover:border-sky-300 text-slate-800"
+                            )}
+                          >
+                            <span className="truncate">
+                              {selectedDistrict === "all" ? "📍 All 38 Districts" : `📍 ${selectedDistrict} District`}
+                            </span>
+                            <ChevronDown className={cn("size-4 text-sky-600 shrink-0 transition-transform duration-200", isDistrictDropdownOpen && "rotate-180")} />
+                          </button>
+
+                          {/* Custom Styled Dropdown List with white & light blue theme */}
+                          {isDistrictDropdownOpen && (
+                            <div className="absolute left-0 right-0 top-full mt-1.5 max-h-52 overflow-y-auto rounded-2xl border border-sky-100 bg-white p-1.5 shadow-xl ring-1 ring-slate-900/5 z-50">
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setSelectedDistrict("all");
+                                  setIsDistrictDropdownOpen(false);
+                                }}
+                                className={cn(
+                                  "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-left transition cursor-pointer",
+                                  selectedDistrict === "all"
+                                    ? "bg-sky-500 text-white font-bold shadow-sm"
+                                    : "text-slate-700 hover:bg-sky-50 hover:text-sky-900"
+                                )}
+                              >
+                                <span>📍 All 38 Districts</span>
+                                {selectedDistrict === "all" && <Check className="size-3.5 stroke-[3]" />}
+                              </button>
+                              {availableDistricts.map((d) => {
+                                const isDistSelected = selectedDistrict.toLowerCase() === d.toLowerCase();
+                                return (
+                                  <button
+                                    key={d}
+                                    type="button"
+                                    onClick={() => {
+                                      setSelectedDistrict(d);
+                                      setIsDistrictDropdownOpen(false);
+                                    }}
+                                    className={cn(
+                                      "w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold text-left transition cursor-pointer",
+                                      isDistSelected
+                                        ? "bg-sky-500 text-white font-bold shadow-sm"
+                                        : "text-slate-700 hover:bg-sky-50 hover:text-sky-900"
+                                    )}
+                                  >
+                                    <span>{d} District</span>
+                                    {isDistSelected && <Check className="size-3.5 stroke-[3]" />}
+                                  </button>
+                                );
+                              })}
+                            </div>
+                          )}
                         </div>
 
                         {/* Rating filter with range slider / highlight */}
                         <div className="pt-4">
                           <div className="flex items-center justify-between mb-2">
-                            <span className="text-sm font-semibold text-neutral-300">
+                            <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
                               {lang === "ta" ? "குறைந்தபட்ச மதிப்பீடு" : "Rating range"}
                             </span>
-                            <span className="text-sm font-bold text-amber-400 flex items-center gap-1">
-                              <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                            <span className="text-xs font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded-full border border-sky-200 flex items-center gap-1">
+                              <Star className="size-3 fill-amber-400 text-amber-400" />
                               {minRating > 0 ? `${minRating.toFixed(1)}+ Stars` : "All Ratings"}
                             </span>
                           </div>
@@ -514,9 +576,9 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                             step="0.1"
                             value={minRating}
                             onChange={(e) => setMinRating(parseFloat(e.target.value))}
-                            className="w-full h-1.5 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-lime-500"
+                            className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-sky-500"
                           />
-                          <div className="flex justify-between text-[11px] font-mono text-neutral-400 mt-1">
+                          <div className="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
                             <span>0 ★</span>
                             <span>4.5 ★</span>
                             <span>4.8+ ★</span>
