@@ -345,23 +345,24 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                 </div>
               )}
 
-              {/* Advanced Options Toggle Button */}
+              {/* Filter Options Toggle Button */}
               {viewMode === "spots" && (
                 <button
                   type="button"
                   aria-expanded={showAdvanced}
+                  aria-label={lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Filter options"}
+                  title={lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Filter options"}
                   onClick={() => setShowAdvanced(!showAdvanced)}
                   className={cn(
-                    "flex items-center gap-1.5 px-3 py-1.5 min-h-[36px] rounded-xl border text-xs font-bold transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
+                    "relative grid size-9 sm:size-10 min-w-[36px] min-h-[36px] place-items-center rounded-xl border transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
                     showAdvanced || selectedDistrict !== "all" || sortBy !== "rating"
                       ? "bg-sky-50 text-sky-700 border-sky-300 shadow-sm"
                       : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
-                  <Filter className="size-3.5 text-sky-600" aria-hidden="true" />
-                  <span>{lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Advanced Options"}</span>
+                  <Filter className="size-4 text-sky-600" aria-hidden="true" />
                   {(selectedDistrict !== "all" || sortBy !== "rating") && (
-                    <span className="size-1.5 rounded-full bg-sky-500 animate-ping" aria-hidden="true" />
+                    <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-sky-500 ring-2 ring-white" aria-hidden="true" />
                   )}
                 </button>
               )}
