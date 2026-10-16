@@ -160,10 +160,10 @@ export function HeroWordReelSection({ attractions }: HeroWordReelProps) {
             </AnimatePresence>
           </div>
 
-          {/* FLOATING VERTICAL THUMBNAIL PILL DOCK (Exact recreation of user reference image) */}
+          {/* FLOATING VERTICAL THUMBNAIL PILL DOCK - Positioned on the Right Side */}
           <div
             onWheel={handleWheel}
-            className="absolute z-30 flex flex-col items-center gap-2 p-1.5 sm:p-2 rounded-3xl sm:rounded-[28px] bg-slate-950/75 border border-white/20 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] cursor-pointer"
+            className="absolute right-5 sm:right-8 z-30 flex flex-col items-center gap-2 p-1.5 sm:p-2 rounded-3xl sm:rounded-[28px] bg-slate-950/75 border border-white/20 backdrop-blur-xl shadow-[0_20px_50px_rgba(0,0,0,0.6)] cursor-pointer"
           >
             {attractions.map((attraction, idx) => {
               const isActive = idx === activeIndex;
