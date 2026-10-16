@@ -358,7 +358,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                       : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
                   )}
                 >
-                  <SlidersHorizontal className="size-3.5 text-sky-600" aria-hidden="true" />
+                  <Filter className="size-3.5 text-sky-600" aria-hidden="true" />
                   <span>{lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Advanced Options"}</span>
                   {(selectedDistrict !== "all" || sortBy !== "rating") && (
                     <span className="size-1.5 rounded-full bg-sky-500 animate-ping" aria-hidden="true" />
