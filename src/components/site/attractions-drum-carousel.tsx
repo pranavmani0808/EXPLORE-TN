@@ -144,7 +144,7 @@ export function AttractionsDrumCarousel({
       <div
         className={
           fullScreenSticky
-            ? "mx-auto w-full max-w-6xl flex flex-col justify-between px-4 sm:px-8 select-none"
+            ? "mx-auto w-full max-w-7xl flex flex-col justify-between px-3 sm:px-6 lg:px-8 select-none"
             : "relative w-full"
         }
         role="region"
@@ -155,7 +155,7 @@ export function AttractionsDrumCarousel({
       >
         {/* Full-screen Section Header when sticky */}
         {fullScreenSticky && (
-          <div className="mx-auto w-full max-w-6xl pt-1 pb-1 flex items-end justify-between z-40">
+          <div className="mx-auto w-full max-w-7xl pt-1 pb-1 flex items-end justify-between z-40">
             <div>
               <div className="inline-flex items-center gap-2 mb-1.5 px-3 py-1 rounded-full bg-sky-50 dark:bg-sky-950/50 text-sky-700 dark:text-sky-300 text-xs font-semibold border border-sky-200/60 dark:border-sky-800/50">
                 <Compass className="size-3.5 text-sky-600 dark:text-sky-400" />
@@ -189,7 +189,7 @@ export function AttractionsDrumCarousel({
           onPointerCancel={handlePointerUp}
           className={`relative ${
             fullScreenSticky
-              ? "flex-1 min-h-[380px] sm:min-h-[460px] md:min-h-[540px]"
+              ? "flex-1 min-h-[420px] sm:min-h-[500px] md:min-h-[580px]"
               : "h-[440px] sm:h-[480px] md:h-[520px]"
           } w-full flex items-center justify-center overflow-hidden cursor-grab active:cursor-grabbing`}
           style={{
@@ -218,7 +218,7 @@ export function AttractionsDrumCarousel({
 
             // Compute 3D cylinder transformation values
             const rotX = prefersReducedMotion ? 0 : dist * 28;
-            const translateY = dist * (fullScreenSticky ? 160 : 140);
+            const translateY = dist * (fullScreenSticky ? 175 : 140);
             const translateZ = prefersReducedMotion ? 0 : -Math.abs(dist) * 125;
             const scale = 1 - Math.min(Math.abs(dist) * 0.12, 0.32);
             const opacity = Math.max(0.15, 1 - Math.abs(dist) * 0.38);
@@ -242,7 +242,7 @@ export function AttractionsDrumCarousel({
                     : "transform 0.45s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.45s ease",
                   transformStyle: "preserve-3d",
                 }}
-                className={`absolute w-[88%] sm:w-[540px] md:w-[680px] lg:w-[760px] aspect-[16/10] max-h-[420px] rounded-2xl sm:rounded-3xl shadow-xl transition-shadow duration-300 ${
+                className={`absolute w-[94%] sm:w-[680px] md:w-[860px] lg:w-[1040px] xl:w-[1120px] aspect-[16/9] sm:aspect-[16/9.5] md:aspect-[21/10] max-h-[480px] rounded-2xl sm:rounded-3xl shadow-xl transition-shadow duration-300 ${
                   isCenter
                     ? "shadow-2xl shadow-sky-950/20 ring-2 ring-sky-400/60 cursor-pointer"
                     : "cursor-pointer hover:opacity-90"
@@ -324,7 +324,7 @@ export function AttractionsDrumCarousel({
         </div>
 
         {/* Controller & Indicators Footer */}
-        <div className="mx-auto w-full max-w-6xl pb-2 pt-1 flex items-center justify-between z-40">
+        <div className="mx-auto w-full max-w-7xl pb-2 pt-1 flex items-center justify-between z-40">
           {/* Active attraction index & title */}
           <div className="flex items-center gap-3">
             <div className="flex items-center gap-1.5 font-mono text-xs">
