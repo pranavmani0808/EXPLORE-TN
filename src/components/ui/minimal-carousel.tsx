@@ -145,11 +145,18 @@ export const MinimalCarousel: React.FC<MinimalCarouselProps> = ({
                       e.stopPropagation();
                       setActiveId(isSelected && !hideExpandedCard ? null : card.id);
                     }}
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    whileHover={{ scale: isSelected ? 1.06 : 1.03 }}
+                    whileTap={{ scale: 0.94 }}
+                    animate={{
+                      scale: isSelected ? 1.05 : 1,
+                    }}
+                    transition={{ type: "spring", stiffness: 400, damping: 25 }}
                     className={cn(
-                      "relative flex flex-col justify-between cursor-pointer rounded-[22px] sm:rounded-[28px] p-3 sm:p-4 text-white shadow-lg transition-all",
+                      "relative flex flex-col justify-between cursor-pointer rounded-[22px] sm:rounded-[28px] p-3 sm:p-4 text-white shadow-lg transition-shadow duration-300",
                       card.color,
-                      isSelected ? "ring-4 ring-sky-300 ring-offset-2 scale-[1.03] shadow-2xl" : "hover:brightness-105",
+                      isSelected
+                        ? "ring-4 ring-sky-300 ring-offset-2 ring-offset-white dark:ring-offset-slate-900 shadow-2xl z-10"
+                        : "hover:brightness-105 hover:shadow-xl",
                       cardClassName || (activeId && !hideExpandedCard ? "h-24 sm:h-28" : "h-28 sm:h-32")
                     )}
                   >

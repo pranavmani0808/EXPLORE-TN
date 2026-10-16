@@ -1,5 +1,6 @@
 import React, { useRef } from "react";
 import { Link, useNavigate } from "@tanstack/react-router";
+import { motion, AnimatePresence } from "motion/react";
 import {
   ChevronRight,
   ChevronLeft,
@@ -837,45 +838,54 @@ export function ThingsToDoSection() {
               </Link>
             </div>
 
-            {/* Places Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-              {currentHubData.places.map((place, idx) => (
-                <Link
-                  key={idx}
-                  to="/place/$slug"
-                  params={{ slug: place.slug }}
-                  className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-3 hover:border-sky-300 hover:shadow-md transition-all duration-200"
-                >
-                  <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-slate-100 mb-2.5">
-                    <SafeImage
-                      src={place.image}
-                      alt={place.name}
-                      category="heritage"
-                      className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
-                    <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md bg-white/90 backdrop-blur-md px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-800 border border-slate-200/80">
-                      ★ {place.rating}
-                    </span>
-                    <span className="absolute top-2 right-2 rounded-full bg-slate-900/70 backdrop-blur-md px-2 py-0.5 text-[9px] font-mono font-semibold text-white">
-                      {place.timeNeeded}
-                    </span>
-                  </div>
+            {/* Places Grid with Zoom-in / Zoom-out Transition */}
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={selectedHubId}
+                initial={{ opacity: 0, scale: 0.94 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 1.05 }}
+                transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                className="grid grid-cols-1 sm:grid-cols-2 gap-3.5"
+              >
+                {currentHubData.places.map((place, idx) => (
+                  <Link
+                    key={idx}
+                    to="/place/$slug"
+                    params={{ slug: place.slug }}
+                    className="group flex flex-col justify-between rounded-2xl border border-slate-200/90 bg-white p-3 hover:border-sky-300 hover:shadow-md transition-all duration-200"
+                  >
+                    <div className="relative aspect-[16/10] w-full overflow-hidden rounded-xl bg-slate-100 mb-2.5">
+                      <SafeImage
+                        src={place.image}
+                        alt={place.name}
+                        category="heritage"
+                        className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-950/60 via-transparent to-transparent" />
+                      <span className="absolute bottom-2 left-2 inline-flex items-center gap-1 rounded-md bg-white/90 backdrop-blur-md px-1.5 py-0.5 text-[9px] font-mono font-bold text-slate-800 border border-slate-200/80">
+                        ★ {place.rating}
+                      </span>
+                      <span className="absolute top-2 right-2 rounded-full bg-slate-900/70 backdrop-blur-md px-2 py-0.5 text-[9px] font-mono font-semibold text-white">
+                        {place.timeNeeded}
+                      </span>
+                    </div>
 
-                  <div>
-                    <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-600">
-                      {place.category}
-                    </span>
-                    <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1 mt-0.5">
-                      {place.name}
-                    </h4>
-                    <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
-                      {place.description}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
+                    <div>
+                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider text-sky-600">
+                        {place.category}
+                      </span>
+                      <h4 className="text-xs sm:text-sm font-bold text-slate-900 group-hover:text-sky-600 transition-colors line-clamp-1 mt-0.5">
+                        {place.name}
+                      </h4>
+                      <p className="text-[11px] text-slate-500 line-clamp-2 mt-1 leading-relaxed">
+                        {place.description}
+                      </p>
+                    </div>
+                  </Link>
+                ))}
+              </motion.div>
+            </AnimatePresence>
 
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between sm:hidden">
               <Link
