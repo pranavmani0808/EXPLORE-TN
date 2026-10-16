@@ -21,6 +21,7 @@ import { VscSparkleFilled } from "react-icons/vsc";
 import { SafeImage } from "@/components/ui/safe-image";
 import { MinimalCarousel, type CarouselCard } from "@/components/ui/minimal-carousel";
 import { AttractionsDrumCarousel } from "./attractions-drum-carousel";
+import { HeroWordReelSection } from "./hero-word-reel";
 
 export interface DestinationHub {
   name: string;
@@ -138,7 +139,7 @@ export const ICONIC_ATTRACTIONS: IconicAttraction[] = [
     title: "Shore Temple & Pancha Rathas",
     district: "Mahabalipuram",
     activities: "31 experiences",
-    image: "https://images.unsplash.com/photo-1600100397608-f010f444f434?auto=format&fit=crop&w=900&q=80",
+    image: "https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=900&q=80",
     category: "heritage",
     slug: "mahabalipuram",
   },
@@ -952,8 +953,8 @@ export function ThingsToDoSection() {
 export function AttractionsYouCantMissSection() {
   return (
     <section className="relative w-full overflow-visible">
-      {/* 3D Vertical Cylinder Carousel with Full Screen Viewport Sticky Lock */}
-      <AttractionsDrumCarousel attractions={ICONIC_ATTRACTIONS} fullScreenSticky={true} />
+      {/* Cinematic Big Typography Hero Word Reel with Floating Thumbnail Dock */}
+      <HeroWordReelSection attractions={ICONIC_ATTRACTIONS} />
     </section>
   );
 }
