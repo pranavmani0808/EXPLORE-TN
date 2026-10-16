@@ -16,7 +16,9 @@ import {
   SlidersHorizontal,
   Star,
   Building2,
-  ChevronDown
+  ChevronDown,
+  RotateCcw,
+  Check
 } from "lucide-react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -48,11 +50,32 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
   const [activeCategory, setActiveCategory] = useState<CategoryFilter>("all");
   const [selectedDistrict, setSelectedDistrict] = useState<string>("all");
   const [sortBy, setSortBy] = useState<SortOption>("rating");
+  const [minRating, setMinRating] = useState<number>(0);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("spots");
 
   const searchInputRef = useRef<HTMLInputElement>(null);
+  const filterPopoverRef = useRef<HTMLDivElement>(null);
+  const filterButtonRef = useRef<HTMLButtonElement>(null);
   const previouslyFocusedElementRef = useRef<HTMLElement | null>(null);
+
+  // Close filter popover on click outside
+  useEffect(() => {
+    if (!showAdvanced) return;
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as Node;
+      if (
+        filterPopoverRef.current &&
+        !filterPopoverRef.current.contains(target) &&
+        filterButtonRef.current &&
+        !filterButtonRef.current.contains(target)
+      ) {
+        setShowAdvanced(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [showAdvanced]);
 
   // Trap focus & handle Escape key for accessibility (WCAG 2.1.1, 2.1.2, 2.4.3)
   useEffect(() => {
@@ -175,6 +198,11 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
         return false;
       }
 
+      // Minimum Rating filter
+      if (minRating > 0 && s.rating < minRating) {
+        return false;
+      }
+
       // Category filter
       if (activeCategory === "trending") {
         return (
@@ -239,7 +267,7 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
     });
 
     return result;
-  }, [allSpots, searchQuery, activeCategory, selectedDistrict, sortBy]);
+  }, [allSpots, searchQuery, activeCategory, selectedDistrict, sortBy, minRating]);
 
   if (!isOpen) return null;
 
@@ -345,26 +373,159 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
                 </div>
               )}
 
-              {/* Filter Options Toggle Button */}
+              {/* Filter Options Toggle Button & Popover */}
               {viewMode === "spots" && (
-                <button
-                  type="button"
-                  aria-expanded={showAdvanced}
-                  aria-label={lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Filter options"}
-                  title={lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Filter options"}
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  className={cn(
-                    "relative grid size-9 sm:size-10 min-w-[36px] min-h-[36px] place-items-center rounded-xl border transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
-                    showAdvanced || selectedDistrict !== "all" || sortBy !== "rating"
-                      ? "bg-sky-50 text-sky-700 border-sky-300 shadow-sm"
-                      : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
-                  )}
-                >
-                  <Filter className="size-4 text-sky-600" aria-hidden="true" />
-                  {(selectedDistrict !== "all" || sortBy !== "rating") && (
-                    <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-sky-500 ring-2 ring-white" aria-hidden="true" />
-                  )}
-                </button>
+                <div className="relative">
+                  <button
+                    ref={filterButtonRef}
+                    type="button"
+                    aria-expanded={showAdvanced}
+                    aria-label={lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Filter options"}
+                    title={lang === "ta" ? "மேம்பட்ட வடிகட்டி" : "Filter options"}
+                    onClick={() => setShowAdvanced((prev) => !prev)}
+                    className={cn(
+                      "relative grid size-9 sm:size-10 min-w-[36px] min-h-[36px] place-items-center rounded-xl border transition cursor-pointer focus-visible:ring-2 focus-visible:ring-sky-400",
+                      showAdvanced || selectedDistrict !== "all" || sortBy !== "rating" || minRating > 0 || activeCategory !== "all"
+                        ? "bg-sky-50 text-sky-700 border-sky-300 shadow-sm"
+                        : "bg-white text-slate-700 border-slate-200 hover:border-slate-300 hover:bg-slate-50"
+                    )}
+                  >
+                    <Filter className="size-4 text-sky-600" aria-hidden="true" />
+                    {(selectedDistrict !== "all" || sortBy !== "rating" || minRating > 0 || activeCategory !== "all") && (
+                      <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-sky-500 ring-2 ring-white" aria-hidden="true" />
+                    )}
+                  </button>
+
+                  {/* Dark Popover Card Effect (matches user design screenshot) */}
+                  <AnimatePresence>
+                    {showAdvanced && (
+                      <motion.div
+                        ref={filterPopoverRef}
+                        initial={{ opacity: 0, y: 10, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.18, ease: "easeOut" }}
+                        className="absolute right-0 top-full mt-2.5 w-[320px] sm:w-[350px] z-50 rounded-3xl bg-[#0f1115] text-white p-5 shadow-2xl border border-white/10 ring-1 ring-black/40 backdrop-blur-xl"
+                      >
+                        {/* Header: Title + Reset all button */}
+                        <div className="flex items-start justify-between pb-4 border-b border-white/10">
+                          <div>
+                            <h3 className="font-extrabold text-lg text-white tracking-tight">
+                              {lang === "ta" ? "மேம்பட்ட வடிகட்டிகள்" : "Advanced Filters"}
+                            </h3>
+                            <p className="text-xs text-neutral-400 mt-0.5">
+                              {lang === "ta" ? "விருப்பங்களை தேர்வு செய்க" : "Filter by attributes"}
+                            </p>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setSelectedDistrict("all");
+                              setSortBy("rating");
+                              setMinRating(0);
+                              setActiveCategory("all");
+                            }}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/10 hover:bg-white/15 text-neutral-200 hover:text-white text-xs font-semibold border border-white/10 transition cursor-pointer"
+                          >
+                            <RotateCcw className="size-3" />
+                            <span>{lang === "ta" ? "மீட்டமை" : "Reset all"}</span>
+                          </button>
+                        </div>
+
+                        {/* Filter category section with radio/checkbox style */}
+                        <div className="py-4 border-b border-white/10">
+                          <h4 className="text-sm font-semibold text-neutral-300 mb-3">
+                            {lang === "ta" ? "வகை வடிகட்டி" : "Filter category"}
+                          </h4>
+                          <div className="space-y-2.5">
+                            {[
+                              { key: "all", label: "All Spots" },
+                              { key: "hills", label: "Hill Stations" },
+                              { key: "temples", label: "Heritage Temples" },
+                              { key: "beaches", label: "Beaches & Coastal" },
+                              { key: "trending", label: "Popular & Trending" },
+                            ].map((cat) => {
+                              const isSelected = activeCategory === cat.key;
+                              return (
+                                <button
+                                  key={cat.key}
+                                  type="button"
+                                  onClick={() => setActiveCategory(cat.key as CategoryFilter)}
+                                  className="w-full flex items-center gap-3 py-1 px-1 rounded-lg text-left transition hover:bg-white/5 cursor-pointer group"
+                                >
+                                  <div
+                                    className={cn(
+                                      "size-5 rounded-full flex items-center justify-center border transition-all shrink-0",
+                                      isSelected
+                                        ? "bg-lime-500 border-lime-500 text-black"
+                                        : "border-neutral-600 group-hover:border-neutral-400 bg-transparent"
+                                    )}
+                                  >
+                                    {isSelected && <Check className="size-3.5 stroke-[3]" />}
+                                  </div>
+                                  <span className={cn("text-sm font-medium", isSelected ? "text-white font-semibold" : "text-neutral-300")}>
+                                    {cat.label}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                          </div>
+                        </div>
+
+                        {/* District Selector */}
+                        <div className="py-4 border-b border-white/10">
+                          <label htmlFor="popover-district-select" className="text-sm font-semibold text-neutral-300 block mb-2">
+                            {lang === "ta" ? "மாவட்டம்" : "District"}
+                          </label>
+                          <div className="relative">
+                            <select
+                              id="popover-district-select"
+                              value={selectedDistrict}
+                              onChange={(e) => setSelectedDistrict(e.target.value)}
+                              className="w-full rounded-xl border border-white/15 bg-neutral-900/90 px-3 py-2 text-xs font-medium text-white focus:border-lime-500 focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-lime-500 cursor-pointer appearance-none"
+                            >
+                              <option value="all">📍 All 38 Districts</option>
+                              {availableDistricts.map((d) => (
+                                <option key={d} value={d}>
+                                  {d} District
+                                </option>
+                              ))}
+                            </select>
+                            <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 size-4 text-neutral-400" />
+                          </div>
+                        </div>
+
+                        {/* Rating filter with range slider / highlight */}
+                        <div className="pt-4">
+                          <div className="flex items-center justify-between mb-2">
+                            <span className="text-sm font-semibold text-neutral-300">
+                              {lang === "ta" ? "குறைந்தபட்ச மதிப்பீடு" : "Rating range"}
+                            </span>
+                            <span className="text-sm font-bold text-amber-400 flex items-center gap-1">
+                              <Star className="size-3.5 fill-amber-400 text-amber-400" />
+                              {minRating > 0 ? `${minRating.toFixed(1)}+ Stars` : "All Ratings"}
+                            </span>
+                          </div>
+
+                          <input
+                            type="range"
+                            min="0"
+                            max="4.8"
+                            step="0.1"
+                            value={minRating}
+                            onChange={(e) => setMinRating(parseFloat(e.target.value))}
+                            className="w-full h-1.5 bg-neutral-700 rounded-lg appearance-none cursor-pointer accent-lime-500"
+                          />
+                          <div className="flex justify-between text-[11px] font-mono text-neutral-400 mt-1">
+                            <span>0 ★</span>
+                            <span>4.5 ★</span>
+                            <span>4.8+ ★</span>
+                          </div>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
               )}
 
               {/* Close Button */}
@@ -378,71 +539,6 @@ export function DistrictsMegaModal({ isOpen, onClose, lang = "en" }: DistrictsMe
               </button>
             </div>
           </div>
-
-          {/* Advanced Options Panel */}
-          {viewMode === "spots" && showAdvanced && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="mx-auto mt-3 max-w-[1500px] overflow-hidden rounded-2xl border border-sky-100 bg-sky-50/50 p-3 sm:p-4 text-xs"
-            >
-              <div className="flex flex-wrap items-center gap-4">
-                {/* District Selector */}
-                <div className="flex items-center gap-2">
-                  <label htmlFor="modal-district-select" className="font-bold text-sky-700 flex items-center gap-1">
-                    <Building2 className="size-3.5" aria-hidden="true" /> District:
-                  </label>
-                  <select
-                    id="modal-district-select"
-                    value={selectedDistrict}
-                    onChange={(e) => setSelectedDistrict(e.target.value)}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 min-h-[36px] text-xs text-slate-800 focus:border-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 cursor-pointer shadow-sm"
-                  >
-                    <option value="all">📍 All 38 Districts</option>
-                    {availableDistricts.map((d) => (
-                      <option key={d} value={d}>
-                        {d} District
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Sort Order */}
-                <div className="flex items-center gap-2">
-                  <label htmlFor="modal-sort-select" className="font-bold text-sky-700 flex items-center gap-1">
-                    <Filter className="size-3.5" aria-hidden="true" /> Sort By:
-                  </label>
-                  <select
-                    id="modal-sort-select"
-                    value={sortBy}
-                    onChange={(e) => setSortBy(e.target.value as SortOption)}
-                    className="rounded-xl border border-slate-200 bg-white px-3 py-1.5 min-h-[36px] text-xs text-slate-800 focus:border-sky-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sky-400 cursor-pointer shadow-sm"
-                  >
-                    <option value="rating">★ Highest Rating</option>
-                    <option value="name">🔤 Name (A-Z)</option>
-                    <option value="district">📍 District Wise</option>
-                  </select>
-                </div>
-
-                {/* Reset Filters */}
-                {(selectedDistrict !== "all" || sortBy !== "rating" || searchQuery) && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSelectedDistrict("all");
-                      setSortBy("rating");
-                      setSearchQuery("");
-                      setActiveCategory("all");
-                    }}
-                    className="ml-auto text-sky-600 hover:underline text-xs font-bold py-1 min-h-[36px]"
-                  >
-                    Reset All Filters
-                  </button>
-                )}
-              </div>
-            </motion.div>
-          )}
 
           {/* Category Filter Chips Bar */}
           {viewMode === "spots" && (
