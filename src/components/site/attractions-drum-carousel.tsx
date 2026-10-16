@@ -53,47 +53,29 @@ export function AttractionsDrumCarousel({
     goToIndex(activeIndex - 1);
   }, [activeIndex, goToIndex]);
 
-  // Page scroll tracking: When sectionWrapRef enters viewport, scrub through items based on scroll progress
+  // Wheel event listener: roll 3D drum reel smoothly when scrolling directly on the carousel container
   useEffect(() => {
-    if (!fullScreenSticky) return;
+    const el = containerRef.current;
+    if (!el) return;
 
-    let ticking = false;
-    const handleScroll = () => {
-      if (!sectionWrapRef.current) return;
-      if (ticking) return;
-
-      ticking = true;
-      requestAnimationFrame(() => {
-        ticking = false;
-        if (!sectionWrapRef.current) return;
-
-        const rect = sectionWrapRef.current.getBoundingClientRect();
-        const totalScrollable = rect.height - window.innerHeight;
-
-        if (totalScrollable <= 0) return;
-
-        // When rect.top is 0 or negative up to -totalScrollable
-        const scrolled = -rect.top;
-        if (scrolled >= 0 && scrolled <= totalScrollable) {
-          const rawProgress = scrolled / totalScrollable; // 0 to 1
-          const targetIndex = Math.min(
-            total - 1,
-            Math.max(0, Math.floor(rawProgress * total))
-          );
-          setActiveIndex((prev) => {
-            if (prev !== targetIndex) {
-              onActiveChange?.(targetIndex);
-              return targetIndex;
-            }
-            return prev;
-          });
+    let wheelTimeout: NodeJS.Timeout;
+    const handleWheel = (e: WheelEvent) => {
+      // If user scrolls horizontally or primarily vertically over the drum
+      if (Math.abs(e.deltaY) > 20) {
+        if (e.deltaY > 0) {
+          handleNext();
+        } else {
+          handlePrev();
         }
-      });
+      }
     };
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [fullScreenSticky, total, onActiveChange]);
+    el.addEventListener("wheel", handleWheel, { passive: true });
+    return () => {
+      el.removeEventListener("wheel", handleWheel);
+      clearTimeout(wheelTimeout);
+    };
+  }, [handleNext, handlePrev]);
 
   // Pointer drag events for smooth 3D drum rolling
   const handlePointerDown = (e: React.PointerEvent) => {
@@ -155,14 +137,14 @@ export function AttractionsDrumCarousel({
       ref={sectionWrapRef}
       className={
         fullScreenSticky
-          ? "relative h-[200vh] w-full"
+          ? "relative w-full py-10 sm:py-14 select-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 bg-gradient-to-b from-slate-50/80 via-white to-slate-50/90 dark:from-slate-950/80 dark:via-slate-900 dark:to-slate-950 border-y border-sky-100/60 dark:border-white/5"
           : "relative w-full py-4 select-none outline-none focus-visible:ring-2 focus-visible:ring-sky-500/50 rounded-3xl"
       }
     >
       <div
         className={
           fullScreenSticky
-            ? "sticky top-0 h-screen w-full flex flex-col justify-between pt-20 pb-6 px-4 sm:px-8 overflow-hidden select-none bg-gradient-to-b from-slate-50/80 via-white to-slate-50/90 dark:from-slate-950/80 dark:via-slate-900 dark:to-slate-950"
+            ? "mx-auto w-full max-w-6xl flex flex-col justify-between px-4 sm:px-8 select-none"
             : "relative w-full"
         }
         role="region"
@@ -183,16 +165,16 @@ export function AttractionsDrumCarousel({
                 Attractions you can't miss
               </h2>
               <p className="mt-1 text-xs sm:text-sm text-slate-500 dark:text-slate-400">
-                Scroll to rotate through Tamil Nadu's timeless wonders
+                Drag, scroll, or use arrows to cycle through Tamil Nadu's timeless wonders
               </p>
             </div>
 
             <div className="hidden sm:flex flex-col items-end">
               <span className="text-xs font-mono font-bold tracking-widest uppercase text-sky-600 dark:text-sky-400">
-                Full-screen 3D Motion Reel
+                Interactive 3D Motion Reel
               </span>
               <span className="text-[11px] text-slate-400 dark:text-slate-500 font-sans">
-                Scroll page or use controls to cycle
+                Drag reel or click cards to explore
               </span>
             </div>
           </div>
