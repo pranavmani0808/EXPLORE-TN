@@ -3,7 +3,7 @@
 **Audit Date:** August 17, 2026  
 **Auditor Role:** Principal AI Systems & Conversational Planner Architect  
 **API Endpoint:** `POST /api/v1/planner/chat`  
-**AI Key Configured:** Live (`osk_live_...`)  
+**AI Key Configured:** Secure Environment Variable (`AI_API_KEY`)  
 **Backend Foundation Status:** **`VERIFIED`** ✅  
 **PostgreSQL + PostGIS Status:** **`VERIFIED`** ✅  
 **Data Ingestion Pipeline Status:** **`VERIFIED`** ✅  

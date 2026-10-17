@@ -9,14 +9,18 @@ from backend.app.services.places_service import places_service
 
 client = TestClient(app)
 
-def get_auth_token(email="popzdesigngroup@gmail.com", role="super_admin"):
+TEST_JWT_SECRET = "test-jwt-secret-for-unit-tests"
+
+def get_auth_token(email="admin@exploretn.com", role="super_admin"):
     payload = {
-        "sub": "usr-popz-admin",
+        "sub": "usr-admin-1",
         "email": email,
         "app_metadata": {"role": role},
         "exp": int(time.time()) + 3600
     }
-    return jwt.encode(payload, settings.SUPABASE_JWT_SECRET, algorithm=settings.ALGORITHM)
+    secret = settings.SUPABASE_JWT_SECRET or TEST_JWT_SECRET
+    settings.SUPABASE_JWT_SECRET = secret
+    return jwt.encode(payload, secret, algorithm=settings.ALGORITHM)
 
 # 1. Single Source of Truth Test: Admin queries master places_service DB
 def test_admin_single_source_of_truth():
@@ -38,7 +42,7 @@ def test_admin_crawler_staging_promotion():
     initial_places_count = len(places_service.get_all_places())
 
     # Approve diff-002 (Kumbakkarai Foothill Rock Pools)
-    res = admin_dashboard_service.approve_diff("diff-002", user_email="popzdesigngroup@gmail.com")
+    res = admin_dashboard_service.approve_diff("diff-002", user_email="admin@exploretn.com")
     assert res["status"] == "APPROVED"
 
     # Verify place was promoted directly into production places_service DB
@@ -55,7 +59,7 @@ def test_admin_rbac_and_audit_logs():
     assert len(users) >= 3
 
     # Update role
-    updated_user = admin_dashboard_service.update_user_role("usr-2", "Admin", admin_email="popzdesigngroup@gmail.com")
+    updated_user = admin_dashboard_service.update_user_role("usr-2", "Admin", admin_email="admin@exploretn.com")
     assert updated_user.role == "Admin"
 
     # Audit logs

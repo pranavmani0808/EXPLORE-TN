@@ -26,7 +26,7 @@ class AdminDashboardService:
         self._audit_logs: List[AuditLogEntryDTO] = [
             AuditLogEntryDTO(
                 id="aud-101",
-                userEmail="popzdesigngroup@gmail.com",
+                userEmail="admin@exploretn.com",
                 action="SYSTEM_INIT",
                 resource="Explore TN Production DB",
                 details="Admin Control Center connected to master PostGIS/places_service database with 52+ canonical destinations.",
@@ -175,7 +175,7 @@ class AdminDashboardService:
 
         # 7. Users & Roles RBAC Store
         self._users: List[AdminUserRoleDTO] = [
-            AdminUserRoleDTO(id="usr-1", email="popzdesigngroup@gmail.com", name="Popz Admin", role="Super Admin", permissions=["ALL_PERMISSIONS"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
+            AdminUserRoleDTO(id="usr-1", email="admin@exploretn.com", name="Popz Admin", role="Super Admin", permissions=["ALL_PERMISSIONS"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
             AdminUserRoleDTO(id="usr-2", email="editor.madurai@exploretn.org", name="Anand K", role="Content Editor", permissions=["destinations.create", "destinations.update", "attractions.create"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ")),
             AdminUserRoleDTO(id="usr-3", email="crawler.manager@exploretn.org", name="Crawler Bot Ops", role="Crawler Manager", permissions=["crawler.view", "crawler.run", "crawler.review", "crawler.approve"], status="Active", lastActive=time.strftime("%Y-%m-%dT%H:%M:%SZ"))
         ]
@@ -235,7 +235,7 @@ class AdminDashboardService:
             )
         return result
 
-    def create_destination(self, payload: DestinationDetailDTO, user_email: str = "popzdesigngroup@gmail.com") -> DestinationDetailDTO:
+    def create_destination(self, payload: DestinationDetailDTO, user_email: str = "admin@exploretn.com") -> DestinationDetailDTO:
         # Add directly to master places_service database
         places_service.add_place(
             place_id=payload.id,
@@ -264,7 +264,7 @@ class AdminDashboardService:
         )
         return payload
 
-    def update_destination(self, destination_id: str, payload: DestinationDetailDTO, user_email: str = "popzdesigngroup@gmail.com") -> DestinationDetailDTO:
+    def update_destination(self, destination_id: str, payload: DestinationDetailDTO, user_email: str = "admin@exploretn.com") -> DestinationDetailDTO:
         try:
             place = places_service.get_place_by_id_or_slug(destination_id)
         except Exception:
@@ -313,7 +313,7 @@ class AdminDashboardService:
         )
         return payload
 
-    def delete_destination(self, destination_id: str, user_email: str = "popzdesigngroup@gmail.com") -> bool:
+    def delete_destination(self, destination_id: str, user_email: str = "admin@exploretn.com") -> bool:
         target_key = None
         for k, v in places_service._places_db.items():
             if k == destination_id or v.get("id") == destination_id or v.get("slug") == destination_id:
@@ -515,7 +515,7 @@ class AdminDashboardService:
     def get_crawler_diffs(self) -> List[CrawledDataDiffDTO]:
         return self._crawler_diffs
 
-    def approve_diff(self, diff_id: str, user_email: str = "popzdesigngroup@gmail.com") -> Dict[str, Any]:
+    def approve_diff(self, diff_id: str, user_email: str = "admin@exploretn.com") -> Dict[str, Any]:
         target = next((d for d in self._crawler_diffs if d.id == diff_id), None)
         if target:
             # Promote item directly into master places_service database
@@ -546,7 +546,7 @@ class AdminDashboardService:
         self._crawler_diffs = [d for d in self._crawler_diffs if d.id != diff_id]
         return {"status": "APPROVED", "diffId": diff_id, "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ")}
 
-    def reject_diff(self, diff_id: str, user_email: str = "popzdesigngroup@gmail.com") -> Dict[str, Any]:
+    def reject_diff(self, diff_id: str, user_email: str = "admin@exploretn.com") -> Dict[str, Any]:
         self._audit_logs.append(
             AuditLogEntryDTO(
                 id=f"aud-{int(time.time()*1000)}",
@@ -564,7 +564,7 @@ class AdminDashboardService:
     def get_users(self) -> List[AdminUserRoleDTO]:
         return self._users
 
-    def update_user_role(self, user_id: str, new_role: str, admin_email: str = "popzdesigngroup@gmail.com") -> AdminUserRoleDTO:
+    def update_user_role(self, user_id: str, new_role: str, admin_email: str = "admin@exploretn.com") -> AdminUserRoleDTO:
         target = next((u for u in self._users if u.id == user_id), None)
         if not target:
             raise ValueError(f"User #{user_id} not found")
@@ -625,7 +625,7 @@ class AdminDashboardService:
     def get_settings(self) -> AdminSettingsDTO:
         return self._settings
 
-    def add_category(self, category_name: str, admin_email: str = "popzdesigngroup@gmail.com") -> AdminSettingsDTO:
+    def add_category(self, category_name: str, admin_email: str = "admin@exploretn.com") -> AdminSettingsDTO:
         if category_name not in self._settings.categories:
             self._settings.categories.append(category_name)
             self._audit_logs.append(

@@ -8,14 +8,18 @@ from backend.app.services.admin_dashboard_service import admin_dashboard_service
 
 client = TestClient(app)
 
-def get_auth_token(email="popzdesigngroup@gmail.com", role="super_admin"):
+TEST_JWT_SECRET = "test-jwt-secret-for-unit-tests"
+
+def get_auth_token(email="admin@exploretn.com", role="super_admin"):
     payload = {
-        "sub": "usr-popz-admin",
+        "sub": "usr-admin-1",
         "email": email,
         "app_metadata": {"role": role},
         "exp": int(time.time()) + 3600
     }
-    return jwt.encode(payload, settings.SUPABASE_JWT_SECRET, algorithm=settings.ALGORITHM)
+    secret = settings.SUPABASE_JWT_SECRET or TEST_JWT_SECRET
+    settings.SUPABASE_JWT_SECRET = secret
+    return jwt.encode(payload, secret, algorithm=settings.ALGORITHM)
 
 # 1. Test Overview Metrics
 def test_admin_dashboard_overview():

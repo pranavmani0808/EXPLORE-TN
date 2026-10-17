@@ -1,14 +1,26 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { FullscreenRouteMap } from "@/components/site/fullscreen-route-map";
 
+const ALLOWED_TRAVEL_MODES = ["driving", "flight", "train", "bus", "motorcycle", "walking", "cycling"] as const;
+type TravelMode = (typeof ALLOWED_TRAVEL_MODES)[number];
+
 export const Route = createFileRoute("/routes")({
   validateSearch: (search: Record<string, unknown>) => {
+    const rawMode = typeof search.mode === "string" ? search.mode.toLowerCase() : undefined;
+    const validatedMode: TravelMode | undefined =
+      rawMode && (ALLOWED_TRAVEL_MODES as readonly string[]).includes(rawMode)
+        ? (rawMode as TravelMode)
+        : undefined;
+
     return {
-      origin: (search.origin as string) || undefined,
-      destination: (search.destination as string) || undefined,
-      mode: (search.mode as "driving" | "flight" | "train" | "bus" | "motorcycle" | "walking" | "cycling") || undefined,
-      area: (search.area as string) || undefined,
-      place: (search.place as string) || undefined,
+      origin: typeof search.origin === "string" && search.origin.trim().length > 0 ? search.origin.trim() : undefined,
+      destination:
+        typeof search.destination === "string" && search.destination.trim().length > 0
+          ? search.destination.trim()
+          : undefined,
+      mode: validatedMode,
+      area: typeof search.area === "string" && search.area.trim().length > 0 ? search.area.trim() : undefined,
+      place: typeof search.place === "string" && search.place.trim().length > 0 ? search.place.trim() : undefined,
     };
   },
   head: () => ({
@@ -23,6 +35,18 @@ export const Route = createFileRoute("/routes")({
       {
         property: "og:description",
         content: "Geospatial area exploration and dynamic road network routing across Tamil Nadu.",
+      },
+      {
+        property: "og:image",
+        content: "https://explore-tn-ochre.vercel.app/assets/madurai-hero-temple.jpg",
+      },
+      {
+        name: "twitter:card",
+        content: "summary_large_image",
+      },
+      {
+        name: "twitter:image",
+        content: "https://explore-tn-ochre.vercel.app/assets/madurai-hero-temple.jpg",
       },
     ],
   }),

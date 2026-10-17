@@ -82,42 +82,28 @@ def decode_supabase_jwt(authorization: Optional[str] = Header(None)) -> UserCont
     if not authorization or not authorization.startswith("Bearer "):
         raise UnauthorizedException("Authentication required. Missing or malformed Bearer authorization token.")
     
+    if not settings.SUPABASE_JWT_SECRET:
+        raise UnauthorizedException("Server configuration error: SUPABASE_JWT_SECRET is not configured.")
+
     token = authorization.split(" ")[1]
     try:
-        if token.startswith("fake-jwt-token-for-"):
-            email = token.replace("fake-jwt-token-for-", "").strip() or "popzdesigngroup@gmail.com"
-            is_popz = (email.lower() == "popzdesigngroup@gmail.com")
-            return UserContext(
-                id="usr-popz-admin" if is_popz else f"usr-{email}",
-                name="Popz Admin" if is_popz else email.split("@")[0].title(),
-                email=email,
-                role="super_admin" if is_popz else "admin"
-            )
-
-        try:
-            payload = jwt.decode(
-                token,
-                settings.SUPABASE_JWT_SECRET,
-                algorithms=[settings.ALGORITHM],
-                options={"verify_aud": False}
-            )
-        except Exception:
-            payload = jwt.decode(
-                token,
-                options={"verify_signature": False, "verify_aud": False}
-            )
+        payload = jwt.decode(
+            token,
+            settings.SUPABASE_JWT_SECRET,
+            algorithms=[settings.ALGORITHM],
+            options={"verify_aud": False}
+        )
 
         user_id = payload.get("sub") or payload.get("user_id") or payload.get("id")
         if not user_id:
             raise UnauthorizedException("Invalid JWT token: missing user ID claim.")
             
         email = payload.get("email", "explorer@explorertn.com")
-        is_popz_admin = email.lower() == "popzdesigngroup@gmail.com" or user_id == "usr-popz-admin"
-        assigned_role = "super_admin" if (is_popz_admin or user_id in ["usr-manager-2", "usr-1"]) else payload.get("app_metadata", {}).get("role") or payload.get("user_metadata", {}).get("role") or "explorer"
+        assigned_role = payload.get("app_metadata", {}).get("role") or payload.get("user_metadata", {}).get("role") or "explorer"
 
         return UserContext(
-            id=user_id,
-            name=payload.get("user_metadata", {}).get("full_name") or ("Popz Admin" if is_popz_admin else "Explorer User"),
+            id=str(user_id),
+            name=payload.get("user_metadata", {}).get("full_name") or email.split("@")[0].title(),
             email=email,
             role=assigned_role
         )
