@@ -187,7 +187,7 @@ function EventDetailPage() {
               </span>
             </div>
 
-            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-display text-slate-900 tracking-tight drop-shadow-lg">
+            <h1 className="text-2xl sm:text-4xl md:text-5xl font-black font-display text-white tracking-tight drop-shadow-lg">
               {event.title}
             </h1>
 
@@ -215,9 +215,9 @@ function EventDetailPage() {
           {/* LEFT 2 COLUMNS: CONTENT & SECTIONS */}
           <div className="lg:col-span-2 space-y-8">
             {/* Overview Section */}
-            <section className="space-y-4 rounded-3xl bg-zinc-900/60 border border-zinc-800/80 p-6 sm:p-8">
+            <section className="space-y-4 rounded-3xl bg-white border border-slate-200/80 p-6 sm:p-8 shadow-sm">
               <h2 className="font-display font-bold text-xl text-slate-900">About the Experience</h2>
-              <p className="text-sm text-zinc-300 leading-relaxed whitespace-pre-line">
+              <p className="text-sm text-slate-600 leading-relaxed whitespace-pre-line">
                 {event.fullDescription}
               </p>
             </section>

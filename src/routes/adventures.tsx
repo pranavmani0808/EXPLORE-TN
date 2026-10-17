@@ -75,17 +75,17 @@ function AdventuresPage() {
       />
 
       {/* Hero Header Section */}
-      <section className="relative overflow-hidden pt-28 pb-12 sm:pt-36 sm:pb-16 bg-slate-950 text-white border-b border-white/10">
-        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-emerald-900/30 via-slate-950 to-slate-950" />
+      <section className="relative overflow-hidden pt-28 pb-12 sm:pt-36 sm:pb-16 bg-gradient-to-b from-sky-50 via-white to-slate-50 border-b border-sky-100">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-sky-100/50 via-transparent to-transparent pointer-events-none" />
         
         <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
           <div className="max-w-3xl">
             <motion.div
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              className="inline-flex items-center gap-2 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-4 py-1.5 text-xs font-bold text-emerald-400"
+              className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/95 px-4 py-1.5 text-xs font-bold text-sky-700 shadow-sm"
             >
-              <Flame className="size-4 text-emerald-400" />
+              <Flame className="size-4 text-sky-600" />
               <span>19 Curated Adventure Expeditions in Tamil Nadu & India</span>
             </motion.div>
 
@@ -93,24 +93,26 @@ function AdventuresPage() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.1 }}
-              className="mt-4 text-4xl font-extrabold tracking-tight sm:text-6xl text-white"
+              className="mt-4 text-4xl font-extrabold tracking-tight sm:text-6xl text-slate-900 font-display"
             >
               Adventure Activities <br />
-              <span className="text-gradient font-black">in Tamil Nadu & India</span>
+              <span className="bg-gradient-to-r from-sky-600 via-sky-500 to-indigo-600 bg-clip-text text-transparent font-black">
+                in Tamil Nadu & India
+              </span>
             </motion.h1>
 
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
-              className="mt-4 text-base sm:text-lg text-slate-400 max-w-2xl leading-relaxed"
+              className="mt-4 text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed"
             >
               Explore top outdoor thrills: Scuba diving in Rameswaram, paragliding in Yelagiri, 70 hairpin off-roading in Kolli Hills, surfing at Kovalam Chennai, Mudumalai wildlife safaris, and high-altitude treks. Click any adventure to view full GPS coordinates, gear requirements, how to reach, and safety protocols.
             </motion.p>
           </div>
 
           {/* Search & Filter Controls */}
-          <div className="mt-8 grid grid-cols-1 sm:grid-cols-12 gap-3 pt-6 border-t border-white/10">
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-12 gap-3 pt-6 border-t border-slate-200">
             {/* Search Input */}
             <div className="relative sm:col-span-6">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 size-4 text-slate-400" />
@@ -119,7 +121,7 @@ function AdventuresPage() {
                 placeholder="Search activity or destination (e.g. Bir Billing, Skydiving, Goa)..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-11 h-12 rounded-2xl bg-white/5 border-white/15 text-white placeholder:text-slate-500 focus:border-emerald-500 focus:ring-emerald-500"
+                className="pl-11 h-12 rounded-2xl bg-white border-slate-200 text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:ring-sky-500 shadow-sm"
               />
             </div>
 
@@ -128,13 +130,13 @@ function AdventuresPage() {
               <select
                 value={selectedDifficulty}
                 onChange={(e) => setSelectedDifficulty(e.target.value)}
-                className="w-full h-12 rounded-2xl bg-white/5 border border-white/15 px-4 text-sm text-white focus:border-emerald-500 focus:ring-emerald-500 font-medium"
+                className="w-full h-12 rounded-2xl bg-white border border-slate-200 px-4 text-sm text-slate-800 focus:border-sky-500 focus:ring-sky-500 font-medium shadow-sm"
               >
-                <option value="All" className="bg-slate-900 text-white">All Difficulties</option>
-                <option value="Easy" className="bg-slate-900 text-white">Easy</option>
-                <option value="Moderate" className="bg-slate-900 text-white">Moderate</option>
-                <option value="Advanced" className="bg-slate-900 text-white">Advanced</option>
-                <option value="Extreme" className="bg-slate-900 text-white">Extreme</option>
+                <option value="All">All Difficulties</option>
+                <option value="Easy">Easy</option>
+                <option value="Moderate">Moderate</option>
+                <option value="Advanced">Advanced</option>
+                <option value="Extreme">Extreme</option>
               </select>
             </div>
 
@@ -143,10 +145,10 @@ function AdventuresPage() {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value as "popularity" | "name")}
-                className="w-full h-12 rounded-2xl bg-white/5 border border-white/15 px-4 text-sm text-white focus:border-emerald-500 focus:ring-emerald-500 font-medium"
+                className="w-full h-12 rounded-2xl bg-white border border-slate-200 px-4 text-sm text-slate-800 focus:border-sky-500 focus:ring-sky-500 font-medium shadow-sm"
               >
-                <option value="popularity" className="bg-slate-900 text-white">Sort: Most Popular</option>
-                <option value="name" className="bg-slate-900 text-white">Sort: Name (A–Z)</option>
+                <option value="popularity">Sort: Most Popular</option>
+                <option value="name">Sort: Name (A–Z)</option>
               </select>
             </div>
           </div>
@@ -160,8 +162,8 @@ function AdventuresPage() {
                 onClick={() => setSelectedCategory(cat)}
                 className={`rounded-full px-4 py-2 text-xs font-bold transition-all cursor-pointer ${
                   selectedCategory === cat
-                    ? "bg-emerald-500 text-slate-950 font-black shadow-lg shadow-emerald-500/25"
-                    : "bg-white/5 hover:bg-white/10 text-slate-300 border border-white/10"
+                    ? "bg-sky-600 text-white font-bold shadow-md shadow-sky-600/20"
+                    : "bg-white hover:bg-sky-50 text-slate-700 border border-slate-200 shadow-sm"
                 }`}
               >
                 {cat}
