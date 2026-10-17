@@ -38,7 +38,10 @@ import { places } from "@/data/places";
 import { PeakTravelGuide } from "@/components/site/peak-travel-guide";
 import { ThingsToDoSection, AttractionsYouCantMissSection } from "@/components/site/things-to-do-section";
 import { AnimatedGroup } from "@/components/motion-primitives/animated-group";
-import { ExpandableInterestSection } from "@/components/site/expandable-interest-cards";
+import {
+  CURATED_SIGNATURE_TRAILS,
+  ExpandableTrailCard,
+} from "@/components/site/expandable-interest-cards";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -61,6 +64,70 @@ export const Route = createFileRoute("/")({
 
 import { getCategoryLabel } from "@/lib/categoryLabels";
 import type { Place } from "@/data/places";
+
+// Explore by Interest Categories (Original Popz Design Spec)
+const INTEREST_CATEGORIES = [
+  {
+    slug: "heritage-temples",
+    categoryParam: "heritage-temples",
+    title: "Heritage & Temples",
+    icon: Landmark,
+    count: "480+ Places",
+    bg: "from-sky-50 to-white",
+    border: "border-sky-100",
+    text: "text-sky-600",
+  },
+  {
+    slug: "hill-escapes",
+    categoryParam: "hill-escapes",
+    title: "Hill Escapes",
+    icon: Mountain,
+    count: "120+ Viewpoints",
+    bg: "from-blue-50 to-white",
+    border: "border-sky-100",
+    text: "text-sky-600",
+  },
+  {
+    slug: "waterfalls",
+    categoryParam: "waterfalls",
+    title: "Waterfalls & Streams",
+    icon: CloudRain,
+    count: "85+ Waterfalls",
+    bg: "from-sky-100/60 to-white",
+    border: "border-sky-200",
+    text: "text-sky-600",
+  },
+  {
+    slug: "coastal",
+    categoryParam: "coastal",
+    title: "Coastal Journeys",
+    icon: Waves,
+    count: "140 km Coast",
+    bg: "from-cyan-50 to-white",
+    border: "border-cyan-100",
+    text: "text-cyan-600",
+  },
+  {
+    slug: "culinary",
+    categoryParam: "culinary",
+    title: "Culinary Trails",
+    icon: Utensils,
+    count: "90+ Local Spots",
+    bg: "from-amber-50 to-white",
+    border: "border-amber-100",
+    text: "text-amber-600",
+  },
+  {
+    slug: "wildlife",
+    categoryParam: "wildlife",
+    title: "Forest & Wildlife",
+    icon: Trees,
+    count: "32 Trails",
+    bg: "from-emerald-50 to-white",
+    border: "border-emerald-100",
+    text: "text-emerald-600",
+  },
+];
 
 // District Highlights (Popz Design Section 4)
 const DISTRICT_HIGHLIGHTS = [
@@ -289,8 +356,49 @@ function Index() {
       {/* ATTRACTIONS YOU CAN'T MISS (Full-Screen Sticky 3D Cylinder Reel) */}
       <AttractionsYouCantMissSection />
 
-      {/* SECTION 2: EXPLORE BY INTEREST (Expandable Card Experience) */}
-      <ExpandableInterestSection />
+      {/* SECTION 2: EXPLORE BY INTEREST (Classic 6-Category Cards) */}
+      <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
+                Curated Themes
+              </span>
+            </div>
+            <h2 className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">Explore by Interest</h2>
+            <p className="mt-1 text-sm text-slate-500">Curated collections based on travel themes across Tamil Nadu</p>
+          </div>
+          <Link
+            to="/explore"
+            className="flex items-center gap-1 text-xs font-bold text-sky-600 hover:text-sky-700"
+          >
+            <span>All Categories</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+          {INTEREST_CATEGORIES.map((cat) => {
+            const Icon = cat.icon;
+            return (
+              <Link
+                key={cat.slug}
+                to="/explore"
+                search={{ category: cat.categoryParam }}
+                className={`group flex flex-col justify-between rounded-2xl border ${cat.border} bg-gradient-to-br ${cat.bg} p-4 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:border-sky-300 shadow-sm`}
+              >
+                <span className={`grid size-10 place-items-center rounded-xl bg-white/90 border ${cat.border} ${cat.text} shadow-sm group-hover:scale-105 transition-transform`}>
+                  <Icon className="size-5" />
+                </span>
+                <div className="mt-6">
+                  <h3 className="text-sm font-bold text-slate-900 group-hover:text-sky-600 transition">{cat.title}</h3>
+                  <p className="mt-0.5 text-[11px] font-mono text-slate-500">{cat.count}</p>
+                </div>
+              </Link>
+            );
+          })}
+        </div>
+      </section>
 
       {/* SECTION 3: FEATURED DESTINATIONS UNEVEN BENTO GRID */}
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
@@ -577,94 +685,31 @@ function Index() {
         </AnimatedGroup>
       </section>
 
-      {/* SECTION 5: SIGNATURE EDITORIAL TRAILS (Popz Design Spec with Carousel Effect) */}
+      {/* SECTION 5: SIGNATURE TRAVEL TRAILS (Expandable Card Experience) */}
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="text-xs font-mono font-bold uppercase tracking-wider text-sky-600 bg-sky-50 px-2.5 py-0.5 rounded-full border border-sky-200">
-                Curated Circuits
-              </span>
+            <div className="inline-flex items-center gap-2 mb-2 px-3 py-1 rounded-full bg-sky-50 text-sky-700 text-xs font-semibold border border-sky-200/60">
+              <Sparkles className="size-3.5 text-sky-600" />
+              <span>Curated Circuits</span>
             </div>
-            <h2 className="mt-1 font-display text-2xl font-bold text-slate-900 sm:text-3xl">Signature Travel Trails</h2>
-            <p className="mt-1 text-sm text-slate-500">Curated themed circuits with road distance and verified itineraries</p>
+            <h2 className="font-display text-2xl font-bold text-slate-900 sm:text-3xl">Signature Travel Trails</h2>
+            <p className="mt-1 text-sm text-slate-500">Curated themed circuits with road distance and verified itineraries — click arrow to expand details</p>
           </div>
 
-          {/* Carousel Navigation Buttons */}
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => scrollTrails("left")}
-              aria-label="Previous trail"
-              className="flex size-9 items-center justify-center rounded-full border border-sky-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-300 transition shadow-sm cursor-pointer"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <button
-              type="button"
-              onClick={() => scrollTrails("right")}
-              aria-label="Next trail"
-              className="flex size-9 items-center justify-center rounded-full border border-sky-200 bg-white text-slate-700 hover:bg-sky-50 hover:text-sky-600 hover:border-sky-300 transition shadow-sm cursor-pointer"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-          </div>
+          <Link
+            to="/routes"
+            className="flex items-center gap-1.5 text-xs font-bold text-sky-600 hover:text-sky-700 transition"
+          >
+            <span>View All Trails</span>
+            <ArrowRight className="size-3.5" />
+          </Link>
         </div>
 
-        {/* Scrollable Carousel Track */}
-        <div
-          ref={trailsScrollRef}
-          className="flex gap-5 overflow-x-auto pb-4 pt-1 scrollbar-none snap-x snap-mandatory scroll-smooth"
-          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-        >
-          {SIGNATURE_TRAILS.map((trail) => (
-            <div
-              key={trail.title}
-              className="w-[320px] sm:w-[360px] md:w-[380px] shrink-0 snap-start flex flex-col justify-between rounded-3xl border border-sky-100 bg-white p-6 shadow-sm relative overflow-hidden group hover:border-sky-300 hover:shadow-lg transition-all h-[340px]"
-            >
-              <div className="flex-1 flex flex-col justify-between">
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-sky-50 border border-sky-200 px-3 py-1 text-xs font-bold text-sky-800">
-                      <span>{trail.icon}</span>
-                      <span>{trail.badge}</span>
-                    </span>
-                    <span className="rounded-full bg-slate-50 border border-slate-200 px-2.5 py-0.5 text-xs font-mono text-sky-700 font-bold">
-                      {trail.difficulty}
-                    </span>
-                  </div>
-
-                  <h3 className="mt-4 font-display text-lg font-bold text-slate-900 leading-snug group-hover:text-sky-600 transition-colors line-clamp-2">
-                    {trail.title}
-                  </h3>
-                  <p className="mt-2 text-xs text-slate-600 leading-relaxed line-clamp-2">{trail.subtitle}</p>
-                </div>
-
-                {/* Additional Metadata Pills */}
-                <div className="mt-4 flex flex-wrap gap-2 text-xs font-mono text-slate-600">
-                  <span className="rounded-lg bg-sky-50/60 px-2.5 py-1 border border-sky-100">
-                    🗓️ {trail.bestSeason}
-                  </span>
-                  <span className="rounded-lg bg-sky-50/60 px-2.5 py-1 border border-sky-100">
-                    📍 {trail.stops} Stops
-                  </span>
-                </div>
-              </div>
-
-              <div className="mt-6 pt-4 border-t border-slate-100 flex items-center justify-between text-xs">
-                <div className="flex items-center gap-3 font-mono text-slate-500">
-                  <span>🛣️ {trail.distance}</span>
-                  <span>⏱️ {trail.duration}</span>
-                </div>
-                <Link
-                  to={trail.link}
-                  className="flex items-center gap-1 font-bold text-sky-600 hover:text-sky-700 transition-colors min-h-[36px] items-center"
-                >
-                  <span>View Trail</span>
-                  <ArrowRight className="size-3.5" />
-                </Link>
-              </div>
-            </div>
+        {/* Grid of Expandable Trail Cards */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6 items-start">
+          {CURATED_SIGNATURE_TRAILS.map((trail) => (
+            <ExpandableTrailCard key={trail.slug} trail={trail} />
           ))}
         </div>
       </section>
