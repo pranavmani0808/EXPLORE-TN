@@ -1,5 +1,3 @@
-import { GoogleAuthProvider, signInWithPopup, User } from "firebase/auth";
-import { auth, isFirebaseConfigured } from "./firebase-client";
 import { supabase } from "./supabase-client";
 import { setAuthSession, UserProfile } from "./auth-rbac";
 import { toast } from "sonner";
@@ -8,16 +6,16 @@ import { toast } from "sonner";
  * Maps a Google authenticated user into ExploreTN UserProfile and syncs to Supabase database.
  */
 export async function syncGoogleUserToProfile(
-  firebaseUser: User,
+  authUser: { id: string; email?: string | null; user_metadata?: Record<string, any> },
   customRole: "explorer" | "super_admin" = "explorer"
 ): Promise<UserProfile> {
-  const email = (firebaseUser.email || "").toLowerCase().trim();
+  const email = (authUser.email || "").toLowerCase().trim();
   const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
-  const displayName = firebaseUser.displayName || email.split("@")[0] || "Explorer User";
+  const displayName = authUser.user_metadata?.["full_name"] || authUser.user_metadata?.["name"] || email.split("@")[0] || "Explorer User";
   const avatar = displayName.slice(0, 2).toUpperCase();
 
   const userProfile: UserProfile = {
-    id: firebaseUser.uid || `usr-g-${Date.now()}`,
+    id: authUser.id || `usr-g-${Date.now()}`,
     name: displayName,
     email: email,
     avatar: avatar,
@@ -50,38 +48,31 @@ export async function syncGoogleUserToProfile(
 
 /**
  * Primary Google Sign-In Handler
- * Uses Firebase signInWithPopup as primary, with seamless fallback to Supabase OAuth if Firebase is not yet configured.
+ * Triggers standard Supabase OAuth with Google provider.
  */
 export async function triggerGoogleSignIn(): Promise<UserProfile | null> {
-  // If Firebase is configured with an active apiKey, use popup flow
-  if (isFirebaseConfigured && auth) {
-    try {
-      const provider = new GoogleAuthProvider();
-      provider.addScope("profile");
-      provider.addScope("email");
-      provider.setCustomParameters({ prompt: "select_account" });
+  try {
+    const redirectTo = typeof window !== "undefined" ? window.location.origin : undefined;
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo,
+        queryParams: {
+          access_type: "offline",
+          prompt: "select_account",
+        },
+      },
+    });
 
-      const result = await signInWithPopup(auth, provider);
-      if (result?.user) {
-        const profile = await syncGoogleUserToProfile(result.user);
-        toast.success(`Welcome to ExploreTN, ${profile.name}! Signed in with Google ✓`);
-        return profile;
-      }
-    } catch (fbErr: any) {
-      console.warn("[Google Auth] Firebase popup error:", fbErr?.code, fbErr?.message);
-      if (fbErr?.code === "auth/popup-closed-by-user") {
-        return null;
-      }
-      if (fbErr?.code === "auth/unauthorized-domain") {
-        toast.error("Authorized domain missing. Please add explore-tn-ochre.vercel.app to Firebase Console > Authentication > Settings > Authorized domains.");
-        throw new Error("Domain not authorized in Firebase. Add your Vercel URL to Authorized Domains.");
-      }
-      toast.error(fbErr?.message || "Google sign in failed.");
-      throw fbErr;
+    if (error) {
+      toast.error(error.message || "Failed to initiate Google sign-in.");
+      throw error;
     }
-  }
 
-  // Fallback only if Firebase is completely unconfigured
-  toast.error("Firebase authentication is not configured yet.");
-  return null;
+    return null;
+  } catch (err: any) {
+    console.warn("[Google Auth] Supabase OAuth error:", err?.message);
+    toast.error(err?.message || "Google sign in failed.");
+    throw err;
+  }
 }

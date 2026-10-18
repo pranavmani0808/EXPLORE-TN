@@ -155,12 +155,12 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
       );
     }
 
-    const SUPABASE_URL = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "https://ajxnljrhueiiuwavbrra.supabase.co";
+    const SUPABASE_URL = process.env["VITE_SUPABASE_URL"] || process.env["SUPABASE_URL"] || "https://ajxnljrhueiiuwavbrra.supabase.co";
     const SUPABASE_SECRET_KEY =
-      process.env.SUPABASE_SECRET_KEY ||
-      process.env.VITE_SUPABASE_SERVICE_ROLE_KEY ||
-      process.env.SUPABASE_PUBLISHABLE_KEY ||
-      process.env.VITE_SUPABASE_ANON_KEY;
+      process.env["SUPABASE_SECRET_KEY"] ||
+      process.env["VITE_SUPABASE_SERVICE_ROLE_KEY"] ||
+      process.env["SUPABASE_PUBLISHABLE_KEY"] ||
+      process.env["VITE_SUPABASE_ANON_KEY"];
 
     if (!SUPABASE_SECRET_KEY) {
       return new Response(
@@ -193,7 +193,7 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
         // Also verify in auth.users if service role key is present
         let authUser = null;
-        if (process.env.SUPABASE_SECRET_KEY || process.env.VITE_SUPABASE_SERVICE_ROLE_KEY) {
+        if (process.env["SUPABASE_SECRET_KEY"] || process.env["VITE_SUPABASE_SERVICE_ROLE_KEY"]) {
           try {
             const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
             authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email) || null;
@@ -332,34 +332,40 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
         }
 
         // Upsert user_profiles and user_stats
-        await supabaseAdmin
-          .from("user_profiles")
-          .upsert(
-            {
-              user_id: targetId,
-              city: user.city || user.location || "Tamil Nadu",
-              state: "Tamil Nadu",
-              preferred_language: "en",
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id" }
-          )
-          .catch(() => null);
+        try {
+          await supabaseAdmin
+            .from("user_profiles")
+            .upsert(
+              {
+                user_id: targetId,
+                city: user.city || user.location || "Tamil Nadu",
+                state: "Tamil Nadu",
+                preferred_language: "en",
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id" }
+            );
+        } catch (profileErr) {
+          console.warn("[User Sync API] profile upsert warning:", profileErr);
+        }
 
-        await supabaseAdmin
-          .from("user_stats")
-          .upsert(
-            {
-              user_id: targetId,
-              xp: role === "super_admin" ? 1000 : 100,
-              rank_title: role === "super_admin" ? "Super Admin" : "Verified Explorer",
-              district_count: role === "super_admin" ? 38 : 1,
-              last_active_at: new Date().toISOString(),
-              updated_at: new Date().toISOString(),
-            },
-            { onConflict: "user_id" }
-          )
-          .catch(() => null);
+        try {
+          await supabaseAdmin
+            .from("user_stats")
+            .upsert(
+              {
+                user_id: targetId,
+                xp: role === "super_admin" ? 1000 : 100,
+                rank_title: role === "super_admin" ? "Super Admin" : "Verified Explorer",
+                district_count: role === "super_admin" ? 38 : 1,
+                last_active_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: "user_id" }
+            );
+        } catch (statsErr) {
+          console.warn("[User Sync API] stats upsert warning:", statsErr);
+        }
 
         return new Response(
           JSON.stringify({
@@ -385,7 +391,12 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     const district = url.searchParams.get("district") || undefined;
     const search = url.searchParams.get("query") || url.searchParams.get("q") || url.searchParams.get("search") || undefined;
 
-    const places = await SupabaseDatabaseRepository.getPublicPlaces({ category, district, search });
+    const placesFilters: { category?: string; district?: string; search?: string } = {};
+    if (category) placesFilters.category = category;
+    if (district) placesFilters.district = district;
+    if (search) placesFilters.search = search;
+
+    const places = await SupabaseDatabaseRepository.getPublicPlaces(placesFilters);
     return new Response(
       JSON.stringify({ status: "success", count: places.length, data: places }),
       {
@@ -451,7 +462,7 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
   // 1c-ii. Place Weather Endpoint: GET /api/v1/places/:slug/weather
   if (path.startsWith("/api/v1/places/") && path.endsWith("/weather") && method === "GET") {
     const slug = path.replace("/api/v1/places/", "").replace("/weather", "");
-    const intel = getPlaceTravelIntelligence(slug);
+    const intel = getPlaceTravelIntelligence(slug) as any;
     const weather = intel?.liveTelemetry?.weather || {
       temperatureC: 28,
       condition: "Pleasant",
