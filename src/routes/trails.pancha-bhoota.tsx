@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
+import { SafeImage } from "@/components/ui/safe-image";
 import { panchaBhootaTemples, DEFAULT_PANCHA_BHOOTA_TEMPLES, type Place } from "@/data/places";
 import { cn } from "@/lib/utils";
 import {
@@ -418,13 +419,13 @@ function PanchaBhootaTrailPage() {
 
                   {/* Image Header */}
                   <div className="relative h-56 overflow-hidden bg-slate-100">
-                    <img
+                    <SafeImage
                       src={temple.image}
                       alt={temple.name}
-                      loading="lazy"
+                      category="temple"
                       className="size-full object-cover transition-transform duration-700 group-hover:scale-105"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
                   </div>
 
                   {/* Card Content */}

@@ -300,7 +300,7 @@ export const DEFAULT_ARUPADAI_VEEDU_TEMPLES: Place[] = [
     name: "Swamimalai Murugan Temple",
     district: "Thanjavur",
     category: "spiritual",
-    image: swamimalaiImg,
+    image: "https://upload.wikimedia.org/wikipedia/commons/2/21/Swamimalai_murugan_temple.jpg",
     tagline: "Fourth abode where Lord Murugan expounded the supreme Pranava Mantra (Om) to Lord Shiva.",
     story: "Built on an artificial hillock with 60 steps representing the 60 Tamil years, Swamimalai is renowned for its bronze icon casting heritage.",
     rating: 4.8,
@@ -358,7 +358,7 @@ export const DEFAULT_ARUPADAI_VEEDU_TEMPLES: Place[] = [
     name: "Pazhamudircholai Murugan Temple",
     district: "Madurai",
     category: "spiritual",
-    image: pazhamudircholaiImg,
+    image: "https://upload.wikimedia.org/wikipedia/commons/d/dc/Pazhamuthir_solai_Murugan_1.JPG",
     tagline: "Sixth abode nestled in dense forest slopes near Solaimalai where Lord Murugan blessed Avvaiyar.",
     story: "Located amidst green forest hills near Alagar Kovil, 25km north of Madurai. Celebrated for the famous Avvaiyar jamun tree episode.",
     rating: 4.8,
@@ -378,16 +378,16 @@ export const DEFAULT_ARUPADAI_VEEDU_TEMPLES: Place[] = [
     x: 50,
     y: 60,
     trailOrder: 4,
-    coords: [10.0827, 78.2144],
-    latitude: 10.0827,
-    longitude: 78.2144,
+    coords: [10.0886, 78.2231],
+    latitude: 10.0886,
+    longitude: 78.2231,
   },
   {
     slug: "thirupparankundram-murugan-temple",
     name: "Thirupparankundram Murugan Temple",
     district: "Madurai",
     category: "spiritual",
-    image: thirupparankundramImg,
+    image: "https://upload.wikimedia.org/wikipedia/commons/0/0f/8th_century_Thirupparankundram_cave_temple%2C_Madurai_district%2C_Tamil_Nadu_India_-_1.jpg",
     tagline: "First abode where Lord Murugan married Goddess Deivayanai in rock-cut cave architecture.",
     story: "Located 8km from Madurai, this ancient cave temple carved out of a granite hill marks the divine wedding site of Lord Murugan and Deivayanai.",
     rating: 4.9,
@@ -407,9 +407,9 @@ export const DEFAULT_ARUPADAI_VEEDU_TEMPLES: Place[] = [
     x: 48,
     y: 62,
     trailOrder: 5,
-    coords: [9.8809, 78.0711],
-    latitude: 9.8809,
-    longitude: 78.0711,
+    coords: [9.8789, 78.0722],
+    latitude: 9.8789,
+    longitude: 78.0722,
   },
   {
     slug: "tiruchendur-murugan-temple",
@@ -442,11 +442,7 @@ export const DEFAULT_ARUPADAI_VEEDU_TEMPLES: Place[] = [
   }
 ];
 
-export const arupadaiVeeduTemples: Place[] = ARUPADAI_VEEDU_SLUGS.map((slug) => {
-  const found = places.find((p) => p.slug === slug || p.slug.includes(slug.split("-")[0]));
-  if (found) return found;
-  return DEFAULT_ARUPADAI_VEEDU_TEMPLES.find((d) => d.slug === slug || d.slug.includes(slug.split("-")[0])) || DEFAULT_ARUPADAI_VEEDU_TEMPLES[0];
-});
+export const arupadaiVeeduTemples: Place[] = DEFAULT_ARUPADAI_VEEDU_TEMPLES;
 
 export const PANCHA_BHOOTA_SLUGS = [
   "ekambareswarar-temple",
@@ -494,7 +490,7 @@ export const DEFAULT_PANCHA_BHOOTA_TEMPLES: (Place & { element: string; elementT
     name: "Jambukeswarar Temple",
     district: "Tiruchirappalli",
     category: "spiritual",
-    image: "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/6/68/Tiruvanaikaval5.jpg",
     tagline: "Water (Appu) Stalam with Perennial Underground Spring in Sanctum",
     story: "Revered Pancha Bhoota Sthalam representing the Water element (Appu), situated in Thiruvanaikaval between Cauvery and Kollidam rivers. An underground perennial natural spring flows continuously beneath the Shiva Lingam in the inner sanctum, keeping it submerged in holy water throughout the year. Built by Early Chola King Kochengannan over 1,800 years ago.",
     rating: 4.8,
@@ -558,7 +554,7 @@ export const DEFAULT_PANCHA_BHOOTA_TEMPLES: (Place & { element: string; elementT
     name: "Srikalahasteeswara Temple",
     district: "Tirupati",
     category: "spiritual",
-    image: "https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=1000&q=80",
+    image: "https://upload.wikimedia.org/wikipedia/commons/9/98/Sri_Kala_Hasti.jpg",
     tagline: "Air (Vayu) Stalam with Flickering Sanctum Lamp & Rahu-Ketu Kshetram",
     story: "The ancient Vayu Stalam of the Pancha Bhoota representing the Air element, situated on the banks of the Swarnamukhi River bordering northern Tamil Nadu. Inside the airtight inner sanctum devoid of any wind, the lamp flame continuously flickers, confirming the living presence of the Air Lingam. Renowned worldwide for Rahu-Ketu Sarpa Dosha Nivarana pujas and rich Chola/Vijayanagara stone sculpture.",
     rating: 4.8,
@@ -619,10 +615,6 @@ export const DEFAULT_PANCHA_BHOOTA_TEMPLES: (Place & { element: string; elementT
   },
 ];
 
-export const panchaBhootaTemples: Place[] = PANCHA_BHOOTA_SLUGS.map((slug) => {
-  const found = places.find((p) => p.slug === slug || p.slug.includes(slug.split("-")[0]));
-  if (found) return found;
-  return DEFAULT_PANCHA_BHOOTA_TEMPLES.find((d) => d.slug === slug || d.slug.includes(slug.split("-")[0])) || DEFAULT_PANCHA_BHOOTA_TEMPLES[0];
-});
+export const panchaBhootaTemples: Place[] = DEFAULT_PANCHA_BHOOTA_TEMPLES;
 
 
