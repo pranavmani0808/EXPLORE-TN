@@ -53,6 +53,7 @@ import {
   CorridorPlace,
   TransitModeType,
 } from "@/lib/data/multi-modal-transit";
+import { calculateRailwayTrackGeometry, TN_RAILWAY_STATIONS } from "@/lib/data/railway-network-data";
 import { useAuthGuard } from "@/lib/auth-guard-context";
 import { getUserHomeLocation } from "@/lib/user-location-manager";
 import { toast } from "sonner";
@@ -592,6 +593,28 @@ export function FullscreenRouteMap({
 
     const activeRouteOpt = availableRoutes.find((r) => r.id === selectedRouteId);
 
+    // If Train travel mode is selected, render authentic Southern Railway track geometry
+    if (travelMode === "train") {
+      try {
+        const trainTrack = calculateRailwayTrackGeometry(
+          { latitude: selectedOrigin.latitude, longitude: selectedOrigin.longitude },
+          { latitude: selectedDestination.latitude, longitude: selectedDestination.longitude }
+        );
+
+        setSegmentData([
+          {
+            distanceKm: trainTrack.distanceKm,
+            durationMins: trainTrack.durationMins,
+            polyline: trainTrack.polyline,
+          },
+        ]);
+        setRouteLoading(false);
+        return;
+      } catch (e) {
+        console.warn("Railway track pathfinder notice, falling back to standard calculation", e);
+      }
+    }
+
     if (activeRouteOpt && waypoints.length === 0 && activeRouteOpt.geometry.length > 0) {
       setSegmentData([
         {
@@ -995,6 +1018,58 @@ export function FullscreenRouteMap({
               seg.polyline.forEach((pt) => bounds.extend(pt));
             }
           });
+
+          // If Train mode is active, render intermediate Southern Railway station markers along the tracks
+          if (travelMode === "train" && segmentData[0]?.polyline) {
+            const trackPoints = segmentData[0].polyline;
+            // The points between origin (first) and destination (last) are the authentic railway stations
+            const stationPoints = trackPoints.slice(1, trackPoints.length - 1);
+
+            stationPoints.forEach((coord, idx) => {
+              // Find matching station info
+              const matchedStation = Object.values(TN_RAILWAY_STATIONS).find(
+                (st) => Math.hypot(st.latitude - coord[0], st.longitude - coord[1]) < 0.08
+              );
+
+              const stationName = matchedStation ? `${matchedStation.name} (${matchedStation.code})` : `Railway Junction #${idx + 1}`;
+              const divisionName = matchedStation ? `${matchedStation.division} Division` : "Southern Railway";
+
+              const stationIcon = L.divIcon({
+                className: "custom-station-pin",
+                html: `
+                  <div style="position: relative; display: flex; flex-direction: column; align-items: center; cursor: pointer;">
+                    <div style="
+                      background: #f59e0b;
+                      color: #451a03;
+                      border: 2px solid #ffffff;
+                      border-radius: 9999px;
+                      width: 22px;
+                      height: 22px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      font-size: 11px;
+                      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+                    ">
+                      🚂
+                    </div>
+                  </div>
+                `,
+                iconSize: [22, 22],
+                iconAnchor: [11, 11],
+              });
+
+              const stMarker = L.marker(coord, { icon: stationIcon }).addTo(map);
+              stMarker.bindPopup(`
+                <div style="font-family: system-ui, sans-serif; width: 220px; color: #fff;">
+                  <strong style="font-size: 13px; display: block; color: #f59e0b;">${stationName}</strong>
+                  <p style="font-size: 11px; margin: 4px 0; color: #94a3b8;">${divisionName} · Southern Railway</p>
+                  <p style="font-size: 11px; color: #38bdf8;">Mainline Rail Track Node</p>
+                </div>
+              `, { className: "custom-mapcn-popup-window" });
+              markersRef.current.push(stMarker);
+            });
+          }
         } else if (activeTransitOption?.routePolyline && activeTransitOption.routePolyline.length > 1) {
           L.polyline(activeTransitOption.routePolyline, {
             color: "#0f172a",

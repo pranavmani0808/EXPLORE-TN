@@ -902,3 +902,218 @@ export const TN_TRAIN_TRAILS: Record<string, RailwayTrail> = {
     ]
   }
 };
+
+/**
+ * Key Southern Railway Tracks & Corridors (from Southern Railway System Map)
+ * Each corridor is a sequence of connected stations representing physical railway tracks
+ */
+export const TN_RAIL_TRACK_CORRIDORS: Array<{
+  id: string;
+  name: string;
+  stations: string[]; // Ordered station codes
+}> = [
+  // 1. Grand Southern Trunk Line (Chord Line): Chennai -> Tambaram -> Chengalpattu -> Tindivanam -> Villupuram -> Vriddhachalam -> Ariyalur -> Trichy -> Dindigul -> Madurai
+  {
+    id: "chord-line-trunk",
+    name: "Southern Trunk Chord Line (Chennai - Trichy - Madurai)",
+    stations: ["MAS", "MS", "TBM", "CGL", "VM", "TPJ", "DG", "MDU"]
+  },
+  // 2. Cauvery Delta Main Line: Chennai -> Villupuram -> Cuddalore -> Chidambaram -> Mayiladuthurai -> Kumbakonam -> Thanjavur -> Trichy
+  {
+    id: "cauvery-delta-mainline",
+    name: "Cauvery Delta Main Line (Villupuram - Kumbakonam - Thanjavur - Trichy)",
+    stations: ["VM", "CDM", "MV", "TJ", "TPJ"]
+  },
+  // 3. Kongu Western Trunk Line: Chennai -> Arakkonam -> Katpadi -> Jolarpettai -> Salem -> Erode -> Tiruppur -> Coimbatore
+  {
+    id: "western-trunk-line",
+    name: "Western Kongu Corridor (Chennai - Jolarpettai - Salem - Erode - Coimbatore)",
+    stations: ["MAS", "AJJ", "KPD", "JTJ", "SA", "ED", "TUP", "CBE"]
+  },
+  // 4. Nilgiri Mountain Line: Coimbatore -> Mettupalayam -> Coonoor -> Ooty
+  {
+    id: "nilgiri-line",
+    name: "Nilgiri Mountain Rail Line",
+    stations: ["CBE", "MTP", "ONR", "UAM"]
+  },
+  // 5. Central Link: Erode -> Karur -> Trichy
+  {
+    id: "erode-karur-trichy",
+    name: "Erode - Karur - Trichy Line",
+    stations: ["ED", "KRR", "TPJ"]
+  },
+  // 6. Salem - Karur - Dindigul Link
+  {
+    id: "salem-karur-dindigul",
+    name: "Salem - Karur - Dindigul Line",
+    stations: ["SA", "KRR", "DG"]
+  },
+  // 7. Dindigul - Palani - Pollachi - Coimbatore
+  {
+    id: "dindigul-palani-pollachi",
+    name: "Dindigul - Palani - Coimbatore Line",
+    stations: ["DG", "PLNI", "CBE"]
+  },
+  // 8. Madurai - Rameswaram Ocean Line
+  {
+    id: "madurai-rameswaram-ocean",
+    name: "Madurai - Manamadurai - Rameswaram Island Line",
+    stations: ["MDU", "MNM", "RMM"]
+  },
+  // 9. Trichy - Karaikkudi - Manamadurai Loop
+  {
+    id: "trichy-karaikkudi-manamadurai",
+    name: "Trichy - Karaikkudi - Manamadurai Cord Line",
+    stations: ["TPJ", "KKDI", "MNM"]
+  },
+  // 10. Deep South Trunk Line: Madurai -> Virudhunagar -> Kovilpatti -> Tirunelveli -> Nagercoil -> Kanyakumari
+  {
+    id: "deep-south-trunk",
+    name: "Deep South Trunk Line (Madurai - Tirunelveli - Kanyakumari)",
+    stations: ["MDU", "VPT", "TEN", "NCJ", "CAPE"]
+  },
+  // 11. Virudhunagar - Tenkasi - Sengottai - Aryankavu (Ghat Line)
+  {
+    id: "western-ghats-sengottai",
+    name: "Sengottai Western Ghats Line",
+    stations: ["VPT", "TSI", "SCT"]
+  },
+  // 12. Tirunelveli - Tiruchendur Coast Line
+  {
+    id: "tiruchendur-branch",
+    name: "Tirunelveli - Tiruchendur Ocean Branch",
+    stations: ["TEN", "TCN"]
+  },
+  // 13. Tirunelveli - Tuticorin Port Branch
+  {
+    id: "tuticorin-branch",
+    name: "Tirunelveli - Tuticorin Port Line",
+    stations: ["TEN", "TN"]
+  },
+  // 14. Villupuram - Tiruvannamalai - Katpadi Branch
+  {
+    id: "villupuram-katpadi-branch",
+    name: "Villupuram - Tiruvannamalai - Katpadi Line",
+    stations: ["VM", "TNM", "KPD"]
+  },
+  // 15. Villupuram - Puducherry Branch
+  {
+    id: "puducherry-branch",
+    name: "Villupuram - Puducherry Coastal Branch",
+    stations: ["VM", "PDY"]
+  }
+];
+
+/**
+ * Build graph adjacency list of connected Southern Railway stations
+ */
+const RAIL_GRAPH: Record<string, string[]> = {};
+for (const corridor of TN_RAIL_TRACK_CORRIDORS) {
+  for (let i = 0; i < corridor.stations.length; i++) {
+    const curr = corridor.stations[i];
+    if (!RAIL_GRAPH[curr]) RAIL_GRAPH[curr] = [];
+    if (i > 0) {
+      const prev = corridor.stations[i - 1];
+      if (!RAIL_GRAPH[curr].includes(prev)) RAIL_GRAPH[curr].push(prev);
+    }
+    if (i < corridor.stations.length - 1) {
+      const next = corridor.stations[i + 1];
+      if (!RAIL_GRAPH[curr].includes(next)) RAIL_GRAPH[curr].push(next);
+    }
+  }
+}
+
+/**
+ * Find nearest railway station code from coordinates
+ */
+export function findNearestStationCode(lat: number, lng: number): string {
+  let nearestCode = "MAS";
+  let minDist = Infinity;
+  for (const [code, station] of Object.entries(TN_RAILWAY_STATIONS)) {
+    const d = Math.hypot(station.latitude - lat, station.longitude - lng);
+    if (d < minDist) {
+      minDist = d;
+      nearestCode = code;
+    }
+  }
+  return nearestCode;
+}
+
+/**
+ * BFS pathfinder to calculate exact railway track path between two stations
+ */
+export function getRailwayPathStationCodes(startCode: string, endCode: string): string[] {
+  if (startCode === endCode) return [startCode];
+
+  const queue: Array<{ code: string; path: string[] }> = [{ code: startCode, path: [startCode] }];
+  const visited = new Set<string>([startCode]);
+
+  while (queue.length > 0) {
+    const { code, path } = queue.shift()!;
+    if (code === endCode) return path;
+
+    const neighbors = RAIL_GRAPH[code] || [];
+    for (const neighbor of neighbors) {
+      if (!visited.has(neighbor)) {
+        visited.add(neighbor);
+        queue.push({ code: neighbor, path: [...path, neighbor] });
+      }
+    }
+  }
+
+  return [startCode, endCode];
+}
+
+/**
+ * Calculate authentic railway track polyline geometry between origin and destination
+ */
+export function calculateRailwayTrackGeometry(
+  origin: { latitude: number; longitude: number },
+  destination: { latitude: number; longitude: number }
+): {
+  distanceKm: number;
+  durationMins: number;
+  stationCodes: string[];
+  polyline: [number, number][];
+} {
+  const origCode = findNearestStationCode(origin.latitude, origin.longitude);
+  const destCode = findNearestStationCode(destination.latitude, destination.longitude);
+
+  const stationCodes = getRailwayPathStationCodes(origCode, destCode);
+  const trackCoords: [number, number][] = [];
+
+  // 1. Origin point to boarding station
+  trackCoords.push([origin.latitude, origin.longitude]);
+
+  // 2. Traverse authentic railway track station nodes
+  for (const code of stationCodes) {
+    const station = TN_RAILWAY_STATIONS[code];
+    if (station) {
+      trackCoords.push([station.latitude, station.longitude]);
+    }
+  }
+
+  // 3. Deboarding station to destination point
+  trackCoords.push([destination.latitude, destination.longitude]);
+
+  // Calculate rail distance along stations
+  let distKm = 0;
+  for (let i = 0; i < trackCoords.length - 1; i++) {
+    const p1 = trackCoords[i];
+    const p2 = trackCoords[i + 1];
+    const dLat = (p2[0] - p1[0]) * 111;
+    const dLng = (p2[1] - p1[1]) * 105;
+    distKm += Math.sqrt(dLat * dLat + dLng * dLng);
+  }
+
+  distKm = Math.round(distKm);
+  const durationMins = Math.round((distKm / 68) * 60) + 40; // 68 km/h avg express speed + 40m boarding buffer
+
+  return {
+    distanceKm: distKm,
+    durationMins,
+    stationCodes,
+    polyline: trackCoords,
+  };
+}
+
