@@ -20,6 +20,7 @@ import {
 import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { CANONICAL_PLACES, ExplorerPlace } from "@/lib/data/canonical-places";
+import { TN_TRAIN_TRAILS } from "@/lib/data/railway-network-data";
 import {
   Map,
   MapMarker,
@@ -41,10 +42,10 @@ export interface TrailData {
   bestSeason: string;
   description: string;
   highlights: string[];
-  stops: { name: string; district: string; slug: string; description: string; latitude: number; longitude: number }[];
+  stops: { name: string; district: string; slug: string; description: string; latitude: number; longitude: number; code?: string; stationType?: string; heritageFact?: string }[];
 }
 
-const TRAIL_CATALOG: Record<string, TrailData> = {
+const ROAD_TRAIL_CATALOG: Record<string, TrailData> = {
   "western-ghats-70-hairpin": {
     slug: "western-ghats-70-hairpin",
     title: "Western Ghats 70-Hairpin Pass Road Trip",
@@ -92,6 +93,11 @@ const TRAIL_CATALOG: Record<string, TrailData> = {
       { name: "Mathoor Hanging Aqueduct", district: "Kanyakumari", slug: "mathoor-hanging-trough", description: "Asia's highest canal aqueduct", latitude: 8.3283, longitude: 77.3197 }
     ]
   }
+};
+
+const TRAIL_CATALOG: Record<string, TrailData> = {
+  ...ROAD_TRAIL_CATALOG,
+  ...TN_TRAIN_TRAILS,
 };
 
 export const Route = createFileRoute("/trails/$slug")({
@@ -163,7 +169,16 @@ function TrailPage() {
 
           <div className="flex flex-wrap items-center gap-4 pt-4 border-t border-slate-100">
             <Button
-              onClick={() => navigate({ to: "/routes", search: { destination: trail.stops[0]?.slug } })}
+              onClick={() => {
+                const isTrain = trail.badge.toLowerCase().includes("rail");
+                navigate({
+                  to: "/routes",
+                  search: {
+                    destination: trail.stops[0]?.slug,
+                    ...(isTrain ? { mode: "train" } : {}),
+                  },
+                });
+              }}
               className="rounded-2xl bg-sky-600 hover:bg-sky-700 text-white font-bold shadow-md shadow-sky-600/20"
             >
               <Sparkles className="mr-2 size-4" /> Open Interactive Route Planner
@@ -221,11 +236,18 @@ function TrailPage() {
               <MapControls position="top-right" />
 
               {routeCoordinates.length > 1 && (
-                <MapRoute coordinates={routeCoordinates} animated color="#0284c7" weight={4} />
+                <MapRoute
+                  coordinates={routeCoordinates}
+                  animated
+                  color={trail.badge.toLowerCase().includes("rail") ? "#d97706" : "#0284c7"}
+                  casingColor={trail.badge.toLowerCase().includes("rail") ? "#451a03" : "#0f172a"}
+                  weight={5}
+                />
               )}
 
               {trail.stops.map((stop, idx) => {
                 const isActive = activeStopIndex === idx;
+                const isTrain = !!stop.code;
                 return (
                   <MapMarker key={stop.name} latitude={stop.latitude} longitude={stop.longitude}>
                     <MarkerContent>
@@ -237,14 +259,18 @@ function TrailPage() {
                         }}
                         className={`flex size-7 items-center justify-center rounded-full font-bold text-xs shadow-md transition-all cursor-pointer ${
                           isActive
-                            ? "bg-sky-600 text-white scale-125 ring-4 ring-sky-300"
+                            ? isTrain
+                              ? "bg-amber-600 text-white scale-125 ring-4 ring-amber-300"
+                              : "bg-sky-600 text-white scale-125 ring-4 ring-sky-300"
+                            : isTrain
+                            ? "bg-amber-50 text-amber-900 border border-amber-400 hover:scale-110"
                             : "bg-white text-sky-700 border border-sky-300 hover:scale-110"
                         }`}
                       >
-                        {idx + 1}
+                        {isTrain ? "🚂" : idx + 1}
                       </button>
                     </MarkerContent>
-                    <MarkerTooltip>{stop.name}</MarkerTooltip>
+                    <MarkerTooltip>{stop.name}{stop.code ? ` (${stop.code})` : ""}</MarkerTooltip>
                     <MarkerPopup title={stop.name}>
                       <div className="space-y-1.5 p-1 text-slate-800">
                         <p className="text-xs text-slate-500">{stop.district} District · Stop #{idx + 1}</p>
@@ -291,16 +317,33 @@ function TrailPage() {
                   }`}
                 >
                   <div className="flex items-center justify-between">
-                    <span className="px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-700 font-mono text-[10px] font-bold border border-sky-100">
-                      Stop #{i + 1}
-                    </span>
+                    <div className="flex items-center gap-1.5">
+                      <span className="px-2.5 py-0.5 rounded-md bg-sky-50 text-sky-700 font-mono text-[10px] font-bold border border-sky-100">
+                        Stop #{i + 1}
+                      </span>
+                      {stop.code && (
+                        <span className="px-2 py-0.5 rounded-md bg-amber-50 text-amber-800 font-mono text-[10px] font-bold border border-amber-200">
+                          🚂 {stop.code}
+                        </span>
+                      )}
+                    </div>
                     <span className="text-xs font-semibold text-slate-500">{stop.district} District</span>
                   </div>
 
                   <div>
                     <h3 className="text-lg font-bold text-slate-900">{stop.name}</h3>
-                    <p className="text-xs text-slate-600 mt-1">{stop.description}</p>
-                    <p className="text-[11px] font-mono text-slate-400 mt-1">
+                    {stop.stationType && (
+                      <span className="inline-block mt-1 text-[11px] font-semibold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                        {stop.stationType}
+                      </span>
+                    )}
+                    <p className="text-xs text-slate-600 mt-1.5">{stop.description}</p>
+                    {stop.heritageFact && (
+                      <p className="text-[11px] text-amber-800 bg-amber-50/70 border border-amber-200/60 rounded-xl p-2.5 mt-2">
+                        💡 <strong>Rail Heritage:</strong> {stop.heritageFact}
+                      </p>
+                    )}
+                    <p className="text-[11px] font-mono text-slate-400 mt-2">
                       Coordinates: {stop.latitude.toFixed(4)}°N, {stop.longitude.toFixed(4)}°E
                     </p>
                   </div>
