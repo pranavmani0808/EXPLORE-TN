@@ -1,6 +1,6 @@
 import math
 import re
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from backend.app.schemas.places import PlaceCreate, PlaceResponse, PlaceFeedbackCreate
 from backend.app.core.exceptions import ValidationException, ResourceNotFoundException, APIException, ConflictException
 from backend.app.core.security import UserContext

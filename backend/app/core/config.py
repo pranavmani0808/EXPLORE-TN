@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str = ""
 
     # OpenSERP Server-Side Web-Grounding Configuration
-    OPENSERP_API_KEY: str = ""
+    OPENSERP_API_KEY: str = "mock-openserp-key-v1"
     OPENSERP_BASE_URL: str = "https://api.openserp.com/v1/search"
 
     # WEB_CRAWL-main Service Integration
