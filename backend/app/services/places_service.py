@@ -1,16 +1,22 @@
 import math
 import re
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from backend.app.schemas.places import PlaceCreate, PlaceResponse, PlaceFeedbackCreate
 from backend.app.core.exceptions import ValidationException, ResourceNotFoundException, APIException, ConflictException
 from backend.app.core.security import UserContext
 
 # HAVERSINE DISTANCE MATHEMATICAL ENGINE
 def calculate_haversine(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    # Bolt Optimization: Identity fast path to avoid unnecessary trig ops
+    if lat1 == lat2 and lon1 == lon2:
+        return 0.0
+
     R = 6371.0 # Earth's radius in km
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
-    a = (math.sin(dlat / 2) ** 2) + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * (math.sin(dlon / 2) ** 2)
+    lat1_rad = math.radians(lat1)
+    lat2_rad = math.radians(lat2)
+    a = (math.sin(dlat / 2) ** 2) + math.cos(lat1_rad) * math.cos(lat2_rad) * (math.sin(dlon / 2) ** 2)
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return round(R * c, 2)
 
@@ -2059,24 +2065,36 @@ class PlacesService:
 
     def find_nearby_places(self, lat: float, lng: float, radius_km: float = 50.0, category: Optional[str] = None, place_type: Optional[str] = None, min_rating: float = 0.0) -> List[dict]:
         results = []
+        # Bolt Optimization: 1 deg lat is ~111.1km everywhere. Points with abs(lat_diff) > max_dlat
+        # are guaranteed to be > radius_km away, avoiding expensive trig functions.
+        max_dlat = radius_km / 110.0
+
         for slug, place in self._places_db.items():
             p_lat = place.get("latitude")
             p_lng = place.get("longitude")
             if p_lat is None or p_lng is None:
                 continue
+
+            # Bolt Optimization: Filter by category/type FIRST before doing any spatial math
+            if category and category.lower() != "all":
+                p_cat = (place.get("category") or "").lower()
+                if category.lower() not in p_cat:
+                    continue
+            if place_type and place_type.lower() != "all":
+                p_type = (place.get("type") or "").lower()
+                if place_type.lower() not in p_type:
+                    continue
+
+            # Fast bounding-box pre-filter on latitude difference
+            if abs(p_lat - lat) > max_dlat:
+                continue
+
             dist_km = calculate_haversine(lat, lng, p_lat, p_lng)
             if dist_km <= radius_km:
-                if category and category.lower() != "all":
-                    p_cat = (place.get("category") or "").lower()
-                    if category.lower() not in p_cat:
-                        continue
-                if place_type and place_type.lower() != "all":
-                    p_type = (place.get("type") or "").lower()
-                    if place_type.lower() not in p_type:
-                        continue
                 place_copy = dict(place)
                 place_copy["distanceKm"] = dist_km
                 results.append(place_copy)
+
         results.sort(key=lambda x: x["distanceKm"])
         return results
 
@@ -2097,6 +2115,9 @@ class PlacesService:
         if points[-1] not in sampled_points:
             sampled_points.append(points[-1])
 
+        # Bolt Optimization: Fast bounding-box latitude threshold for corridor math
+        max_dlat = corridor_width_km / 110.0
+
         for slug, place in self._places_db.items():
             p_lat = place.get("latitude")
             p_lng = place.get("longitude")
@@ -2111,6 +2132,8 @@ class PlacesService:
 
             min_dist = float('inf')
             for lat_pt, lng_pt in sampled_points:
+                if abs(p_lat - lat_pt) > max_dlat:
+                    continue
                 d = calculate_haversine(p_lat, p_lng, lat_pt, lng_pt)
                 if d < min_dist:
                     min_dist = d
