@@ -49,3 +49,4 @@ __pycache__/
 test-results/
 .agents/
 skills-lock.json
+.freebuff/

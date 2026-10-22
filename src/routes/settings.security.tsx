@@ -4,7 +4,7 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { ShieldCheck, Lock, Smartphone, Key, Download, Trash2, CheckCircle2 } from "lucide-react";
 import { getCurrentAuthUser } from "@/lib/auth-rbac";
-import { sanitizePiiResponse, maskEmail } from "@/lib/security/encryption";
+import { sanitizePiiResponse, maskEmail } from "@/lib/security/pii-masking";
 import { recordChainedAuditLog } from "@/lib/security/hash-chain-audit";
 import { toast } from "sonner";
 

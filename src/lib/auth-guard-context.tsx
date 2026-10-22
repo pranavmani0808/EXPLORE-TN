@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { getCurrentAuthUser, subscribeToAuthChanges, setAuthSession, clearAuthSession, UserProfile } from "./auth-rbac";
 import { supabase } from "./supabase-client";
+import { syncUserWithServer } from "./user-sync";
 import { AuthModal } from "@/components/site/auth-modal";
 import { toast } from "sonner";
 
@@ -35,27 +36,30 @@ export function AuthGuardProvider({ children }: { children: React.ReactNode }) {
       const existing = getCurrentAuthUser();
       if (!existing || existing.email.toLowerCase() !== email) {
         const userName = sessionUser.user_metadata?.full_name || email.split("@")[0] || "Explorer User";
-        const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
         const verifiedUser: UserProfile = {
           id: sessionUser.id,
           name: userName,
           email: email,
           avatar: userName.slice(0, 2).toUpperCase(),
-          role: isAdmin ? "super_admin" : "explorer",
+          // Privileged roles are owned by the server-side database record;
+          // the server reply below carries the DB-owned role.
+          role: "explorer",
           status: "active",
-          rank: isAdmin ? "Super Admin" : "Verified Explorer",
-          districtCount: isAdmin ? 38 : 1,
+          rank: "Verified Explorer",
+          districtCount: 1,
         };
 
-        // Sync to Supabase public tables
-        await fetch("/api/v1/user/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user: verifiedUser,
-            isSignUp: true,
-          }),
-        }).catch(() => null);
+        // Sync to Supabase public tables. Identity is proven by the session
+        // token attached by the sync helper.
+        const syncResult = await syncUserWithServer(verifiedUser, true);
+        const serverRole = syncResult?.user?.role;
+        if (serverRole) {
+          verifiedUser.role = serverRole as UserProfile["role"];
+          if (serverRole === "super_admin") {
+            verifiedUser.rank = "Super Admin";
+            verifiedUser.districtCount = 38;
+          }
+        }
 
         setAuthSession(verifiedUser);
         setUser(verifiedUser);

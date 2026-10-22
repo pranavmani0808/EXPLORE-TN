@@ -1,10 +1,13 @@
 export * from "./types";
+export * from "./pii-masking";
 export * from "./encryption";
 export * from "./integrity-engine";
 export * from "./hash-chain-audit";
 export * from "./digital-signature";
 export * from "./mfa";
 export * from "./crawler-provenance";
+// NOTE: ./server-auth is intentionally NOT re-exported here — it requires the
+// Supabase service key and must stay out of any client bundle.
 
 import { CainSecurityStatus } from "./types";
 import { verifyAuditChain, getChainedAuditLogs } from "./hash-chain-audit";

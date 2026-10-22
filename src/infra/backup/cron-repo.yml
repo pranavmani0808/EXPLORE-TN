@@ -1,0 +1,13 @@
+// src/infra/backup/cron-repo.yml
+cronjob:
+  - id: db-backup
+    schedule: "0 3 * * *" # every day at 3 AM UTC
+    job:
+      exec: "node ./src/lib/backup/cron-job.js"
+    env:
+      - name: SUPABASE_URL
+        secret: supabase_url
+      - name: SUPABASE_SECRET_KEY
+        secret: supabase_svc_key
+      - name: BACKUP_BUCKET_URL
+        secret: backup_bucket

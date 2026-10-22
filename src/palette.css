@@ -1,0 +1,10 @@
+/* Nature‑inspired palette custom properties */
+:root {
+  --color-primary: #2c6e49;   /* forest green */
+  --color-primary-foreground: #f5fdf4;
+  --color-accent: #6c9a8b;   /* moss */
+  --color-muted: #e2e8f0;    /* mist */
+  --color-background: #fcfaf6; /* parchment */
+  --color-foreground: #2d2d2d;
+  --radius: 0.5rem;
+}

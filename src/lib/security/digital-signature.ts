@@ -1,9 +1,25 @@
 import { computeHmacSha256 } from "./browser-crypto";
 import { CryptographicSignature } from "./types";
 
-const ADMIN_SIGNING_SECRET =
-  (typeof process !== "undefined" && process.env?.EXPLORETN_ADMIN_SIGNING_KEY) ||
-  "cain-super-admin-digital-signature-master-secret-key-99887766554433221100";
+/**
+ * SERVER-ONLY. Do not import from client components.
+ *
+ * The signing key must come from the EXPLORETN_ADMIN_SIGNING_KEY environment
+ * variable — a hardcoded fallback would let anyone who reads the repo forge
+ * admin signatures.
+ */
+function getAdminSigningSecret(): string {
+  const secret =
+    typeof process !== "undefined"
+      ? process.env?.["EXPLORETN_ADMIN_SIGNING_KEY"]
+      : undefined;
+  if (!secret) {
+    throw new Error(
+      "EXPLORETN_ADMIN_SIGNING_KEY is not configured. Admin action signing is disabled."
+    );
+  }
+  return secret;
+}
 
 /**
  * Sign an administrative action payload with HMAC-SHA256 to ensure non-repudiation
@@ -16,7 +32,7 @@ export function signAdminAction(
   const timestamp = new Date().toISOString();
   const rawToSign = `${payloadHash}|${signerName}|${signerRole}|${timestamp}`;
 
-  const signature = computeHmacSha256(ADMIN_SIGNING_SECRET, rawToSign);
+  const signature = computeHmacSha256(getAdminSigningSecret(), rawToSign);
 
   return {
     signature,
@@ -37,7 +53,7 @@ export function verifyAdminSignature(signatureObj: CryptographicSignature): {
 } {
   try {
     const rawToSign = `${signatureObj.payloadHash}|${signatureObj.signedBy}|${signatureObj.signerRole}|${signatureObj.timestamp}`;
-    const recomputed = computeHmacSha256(ADMIN_SIGNING_SECRET, rawToSign);
+    const recomputed = computeHmacSha256(getAdminSigningSecret(), rawToSign);
 
     const isValid = recomputed === signatureObj.signature;
 

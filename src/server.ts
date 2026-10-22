@@ -20,6 +20,14 @@ import {
 } from "./lib/security";
 import { checkRateLimit, getClientIp } from "./lib/security/rate-limiter";
 import { CreatePlaceSchema, UserSyncPayloadSchema, PlannerChatPayloadSchema } from "./lib/security/api-schemas";
+import {
+  getSupabaseAdminClient,
+  verifySupabaseSession,
+  unauthorized,
+  forbidden,
+  requireAdmin,
+  VerifiedSession,
+} from "./lib/security/server-auth";
 
 type ServerEntry = {
   fetch: (request: Request, env: unknown, ctx: unknown) => Promise<Response> | Response;
@@ -55,83 +63,87 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     );
   }
 
-  // 1a. CAIN Security Status Endpoint: GET /api/v1/security/status
-  if (path === "/api/v1/security/status" && method === "GET") {
-    const status = getCainSecurityStatus();
-    return new Response(
-      JSON.stringify({ status: "success", data: status }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  }
+  // 1a-1e. CAIN Security Endpoints — administrator-only. Every route below the
+  // /api/v1/security/ prefix requires a verified Supabase session with an
+  // admin/super_admin role in public.users.
+  if (path.startsWith("/api/v1/security/")) {
+    const guard = await requireAdmin(request);
+    if (!guard.ok) return guard.response;
 
-  // 1b. CAIN Audit Logs Endpoint: GET /api/v1/security/audit-logs
-  if (path === "/api/v1/security/audit-logs" && method === "GET") {
-    const logs = getChainedAuditLogs();
-    const verification = verifyAuditChain();
-    return new Response(
-      JSON.stringify({ status: "success", count: logs.length, verification, data: logs }),
-      { status: 200, headers: { "Content-Type": "application/json" } }
-    );
-  }
-
-  // 1c. CAIN Verify Integrity Endpoint: POST /api/v1/security/verify-integrity
-  if (path === "/api/v1/security/verify-integrity" && method === "POST") {
-    try {
-      const body = await request.clone().json().catch(() => ({}));
-      const recordId = body.recordId || "place-madurai-meenakshi";
-      const recordData = body.data || { name: "Meenakshi Amman Temple", district: "Madurai" };
-
-      const check = checkRecordIntegrity(recordId, recordData);
+    if (path === "/api/v1/security/status" && method === "GET") {
+      const status = getCainSecurityStatus();
       return new Response(
-        JSON.stringify({ status: "success", data: check }),
+        JSON.stringify({ status: "success", data: status }),
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
-    } catch (err: any) {
-      return new Response(
-        JSON.stringify({ error: { message: err?.message || "Integrity verification failed" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
     }
-  }
 
-  // 1d. CAIN Admin MFA Setup Endpoint: POST /api/v1/security/mfa/setup
-  if (path === "/api/v1/security/mfa/setup" && method === "POST") {
-    try {
-      const body = await request.clone().json().catch(() => ({}));
-      const userId = body.userId || "usr-admin-1";
-      const email = body.email || "pranavviper7@gmail.com";
-
-      const mfaConfig = setupAdminMfa(userId, email);
+    if (path === "/api/v1/security/audit-logs" && method === "GET") {
+      const logs = getChainedAuditLogs();
+      const verification = verifyAuditChain();
       return new Response(
-        JSON.stringify({ status: "success", data: mfaConfig }),
+        JSON.stringify({ status: "success", count: logs.length, verification, data: logs }),
         { status: 200, headers: { "Content-Type": "application/json" } }
       );
-    } catch (err: any) {
-      return new Response(
-        JSON.stringify({ error: { message: err?.message || "MFA setup failed" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
     }
-  }
 
-  // 1e. CAIN Admin MFA Verify Endpoint: POST /api/v1/security/mfa/verify
-  if (path === "/api/v1/security/mfa/verify" && method === "POST") {
-    try {
-      const body = await request.clone().json().catch(() => ({}));
-      const userId = body.userId || "usr-admin-1";
-      const token = body.token || "";
+    if (path === "/api/v1/security/verify-integrity" && method === "POST") {
+      try {
+        const body = await request.clone().json().catch(() => ({}));
+        const recordId = body.recordId || "place-madurai-meenakshi";
+        const recordData = body.data || { name: "Meenakshi Amman Temple", district: "Madurai" };
 
-      const result = verifyAdminMfaToken(userId, token);
-      return new Response(
-        JSON.stringify({ status: result.success ? "success" : "error", data: result }),
-        { status: result.success ? 200 : 400, headers: { "Content-Type": "application/json" } }
-      );
-    } catch (err: any) {
-      return new Response(
-        JSON.stringify({ error: { message: err?.message || "MFA verification failed" } }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
+        const check = checkRecordIntegrity(recordId, recordData);
+        return new Response(
+          JSON.stringify({ status: "success", data: check }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        return new Response(
+          JSON.stringify({ error: { message: err?.message || "Integrity verification failed" } }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
     }
+
+    if (path === "/api/v1/security/mfa/setup" && method === "POST") {
+      try {
+        // The admin identity comes from the verified session, never the request body.
+        const mfaConfig = setupAdminMfa(guard.session.userId, guard.session.email);
+        return new Response(
+          JSON.stringify({ status: "success", data: mfaConfig }),
+          { status: 200, headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        return new Response(
+          JSON.stringify({ error: { message: err?.message || "MFA setup failed" } }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    if (path === "/api/v1/security/mfa/verify" && method === "POST") {
+      try {
+        const body = await request.clone().json().catch(() => ({}));
+        const token = body.token || "";
+
+        const result = verifyAdminMfaToken(guard.session.userId, token);
+        return new Response(
+          JSON.stringify({ status: result.success ? "success" : "error", data: result }),
+          { status: result.success ? 200 : 400, headers: { "Content-Type": "application/json" } }
+        );
+      } catch (err: any) {
+        return new Response(
+          JSON.stringify({ error: { message: err?.message || "MFA verification failed" } }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+    }
+
+    return new Response(
+      JSON.stringify({ error: "Unknown security endpoint" }),
+      { status: 404, headers: { "Content-Type": "application/json" } }
+    );
   }
 
   // 1a. Geo Districts API Endpoint
@@ -155,25 +167,22 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
       );
     }
 
-    const SUPABASE_URL = process.env["VITE_SUPABASE_URL"] || process.env["SUPABASE_URL"] || "https://ajxnljrhueiiuwavbrra.supabase.co";
-    const SUPABASE_SECRET_KEY =
-      process.env["SUPABASE_SECRET_KEY"] ||
-      process.env["VITE_SUPABASE_SERVICE_ROLE_KEY"] ||
-      process.env["SUPABASE_PUBLISHABLE_KEY"] ||
-      process.env["VITE_SUPABASE_ANON_KEY"];
+    // Writes require a verified Supabase session; identity is derived from the
+    // token, never from the request body.
+    const verified = await verifySupabaseSession(request);
 
-    if (!SUPABASE_SECRET_KEY) {
+    let supabaseAdmin;
+    try {
+      supabaseAdmin = getSupabaseAdminClient();
+    } catch (configErr) {
       return new Response(
         JSON.stringify({ error: "Supabase service key is not configured on server" }),
         { status: 500, headers: { "Content-Type": "application/json" } }
       );
     }
 
-    const { createClient } = await import("@supabase/supabase-js");
-    const supabaseAdmin = createClient(SUPABASE_URL, SUPABASE_SECRET_KEY, {
-      auth: { autoRefreshToken: false, persistSession: false },
-    });
-
+    // GET stays intentionally unauthenticated: the sign-in modal checks an
+    // email before a session exists. Rate limiting above blunts enumeration.
     if (method === "GET") {
       try {
         const email = url.searchParams.get("email")?.trim().toLowerCase();
@@ -191,15 +200,13 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
           .eq("email", email)
           .maybeSingle();
 
-        // Also verify in auth.users if service role key is present
+        // Also verify in auth.users (the service key is configured at this point)
         let authUser = null;
-        if (process.env["SUPABASE_SECRET_KEY"] || process.env["VITE_SUPABASE_SERVICE_ROLE_KEY"]) {
-          try {
-            const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
-            authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email) || null;
-          } catch (authErr) {
-            console.warn("[User Sync API] auth list check warning:", authErr);
-          }
+        try {
+          const { data: authList } = await supabaseAdmin.auth.admin.listUsers();
+          authUser = authList?.users?.find((u) => u.email?.toLowerCase() === email) || null;
+        } catch (authErr) {
+          console.warn("[User Sync API] auth list check warning:", authErr);
         }
 
         const emailFound = Boolean(userRecord || authUser);
@@ -247,6 +254,8 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     }
 
     if (method === "POST") {
+      if (!verified) return unauthorized();
+
       try {
         const rawBody = await request.clone().json().catch(() => ({}));
         const parseResult = UserSyncPayloadSchema.safeParse(rawBody);
@@ -258,8 +267,9 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
         }
 
         const { user, isSignUp } = parseResult.data;
-        const email = user.email.trim().toLowerCase();
-        const userId = user.id;
+        // Identity always comes from the verified session token; the body only
+        // carries profile fields.
+        const email = verified.email;
         const name = user.name || email.split("@")[0] || "Explorer User";
 
         const { data: existingUser } = await supabaseAdmin
@@ -268,12 +278,20 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
           .eq("email", email)
           .maybeSingle();
 
-        let role = "explorer";
-        if (email === "admin@explorertn.com") {
-          role = "super_admin";
-        } else if (existingUser?.role) {
-          role = existingUser.role;
+        if (existingUser && (existingUser.status === "suspended" || existingUser.status === "blocked")) {
+          return new Response(
+            JSON.stringify({
+              exists: true,
+              valid: false,
+              message: "User account has been deactivated or suspended.",
+            }),
+            { status: 403, headers: { "Content-Type": "application/json" } }
+          );
         }
+
+        // Role is owned by the database record — this API never mints
+        // privileged roles from caller-supplied emails.
+        const role = existingUser?.role || "explorer";
 
         if (!isSignUp && !existingUser) {
           return new Response(
@@ -282,30 +300,10 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
           );
         }
 
-        // Also sync user to Supabase auth.users so they appear in Supabase Authentication dashboard
-        let targetId = existingUser?.id || userId;
-        try {
-          const { data: authCreated, error: createAuthError } = await supabaseAdmin.auth.admin.createUser({
-            email: email,
-            email_confirm: true,
-            user_metadata: {
-              full_name: name,
-              avatar_url: user.avatar || "",
-              provider: "google",
-            },
-          });
-          if (authCreated?.user?.id) {
-            targetId = authCreated.user.id;
-          } else if (createAuthError) {
-            const { data: listData } = await supabaseAdmin.auth.admin.listUsers();
-            const match = listData?.users?.find((u) => u.email?.toLowerCase() === email);
-            if (match?.id) {
-              targetId = match.id;
-            }
-          }
-        } catch (authAdminErr) {
-          console.warn("[Server User Sync] auth.admin.createUser notice:", authAdminErr);
-        }
+        // The caller already holds a verified Supabase session, so their auth
+        // user exists. Keep the existing row id (legacy rows use synthetic ids)
+        // to avoid primary-key changes on referenced rows.
+        const targetId = existingUser?.id || verified.userId;
 
         const { data: savedUser, error: userError } = await supabaseAdmin
           .from("users")
@@ -410,6 +408,11 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
   }
 
   if (path === "/api/v1/places" && method === "POST") {
+    // Writes require a signed-in explorer: the service key bypasses RLS, so
+    // this endpoint must never be anonymous.
+    const placeSession = await verifySupabaseSession(request);
+    if (!placeSession) return unauthorized();
+
     // Rate limit write endpoint: 20 creations per hour per IP
     const clientIp = getClientIp(request);
     const rateLimit = await checkRateLimit(`create-place:${clientIp}`, { limit: 20, windowMs: 3600000 });
@@ -528,6 +531,12 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
 
       let session = sessionsMemory.get(cid);
       if (!session) {
+        // Cap in-memory sessions so long-lived instances don't grow unbounded.
+        const MAX_PLANNER_SESSIONS = 500;
+        if (sessionsMemory.size >= MAX_PLANNER_SESSIONS) {
+          const oldest = sessionsMemory.keys().next().value;
+          if (oldest !== undefined) sessionsMemory.delete(oldest);
+        }
         session = {
           conversationId: cid,
           origin: body.origin || "Chennai",
@@ -652,7 +661,25 @@ async function handleApiRequest(request: Request): Promise<Response | null> {
     }
   }
 
-  return null;
+  
+    // 1e. User Delete Endpoint (soft delete)
+    if (path === "/api/v1/user/delete" && method === "DELETE") {
+      const guard = await requireAdmin(request)
+      if (!guard.ok) return guard.response
+
+      const userId = guard.session.userId
+      const supabase = getSupabaseAdminClient()
+      const { error } = await supabase.from("users").update({ status: "deleted" }).eq("id", userId)
+      if (error) return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+
+      // Also delete related profile and stats rows
+      await supabase.from("user_profiles").delete().eq("user_id", userId)
+      await supabase.from("user_stats").delete().eq("user_id", userId)
+
+      return new Response(JSON.stringify({ status: "deleted" }), { status: 200 })
+    }
+
+    return null;
 }
 
 // h3 swallows in-handler throws into a normal 500 Response with body
@@ -682,16 +709,37 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// 'unsafe-eval' is only needed by Vite's dev runtime (HMR/module transforms);
+// production builds never receive it. Firebase domains were dropped after the
+// Google auth migration to Supabase OAuth.
+function buildContentSecurityPolicy(): string {
+  const isDev = process.env["NODE_ENV"] !== "production";
+  const scriptSrc = [
+    "'self'",
+    "'unsafe-inline'",
+    ...(isDev ? ["'unsafe-eval'"] : []),
+    "https://apis.google.com",
+    "https://maps.googleapis.com",
+    "https://unpkg.com",
+  ].join(" ");
+  return [
+    "default-src 'self'",
+    `script-src ${scriptSrc}`,
+    "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com",
+    "img-src 'self' data: blob: https:",
+    "font-src 'self' https://fonts.gstatic.com",
+    "connect-src 'self' https: wss:",
+    "frame-src 'self' https://apis.google.com https://*.google.com",
+  ].join("; ");
+}
+
 function applySecurityHeaders(res: Response): Response {
   const newHeaders = new Headers(res.headers);
   newHeaders.set("X-Content-Type-Options", "nosniff");
   newHeaders.set("X-Frame-Options", "SAMEORIGIN");
   newHeaders.set("Referrer-Policy", "strict-origin-when-cross-origin");
   newHeaders.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
-  newHeaders.set(
-    "Content-Security-Policy",
-    "default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://apis.google.com https://*.firebaseapp.com https://maps.googleapis.com https://unpkg.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://unpkg.com; img-src 'self' data: blob: https:; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https: wss:; frame-src 'self' https://apis.google.com https://*.firebaseapp.com https://*.google.com;"
-  );
+  newHeaders.set("Content-Security-Policy", buildContentSecurityPolicy());
   newHeaders.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(self), payment=()");
   newHeaders.set("X-CAIN-Security-Layer", "Active; SHA256-Chained-Audit");
 

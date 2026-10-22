@@ -25,10 +25,13 @@ export const CreatePlaceSchema = z.object({
 
 export const UserSyncPayloadSchema = z.object({
   user: z.object({
-    id: z.string().min(1, "User ID is required"),
-    email: z.string().email("Invalid email format"),
+    // Identity fields are derived from the verified session token on the
+    // server; body values, when present, are ignored.
+    id: z.string().min(1).optional(),
+    email: z.string().email("Invalid email format").optional(),
     name: z.string().min(1).max(100).optional(),
-    avatar: z.string().url().or(z.literal("")).optional(),
+    // Accepts either an image URL or short initials rendered by the client.
+    avatar: z.string().max(400).optional(),
     city: z.string().max(100).optional(),
     location: z.string().max(100).optional(),
     bio: z.string().max(500).optional(),

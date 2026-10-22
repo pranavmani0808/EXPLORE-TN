@@ -1,5 +1,6 @@
 import { supabase } from "./supabase-client";
 import { setAuthSession, UserProfile } from "./auth-rbac";
+import { syncUserWithServer, UserSyncResult } from "./user-sync";
 import { toast } from "sonner";
 
 /**
@@ -10,7 +11,6 @@ export async function syncGoogleUserToProfile(
   customRole: "explorer" | "super_admin" = "explorer"
 ): Promise<UserProfile> {
   const email = (authUser.email || "").toLowerCase().trim();
-  const isAdmin = email === "admin@explorertn.com" || email.endsWith("@explorertn.com");
   const displayName = authUser.user_metadata?.["full_name"] || authUser.user_metadata?.["name"] || email.split("@")[0] || "Explorer User";
   const avatar = displayName.slice(0, 2).toUpperCase();
 
@@ -19,26 +19,27 @@ export async function syncGoogleUserToProfile(
     name: displayName,
     email: email,
     avatar: avatar,
-    role: isAdmin ? "super_admin" : customRole,
+    // Privileged roles are owned by the server-side database record; the
+    // server response below overrides this default.
+    role: customRole,
     status: "active",
-    rank: isAdmin ? "Super Admin" : "Verified Explorer",
-    districtCount: isAdmin ? 38 : 1,
-    xp: isAdmin ? 1000 : 100,
+    rank: "Verified Explorer",
+    districtCount: 1,
+    xp: 100,
     authProvider: "google",
   };
 
-  // Sync with Supabase public.users and user_profiles table
-  try {
-    await fetch("/api/v1/user/sync", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user: userProfile,
-        isSignUp: true,
-      }),
-    });
-  } catch (err) {
-    console.warn("[Google Auth] Warning syncing user to database:", err);
+  // Sync with Supabase public.users and user_profiles table. Identity is
+  // proven by the session token; the server replies with the DB-owned role.
+  const syncResult = await syncUserWithServer(userProfile, true);
+  const serverRole = (syncResult as UserSyncResult | null)?.user?.role;
+  if (serverRole) {
+    userProfile.role = serverRole as UserProfile["role"];
+    if (serverRole === "super_admin") {
+      userProfile.rank = "Super Admin";
+      userProfile.districtCount = 38;
+      userProfile.xp = 1000;
+    }
   }
 
   // Update local session & notify all components

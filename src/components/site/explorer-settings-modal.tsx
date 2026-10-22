@@ -39,6 +39,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Skiper96, TabItemOrSeparator } from "@/components/ui/skiper96";
 import { getCurrentAuthUser, UserProfile, updateProfileUser, clearAuthSession } from "@/lib/auth-rbac";
+import { syncUserWithServer } from "@/lib/user-sync";
 import { getStoredPreferences, saveStoredPreferences } from "@/components/site/explorer-onboarding-modal";
 import { supabase } from "@/lib/supabase-client";
 import {
@@ -327,22 +328,19 @@ export function ExplorerSettingsModal({ isOpen, onClose, defaultTab = "profile" 
     if (currentUser) {
       updateProfileUser({ name, email });
 
-      // Persist profile updates directly to Supabase
-      fetch("/api/v1/user/sync", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          user: {
-            ...currentUser,
-            name,
-            email,
-            phone,
-            bio,
-            city: homeLocation,
-          },
-          isSignUp: false,
-        }),
-      }).catch((err) => console.warn("[ExplorerSettingsModal] Profile sync error:", err));
+      // Persist profile updates directly to Supabase (identity comes from the
+      // session token attached by the sync helper).
+      syncUserWithServer(
+        {
+          ...currentUser,
+          name,
+          email,
+          phone,
+          bio,
+          city: homeLocation,
+        } as UserProfile,
+        false
+      ).catch((err) => console.warn("[ExplorerSettingsModal] Profile sync error:", err));
     }
     toast.success("Explorer profile & settings updated successfully!");
   };

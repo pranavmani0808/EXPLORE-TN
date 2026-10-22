@@ -5,6 +5,7 @@ import { Compass, X, Mail, Lock, User, ArrowRight, Sparkles, Loader2, CheckCircl
 import { Button } from "@/components/ui/button";
 import { supabase } from "@/lib/supabase-client";
 import { setAuthSession, UserProfile } from "@/lib/auth-rbac";
+import { syncUserWithServer } from "@/lib/user-sync";
 
 interface AuthModalProps {
   isOpen: boolean;
@@ -103,11 +104,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
             rank: "Verified Explorer",
             districtCount: 1,
           };
-          await fetch("/api/v1/user/sync", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ user: verifiedUser, isSignUp: true }),
-          }).catch(() => null);
+          await syncUserWithServer(verifiedUser, true);
           setAuthSession(verifiedUser);
           setLoading(false);
           onClose();
@@ -152,14 +149,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
           districtCount: 1,
         };
 
-        await fetch("/api/v1/user/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user: verifiedUser,
-            isSignUp: true,
-          }),
-        }).catch(() => null);
+        await syncUserWithServer(verifiedUser, true);
 
         setAuthSession(verifiedUser);
         setLoading(false);
@@ -253,49 +243,42 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
         return;
       }
 
-      const emailLower = email.toLowerCase();
-      const isAdmin =
-        emailLower === "admin@exploretn.com" ||
-        emailLower === "admin@explorertn.com" ||
-        emailLower.endsWith("@explorertn.com") ||
-        emailLower.endsWith("@exploretn.com");
-      const assignedRole = isAdmin ? "super_admin" : "explorer";
-
+      // Privileged roles come from the server's database record, never from
+      // the email address on the client.
       const authenticatedUser: UserProfile = {
         id: userId,
         name: name,
         email: email,
         avatar: name.slice(0, 2).toUpperCase(),
-        role: assignedRole as any,
+        role: "explorer",
         status: "active",
-        rank: assignedRole === "super_admin" ? "Super Admin" : "Verified Explorer",
-        districtCount: assignedRole === "super_admin" ? 38 : 1,
+        rank: "Verified Explorer",
+        districtCount: 1,
       };
 
-      let isProfileComplete = assignedRole === "super_admin";
+      let isProfileComplete = false;
       // Sync user to Supabase and check if user exists on normal sign in
       try {
-        const syncRes = await fetch("/api/v1/user/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            user: authenticatedUser,
-            isSignUp: authMode === "signup"
-          })
-        });
+        // Sign-in flow: never treated as a signup (identity already exists).
+        const syncData = await syncUserWithServer(authenticatedUser, false);
 
-        if (syncRes.status === 404 && authMode === "signin") {
-          const data = await syncRes.json().catch(() => ({}));
-          const alertMsg = data.message || "user not found";
-          setError(alertMsg);
+        if (syncData && syncData.exists === false && authMode === "signin") {
+          setError(syncData.message || "user not found");
           setLoading(false);
           return;
         }
 
-        if (syncRes.ok) {
-          const syncData = await syncRes.json().catch(() => ({}));
+        if (syncData) {
           if (syncData.profileComplete !== undefined) {
             isProfileComplete = syncData.profileComplete;
+          }
+          const serverRole = syncData.user?.role;
+          if (serverRole) {
+            authenticatedUser.role = serverRole as UserProfile["role"];
+            if (serverRole === "super_admin") {
+              authenticatedUser.rank = "Super Admin";
+              authenticatedUser.districtCount = 38;
+            }
           }
         }
       } catch (syncErr) {
@@ -306,7 +289,7 @@ export function AuthModal({ isOpen, onClose, onSuccess, promptMessage }: AuthMod
       setLoading(false);
       onClose();
 
-      if (!isProfileComplete && assignedRole !== "super_admin") {
+      if (!isProfileComplete) {
         navigate({ to: "/onboarding" });
       } else if (onSuccess) {
         onSuccess();

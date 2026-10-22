@@ -1,9 +1,26 @@
 import { generateRandomHex, computeSha256 } from "./browser-crypto";
 
-// Fallback key if environment secret is not set (32-byte key for AES-256)
-const SECRET_KEY_HEX =
-  (typeof process !== "undefined" && process.env?.EXPLORETN_SECURITY_SECRET) ||
-  "4f8a9b2c3d1e0f7e6d5c4b3a2f1e0d9c8b7a6f5e4d3c2b1a0f9e8d7c6b5a4f3e";
+/**
+ * SERVER-ONLY. Do not import from client components.
+ *
+ * The key must be provided via the EXPLORETN_SECURITY_SECRET environment
+ * variable — there is deliberately no fallback, because a hardcoded key in
+ * source (or in the client bundle) is equivalent to publishing it.
+ *
+ * NOTE: this is a lightweight XOR stream construction, not authenticated
+ * encryption. For data whose confidentiality actually matters, prefer
+ * WebCrypto AES-GCM or server-side Postgres encryption.
+ */
+function getSecretKeyHex(): string {
+  const key =
+    typeof process !== "undefined" ? process.env?.["EXPLORETN_SECURITY_SECRET"] : undefined;
+  if (!key) {
+    throw new Error(
+      "EXPLORETN_SECURITY_SECRET is not configured. Encryption is disabled outside the server environment."
+    );
+  }
+  return key;
+}
 
 export interface EncryptedPayload {
   ciphertext: string;
@@ -13,10 +30,11 @@ export interface EncryptedPayload {
 }
 
 /**
- * Encrypt sensitive string data (browser-safe XOR stream cipher with SHA-256 key derivation)
+ * Encrypt sensitive string data (XOR stream keyed by SHA-256(secret + iv))
  */
 export function encryptData(plainText: string, keyVersion: string = "v1"): EncryptedPayload {
   try {
+    const SECRET_KEY_HEX = getSecretKeyHex();
     const iv = generateRandomHex(12);
     // Deterministic keystream generation using SHA-256(secret + iv)
     const keystream = computeSha256(SECRET_KEY_HEX + iv);
@@ -47,6 +65,7 @@ export function encryptData(plainText: string, keyVersion: string = "v1"): Encry
  */
 export function decryptData(encryptedData: string, ivHex: string, authTagHex: string): string {
   try {
+    const SECRET_KEY_HEX = getSecretKeyHex();
     const expectedTag = computeSha256(encryptedData + ivHex + SECRET_KEY_HEX).slice(0, 32);
     if (expectedTag !== authTagHex) {
       throw new Error("Authentication tag mismatch");
@@ -66,53 +85,4 @@ export function decryptData(encryptedData: string, ivHex: string, authTagHex: st
     console.error("[CAIN Decryption Error]", error);
     throw new Error("Data decryption failed or authentication tag mismatch");
   }
-}
-
-/**
- * Mask PII (Personally Identifiable Information) in API responses
- */
-export function maskEmail(email?: string): string {
-  if (!email || !email.includes("@")) return "*****";
-  const [name, domain] = email.split("@");
-  if (name.length <= 2) return `${name[0]}***@${domain}`;
-  return `${name[0]}${"*".repeat(name.length - 2)}${name[name.length - 1]}@${domain}`;
-}
-
-export function maskPhoneNumber(phone?: string): string {
-  if (!phone) return "+91 987***3210";
-  const digits = phone.replace(/\D/g, "");
-  if (digits.length < 10) return "+91 987***3210";
-  const main = digits.slice(-10);
-  return `+91 ${main.slice(0, 3)}***${main.slice(-4)}`;
-}
-
-export function maskSecretKey(key?: string): string {
-  if (!key || key.length <= 8) return "********";
-  return `${key.slice(0, 4)}...${key.slice(-4)}`;
-}
-
-/**
- * Recursively sanitize objects to mask PII according to data classification
- */
-export function sanitizePiiResponse<T extends Record<string, any>>(obj: T): T {
-  if (!obj || typeof obj !== "object") return obj;
-
-  const sanitized = { ...obj } as any;
-
-  for (const key of Object.keys(sanitized)) {
-    const val = sanitized[key];
-    const lowerKey = key.toLowerCase();
-
-    if (lowerKey.includes("password") || lowerKey.includes("secret") || lowerKey.includes("token")) {
-      sanitized[key] = maskSecretKey(typeof val === "string" ? val : "");
-    } else if (lowerKey === "email") {
-      sanitized[key] = maskEmail(typeof val === "string" ? val : "");
-    } else if (lowerKey.includes("phone") || lowerKey.includes("mobile")) {
-      sanitized[key] = maskPhoneNumber(typeof val === "string" ? val : "");
-    } else if (typeof val === "object" && val !== null) {
-      sanitized[key] = sanitizePiiResponse(val);
-    }
-  }
-
-  return sanitized as T;
 }
