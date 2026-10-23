@@ -6,7 +6,8 @@ from backend.app.services.openserp_service import openserp_service, SourceDTO
 client = TestClient(app)
 
 # TEST 1: OpenSERP Health Probe
-def test_openserp_health_probe():
+def test_openserp_health_probe(monkeypatch):
+    monkeypatch.setattr(openserp_service, "api_key", "test-key-2026")
     health = openserp_service.check_health()
     assert health["status"] == "Healthy"
     assert health["provider"] == "OpenSERP Web Grounding Engine"

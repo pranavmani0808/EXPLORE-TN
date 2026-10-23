@@ -452,61 +452,73 @@ function ExploreByExperiencePage() {
     setRouteStops([]);
   };
 
-  // Helper: compute category count
-  const getCategoryCount = (tileId: string) => {
-    if (tileId === "arupadai") return 6;
-    if (tileId === "pancha-bhoota") return 5;
+  const categoryTiles = useMemo(() => {
+    return getLiveCategoryTiles();
+  }, []);
 
-    return places.filter((p) => {
-      if (!p) return false;
-      const cats = p.categories || [];
-      const primaryCat = (p.category || "").toLowerCase();
-      const subCat = (p.subcategory || "").toLowerCase();
-      const nameLower = (p.name || "").toLowerCase();
-      const tagsStr = (p.tags || []).join(" ").toLowerCase();
+  // Performance Optimization: Memoize category tile counts to avoid re-filtering the entire places array
+  // 15 times on every render / search keystroke
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {
+      arupadai: 6,
+      "pancha-bhoota": 5,
+    };
 
-      if (tileId === "waterfall") {
-        return cats.includes("waterfall") || cats.includes("waterfalls") || primaryCat === "waterfall" || primaryCat === "waterfalls" || subCat === "waterfall" || nameLower.includes("fall") || nameLower.includes("aruvi");
-      }
-      if (tileId === "trekking") {
-        return cats.includes("trekking") || p.is_trekking || primaryCat === "trekking" || subCat === "trekking" || (nameLower.includes("trek") && !cats.includes("hills"));
-      }
-      if (tileId === "beaches") {
-        return cats.includes("beaches") || cats.includes("coastal") || primaryCat === "beaches" || primaryCat === "coastal" || subCat === "beach" || nameLower.includes("beach");
-      }
-      if (tileId === "hills") {
-        return cats.includes("hills") || cats.includes("mountains") || primaryCat === "hills" || primaryCat === "mountains" || (subCat === "viewpoint" && !cats.includes("heritage"));
-      }
-      if (tileId === "lake") {
-        return cats.includes("lake") || cats.includes("dams") || primaryCat === "lake" || primaryCat === "dams" || subCat === "lake" || nameLower.includes("lake") || nameLower.includes("dam");
-      }
-      if (tileId === "nature") {
-        return cats.includes("nature") || cats.includes("wildlife") || primaryCat === "nature" || primaryCat === "wildlife";
-      }
-      if (tileId === "temple") {
-        return (cats.includes("temples") || primaryCat === "temples") && !cats.includes("heritage");
-      }
-      if (tileId === "heritage") {
-        return cats.includes("heritage") || primaryCat === "heritage" || subCat === "fort" || subCat === "palace" || nameLower.includes("fort");
-      }
-      if (tileId === "adventure") {
-        return cats.includes("adventure") || primaryCat === "adventure" || (tagsStr.includes("adventure") && !cats.includes("heritage"));
-      }
-      if (tileId === "food") {
-        return cats.includes("food") || primaryCat === "food" || tagsStr.includes("food");
-      }
-      if (tileId === "rural") {
-        return cats.includes("rural") || subCat === "rural_tourism";
-      }
-      if (tileId === "viewpoint") {
-        return cats.includes("viewpoint") && !cats.includes("hills");
-      }
-      if (tileId === "hidden") {
-        return cats.includes("offroad") || (p.rating && p.rating < 4.8) || p.verified === false;
-      }
-      return cats.includes(tileId) || primaryCat === tileId;
-    }).length;
-  };
+    categoryTiles.forEach((tile) => {
+      if (tile.id === "arupadai" || tile.id === "pancha-bhoota") return;
+      counts[tile.id] = places.filter((p) => {
+        if (!p) return false;
+        const cats = p.categories || [];
+        const primaryCat = (p.category || "").toLowerCase();
+        const subCat = (p.subcategory || "").toLowerCase();
+        const nameLower = (p.name || "").toLowerCase();
+        const tagsStr = (p.tags || []).join(" ").toLowerCase();
+
+        if (tile.id === "waterfall") {
+          return cats.includes("waterfall") || cats.includes("waterfalls") || primaryCat === "waterfall" || primaryCat === "waterfalls" || subCat === "waterfall" || nameLower.includes("fall") || nameLower.includes("aruvi");
+        }
+        if (tile.id === "trekking") {
+          return cats.includes("trekking") || p.is_trekking || primaryCat === "trekking" || subCat === "trekking" || (nameLower.includes("trek") && !cats.includes("hills"));
+        }
+        if (tile.id === "beaches") {
+          return cats.includes("beaches") || cats.includes("coastal") || primaryCat === "beaches" || primaryCat === "coastal" || subCat === "beach" || nameLower.includes("beach");
+        }
+        if (tile.id === "hills") {
+          return cats.includes("hills") || cats.includes("mountains") || primaryCat === "hills" || primaryCat === "mountains" || (subCat === "viewpoint" && !cats.includes("heritage"));
+        }
+        if (tile.id === "lake") {
+          return cats.includes("lake") || cats.includes("dams") || primaryCat === "lake" || primaryCat === "dams" || subCat === "lake" || nameLower.includes("lake") || nameLower.includes("dam");
+        }
+        if (tile.id === "nature") {
+          return cats.includes("nature") || cats.includes("wildlife") || primaryCat === "nature" || primaryCat === "wildlife";
+        }
+        if (tile.id === "temple") {
+          return (cats.includes("temples") || primaryCat === "temples") && !cats.includes("heritage");
+        }
+        if (tile.id === "heritage") {
+          return cats.includes("heritage") || primaryCat === "heritage" || subCat === "fort" || subCat === "palace" || nameLower.includes("fort");
+        }
+        if (tile.id === "adventure") {
+          return cats.includes("adventure") || primaryCat === "adventure" || (tagsStr.includes("adventure") && !cats.includes("heritage"));
+        }
+        if (tile.id === "food") {
+          return cats.includes("food") || primaryCat === "food" || tagsStr.includes("food");
+        }
+        if (tile.id === "rural") {
+          return cats.includes("rural") || subCat === "rural_tourism";
+        }
+        if (tile.id === "viewpoint") {
+          return cats.includes("viewpoint") && !cats.includes("hills");
+        }
+        if (tile.id === "hidden") {
+          return cats.includes("offroad") || (p.rating && p.rating < 4.8) || p.verified === false;
+        }
+        return cats.includes(tile.id) || primaryCat === tile.id;
+      }).length;
+    });
+
+    return counts;
+  }, [places, categoryTiles]);
 
   // Filter places based on selected category
   const categoryFilteredPlaces = useMemo(() => {
@@ -603,9 +615,6 @@ function ExploreByExperiencePage() {
     });
   }, [places, selectedCategory, selectedDistrict, debouncedSearch]);
 
-  const categoryTiles = useMemo(() => {
-    return getLiveCategoryTiles();
-  }, []);
 
   const selectedCategoryTile = useMemo(() => {
     return categoryTiles.find((t) => t.id === selectedCategory) || categoryTiles[0];
@@ -662,7 +671,7 @@ function ExploreByExperiencePage() {
               <div className="space-y-1.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 custom-scrollbar">
                 {categoryTiles.map((tile) => {
                   const isSelected = selectedCategory === tile.id;
-                  const count = getCategoryCount(tile.id);
+                  const count = categoryCounts[tile.id] ?? 0;
                   const Icon = tile.icon;
 
                   return (
