@@ -6,6 +6,11 @@ const supabaseAnonKey = process.env.VITE_SUPABASE_ANON_KEY!
 
 export const supabase = createClient(supabaseUrl, supabaseAnonKey)
 
+export async function getSupabaseAccessToken(): Promise<string | null> {
+  const { data } = await supabase.auth.getSession()
+  return data.session?.access_token ?? null
+}
+
 /**
  * Create a Supabase client that uses the service‑role key.
  * Only call this on the server (e.g., in API routes).
