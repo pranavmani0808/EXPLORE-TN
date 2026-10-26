@@ -25,6 +25,11 @@ export interface NearbyPlace extends ExplorerPlace {
 /**
  * Returns all canonical places within `radiusKm` of the given point,
  * sorted by distance ascending. Excludes the origin point itself.
+ *
+ * Performance optimization:
+ * 1. Convert excludeIds to a Set for O(1) lookup instead of O(M) array search.
+ * 2. Calculate haversine distance ONCE per place in a single pass (eliminates
+ *    ~50% of trigonometric operations vs double-eval in filter and map).
  */
 export function getPlacesWithinRadius(
   lat: number,
@@ -33,19 +38,24 @@ export function getPlacesWithinRadius(
   category?: PlaceCategory,
   excludeIds: string[] = []
 ): NearbyPlace[] {
-  return CANONICAL_PLACES.filter((p) => {
-    if (excludeIds.includes(p.id)) return false;
-    if (category && category !== "all" && p.primaryCategory !== category && !p.categories?.includes(category)) return false;
+  const excludeSet = excludeIds.length > 0 ? new Set(excludeIds) : null;
+  const result: NearbyPlace[] = [];
+
+  for (let i = 0; i < CANONICAL_PLACES.length; i++) {
+    const p = CANONICAL_PLACES[i];
+    if (excludeSet?.has(p.id)) continue;
+    if (category && category !== "all" && p.primaryCategory !== category && !p.categories?.includes(category)) continue;
+
     const d = haversineKm(lat, lng, p.latitude, p.longitude);
-    return d > 0.5 && d <= radiusKm; // exclude origin itself (< 0.5km)
-  })
-    .map((p) => {
-      const distanceKm = Math.round(haversineKm(lat, lng, p.latitude, p.longitude) * 10) / 10;
+    if (d > 0.5 && d <= radiusKm) {
+      const distanceKm = Math.round(d * 10) / 10;
       const estimatedRoadKm = Math.round(distanceKm * 1.28 * 10) / 10; // road factor
       const estimatedDriveMins = Math.round((estimatedRoadKm / 40) * 60); // avg 40km/h
-      return { ...p, distanceKm, estimatedRoadKm, estimatedDriveMins };
-    })
-    .sort((a, b) => a.distanceKm - b.distanceKm);
+      result.push({ ...p, distanceKm, estimatedRoadKm, estimatedDriveMins });
+    }
+  }
+
+  return result.sort((a, b) => a.distanceKm - b.distanceKm);
 }
 
 /** Get places in a specific distance band (minKm..maxKm) */
@@ -57,17 +67,22 @@ export function getPlacesInBand(
   category?: PlaceCategory,
   excludeIds: string[] = []
 ): NearbyPlace[] {
-  return CANONICAL_PLACES.filter((p) => {
-    if (excludeIds.includes(p.id)) return false;
-    if (category && category !== "all" && p.primaryCategory !== category && !p.categories?.includes(category)) return false;
+  const excludeSet = excludeIds.length > 0 ? new Set(excludeIds) : null;
+  const result: NearbyPlace[] = [];
+
+  for (let i = 0; i < CANONICAL_PLACES.length; i++) {
+    const p = CANONICAL_PLACES[i];
+    if (excludeSet?.has(p.id)) continue;
+    if (category && category !== "all" && p.primaryCategory !== category && !p.categories?.includes(category)) continue;
+
     const d = haversineKm(lat, lng, p.latitude, p.longitude);
-    return d > minKm && d <= maxKm;
-  })
-    .map((p) => {
-      const distanceKm = Math.round(haversineKm(lat, lng, p.latitude, p.longitude) * 10) / 10;
+    if (d > minKm && d <= maxKm) {
+      const distanceKm = Math.round(d * 10) / 10;
       const estimatedRoadKm = Math.round(distanceKm * 1.28 * 10) / 10;
       const estimatedDriveMins = Math.round((estimatedRoadKm / 40) * 60);
-      return { ...p, distanceKm, estimatedRoadKm, estimatedDriveMins };
-    })
-    .sort((a, b) => a.distanceKm - b.distanceKm);
+      result.push({ ...p, distanceKm, estimatedRoadKm, estimatedDriveMins });
+    }
+  }
+
+  return result.sort((a, b) => a.distanceKm - b.distanceKm);
 }
