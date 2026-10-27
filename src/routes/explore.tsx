@@ -31,7 +31,12 @@ import { AppShell } from "@/components/site/app-shell";
 import { Button } from "@/components/ui/button";
 import { PlaceApiRepository } from "@/lib/api-client/places";
 import { CANONICAL_PLACES, ExplorerPlace } from "@/lib/data/canonical-places";
-import { DEFAULT_ARUPADAI_VEEDU_TEMPLES, DEFAULT_PANCHA_BHOOTA_TEMPLES, getPlace, type Place } from "@/data/places";
+import {
+  DEFAULT_ARUPADAI_VEEDU_TEMPLES,
+  DEFAULT_PANCHA_BHOOTA_TEMPLES,
+  getPlace,
+  type Place,
+} from "@/data/places";
 import { cn } from "@/lib/utils";
 import { TripRouteBuilderPanel } from "@/components/site/trip-route-builder-panel";
 import { PlaceQuickDetailsModal } from "@/components/site/place-quick-details-modal";
@@ -256,13 +261,44 @@ export const CATEGORY_TILES: CategoryTile[] = BASE_CATEGORY_TILES;
 
 const TN_DISTRICTS = [
   "All Districts",
-  "Ariyalur", "Chengalpattu", "Chennai", "Coimbatore", "Cuddalore", "Dharmapuri",
-  "Dindigul", "Erode", "Kallakurichi", "Kancheepuram", "Kanyakumari", "Karur",
-  "Krishnagiri", "Madurai", "Mayiladuthurai", "Nagapattinam", "Namakkal", "Nilgiris",
-  "Perambalur", "Pudukkottai", "Ramanathapuram", "Ranipet", "Salem", "Sivaganga",
-  "Tenkasi", "Thanjavur", "Theni", "Thoothukudi", "Tiruchirappalli", "Tirunelveli",
-  "Tirupattur", "Tiruppur", "Tiruvallur", "Tiruvannamalai", "Tiruvarur", "Vellore",
-  "Villupuram", "Virudhunagar"
+  "Ariyalur",
+  "Chengalpattu",
+  "Chennai",
+  "Coimbatore",
+  "Cuddalore",
+  "Dharmapuri",
+  "Dindigul",
+  "Erode",
+  "Kallakurichi",
+  "Kancheepuram",
+  "Kanyakumari",
+  "Karur",
+  "Krishnagiri",
+  "Madurai",
+  "Mayiladuthurai",
+  "Nagapattinam",
+  "Namakkal",
+  "Nilgiris",
+  "Perambalur",
+  "Pudukkottai",
+  "Ramanathapuram",
+  "Ranipet",
+  "Salem",
+  "Sivaganga",
+  "Tenkasi",
+  "Thanjavur",
+  "Theni",
+  "Thoothukudi",
+  "Tiruchirappalli",
+  "Tirunelveli",
+  "Tirupattur",
+  "Tiruppur",
+  "Tiruvallur",
+  "Tiruvannamalai",
+  "Tiruvarur",
+  "Vellore",
+  "Villupuram",
+  "Virudhunagar",
 ];
 
 function ExploreByExperiencePage() {
@@ -358,14 +394,43 @@ function ExploreByExperiencePage() {
         setSelectedCategory("trekking");
       } else if (cat !== null) {
         const normalized = (cat || "").toLowerCase().trim();
-        if (normalized === "" || normalized === "arupadai" || normalized === "murugan" || normalized === "arupadaiveedu") setSelectedCategory("arupadai");
-        else if (normalized === "pancha-bhoota" || normalized === "panchabhoota" || normalized === "five-elements" || normalized === "elements") setSelectedCategory("pancha-bhoota");
-        else if (normalized === "mountain" || normalized === "hills" || normalized === "hill-escapes") setSelectedCategory("hills");
-        else if (normalized === "coastal" || normalized === "beaches") setSelectedCategory("beaches");
-        else if (normalized === "heritage-temples" || normalized === "temples" || normalized === "temple") setSelectedCategory("temple");
-        else if (normalized === "waterfalls" || normalized === "falls" || normalized === "waterfall") setSelectedCategory("waterfall");
+        if (
+          normalized === "" ||
+          normalized === "arupadai" ||
+          normalized === "murugan" ||
+          normalized === "arupadaiveedu"
+        )
+          setSelectedCategory("arupadai");
+        else if (
+          normalized === "pancha-bhoota" ||
+          normalized === "panchabhoota" ||
+          normalized === "five-elements" ||
+          normalized === "elements"
+        )
+          setSelectedCategory("pancha-bhoota");
+        else if (
+          normalized === "mountain" ||
+          normalized === "hills" ||
+          normalized === "hill-escapes"
+        )
+          setSelectedCategory("hills");
+        else if (normalized === "coastal" || normalized === "beaches")
+          setSelectedCategory("beaches");
+        else if (
+          normalized === "heritage-temples" ||
+          normalized === "temples" ||
+          normalized === "temple"
+        )
+          setSelectedCategory("temple");
+        else if (
+          normalized === "waterfalls" ||
+          normalized === "falls" ||
+          normalized === "waterfall"
+        )
+          setSelectedCategory("waterfall");
         else if (normalized === "culinary" || normalized === "food") setSelectedCategory("food");
-        else if (normalized === "wildlife" || normalized === "nature" || normalized === "forest") setSelectedCategory("nature");
+        else if (normalized === "wildlife" || normalized === "nature" || normalized === "forest")
+          setSelectedCategory("nature");
         else if (validCategoryIds.includes(normalized)) setSelectedCategory(normalized);
         else setSelectedCategory("arupadai");
       } else if (tag && validCategoryIds.includes(tag.toLowerCase())) {
@@ -379,25 +444,30 @@ function ExploreByExperiencePage() {
       try {
         const data = await PlaceApiRepository.fetchPlaces();
         if (data && data.length > 0) {
-          setPlaces(data.map((p: any) => ({
-            id: p.id || p.slug,
-            slug: p.slug,
-            name: p.name || p.canonicalName,
-            display_name: p.canonicalName || p.name,
-            district: p.district,
-            state: p.state || "Tamil Nadu",
-            category: p.category ? p.category.toLowerCase() : "heritage",
-            subcategory: p.subcategories?.[0] || p.category,
-            categories: p.tags || [p.category],
-            tagline: p.tagline || "",
-            description: p.description || "",
-            latitude: p.latitude,
-            longitude: p.longitude,
-            rating: p.rating || 4.8,
-            reviewsCount: p.review_count || 120,
-            image: p.image_url || p.image || "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
-            verified: p.is_verified ?? true,
-          })));
+          setPlaces(
+            data.map((p: any) => ({
+              id: p.id || p.slug,
+              slug: p.slug,
+              name: p.name || p.canonicalName,
+              display_name: p.canonicalName || p.name,
+              district: p.district,
+              state: p.state || "Tamil Nadu",
+              category: p.category ? p.category.toLowerCase() : "heritage",
+              subcategory: p.subcategories?.[0] || p.category,
+              categories: p.tags || [p.category],
+              tagline: p.tagline || "",
+              description: p.description || "",
+              latitude: p.latitude,
+              longitude: p.longitude,
+              rating: p.rating || 4.8,
+              reviewsCount: p.review_count || 120,
+              image:
+                p.image_url ||
+                p.image ||
+                "https://images.unsplash.com/photo-1621847468516-1ed5d0df56fe?auto=format&fit=crop&w=1000&q=80",
+              verified: p.is_verified ?? true,
+            })),
+          );
         }
       } catch {
         // Retain fallback places
@@ -409,7 +479,7 @@ function ExploreByExperiencePage() {
   // Toggle Add / Remove place to route
   const handleTogglePlaceToRoute = (place: any) => {
     const matchedCanonical = CANONICAL_PLACES.find(
-      (cp) => cp.id === place.id || cp.slug === place.slug
+      (cp) => cp.id === place.id || cp.slug === place.slug,
     ) || {
       id: place.id || place.slug,
       canonicalName: place.name || place.display_name,
@@ -430,10 +500,14 @@ function ExploreByExperiencePage() {
       tags: place.tags || [],
     };
 
-    const isAlreadyAdded = routeStops.some((s) => s.id === matchedCanonical.id || s.slug === matchedCanonical.slug);
+    const isAlreadyAdded = routeStops.some(
+      (s) => s.id === matchedCanonical.id || s.slug === matchedCanonical.slug,
+    );
 
     if (isAlreadyAdded) {
-      setRouteStops((prev) => prev.filter((s) => s.id !== matchedCanonical.id && s.slug !== matchedCanonical.slug));
+      setRouteStops((prev) =>
+        prev.filter((s) => s.id !== matchedCanonical.id && s.slug !== matchedCanonical.slug),
+      );
     } else {
       setRouteStops((prev) => [...prev, matchedCanonical as ExplorerPlace]);
       setIsPanelOpen(true);
@@ -452,61 +526,131 @@ function ExploreByExperiencePage() {
     setRouteStops([]);
   };
 
-  // Helper: compute category count
-  const getCategoryCount = (tileId: string) => {
-    if (tileId === "arupadai") return 6;
-    if (tileId === "pancha-bhoota") return 5;
+  const categoryTiles = useMemo(() => {
+    return getLiveCategoryTiles();
+  }, []);
 
-    return places.filter((p) => {
-      if (!p) return false;
-      const cats = p.categories || [];
-      const primaryCat = (p.category || "").toLowerCase();
-      const subCat = (p.subcategory || "").toLowerCase();
-      const nameLower = (p.name || "").toLowerCase();
-      const tagsStr = (p.tags || []).join(" ").toLowerCase();
+  // Performance Optimization: Pre-calculate and memoize category counts in O(N*C) once when `places` or `categoryTiles` change,
+  // avoiding 15+ redundant array filters on every UI render (e.g. while typing search input or toggling route stops).
+  const categoryCounts = useMemo(() => {
+    const counts: Record<string, number> = {};
 
-      if (tileId === "waterfall") {
-        return cats.includes("waterfall") || cats.includes("waterfalls") || primaryCat === "waterfall" || primaryCat === "waterfalls" || subCat === "waterfall" || nameLower.includes("fall") || nameLower.includes("aruvi");
+    categoryTiles.forEach((tile) => {
+      const tileId = tile.id;
+      if (tileId === "arupadai") {
+        counts[tileId] = 6;
+        return;
       }
-      if (tileId === "trekking") {
-        return cats.includes("trekking") || p.is_trekking || primaryCat === "trekking" || subCat === "trekking" || (nameLower.includes("trek") && !cats.includes("hills"));
+      if (tileId === "pancha-bhoota") {
+        counts[tileId] = 5;
+        return;
       }
-      if (tileId === "beaches") {
-        return cats.includes("beaches") || cats.includes("coastal") || primaryCat === "beaches" || primaryCat === "coastal" || subCat === "beach" || nameLower.includes("beach");
-      }
-      if (tileId === "hills") {
-        return cats.includes("hills") || cats.includes("mountains") || primaryCat === "hills" || primaryCat === "mountains" || (subCat === "viewpoint" && !cats.includes("heritage"));
-      }
-      if (tileId === "lake") {
-        return cats.includes("lake") || cats.includes("dams") || primaryCat === "lake" || primaryCat === "dams" || subCat === "lake" || nameLower.includes("lake") || nameLower.includes("dam");
-      }
-      if (tileId === "nature") {
-        return cats.includes("nature") || cats.includes("wildlife") || primaryCat === "nature" || primaryCat === "wildlife";
-      }
-      if (tileId === "temple") {
-        return (cats.includes("temples") || primaryCat === "temples") && !cats.includes("heritage");
-      }
-      if (tileId === "heritage") {
-        return cats.includes("heritage") || primaryCat === "heritage" || subCat === "fort" || subCat === "palace" || nameLower.includes("fort");
-      }
-      if (tileId === "adventure") {
-        return cats.includes("adventure") || primaryCat === "adventure" || (tagsStr.includes("adventure") && !cats.includes("heritage"));
-      }
-      if (tileId === "food") {
-        return cats.includes("food") || primaryCat === "food" || tagsStr.includes("food");
-      }
-      if (tileId === "rural") {
-        return cats.includes("rural") || subCat === "rural_tourism";
-      }
-      if (tileId === "viewpoint") {
-        return cats.includes("viewpoint") && !cats.includes("hills");
-      }
-      if (tileId === "hidden") {
-        return cats.includes("offroad") || (p.rating && p.rating < 4.8) || p.verified === false;
-      }
-      return cats.includes(tileId) || primaryCat === tileId;
-    }).length;
-  };
+
+      counts[tileId] = places.filter((p) => {
+        if (!p) return false;
+        const cats = p.categories || [];
+        const primaryCat = (p.category || "").toLowerCase();
+        const subCat = (p.subcategory || "").toLowerCase();
+        const nameLower = (p.name || "").toLowerCase();
+        const tagsStr = (p.tags || []).join(" ").toLowerCase();
+
+        if (tileId === "waterfall") {
+          return (
+            cats.includes("waterfall") ||
+            cats.includes("waterfalls") ||
+            primaryCat === "waterfall" ||
+            primaryCat === "waterfalls" ||
+            subCat === "waterfall" ||
+            nameLower.includes("fall") ||
+            nameLower.includes("aruvi")
+          );
+        }
+        if (tileId === "trekking") {
+          return (
+            cats.includes("trekking") ||
+            p.is_trekking ||
+            primaryCat === "trekking" ||
+            subCat === "trekking" ||
+            (nameLower.includes("trek") && !cats.includes("hills"))
+          );
+        }
+        if (tileId === "beaches") {
+          return (
+            cats.includes("beaches") ||
+            cats.includes("coastal") ||
+            primaryCat === "beaches" ||
+            primaryCat === "coastal" ||
+            subCat === "beach" ||
+            nameLower.includes("beach")
+          );
+        }
+        if (tileId === "hills") {
+          return (
+            cats.includes("hills") ||
+            cats.includes("mountains") ||
+            primaryCat === "hills" ||
+            primaryCat === "mountains" ||
+            (subCat === "viewpoint" && !cats.includes("heritage"))
+          );
+        }
+        if (tileId === "lake") {
+          return (
+            cats.includes("lake") ||
+            cats.includes("dams") ||
+            primaryCat === "lake" ||
+            primaryCat === "dams" ||
+            subCat === "lake" ||
+            nameLower.includes("lake") ||
+            nameLower.includes("dam")
+          );
+        }
+        if (tileId === "nature") {
+          return (
+            cats.includes("nature") ||
+            cats.includes("wildlife") ||
+            primaryCat === "nature" ||
+            primaryCat === "wildlife"
+          );
+        }
+        if (tileId === "temple") {
+          return (
+            (cats.includes("temples") || primaryCat === "temples") && !cats.includes("heritage")
+          );
+        }
+        if (tileId === "heritage") {
+          return (
+            cats.includes("heritage") ||
+            primaryCat === "heritage" ||
+            subCat === "fort" ||
+            subCat === "palace" ||
+            nameLower.includes("fort")
+          );
+        }
+        if (tileId === "adventure") {
+          return (
+            cats.includes("adventure") ||
+            primaryCat === "adventure" ||
+            (tagsStr.includes("adventure") && !cats.includes("heritage"))
+          );
+        }
+        if (tileId === "food") {
+          return cats.includes("food") || primaryCat === "food" || tagsStr.includes("food");
+        }
+        if (tileId === "rural") {
+          return cats.includes("rural") || subCat === "rural_tourism";
+        }
+        if (tileId === "viewpoint") {
+          return cats.includes("viewpoint") && !cats.includes("hills");
+        }
+        if (tileId === "hidden") {
+          return cats.includes("offroad") || (p.rating && p.rating < 4.8) || p.verified === false;
+        }
+        return cats.includes(tileId) || primaryCat === tileId;
+      }).length;
+    });
+
+    return counts;
+  }, [places, categoryTiles]);
 
   // Filter places based on selected category
   const categoryFilteredPlaces = useMemo(() => {
@@ -555,23 +699,66 @@ function ExploreByExperiencePage() {
       let matchCategory = false;
 
       if (selectedCategory === "waterfall") {
-        matchCategory = cats.includes("waterfall") || cats.includes("waterfalls") || primaryCat === "waterfall" || primaryCat === "waterfalls" || subCat === "waterfall" || nameLower.includes("fall") || nameLower.includes("aruvi");
+        matchCategory =
+          cats.includes("waterfall") ||
+          cats.includes("waterfalls") ||
+          primaryCat === "waterfall" ||
+          primaryCat === "waterfalls" ||
+          subCat === "waterfall" ||
+          nameLower.includes("fall") ||
+          nameLower.includes("aruvi");
       } else if (selectedCategory === "trekking") {
-        matchCategory = cats.includes("trekking") || p.is_trekking || primaryCat === "trekking" || subCat === "trekking" || (nameLower.includes("trek") && !cats.includes("hills"));
+        matchCategory =
+          cats.includes("trekking") ||
+          p.is_trekking ||
+          primaryCat === "trekking" ||
+          subCat === "trekking" ||
+          (nameLower.includes("trek") && !cats.includes("hills"));
       } else if (selectedCategory === "beaches") {
-        matchCategory = cats.includes("beaches") || cats.includes("coastal") || primaryCat === "beaches" || primaryCat === "coastal" || subCat === "beach" || nameLower.includes("beach");
+        matchCategory =
+          cats.includes("beaches") ||
+          cats.includes("coastal") ||
+          primaryCat === "beaches" ||
+          primaryCat === "coastal" ||
+          subCat === "beach" ||
+          nameLower.includes("beach");
       } else if (selectedCategory === "hills") {
-        matchCategory = cats.includes("hills") || cats.includes("mountains") || primaryCat === "hills" || primaryCat === "mountains" || (subCat === "viewpoint" && !cats.includes("heritage"));
+        matchCategory =
+          cats.includes("hills") ||
+          cats.includes("mountains") ||
+          primaryCat === "hills" ||
+          primaryCat === "mountains" ||
+          (subCat === "viewpoint" && !cats.includes("heritage"));
       } else if (selectedCategory === "lake") {
-        matchCategory = cats.includes("lake") || cats.includes("dams") || primaryCat === "lake" || primaryCat === "dams" || subCat === "lake" || nameLower.includes("lake") || nameLower.includes("dam");
+        matchCategory =
+          cats.includes("lake") ||
+          cats.includes("dams") ||
+          primaryCat === "lake" ||
+          primaryCat === "dams" ||
+          subCat === "lake" ||
+          nameLower.includes("lake") ||
+          nameLower.includes("dam");
       } else if (selectedCategory === "nature") {
-        matchCategory = cats.includes("nature") || cats.includes("wildlife") || primaryCat === "nature" || primaryCat === "wildlife";
+        matchCategory =
+          cats.includes("nature") ||
+          cats.includes("wildlife") ||
+          primaryCat === "nature" ||
+          primaryCat === "wildlife";
       } else if (selectedCategory === "temple") {
-        matchCategory = (cats.includes("temples") || primaryCat === "temples") && !cats.includes("heritage");
+        matchCategory =
+          (cats.includes("temples") || primaryCat === "temples") && !cats.includes("heritage");
       } else if (selectedCategory === "heritage") {
-        matchCategory = cats.includes("heritage") || primaryCat === "heritage" || subCat === "fort" || subCat === "palace" || nameLower.includes("fort");
+        matchCategory =
+          cats.includes("heritage") ||
+          primaryCat === "heritage" ||
+          subCat === "fort" ||
+          subCat === "palace" ||
+          nameLower.includes("fort");
       } else if (selectedCategory === "adventure") {
-        matchCategory = cats.includes("adventure") || primaryCat === "adventure" || (tagsStr.includes("adventure") && !cats.includes("heritage"));
+        matchCategory =
+          cats.includes("adventure") ||
+          primaryCat === "adventure" ||
+          (tagsStr.includes("adventure") && !cats.includes("heritage"));
       } else if (selectedCategory === "food") {
         matchCategory = cats.includes("food") || primaryCat === "food" || tagsStr.includes("food");
       } else if (selectedCategory === "rural") {
@@ -579,7 +766,8 @@ function ExploreByExperiencePage() {
       } else if (selectedCategory === "viewpoint") {
         matchCategory = cats.includes("viewpoint") && !cats.includes("hills");
       } else if (selectedCategory === "hidden") {
-        matchCategory = cats.includes("offroad") || (p.rating && p.rating < 4.8) || p.verified === false;
+        matchCategory =
+          cats.includes("offroad") || (p.rating && p.rating < 4.8) || p.verified === false;
       } else {
         matchCategory = true;
       }
@@ -603,10 +791,6 @@ function ExploreByExperiencePage() {
     });
   }, [places, selectedCategory, selectedDistrict, debouncedSearch]);
 
-  const categoryTiles = useMemo(() => {
-    return getLiveCategoryTiles();
-  }, []);
-
   const selectedCategoryTile = useMemo(() => {
     return categoryTiles.find((t) => t.id === selectedCategory) || categoryTiles[0];
   }, [selectedCategory, categoryTiles]);
@@ -625,7 +809,9 @@ function ExploreByExperiencePage() {
                 Curated Experiences & Destinations
               </h1>
               <p className="mt-1 text-sm text-slate-500 max-w-3xl">
-                Discover canonical places grouped by theme. Click <strong className="text-sky-600">+ Add to Map</strong> on any place to build your interactive trip route.
+                Discover canonical places grouped by theme. Click{" "}
+                <strong className="text-sky-600">+ Add to Map</strong> on any place to build your
+                interactive trip route.
               </p>
             </div>
 
@@ -645,7 +831,6 @@ function ExploreByExperiencePage() {
       {/* Main Content Layout */}
       <div className="mx-auto max-w-[1720px] px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 xl:grid-cols-16 gap-6 items-start">
-          
           {/* LEFT SIDEBAR: Experience Categories */}
           <aside className="lg:col-span-4 xl:col-span-3 sticky top-28 space-y-4">
             <div className="rounded-3xl bg-white border border-sky-100 p-4 shadow-sm space-y-3">
@@ -662,7 +847,7 @@ function ExploreByExperiencePage() {
               <div className="space-y-1.5 max-h-[calc(100vh-220px)] overflow-y-auto pr-1 custom-scrollbar">
                 {categoryTiles.map((tile) => {
                   const isSelected = selectedCategory === tile.id;
-                  const count = getCategoryCount(tile.id);
+                  const count = categoryCounts[tile.id] || 0;
                   const Icon = tile.icon;
 
                   return (
@@ -673,34 +858,45 @@ function ExploreByExperiencePage() {
                         "w-full text-left flex items-center justify-between p-3 rounded-2xl transition-all duration-200 border group cursor-pointer",
                         isSelected
                           ? "bg-sky-50 border-sky-300 text-sky-900 shadow-sm"
-                          : "bg-slate-50/60 border-slate-100 text-slate-700 hover:bg-sky-50/50 hover:border-sky-200"
+                          : "bg-slate-50/60 border-slate-100 text-slate-700 hover:bg-sky-50/50 hover:border-sky-200",
                       )}
                     >
                       <div className="flex items-center gap-3 min-w-0">
-                        <div className={cn(
-                          "size-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
-                          isSelected ? "bg-sky-500 text-white font-bold shadow-sm shadow-sky-500/20" : "bg-slate-100 text-slate-600 group-hover:text-sky-600"
-                        )}>
+                        <div
+                          className={cn(
+                            "size-8 rounded-xl flex items-center justify-center shrink-0 transition-colors",
+                            isSelected
+                              ? "bg-sky-500 text-white font-bold shadow-sm shadow-sky-500/20"
+                              : "bg-slate-100 text-slate-600 group-hover:text-sky-600",
+                          )}
+                        >
                           <Icon className="size-4" />
                         </div>
                         <div className="min-w-0">
-                          <p className={cn("text-xs font-bold truncate", isSelected ? "text-sky-900" : "text-slate-800 group-hover:text-sky-700")}>
+                          <p
+                            className={cn(
+                              "text-xs font-bold truncate",
+                              isSelected
+                                ? "text-sky-900"
+                                : "text-slate-800 group-hover:text-sky-700",
+                            )}
+                          >
                             {tile.title}
                           </p>
-                          <p className="text-[10px] text-slate-400 truncate">
-                            {tile.subtitle}
-                          </p>
+                          <p className="text-[10px] text-slate-400 truncate">{tile.subtitle}</p>
                         </div>
                       </div>
 
-                      <span className={cn(
-                        "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ml-2",
-                        isSelected
-                          ? "bg-sky-500 text-white"
-                          : count > 0
-                          ? "bg-sky-100 text-sky-700 border border-sky-200"
-                          : "bg-slate-100 text-slate-400"
-                      )}>
+                      <span
+                        className={cn(
+                          "text-[10px] font-mono font-bold px-2 py-0.5 rounded-full shrink-0 ml-2",
+                          isSelected
+                            ? "bg-sky-500 text-white"
+                            : count > 0
+                              ? "bg-sky-100 text-sky-700 border border-sky-200"
+                              : "bg-slate-100 text-slate-400",
+                        )}
+                      >
                         {count}
                       </span>
                     </button>
@@ -711,10 +907,21 @@ function ExploreByExperiencePage() {
           </aside>
 
           {/* MAIN EXPLORE + TRIP ROUTE WORKSPACE */}
-          <div className={cn("transition-all duration-500 grid gap-6", isPanelOpen ? "lg:col-span-8 xl:col-span-13 grid-cols-1 xl:grid-cols-12" : "lg:col-span-8 xl:col-span-13 grid-cols-1")}>
-            
+          <div
+            className={cn(
+              "transition-all duration-500 grid gap-6",
+              isPanelOpen
+                ? "lg:col-span-8 xl:col-span-13 grid-cols-1 xl:grid-cols-12"
+                : "lg:col-span-8 xl:col-span-13 grid-cols-1",
+            )}
+          >
             {/* Explore Cards Grid Column */}
-            <section className={cn("space-y-6 transition-all duration-300", isPanelOpen ? "xl:col-span-7" : "col-span-1")}>
+            <section
+              className={cn(
+                "space-y-6 transition-all duration-300",
+                isPanelOpen ? "xl:col-span-7" : "col-span-1",
+              )}
+            >
               {/* Category Header & Filters Toolbar */}
               <div className="transform-gpu rounded-3xl bg-white border border-sky-100 p-5 sm:p-6 shadow-sm space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-100 pb-4">
@@ -767,8 +974,13 @@ function ExploreByExperiencePage() {
                         🛕
                       </span>
                       <div>
-                        <h4 className="text-sm font-extrabold text-white">Full Pancha Bhoota Sthalams Interactive Road Trail</h4>
-                        <p className="text-xs text-zinc-400">View real road route connecting all 5 elemental temples: Kanchipuram ➔ Srikalahasti ➔ Tiruvannamalai ➔ Chidambaram ➔ Thiruvanaikaval</p>
+                        <h4 className="text-sm font-extrabold text-white">
+                          Full Pancha Bhoota Sthalams Interactive Road Trail
+                        </h4>
+                        <p className="text-xs text-zinc-400">
+                          View real road route connecting all 5 elemental temples: Kanchipuram ➔
+                          Srikalahasti ➔ Tiruvannamalai ➔ Chidambaram ➔ Thiruvanaikaval
+                        </p>
                       </div>
                     </div>
                     <Link
@@ -790,8 +1002,13 @@ function ExploreByExperiencePage() {
                         🔥
                       </span>
                       <div>
-                        <h4 className="text-sm font-extrabold text-slate-900">Arupadai Veedu Interactive Road Trail</h4>
-                        <p className="text-xs text-slate-600">View real road route connecting all six sacred Murugan shrines sequentially (1 to 6) with turn-by-turn geometry</p>
+                        <h4 className="text-sm font-extrabold text-slate-900">
+                          Arupadai Veedu Interactive Road Trail
+                        </h4>
+                        <p className="text-xs text-slate-600">
+                          View real road route connecting all six sacred Murugan shrines
+                          sequentially (1 to 6) with turn-by-turn geometry
+                        </p>
                       </div>
                     </div>
                     <Link
@@ -815,7 +1032,14 @@ function ExploreByExperiencePage() {
                     <p className="text-xs text-slate-500">
                       No places match your criteria. Reset filters to explore more places.
                     </p>
-                    <Button size="sm" onClick={() => { setSearchQuery(""); setSelectedDistrict("All Districts"); }} className="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs">
+                    <Button
+                      size="sm"
+                      onClick={() => {
+                        setSearchQuery("");
+                        setSelectedDistrict("All Districts");
+                      }}
+                      className="bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs"
+                    >
                       Reset Filters
                     </Button>
                   </div>
@@ -826,11 +1050,14 @@ function ExploreByExperiencePage() {
                       "grid gap-5",
                       isPanelOpen
                         ? "grid-cols-1 sm:grid-cols-2"
-                        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4"
+                        : "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4",
                     )}
                   >
                     {categoryFilteredPlaces.slice(0, visibleCount).map((p, idx) => {
-                      const img = p.imageUrl || p.image || "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
+                      const img =
+                        p.imageUrl ||
+                        p.image ||
+                        "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1000&q=80";
                       const isAdded = routeStops.some((s) => s.id === p.id || s.slug === p.slug);
 
                       const layoutId = `expandable-event-card-${p.slug || p.id}`;
@@ -841,7 +1068,9 @@ function ExploreByExperiencePage() {
                           key={p.id || p.slug}
                           className={cn(
                             "group transform-gpu rounded-2xl border bg-white overflow-hidden shadow-sm hover:shadow-md transition-all duration-300 flex flex-col justify-between",
-                            isAdded ? "border-sky-500 shadow-[0_0_15px_rgba(2,132,199,0.15)] ring-1 ring-sky-500" : "border-slate-200 hover:border-sky-300"
+                            isAdded
+                              ? "border-sky-500 shadow-[0_0_15px_rgba(2,132,199,0.15)] ring-1 ring-sky-500"
+                              : "border-slate-200 hover:border-sky-300",
                           )}
                         >
                           <div>
@@ -858,7 +1087,7 @@ function ExploreByExperiencePage() {
                                 loading="lazy"
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-slate-900/60 via-transparent to-transparent" />
-                              
+
                               {/* Sequence Badge if Added */}
                               {isAdded && (
                                 <div className="absolute top-3 left-3 bg-sky-500 text-white font-black text-xs px-2.5 py-1 rounded-full shadow-md flex items-center gap-1">
@@ -896,7 +1125,7 @@ function ExploreByExperiencePage() {
                                 "flex-1 py-2 px-3 rounded-xl font-extrabold text-xs transition border flex items-center justify-center gap-1.5 cursor-pointer",
                                 isAdded
                                   ? "bg-sky-600 text-white border-sky-600 shadow-sm hover:bg-sky-700"
-                                  : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200 hover:border-sky-300"
+                                  : "bg-sky-50 hover:bg-sky-100 text-sky-700 border-sky-200 hover:border-sky-300",
                               )}
                             >
                               {isAdded ? (
@@ -950,63 +1179,70 @@ function ExploreByExperiencePage() {
                           </div>
                         </motion.div>
                       );
-                      })}
-                    </AnimatedGroup>
-                  )}
+                    })}
+                  </AnimatedGroup>
+                )}
 
-                  {/* Load More Pagination Trigger */}
-                  {visibleCount < categoryFilteredPlaces.length && (
-                    <div className="flex justify-center pt-6">
-                      <Button
-                        onClick={() => setVisibleCount((prev) => prev + 18)}
-                        className="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs px-6 py-2 rounded-xl transition shadow-sm"
-                      >
-                        Load More Destinations ({categoryFilteredPlaces.length - visibleCount} remaining)
-                      </Button>
-                    </div>
-                  )}
-                </div>
-              </section>
+                {/* Load More Pagination Trigger */}
+                {visibleCount < categoryFilteredPlaces.length && (
+                  <div className="flex justify-center pt-6">
+                    <Button
+                      onClick={() => setVisibleCount((prev) => prev + 18)}
+                      className="bg-white hover:bg-sky-50 text-sky-700 border border-sky-200 font-bold text-xs px-6 py-2 rounded-xl transition shadow-sm"
+                    >
+                      Load More Destinations ({categoryFilteredPlaces.length - visibleCount}{" "}
+                      remaining)
+                    </Button>
+                  </div>
+                )}
+              </div>
+            </section>
 
-              {/* Right Workspace: Trip Route Builder Panel */}
-              {isPanelOpen && (
-                <aside className="xl:col-span-5 sticky top-24 h-[calc(100vh-120px)] transition-all duration-500">
-                  <TripRouteBuilderPanel
-                    stops={routeStops}
-                    onRemoveStop={handleRemoveStop}
-                    onReorderStops={handleReorderStops}
-                    onClearRoute={handleClearRoute}
-                    onClose={() => setIsPanelOpen(false)}
-                  />
-                </aside>
-              )}
-
-            </div>
-
+            {/* Right Workspace: Trip Route Builder Panel */}
+            {isPanelOpen && (
+              <aside className="xl:col-span-5 sticky top-24 h-[calc(100vh-120px)] transition-all duration-500">
+                <TripRouteBuilderPanel
+                  stops={routeStops}
+                  onRemoveStop={handleRemoveStop}
+                  onReorderStops={handleReorderStops}
+                  onClearRoute={handleClearRoute}
+                  onClose={() => setIsPanelOpen(false)}
+                />
+              </aside>
+            )}
           </div>
         </div>
+      </div>
 
-        {/* Floating My Route Button (Bottom-Right) when Panel is Closed */}
-        {!isPanelOpen && routeStops.length > 0 && (
-          <motion.button
-            initial={{ opacity: 0, scale: 0.9, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            onClick={() => setIsPanelOpen(true)}
-            className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950 font-black text-xs shadow-2xl shadow-emerald-500/30 border border-emerald-300 hover:scale-105 transition flex items-center gap-2.5 cursor-pointer"
-          >
-            <MapIcon className="size-4" />
-            <span>🗺 My Route · {routeStops.length} {routeStops.length === 1 ? "stop" : "stops"}</span>
-          </motion.button>
-        )}
+      {/* Floating My Route Button (Bottom-Right) when Panel is Closed */}
+      {!isPanelOpen && routeStops.length > 0 && (
+        <motion.button
+          initial={{ opacity: 0, scale: 0.9, y: 20 }}
+          animate={{ opacity: 1, scale: 1, y: 0 }}
+          onClick={() => setIsPanelOpen(true)}
+          className="fixed bottom-6 right-6 z-50 px-5 py-3 rounded-full bg-gradient-to-r from-emerald-500 to-emerald-400 text-zinc-950 font-black text-xs shadow-2xl shadow-emerald-500/30 border border-emerald-300 hover:scale-105 transition flex items-center gap-2.5 cursor-pointer"
+        >
+          <MapIcon className="size-4" />
+          <span>
+            🗺 My Route · {routeStops.length} {routeStops.length === 1 ? "stop" : "stops"}
+          </span>
+        </motion.button>
+      )}
 
-        {/* Place Quick Details Modal */}
-        <PlaceQuickDetailsModal
-          place={selectedModalPlace}
-          isOpen={!!selectedModalPlace}
-          onClose={() => setSelectedModalPlace(null)}
-          onToggleTrip={(targetP) => handleTogglePlaceToRoute(targetP)}
-          isAddedToTrip={selectedModalPlace ? routeStops.some((s) => s.slug === selectedModalPlace.slug || s.id === selectedModalPlace.slug) : false}
-        />
-      </AppShell>
-    );
-  }
+      {/* Place Quick Details Modal */}
+      <PlaceQuickDetailsModal
+        place={selectedModalPlace}
+        isOpen={!!selectedModalPlace}
+        onClose={() => setSelectedModalPlace(null)}
+        onToggleTrip={(targetP) => handleTogglePlaceToRoute(targetP)}
+        isAddedToTrip={
+          selectedModalPlace
+            ? routeStops.some(
+                (s) => s.slug === selectedModalPlace.slug || s.id === selectedModalPlace.slug,
+              )
+            : false
+        }
+      />
+    </AppShell>
+  );
+}

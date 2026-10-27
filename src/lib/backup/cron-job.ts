@@ -1,7 +1,7 @@
-# This script runs the nightly backup on Vercel via the /api/v1/cron/db-backup endpoint.
-# It uses the pg_dump utility to export the database, compresses it, and uploads the result
-# to the object storage bucket configured by BACKUP_BUCKET_URL.
-# The script assumes environment variables are set in Vercel's environment.
+// This script runs the nightly backup on Vercel via the /api/v1/cron/db-backup endpoint.
+// It uses the pg_dump utility to export the database, compresses it, and uploads the result
+// to the object storage bucket configured by BACKUP_BUCKET_URL.
+// The script assumes environment variables are set in Vercel's environment.
 
 import { execSync } from "child_process"
 import fs from "fs"
