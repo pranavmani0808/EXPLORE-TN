@@ -1,6 +1,6 @@
 import math
 import re
-from typing import List, Dict, Any, Tuple
+from typing import List, Dict, Any, Tuple, Optional
 from backend.app.schemas.places import PlaceCreate, PlaceResponse, PlaceFeedbackCreate
 from backend.app.core.exceptions import ValidationException, ResourceNotFoundException, APIException, ConflictException
 from backend.app.core.security import UserContext
@@ -1704,6 +1704,7 @@ class PlacesService:
         }
         self._audit_logs: List[dict] = []
         self._feedback_store: List[dict] = []
+        self._search_indices: Dict[str, dict] = {}
 
     def detect_spatial_duplicates(self, name: str, lat: float, lng: float) -> Tuple[bool, str]:
         norm_name = name.lower().strip().replace(" ", "")
@@ -1859,53 +1860,72 @@ class PlacesService:
             target["createdAt"] = "2026-08-20T10:00:00Z"
         return target
 
+    def _get_place_index(self, p: dict) -> dict:
+        """Helper to compute/retrieve pre-indexed search metadata in a separate lookup map."""
+        slug = p.get("slug") or p.get("id") or p.get("name", "")
+        if slug in self._search_indices:
+            return self._search_indices[slug]
+
+        if "version" not in p:
+            p["version"] = 1
+        if "createdBy" not in p:
+            p["createdBy"] = "System"
+        if "createdAt" not in p:
+            p["createdAt"] = "2026-08-20T10:00:00Z"
+        if "state" not in p:
+            p["state"] = "Tamil Nadu"
+
+        if "categories" not in p:
+            cats = set()
+            cat_lower = (p.get("category") or "").lower()
+            sub_lower = (p.get("subcategory") or "").lower()
+            name_lower = (p.get("name") or "").lower()
+            desc_lower = (p.get("description") or "").lower()
+            tags_str = str(p.get("tags") or []).lower()
+
+            if cat_lower:
+                cats.add(cat_lower)
+            if sub_lower:
+                cats.add(sub_lower)
+
+            if p.get("is_trekking") or cat_lower in ["mountain", "hill"] or sub_lower == "trekking" or "trek" in name_lower or "hill" in name_lower:
+                cats.add("trekking")
+                cats.add("hills")
+            if cat_lower == "waterfall" or "fall" in name_lower or "aruvi" in name_lower:
+                cats.add("waterfall")
+                cats.add("nature")
+            if cat_lower == "coastal" or sub_lower == "beach" or "beach" in name_lower:
+                cats.add("beaches")
+                cats.add("coastal")
+            if cat_lower == "heritage" or "fort" in name_lower or "palace" in name_lower or "aqueduct" in name_lower or "ruins" in name_lower:
+                cats.add("heritage")
+            if cat_lower == "temple" or "temple" in name_lower or "kovil" in name_lower:
+                cats.add("temple")
+            if cat_lower == "lake" or "lake" in name_lower or "dam" in name_lower or "lagoon" in name_lower or "reservoir" in name_lower:
+                cats.add("lake")
+            if sub_lower == "rural_tourism" or "village" in name_lower or "rural" in tags_str or "countryside" in desc_lower:
+                cats.add("rural")
+                cats.add("nature")
+            if "hidden" in tags_str or p.get("verified") is False or "secluded" in desc_lower or "lesser-known" in desc_lower or "offbeat" in desc_lower:
+                cats.add("hidden")
+            p["categories"] = list(cats)
+
+        name_raw = p.get("name", "").lower()
+        slug_raw = p.get("slug", "").lower()
+
+        idx = {
+            "name_norm": re.sub(r'[^a-z0-9]+', '', name_raw),
+            "slug_norm": re.sub(r'[^a-z0-9]+', '', slug_raw),
+            "aliases_norm": [re.sub(r'[^a-z0-9]+', '', str(a).lower()) for a in p.get("aliases", [])],
+            "search_terms_norm": [re.sub(r'[^a-z0-9]+', '', str(t).lower()) for t in p.get("search_terms", [])],
+            "categories_lower": [c.lower() for c in p.get("categories", [])]
+        }
+        self._search_indices[slug] = idx
+        return idx
+
     def get_all_places(self) -> List[dict]:
         for p in self._places_db.values():
-            if "version" not in p:
-                p["version"] = 1
-            if "createdBy" not in p:
-                p["createdBy"] = "System"
-            if "createdAt" not in p:
-                p["createdAt"] = "2026-08-20T10:00:00Z"
-            if "state" not in p:
-                p["state"] = "Tamil Nadu"
-
-            # Derive multi-categories tag list
-            if "categories" not in p:
-                cats = set()
-                cat_lower = (p.get("category") or "").lower()
-                sub_lower = (p.get("subcategory") or "").lower()
-                name_lower = (p.get("name") or "").lower()
-                desc_lower = (p.get("description") or "").lower()
-                tags_str = str(p.get("tags") or []).lower()
-
-                if cat_lower:
-                    cats.add(cat_lower)
-                if sub_lower:
-                    cats.add(sub_lower)
-
-                if p.get("is_trekking") or cat_lower in ["mountain", "hill"] or sub_lower == "trekking" or "trek" in name_lower or "hill" in name_lower:
-                    cats.add("trekking")
-                    cats.add("hills")
-                if cat_lower == "waterfall" or "fall" in name_lower or "aruvi" in name_lower:
-                    cats.add("waterfall")
-                    cats.add("nature")
-                if cat_lower == "coastal" or sub_lower == "beach" or "beach" in name_lower:
-                    cats.add("beaches")
-                    cats.add("coastal")
-                if cat_lower == "heritage" or "fort" in name_lower or "palace" in name_lower or "aqueduct" in name_lower or "ruins" in name_lower:
-                    cats.add("heritage")
-                if cat_lower == "temple" or "temple" in name_lower or "kovil" in name_lower:
-                    cats.add("temple")
-                if cat_lower == "lake" or "lake" in name_lower or "dam" in name_lower or "lagoon" in name_lower or "reservoir" in name_lower:
-                    cats.add("lake")
-                if sub_lower == "rural_tourism" or "village" in name_lower or "rural" in tags_str or "countryside" in desc_lower:
-                    cats.add("rural")
-                    cats.add("nature")
-                if "hidden" in tags_str or p.get("verified") is False or "secluded" in desc_lower or "lesser-known" in desc_lower or "offbeat" in desc_lower:
-                    cats.add("hidden")
-                p["categories"] = list(cats)
-
+            self._get_place_index(p)
         return list(self._places_db.values())
 
     def _build_resolved_dict(self, place: dict, confidence: str, matched_alias: str = None, extracted_activity: str = None) -> dict:
@@ -2059,11 +2079,17 @@ class PlacesService:
 
     def find_nearby_places(self, lat: float, lng: float, radius_km: float = 50.0, category: Optional[str] = None, place_type: Optional[str] = None, min_rating: float = 0.0) -> List[dict]:
         results = []
+        # Fast latitude bounding box margin (~111 km per degree lat)
+        lat_margin = radius_km / 111.0
         for slug, place in self._places_db.items():
             p_lat = place.get("latitude")
             p_lng = place.get("longitude")
             if p_lat is None or p_lng is None:
                 continue
+            # Bounding box pre-filter to bypass expensive Haversine trigonometric calls
+            if abs(lat - p_lat) > lat_margin:
+                continue
+
             dist_km = calculate_haversine(lat, lng, p_lat, p_lng)
             if dist_km <= radius_km:
                 if category and category.lower() != "all":
@@ -2273,32 +2299,31 @@ class PlacesService:
 
         q_raw = query.strip().lower()
         q_norm = re.sub(r'[^a-z0-9]+', '', q_raw)
+        cat_filter = category.lower() if category and category.lower() not in ["all", "none", ""] else None
 
         matches = []
         for p in self.get_all_places():
+            idx = self._get_place_index(p)
             # Check category filter if provided
-            if category and category.lower() not in ["all", "none", ""]:
-                cats = [c.lower() for c in p.get("categories", [])]
-                if category.lower() not in cats and p.get("category", "").lower() != category.lower():
+            if cat_filter:
+                if cat_filter not in idx["categories_lower"] and p.get("category", "").lower() != cat_filter:
                     continue
 
             name_raw = p.get("name", "").lower()
-            name_norm = re.sub(r'[^a-z0-9]+', '', name_raw)
-
-            slug_raw = p.get("slug", "").lower()
-            slug_norm = re.sub(r'[^a-z0-9]+', '', slug_raw)
+            name_norm = idx["name_norm"]
+            slug_norm = idx["slug_norm"]
 
             district_raw = p.get("district", "").lower()
             city_raw = p.get("city", "").lower()
             state_raw = p.get("state", "").lower()
 
-            aliases_norm = [re.sub(r'[^a-z0-9]+', '', str(a).lower()) for a in p.get("aliases", [])]
-            search_terms_norm = [re.sub(r'[^a-z0-9]+', '', str(t).lower()) for t in p.get("search_terms", [])]
+            aliases_norm = idx["aliases_norm"]
+            search_terms_norm = idx["search_terms_norm"]
 
             score = 0
             if q_norm == name_norm or q_norm == slug_norm:
                 score += 100
-            elif q_norm in name_norm or name_norm in q_norm:
+            elif q_norm in name_norm or (name_norm and name_norm in q_norm):
                 score += 85
             elif any(q_norm in a or a in q_norm for a in aliases_norm):
                 score += 80
