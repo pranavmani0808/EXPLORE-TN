@@ -30,7 +30,7 @@ export interface SafeImageProps extends React.ImgHTMLAttributes<HTMLImageElement
   fallbackSrc?: string;
 }
 
-export function SafeImage({ src, category, fallbackSrc, alt = "", className, ...props }: SafeImageProps) {
+export function SafeImage({ src, category, fallbackSrc, alt = "", className, width = 800, height = 500, ...props }: SafeImageProps) {
   const defaultFallback = fallbackSrc || getCategoryFallback(category);
   const initialSrc = (src && !knownFailedUrls.has(src)) ? src : defaultFallback;
   const [imgSrc, setImgSrc] = useState<string>(initialSrc);
@@ -48,6 +48,8 @@ export function SafeImage({ src, category, fallbackSrc, alt = "", className, ...
     <img
       src={imgSrc}
       alt={alt}
+      width={width}
+      height={height}
       loading={props.loading || "lazy"}
       decoding={props.decoding || "async"}
       className={className}

@@ -1,0 +1,18 @@
+# ExploreTN — Discover Tamil Nadu Trails & Heritage
+
+> ExploreTN is a comprehensive, map-first travel discovery engine and itinerary planning platform for Tamil Nadu, India. It helps travelers discover verified hidden waterfalls, scenic Western Ghats corridors, ancient Chola temple trails, coastal routes, and authentic regional culinary journeys.
+
+## Core Navigation & Pages
+- [ExploreTN Home](https://explore-tn-ochre.vercel.app/): Interactive map explorer, district highlights, signature trails, and travel advisory.
+- [Trip Planner](https://explore-tn-ochre.vercel.app/planner): Custom AI and algorithmic route planner with fuel estimates, travel times, elevation curves, and day-by-day schedules.
+- [Signature Routes](https://explore-tn-ochre.vercel.app/routes): Curated multi-day journeys including East Coast Road, Valparai 40 Hairpin bends, and Madurai-Rameshwaram trails.
+- [Districts Directory](https://explore-tn-ochre.vercel.app/districts): Complete guide to all 38 districts of Tamil Nadu with local attractions, viewpoints, and cultural heritage.
+- [Madurai Guide](https://explore-tn-ochre.vercel.app/districts/madurai): Meenakshi Amman Temple, Nayak architecture, and night culinary food walks.
+- [The Nilgiris Guide](https://explore-tn-ochre.vercel.app/districts/the-nilgiris): Ooty, Coonoor, tea plantation viewpoints, and heritage mountain railways.
+- [Thanjavur Guide](https://explore-tn-ochre.vercel.app/districts/thanjavur): UNESCO World Heritage Great Living Chola Temples and delta culture.
+
+## Key Features
+- **Map-First Exploration**: Interactive pinpoint map with verified coordinates, parking details, and road conditions.
+- **Smart Itineraries**: Multi-stop routing with realistic drive durations and elevation profiles across Western & Eastern Ghats.
+- **Cultural & Regional Authenticity**: Focus on local cuisine, seasonal weather alerts, monsoon warnings, and temple timings.
+- **Comprehensive Knowledge**: For the full consolidated guide and datasets, refer to [llms-full.txt](https://explore-tn-ochre.vercel.app/llms-full.txt).

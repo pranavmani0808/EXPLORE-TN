@@ -369,7 +369,7 @@ export function DedicatedMapModal({
               TN
             </span>
             <div>
-              <h1 className="text-xs font-black text-white leading-none">Tamil Nadu Geographic Directory</h1>
+              <div role="heading" aria-level={2} className="text-xs font-black text-white leading-none">Tamil Nadu Geographic Directory</div>
               <p className="text-[9px] text-emerald-400 font-mono mt-0.5">
                 38 Districts • 25 Corporations • Local Bodies • Phase 1
               </p>

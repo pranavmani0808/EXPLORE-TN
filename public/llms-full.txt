@@ -1,0 +1,28 @@
+# ExploreTN Full Knowledge Base & Geographic Directory
+
+## Overview
+ExploreTN (https://explore-tn-ochre.vercel.app) is an interactive, map-first tourism and trail discovery platform dedicated to Tamil Nadu, India. It indexes over 500+ curated places, scenic ghat corridors, water bodies, wildlife sanctuaries, and architectural landmarks across all 38 districts of Tamil Nadu.
+
+## Key Sections & Modules
+1. **Interactive Geospatial Map**:
+   - Integrates accurate coordinates, terrain classifications, parking feasibility, and trail access conditions.
+2. **AI & Algorithmic Route Planner**:
+   - Computes multi-day itineraries with authentic transit times, fuel estimates, elevation profiles, and day-by-day schedules.
+3. **Heritage & Temple Trails**:
+   - Comprehensive documentation of Dravidian architecture, UNESCO World Heritage monuments (Brihadisvara Temple, Shore Temple, Airavatesvara Temple), and sacred pilgrimage circuits.
+4. **Western & Eastern Ghat Escapes**:
+   - Detailed guides for Ooty, Kodaikanal, Valparai, Kolli Hills, Meghamalai, Yercaud, and Javadi Hills.
+5. **Coastal & Marine Corridors**:
+   - Covers the 1,076 km Tamil Nadu coastline from Chennai, Mahabalipuram, Pondicherry, Pitchavaram Mangroves, Tranquebar, Pamban / Rameshwaram, to Kanyakumari.
+6. **Gastronomic Trails**:
+   - Authentic regional culinary guides spanning Chettinad, Madurai, Dindigul, Ambur, and coastal seafood hubs.
+
+## Authority & Compliance
+- Data aligns with guidelines published by Tamil Nadu Tourism Development Corporation (TTDC) and Archaeological Survey of India (ASI).
+- Maintained actively with seasonal travel alerts, weather warnings, and forest department permit requirements.
+
+For direct platform access and tools:
+- Website: https://explore-tn-ochre.vercel.app/
+- Trip Planner: https://explore-tn-ochre.vercel.app/planner
+- Routes Directory: https://explore-tn-ochre.vercel.app/routes
+- Districts: https://explore-tn-ochre.vercel.app/districts

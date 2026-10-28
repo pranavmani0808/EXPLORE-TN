@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>ExploreTN — Tamil Nadu Travel Trails</title>
+    <link>https://explore-tn-ochre.vercel.app</link>
+    <description>Discover verified heritage temples, Western Ghats waterfalls, coastal drives, and itineraries across Tamil Nadu.</description>
+    <language>en-US</language>
+    <lastBuildDate>Wed, 28 Oct 2026 00:00:00 GMT</lastBuildDate>
+    <atom:link href="https://explore-tn-ochre.vercel.app/feed.xml" rel="self" type="application/rss+xml"/>
+    <item>
+      <title>Western Ghats Monsoon & Winter Trail Guide</title>
+      <link>https://explore-tn-ochre.vercel.app/districts/the-nilgiris</link>
+      <guid>https://explore-tn-ochre.vercel.app/districts/the-nilgiris</guid>
+      <pubDate>Wed, 28 Oct 2026 00:00:00 GMT</pubDate>
+      <description>Complete guide to high-altitude viewpoints, tea plantations, and Nilgiri Mountain Railway schedules.</description>
+    </item>
+    <item>
+      <title>Great Living Chola Temples Circuit</title>
+      <link>https://explore-tn-ochre.vercel.app/districts/thanjavur</link>
+      <guid>https://explore-tn-ochre.vercel.app/districts/thanjavur</guid>
+      <pubDate>Wed, 28 Oct 2026 00:00:00 GMT</pubDate>
+      <description>UNESCO World Heritage architectural wonder featuring Thanjavur Brihadisvara, Gangaikonda Cholapuram, and Darasuram.</description>
+    </item>
+  </channel>
+</rss>

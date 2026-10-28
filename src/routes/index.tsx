@@ -42,21 +42,43 @@ import {
   CURATED_SIGNATURE_TRAILS,
   ExpandableTrailCard,
 } from "@/components/site/expandable-interest-cards";
+import { AeoFaqAuthoritySection } from "@/components/site/aeo-faq-authority-section";
+import { SafeImage } from "@/components/ui/safe-image";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "ExploreTN — Explore Tamil Nadu. Beyond the usual." },
+      { title: "ExploreTN — Discover Tamil Nadu Trails, Temples & Ghats" },
       {
         name: "description",
         content:
-          "Discover heritage trails, hill escapes, and coastal journeys across Tamil Nadu. Build a trip around what you love.",
+          "ExploreTN helps you discover verified heritage temples, Western Ghats waterfalls, coastal road routes, and custom itineraries across all 38 districts.",
       },
-      { property: "og:title", content: "ExploreTN — Explore Tamil Nadu. Beyond the usual." },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1, ai-content" },
+      { property: "og:site_name", content: "ExploreTN" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://explore-tn-ochre.vercel.app/" },
+      { property: "og:title", content: "ExploreTN — Discover Tamil Nadu Trails, Temples & Ghats" },
       {
         property: "og:description",
-        content: "Discover heritage trails, hill escapes, and coastal journeys across Tamil Nadu.",
+        content:
+          "ExploreTN helps you discover verified heritage temples, Western Ghats waterfalls, coastal road routes, and custom itineraries across all 38 districts.",
       },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&h=630&q=85" },
+      { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@ExploreTN" },
+      { name: "twitter:creator", content: "@ExploreTN" },
+      { name: "twitter:title", content: "ExploreTN — Discover Tamil Nadu Trails, Temples & Ghats" },
+      {
+        name: "twitter:description",
+        content:
+          "ExploreTN helps you discover verified heritage temples, Western Ghats waterfalls, coastal road routes, and custom itineraries across all 38 districts.",
+      },
+      { name: "twitter:image", content: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&h=630&q=85" },
+    ],
+    links: [
+      { rel: "canonical", href: "https://explore-tn-ochre.vercel.app/" },
+      { rel: "alternate", type: "application/rss+xml", href: "/feed.xml" },
     ],
   }),
   component: Index,
@@ -326,14 +348,14 @@ function Index() {
               <span className="text-sky-500">Beyond the usual.</span>
             </motion.h1>
 
-            {/* Popz Design Hero Subtitle */}
+            {/* Clear Benefit-Driven Value Proposition Above the Fold */}
             <motion.p
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3, duration: 0.6 }}
-              className="mt-5 max-w-2xl text-base text-slate-600 sm:text-lg leading-relaxed font-normal"
+              className="aeo-value-proposition mt-5 max-w-2xl text-base text-slate-700 sm:text-lg leading-relaxed font-normal"
             >
-              Discover heritage trails, hill escapes, and coastal journeys. Build a trip around what you love.
+              ExploreTN <strong>helps</strong> travelers discover 1,240+ verified heritage temples, secret waterfalls, and Western Ghats viewpoints across all 38 districts. It <strong>automates</strong> personalized itinerary planning with real road distances and elevation profiles, and <strong>reduces</strong> travel preparation time.
             </motion.p>
 
             {/* Airbnb Style Large Search Pill */}
@@ -468,9 +490,12 @@ function Index() {
             params={{ slug: "meenakshi-amman-temple" }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-7 text-white shadow-xl md:col-span-8 md:row-span-2 min-h-[460px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
-            <img
+            <SafeImage
               src="https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1400&q=85"
               alt="Meenakshi Amman Kovil, Madurai"
+              width={1400}
+              height={850}
+              category="heritage"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
@@ -520,9 +545,12 @@ function Index() {
             params={{ slug: "kodaikanal" }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
-            <img
+            <SafeImage
               src="https://images.unsplash.com/photo-1596895111956-bf1cf0599ce5?auto=format&fit=crop&w=1200&q=85"
               alt="Kodaikanal Lake and Misty Hills"
+              width={1200}
+              height={700}
+              category="hills"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
@@ -555,9 +583,12 @@ function Index() {
             params={{ slug: "valli-chunai-falls" }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-4 min-h-[220px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
-            <img
+            <SafeImage
               src="https://images.unsplash.com/photo-1434394354979-a235cd36269d?auto=format&fit=crop&w=1000&q=85"
               alt="Valli Chunai Falls"
+              width={1000}
+              height={600}
+              category="waterfalls"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
@@ -590,9 +621,12 @@ function Index() {
             params={{ slug: "thanjavur" }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-5 min-h-[260px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
-            <img
+            <SafeImage
               src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/81/Thanjavur_2.jpg/1280px-Thanjavur_2.jpg"
               alt="Thanjavur Brihadisvara Temple"
+              width={1280}
+              height={750}
+              category="heritage"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
@@ -632,9 +666,12 @@ function Index() {
             params={{ slug: "mahabalipuram" }}
             className="group relative flex flex-col justify-between overflow-hidden rounded-3xl p-6 text-white shadow-xl md:col-span-7 min-h-[260px] border border-slate-700/60 transition-all hover:border-sky-400/80 hover:shadow-2xl"
           >
-            <img
+            <SafeImage
               src="https://images.unsplash.com/photo-1590050752117-238cb0fb12b1?auto=format&fit=crop&w=1200&q=85"
               alt="Mahabalipuram UNESCO Shore Temple and Coast"
+              width={1200}
+              height={700}
+              category="coastal"
               className="absolute inset-0 size-full object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/60 to-slate-900/30" />
@@ -702,9 +739,12 @@ function Index() {
               className="group relative flex flex-col justify-between overflow-hidden rounded-3xl border border-sky-100 bg-white shadow-sm transition-all duration-300 hover:border-sky-300 hover:shadow-xl"
             >
               <div className="h-48 w-full overflow-hidden">
-                <img
+                <SafeImage
                   src={dist.image}
                   alt={dist.name}
+                  width={800}
+                  height={500}
+                  category="heritage"
                   className="size-full object-cover transition-transform duration-500 group-hover:scale-105"
                 />
               </div>
@@ -847,6 +887,9 @@ function Index() {
       <section className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <PeakTravelGuide />
       </section>
+
+      {/* SECTION 9: VERIFIED FAQ & EDITORIAL AUTHORITY (AEO & E-E-A-T) */}
+      <AeoFaqAuthoritySection />
 
       </div>
     </AppShell>

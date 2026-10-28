@@ -17,6 +17,7 @@ import { CookieBanner } from "../components/site/cookie-banner";
 import { UxStateListeners } from "../components/site/ux-state-listeners";
 import { GsapGlobalProvider } from "../components/site/gsap-provider";
 import { RouteLoadingBar } from "../components/site/route-loading-bar";
+import { SeoStructuredData } from "../components/site/seo-structured-data";
 
 function NotFoundComponent() {
   return (
@@ -89,21 +90,39 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ExplorerTN — Discover Tamil Nadu" },
+      { title: "ExploreTN — Discover Tamil Nadu Trails, Temples & Ghats" },
       {
         name: "description",
         content:
-          "A map-first explorer for Tamil Nadu: hidden waterfalls, scenic ghat roads, temple trails, food routes and viewpoints.",
+          "ExploreTN helps you discover verified heritage temples, Western Ghats waterfalls, coastal road routes, and custom itineraries across all 38 districts.",
       },
-      { property: "og:title", content: "ExplorerTN — Discover Tamil Nadu" },
+      { name: "robots", content: "index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1, ai-content" },
+      { property: "og:site_name", content: "ExploreTN" },
+      { property: "og:type", content: "website" },
+      { property: "og:url", content: "https://explore-tn-ochre.vercel.app/" },
+      { property: "og:title", content: "ExploreTN — Discover Tamil Nadu Trails, Temples & Ghats" },
       {
         property: "og:description",
-        content: "Hidden places, scenic routes and food trails across Tamil Nadu.",
+        content:
+          "ExploreTN helps you discover verified heritage temples, Western Ghats waterfalls, coastal road routes, and custom itineraries across all 38 districts.",
       },
-      { property: "og:type", content: "website" },
+      { property: "og:image", content: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&h=630&q=85" },
+      { property: "og:image:width", content: "1200" },
+      { property: "og:image:height", content: "630" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:site", content: "@ExploreTN" },
+      { name: "twitter:creator", content: "@ExploreTN" },
+      { name: "twitter:title", content: "ExploreTN — Discover Tamil Nadu Trails, Temples & Ghats" },
+      {
+        name: "twitter:description",
+        content:
+          "ExploreTN helps you discover verified heritage temples, Western Ghats waterfalls, coastal road routes, and custom itineraries across all 38 districts.",
+      },
+      { name: "twitter:image", content: "https://images.unsplash.com/photo-1582510003544-4d00b7f74220?auto=format&fit=crop&w=1200&h=630&q=85" },
     ],
     links: [
+      { rel: "canonical", href: "https://explore-tn-ochre.vercel.app/" },
+      { rel: "alternate", type: "application/rss+xml", href: "/feed.xml" },
       {
         rel: "stylesheet",
         href: appCss,
@@ -143,6 +162,7 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
+      <SeoStructuredData />
       <AuthGuardProvider>
         <GsapGlobalProvider>
           <RouteLoadingBar />
