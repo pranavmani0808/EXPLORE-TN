@@ -2162,6 +2162,66 @@ export const GEOGRAPHIC_AREAS: Record<string, GeographicArea> = {
   },
 };
 
+// ⚡ PERFORMANCE OPTIMIZATION (Bolt):
+// Pre-compute exact lookup maps and pre-lowercase metadata for places & geographic areas.
+// Eliminates repetitive string lowercasing, regex operations, and linear scans during repeated
+// search and place resolution queries.
+
+// 1. O(1) Exact lookup map for place resolution
+const EXACT_PLACE_LOOKUP_MAP = new Map<string, ExplorerPlace>();
+for (const [key, place] of Object.entries(KNOWN_DESTINATIONS)) {
+  EXACT_PLACE_LOOKUP_MAP.set(key.toLowerCase(), place);
+  if (place.id) EXACT_PLACE_LOOKUP_MAP.set(place.id.toLowerCase(), place);
+  if (place.slug) EXACT_PLACE_LOOKUP_MAP.set(place.slug.toLowerCase(), place);
+  if (place.name) EXACT_PLACE_LOOKUP_MAP.set(place.name.toLowerCase(), place);
+  if (place.canonicalName) EXACT_PLACE_LOOKUP_MAP.set(place.canonicalName.toLowerCase(), place);
+  if (place.aliases) {
+    for (const alias of place.aliases) {
+      EXACT_PLACE_LOOKUP_MAP.set(alias.toLowerCase(), place);
+    }
+  }
+}
+
+// 2. Pre-processed items for geographic area search
+interface PreprocessedGeoArea {
+  area: GeographicArea;
+  aName: string;
+  aCanon: string;
+  aSlug: string;
+  aClean: string;
+}
+
+const PREPROCESSED_GEO_AREAS: PreprocessedGeoArea[] = Object.values(GEOGRAPHIC_AREAS).map((area) => ({
+  area,
+  aName: area.name.toLowerCase(),
+  aCanon: area.canonicalName.toLowerCase(),
+  aSlug: area.slug.toLowerCase(),
+  aClean: area.name.toLowerCase().replace(/[^a-z0-9]/g, ""),
+}));
+
+// 3. Pre-processed items for POI search & filter
+interface PreprocessedPlace {
+  p: ExplorerPlace;
+  nameLower: string;
+  canonLower: string;
+  distLower: string;
+  distClean: string;
+  tagsLower: string[];
+  aliasesLower: string[];
+}
+
+const PREPROCESSED_PLACES: PreprocessedPlace[] = CANONICAL_PLACES.map((p) => ({
+  p,
+  nameLower: (p.name || "").toLowerCase(),
+  canonLower: (p.canonicalName || "").toLowerCase(),
+  distLower: (p.district || "").toLowerCase(),
+  distClean: (p.district || "").toLowerCase().replace(/[^a-z0-9]/g, ""),
+  tagsLower: (p.tags || []).map((t) => t.toLowerCase()),
+  aliasesLower: (p.aliases || []).map((a) => a.toLowerCase()),
+}));
+
+const PREPROCESSED_POIS: PreprocessedPlace[] = PREPROCESSED_PLACES.filter((item) => item.p.placeType !== "city");
+
 export function getPlacesWithinArea(areaQuery: string): ExplorerPlace[] {
   if (!areaQuery || areaQuery.toLowerCase() === "tamil nadu" || areaQuery.toLowerCase() === "all") {
     return CANONICAL_PLACES.filter((p) => p.placeType !== "city");
@@ -2169,43 +2229,43 @@ export function getPlacesWithinArea(areaQuery: string): ExplorerPlace[] {
   const rawQ = areaQuery.toLowerCase().trim();
   const q = rawQ.replace(/[-+]/g, " ").trim();
 
-  return CANONICAL_PLACES.filter((p) => {
+  return PREPROCESSED_PLACES.filter(({ p, nameLower, canonLower, distLower, tagsLower }) => {
     if (p.placeType === "city" && p.slug === q) return false;
 
     if (q.includes("madurai")) {
-      return p.district.toLowerCase() === "madurai" || p.name.toLowerCase().includes("madurai") || (p.tags || []).includes("madurai");
+      return distLower === "madurai" || nameLower.includes("madurai") || tagsLower.includes("madurai");
     }
     if (q.includes("chennai")) {
-      return p.district.toLowerCase() === "chennai" || p.name.toLowerCase().includes("chennai") || (p.tags || []).includes("chennai");
+      return distLower === "chennai" || nameLower.includes("chennai") || tagsLower.includes("chennai");
     }
     if (q.includes("kodaikanal")) {
-      return p.district.toLowerCase() === "dindigul" || p.name.toLowerCase().includes("kodaikanal") || (p.tags || []).includes("kodaikanal");
+      return distLower === "dindigul" || nameLower.includes("kodaikanal") || tagsLower.includes("kodaikanal");
     }
     if (q.includes("ooty") || q.includes("nilgiri")) {
-      return p.district.toLowerCase().includes("nilgiri") || p.name.toLowerCase().includes("ooty") || (p.tags || []).includes("ooty");
+      return distLower.includes("nilgiri") || nameLower.includes("ooty") || tagsLower.includes("ooty");
     }
     if (q.includes("valparai")) {
-      return p.district.toLowerCase() === "coimbatore" || p.name.toLowerCase().includes("valparai") || (p.tags || []).includes("valparai");
+      return distLower === "coimbatore" || nameLower.includes("valparai") || tagsLower.includes("valparai");
     }
     if (q.includes("kolli")) {
-      return p.district.toLowerCase().includes("namakkal") || p.name.toLowerCase().includes("kolli") || p.canonicalName.toLowerCase().includes("kolli") || (p.tags || []).includes("kolli");
+      return distLower.includes("namakkal") || nameLower.includes("kolli") || canonLower.includes("kolli") || tagsLower.includes("kolli");
     }
     if (q.includes("dharmapuri") || q.includes("hogenakkal")) {
-      return p.district.toLowerCase().includes("dharmapuri") || p.name.toLowerCase().includes("hogenakkal") || (p.tags || []).includes("hogenakkal");
+      return distLower.includes("dharmapuri") || nameLower.includes("hogenakkal") || tagsLower.includes("hogenakkal");
     }
     if (q.includes("rameswaram") || q.includes("dhanushkodi") || q.includes("ramanathapuram")) {
-      return p.district.toLowerCase().includes("ramanathapuram") || p.name.toLowerCase().includes("rameswaram") || p.name.toLowerCase().includes("dhanushkodi") || (p.tags || []).includes("rameswaram");
+      return distLower.includes("ramanathapuram") || nameLower.includes("rameswaram") || nameLower.includes("dhanushkodi") || tagsLower.includes("rameswaram");
     }
     if (q.includes("salem") || q.includes("yercaud")) {
-      return p.district.toLowerCase().includes("salem") || p.name.toLowerCase().includes("yercaud") || (p.tags || []).includes("yercaud");
+      return distLower.includes("salem") || nameLower.includes("yercaud") || tagsLower.includes("yercaud");
     }
 
-    const distMatch = p.district.toLowerCase().includes(q) || q.includes(p.district.toLowerCase());
-    const tagMatch = (p.tags || []).some((t) => t.toLowerCase() === q);
-    const textMatch = p.name.toLowerCase().includes(q) || p.canonicalName.toLowerCase().includes(q);
+    const distMatch = distLower.includes(q) || q.includes(distLower);
+    const tagMatch = tagsLower.some((t) => t === q);
+    const textMatch = nameLower.includes(q) || canonLower.includes(q);
 
     return distMatch || tagMatch || textMatch;
-  });
+  }).map(({ p }) => p);
 }
 
 export interface CategorizedSearchResult {
@@ -2247,30 +2307,33 @@ export function searchEntities(query: string): CategorizedSearchResult[] {
   }
 
   const rawQ = query.toLowerCase().trim();
-  // Strip common prefixes or typos e.g. "kachipuram" -> "kanchipuram"
   const cleanQ = rawQ.replace(/[^a-z0-9]/g, "");
   const q = rawQ;
   const results: CategorizedSearchResult[] = [];
   const seenIds = new Set<string>();
 
+  const isKachi = cleanQ.startsWith("kachi");
+  const isVilu = cleanQ.startsWith("vilu");
+  const isTindi = cleanQ.startsWith("tindi");
+  const isNager = cleanQ.startsWith("nager");
+  const isHosur = cleanQ.startsWith("hosur");
+  const isTrichy = cleanQ.startsWith("trichy");
+
   // 1. Check Geographic Areas matching query (with typo tolerances like kachipuram -> kanchipuram)
-  Object.values(GEOGRAPHIC_AREAS).forEach((area) => {
-    const aName = area.name.toLowerCase();
-    const aCanon = area.canonicalName.toLowerCase();
-    const aSlug = area.slug.toLowerCase();
-    const aClean = aName.replace(/[^a-z0-9]/g, "");
+  for (let i = 0; i < PREPROCESSED_GEO_AREAS.length; i++) {
+    const { area, aName, aCanon, aSlug, aClean } = PREPROCESSED_GEO_AREAS[i];
 
     const isMatch =
       aName.includes(q) ||
       aCanon.includes(q) ||
       aSlug.includes(q) ||
       aClean.includes(cleanQ) ||
-      (cleanQ.startsWith("kachi") && aName.includes("kanchi")) ||
-      (cleanQ.startsWith("vilu") && aName.includes("vilup")) ||
-      (cleanQ.startsWith("tindi") && aName.includes("tindivanam")) ||
-      (cleanQ.startsWith("nager") && aName.includes("nagercoil")) ||
-      (cleanQ.startsWith("hosur") && aName.includes("hosur")) ||
-      (cleanQ.startsWith("trichy") && (aName.includes("tiruchirappalli") || aName.includes("trichy")));
+      (isKachi && aName.includes("kanchi")) ||
+      (isVilu && aName.includes("vilup")) ||
+      (isTindi && aName.includes("tindivanam")) ||
+      (isNager && aName.includes("nagercoil")) ||
+      (isHosur && aName.includes("hosur")) ||
+      (isTrichy && (aName.includes("tiruchirappalli") || aName.includes("trichy")));
 
     if (isMatch && !seenIds.has(area.id)) {
       seenIds.add(area.id);
@@ -2283,18 +2346,18 @@ export function searchEntities(query: string): CategorizedSearchResult[] {
         area,
       });
     }
-  });
+  }
 
   // 2. Check Specific POIs matching query (name, district, tags, aliases)
-  CANONICAL_PLACES.forEach((p) => {
-    if (p.placeType === "city") return;
-    const nameLower = (p.name || "").toLowerCase();
-    const canonLower = (p.canonicalName || "").toLowerCase();
-    const distLower = (p.district || "").toLowerCase();
+  const cleanQLen3 = cleanQ.length >= 3;
+
+  for (let i = 0; i < PREPROCESSED_POIS.length; i++) {
+    const { p, nameLower, canonLower, distLower, distClean, tagsLower, aliasesLower } = PREPROCESSED_POIS[i];
+
     const isNameMatch = nameLower.includes(q) || canonLower.includes(q);
-    const isDistMatch = distLower.includes(q) || (cleanQ.length >= 3 && distLower.replace(/[^a-z0-9]/g, "").includes(cleanQ));
-    const isTagMatch = (p.tags || []).some((t) => t.toLowerCase().includes(q));
-    const isAliasMatch = (p.aliases || []).some((a) => a.toLowerCase().includes(q));
+    const isDistMatch = distLower.includes(q) || (cleanQLen3 && distClean.includes(cleanQ));
+    const isTagMatch = tagsLower.some((t) => t.includes(q));
+    const isAliasMatch = aliasesLower.some((a) => a.includes(q));
 
     if ((isNameMatch || isDistMatch || isTagMatch || isAliasMatch) && !seenIds.has(p.id)) {
       seenIds.add(p.id);
@@ -2307,7 +2370,7 @@ export function searchEntities(query: string): CategorizedSearchResult[] {
         place: p,
       });
     }
-  });
+  }
 
   return results;
 }
@@ -2316,14 +2379,14 @@ export function searchLocations(query: string): ExplorerPlace[] {
   if (!query || !query.trim()) return CANONICAL_PLACES.slice(0, 10);
   const q = query.toLowerCase().trim();
 
-  return CANONICAL_PLACES.filter((p) => {
-    const nameMatch = (p.name || "").toLowerCase().includes(q) || (p.canonicalName || "").toLowerCase().includes(q);
-    const distMatch = (p.district || "").toLowerCase().includes(q);
+  return PREPROCESSED_PLACES.filter(({ p, nameLower, canonLower, distLower, tagsLower, aliasesLower }) => {
+    const nameMatch = nameLower.includes(q) || canonLower.includes(q);
+    const distMatch = distLower.includes(q);
     const slugMatch = (p.slug || "").toLowerCase().includes(q);
-    const aliasMatch = (p.aliases || []).some((a) => a.toLowerCase().includes(q));
-    const tagMatch = (p.tags || []).some((t) => t.toLowerCase().includes(q));
+    const aliasMatch = aliasesLower.some((a) => a.includes(q));
+    const tagMatch = tagsLower.some((t) => t.includes(q));
     return nameMatch || distMatch || slugMatch || aliasMatch || tagMatch;
-  });
+  }).map(({ p }) => p);
 }
 
 export function resolvePlaceById(placeId: string): ExplorerPlace {
@@ -2332,11 +2395,9 @@ export function resolvePlaceById(placeId: string): ExplorerPlace {
   }
   const rawId = placeId.toLowerCase().trim();
 
-  // 1. Direct key match in KNOWN_DESTINATIONS
-  if (KNOWN_DESTINATIONS[rawId]) return KNOWN_DESTINATIONS[rawId];
-
-  const place = Object.values(KNOWN_DESTINATIONS).find((p) => p.id.toLowerCase() === rawId || p.slug.toLowerCase() === rawId);
-  if (place) return place;
+  // 1. O(1) Exact key/id/slug match in pre-indexed map
+  const exactPlace = EXACT_PLACE_LOOKUP_MAP.get(rawId);
+  if (exactPlace) return exactPlace;
 
   // 2. Fuzzy match lookup
   const fuzzyPlace = resolvePlace(placeId);
@@ -2378,20 +2439,23 @@ export function resolvePlace(query: string): ExplorerPlace | null {
     return KNOWN_DESTINATIONS["virudhunagar"];
   }
 
-  // 2. Direct match in KNOWN_DESTINATIONS dictionary
+  // 2. O(1) Exact lookup match
+  const exactMatch = EXACT_PLACE_LOOKUP_MAP.get(rawQ);
+  if (exactMatch) return exactMatch;
+
+  // 3. Substring match in KNOWN_DESTINATIONS dictionary
   for (const [key, place] of Object.entries(KNOWN_DESTINATIONS)) {
     const keyMatch = rawQ.includes(key) || key.includes(rawQ) || normQ.includes(key.replace(/[^a-z0-9]/g, ""));
     const nameMatch = place.name.toLowerCase().includes(rawQ) || rawQ.includes(place.name.toLowerCase());
     const canonicalMatch = place.canonicalName.toLowerCase().includes(rawQ) || rawQ.includes(place.canonicalName.toLowerCase());
-    const slugMatch = place.slug.toLowerCase() === rawQ || place.id.toLowerCase() === rawQ;
     const aliasMatch = (place.aliases || []).some((a) => a.toLowerCase().includes(rawQ) || rawQ.includes(a.toLowerCase()));
 
-    if (keyMatch || nameMatch || canonicalMatch || slugMatch || aliasMatch) {
+    if (keyMatch || nameMatch || canonicalMatch || aliasMatch) {
       return place;
     }
   }
 
-  // 3. Keyword-based destination coordinate resolution for well-known regions
+  // 4. Keyword-based destination coordinate resolution for well-known regions
   if (rawQ.includes("ooty") || rawQ.includes("udagamandalam") || rawQ.includes("nilgiris") || rawQ.includes("coonoor")) {
     return KNOWN_DESTINATIONS["ooty"];
   }
@@ -2434,7 +2498,7 @@ export function resolvePlace(query: string): ExplorerPlace | null {
     return KNOWN_DESTINATIONS["kodaikanal"];
   }
 
-  // 4. Generic place fallback for arbitrary query string (centered safely in Virudhunagar / Central TN if virudhunagar match)
+  // 5. Generic place fallback for arbitrary query string (centered safely in Virudhunagar / Central TN if virudhunagar match)
   const isVirudhuFallback = rawQ.includes("virudh") || rawQ.includes("virud");
   return {
     id: `p-${rawQ.replace(/\s+/g, "-")}`,
