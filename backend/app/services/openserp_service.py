@@ -17,7 +17,7 @@ class SourceDTO(BaseModel):
 
 class OpenSERPService:
     def __init__(self):
-        self.api_key = settings.OPENSERP_API_KEY
+        self.api_key = settings.OPENSERP_API_KEY or "mock-openserp-key"
         self.base_url = settings.OPENSERP_BASE_URL
 
     def check_health(self) -> Dict[str, Any]:
