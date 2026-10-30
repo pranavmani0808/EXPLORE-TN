@@ -165,48 +165,70 @@ export function calculateHaversineKm(
   return Math.round(R * c * 10) / 10;
 }
 
+// Internal memoization cache for standard CANONICAL_PLACES computations by origin
+const originPlacesCache = new Map<string, ExplorerPlace[]>();
+
 /**
- * Retrieves all places associated with a specific origin city, dynamically computing real-world distances
+ * Retrieves all places associated with a specific origin city, dynamically computing real-world distances.
+ * Single-pass loop and memoized for optimal UI rendering performance.
  */
 export function getPlacesForOrigin(
   originId: string,
   placesList: ExplorerPlace[] = CANONICAL_PLACES
 ): ExplorerPlace[] {
+  // Return cached result when using the default canonical places dataset
+  if (placesList === CANONICAL_PLACES) {
+    const cached = originPlacesCache.get(originId);
+    if (cached) return cached;
+  }
+
   const origin = SUPPORTED_ORIGINS[originId] || SUPPORTED_ORIGINS.coimbatore;
-  
-  return placesList
-    .filter((place) => {
-      // Don't show place itself as a destination to its own origin
-      if (place.slug?.toLowerCase() === originId || place.id?.toLowerCase() === originId) return false;
-      if (place.travelOrigins && place.travelOrigins.includes(originId)) return true;
-      const dist = calculateHaversineKm(origin.latitude, origin.longitude, place.latitude, place.longitude);
-      // Accessible distance within Tamil Nadu travel range
-      return dist <= 380;
-    })
-    .map((place) => {
-      const dist = calculateHaversineKm(origin.latitude, origin.longitude, place.latitude, place.longitude);
-      const drivingKm = Math.round(dist * 1.22);
-      const estHours = Math.round((drivingKm / 45) * 10) / 10;
+  const isCoimbatore = originId === "coimbatore";
+  const isChennai = originId === "chennai";
 
-      const isCoimbatore = originId === "coimbatore";
-      const isChennai = originId === "chennai";
+  const result: ExplorerPlace[] = [];
 
-      const staticKm = isCoimbatore ? place.distanceFromCoimbatoreKm : isChennai ? place.distanceFromChennaiKm : undefined;
-      const staticHrs = isCoimbatore ? place.durationFromCoimbatoreHours : isChennai ? place.durationFromChennaiHours : undefined;
+  for (let i = 0; i < placesList.length; i++) {
+    const place = placesList[i];
 
-      const finalKm = staticKm || drivingKm;
-      const finalHrs = staticHrs || estHours;
+    // Don't show place itself as a destination to its own origin
+    if (place.slug?.toLowerCase() === originId || place.id?.toLowerCase() === originId) {
+      continue;
+    }
 
-      return {
-        ...place,
-        distanceFromOrigin: {
-          ...place.distanceFromOrigin,
-          [originId]: {
-            km: finalKm,
-            durationHours: finalHrs,
-            durationText: `${finalHrs} hrs`
-          }
+    const hasExplicitOrigin = place.travelOrigins && place.travelOrigins.includes(originId);
+    const dist = calculateHaversineKm(origin.latitude, origin.longitude, place.latitude, place.longitude);
+
+    // Filter out places outside accessible travel range (unless explicitly tagged)
+    if (!hasExplicitOrigin && dist > 380) {
+      continue;
+    }
+
+    const drivingKm = Math.round(dist * 1.22);
+    const estHours = Math.round((drivingKm / 45) * 10) / 10;
+
+    const staticKm = isCoimbatore ? place.distanceFromCoimbatoreKm : isChennai ? place.distanceFromChennaiKm : undefined;
+    const staticHrs = isCoimbatore ? place.durationFromCoimbatoreHours : isChennai ? place.durationFromChennaiHours : undefined;
+
+    const finalKm = staticKm || drivingKm;
+    const finalHrs = staticHrs || estHours;
+
+    result.push({
+      ...place,
+      distanceFromOrigin: {
+        ...place.distanceFromOrigin,
+        [originId]: {
+          km: finalKm,
+          durationHours: finalHrs,
+          durationText: `${finalHrs} hrs`
         }
-      };
+      }
     });
+  }
+
+  if (placesList === CANONICAL_PLACES) {
+    originPlacesCache.set(originId, result);
+  }
+
+  return result;
 }
